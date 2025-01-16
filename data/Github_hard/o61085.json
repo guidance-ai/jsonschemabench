@@ -1,0 +1,202 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "the shipment id that can be used for requesting info about a shipment or tracking it"
+    },
+    "carrier_tracking_no": {
+      "type": "string",
+      "description": "the original tracking number that can be used on the carriers website"
+    },
+    "carrier": {
+      "type": "string",
+      "enum": [
+        "dhl",
+        "ups",
+        "dpd",
+        "hermes",
+        "gls"
+      ],
+      "description": "acronym of the carrier"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "timestamp the shipment was created"
+    },
+    "tracking_url": {
+      "type": "string",
+      "description": "URL you can send your customers so they can track this shipment"
+    },
+    "label_url": {
+      "type": "string",
+      "description": "URL where you can download the label in pdf format"
+    },
+    "from": {
+      "$ref": "#/definitions/address",
+      "description": "If missing, the default sender address (if defined in your shipcloud account) will be used"
+    },
+    "to": {
+      "$ref": "#/definitions/address",
+      "description": "the receivers address"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/package"
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "identifier for a single package"
+          },
+          "tracking_events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "timestamp": {
+                  "type": "number",
+                  "description": "timestamp of when this event occured"
+                },
+                "location": {
+                  "type": "string",
+                  "description": "location of the package at this moment"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "shipcloud_label_created",
+                    "label_created",
+                    "picked_up",
+                    "delivered",
+                    "not_delivered",
+                    "transit",
+                    "exception",
+                    "out_for_delivery",
+                    "unknown",
+                    "canceled"
+                  ],
+                  "description": "key describing the status"
+                },
+                "details": {
+                  "type": "string",
+                  "description": "message the carrier sends to describe the package status"
+                }
+              },
+              "required": [
+                "timestamp",
+                "location",
+                "status",
+                "details"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "price": {
+      "type": "number",
+      "description": "price that we're going to charge you (exl. VAT)"
+    },
+    "reference_number": {
+      "type": "string",
+      "description": "a reference number (max. 30 characters) that you want this shipment to be identified with. You can use this afterwards to easier find the shipment in the shipcloud.io backoffice"
+    }
+  },
+  "required": [
+    "id",
+    "carrier_tracking_no",
+    "carrier",
+    "created_at",
+    "tracking_url",
+    "label_url",
+    "from",
+    "to",
+    "packages",
+    "price",
+    "reference_number"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "address": {
+      "type": "object",
+      "properties": {
+        "company": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "care_of": {
+          "type": "string"
+        },
+        "street": {
+          "type": "string"
+        },
+        "street_no": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "zip_code": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country as uppercase ISO 3166-1 alpha-2 code"
+        },
+        "phone": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "last_name",
+        "street",
+        "street_no",
+        "city",
+        "zip_code",
+        "country"
+      ],
+      "additionalProperties": false
+    },
+    "package": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "length": {
+          "type": "number"
+        },
+        "weight": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "length",
+        "weight"
+      ],
+      "additionalProperties": false,
+      "description": "defines package dimensions"
+    }
+  }
+}

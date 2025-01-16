@@ -1,0 +1,344 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IBM Zapp Document",
+  "description": "JSON schema for zapp.json and zapp.yaml files. Version 1.0.0 -- Licensed Materials - Property of IBM - (c) Copyright IBM Corporation 2022. All Rights Reserved.",
+  "type": "object",
+  "definitions": {
+    "coreProperties": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The name of the Z Project.",
+          "type": "string",
+          "maxLength": 214,
+          "minLength": 1
+        },
+        "description": {
+          "description": "This helps people understand your project as it would be used by tools.",
+          "type": "string"
+        },
+        "version": {
+          "description": "Version is a string and it must be parsable for managing dependencies.",
+          "type": "string",
+          "default": "1.0.0"
+        },
+        "groupId": {
+          "description": "Defines a group name that is shared for each application part in case of applications composed of multiple parts. Allows to uniquely identify the parts by concatenating with the artifact id. For example a groupId `com.ibm.wazi` with an artifactId `service` would create the unique application identifier `com.ibm.wazi.service`.",
+          "type": "string",
+          "examples": ["com.ibm.wazi", "payments"]
+        },
+        "artifactId": {
+          "description": "Define id of the application artifact. Use it in combination with a groupId for multi-part applications.",
+          "type": "string",
+          "default": "",
+          "examples": ["sam"]
+        },
+        "parentId": {
+          "description": "In case of a multi-part application defines the name of the parent application part. This zapp will inherit properties such as propertyGroups defined in the parent.",
+          "type": "string",
+          "default": "",
+          "examples": ["com.ibm.wazi.parent"]
+        },
+        "keywords": {
+          "description": "This helps people discover your project.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "homepage": {
+          "description": "The url to the project homepage.",
+          "type": "string",
+          "oneOf": [
+            {
+              "format": "uri"
+            },
+            {
+              "enum": ["."]
+            }
+          ]
+        },
+        "license": {
+          "type": "string",
+          "description": "You should specify a license for your package so that people know how they are permitted to use it and any restrictions you're placing on it."
+        },
+        "author": {
+          "$ref": "#/definitions/person"
+        },
+        "contributors": {
+          "description": "A list of people who contributed to this package.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/person"
+          },
+          "minItems": 1
+        },
+        "maintainers": {
+          "description": "A list of people who maintain this package.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/person"
+          },
+          "minItems": 1
+        },
+        "propertyGroups": {
+          "description": "A list properties defining path names for resolving dependencies.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/propertyGroupItem"
+          },
+          "minItems": 1
+        },
+        "profiles": {
+          "description": "Profiles are additional groups of properties that should only should become valid under specific conditions such as running in a build job or as part of a debug session.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/profile"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "propertyGroupItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the property group, which is used in hovers and error messages.",
+          "examples": ["sample-local"]
+        },
+        "language": {
+          "type": "string",
+          "enum": ["cobol", "pl1", "hlasm", "rexx", "jcl"],
+          "description": "Limits the property group to one specific language."
+        },
+        "compilerOptions": {
+          "type": "string",
+          "description": "Global compiler options separated by a comma that impact the parsing of the programs for the editor. Requires that you specify a language. If there are multiple Property Groups for a language with compiler option then they will be concatenated."
+        },
+        "libraries": {
+          "type": "array",
+          "description": "An array of potential library locations defining the search order for include files. Libraries with the name 'syslib' will be handled as default include locations. The list can contain many entries of the type 'local' or 'mvs'. It can contain items of the same type twice in case, for example, you want to search in remote locations first, then some local location, and if still not found more remote locations.",
+          "items": {
+            "$ref": "#/definitions/libraryItem"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "libraryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "locations"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the library. The default name should be `syslib` if using unamed libraries.",
+          "default": "syslib",
+          "examples": ["syslib", "currencylib"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["mvs", "local"],
+          "description": "The type of the property group defining where dependencies should be located. Allowed values are 'local' for using a local workspace and 'mvs' for dependencies located in MVS Datasets.",
+          "default": "local",
+          "examples": ["local", "mvs"]
+        },
+        "locations": {
+          "type": "array",
+          "description": "An array of include file locations. For 'local' libraries values can be absolute and relative filename paths using GLOB patterns. For 'mvs' libraries value can be data set names. GLOB patterns for dat sets are currently not supported.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": ["**/copybook", "USER1.SAMPLE.COBCOPY"]
+        }
+      }
+    },
+    "person": {
+      "description": "A person who has been involved in creating or maintaining this package",
+      "type": ["object", "string"],
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "description": "Profiles are additional groups of properties that should only should become valid under specific conditions such as running in a build job or as part of a debug session.",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the profile.",
+          "examples": ["dbb-build"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["dbb", "rseapi", "debug"],
+          "description": "The type of the profile.",
+          "default": "dbb",
+          "examples": ["dbb", "rseapi"]
+        },
+        "settings": {
+          "description": "Settings objects specific to the type specified for the profile.",
+          "type": "object"
+        }
+      },
+      "anyOf": [
+        {
+          "required": ["name", "type", "settings"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "type": { "const": "dbb", "type": "string" },
+            "settings": {
+              "$ref": "#/definitions/dbbSettingsItem"
+            }
+          }
+        },
+        {
+          "required": ["name", "type", "settings"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "type": { "const": "rseapi", "type": "string" },
+            "settings": {
+              "$ref": "#/definitions/rseapiSettingsItem"
+            }
+          }
+        }
+      ]
+    },
+    "dbbSettingsItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["application", "command"],
+      "description": "DBB build script properties for running User Build on remote host.",
+      "properties": {
+        "application": {
+          "type": "string",
+          "description": "Defines the name of the application to build. Will be used to create a folder on USS to upload all files to."
+        },
+        "command": {
+          "type": "string",
+          "description": "Command that the build script is executed with such as the path to groovyz and it's parameters."
+        },
+        "buildScriptPath": {
+          "type": "string",
+          "description": "The full path of build script on the remote host that should be used with the command."
+        },
+        "buildScriptArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "A list of strings that are the parameters for the build script. Check the documentation for built-in variables, such as the name of the program to build, that can be used here."
+        },
+        "additionalDependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Lists of GLOB patterns that define the files that should be uploaded to USS for a build. Relative path names are interpreted relative to the location of the ZAPP file that is being used for the build, which is a ZAPP file in the same workspace as the program to be build."
+        },
+        "logFilePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Lists of GLOB patterns that define the files that should be downloaded from USS after the build. Relative path names are interpreted relative to the DBB log directory user setting. If not provided then all files of the user setting location will be downloaded."
+        }
+      }
+    },
+    "rseapiSettingsItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "RSE API client settings for interactions with a z/OS remote host running an RSE API server.",
+      "required": ["mappings", "default.encoding"],
+      "properties": {
+        "mappings": {
+          "type": "array",
+          "description": "A list of mapping objects that map local file extensions to transfer modes and encodings to MVS datasets that can be specified using wildcards.",
+          "items": { "$ref": "#/definitions/rseapiSettingsItemMapping" }
+        },
+        "default.encoding": {
+          "type": "string",
+          "description": "The encoding to be used when no mapping can be found. If not provided then either the user or server default will be used."
+        }
+      }
+    },
+    "rseapiSettingsItemMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One mapping that contains at least transfer and resource values.",
+      "properties": {
+        "extension": {
+          "type": "string",
+          "description": "A local file extension such as cbl or pl1."
+        },
+        "transfer": {
+          "type": "string",
+          "enum": ["text", "binary"],
+          "description": "The transfer mode to be used. Can be 'text' or 'binary'."
+        },
+        "resource": {
+          "type": "string",
+          "description": "The data set name to be mapped to. Can use a wildcard such as '**CPY'."
+        },
+        "encoding": {
+          "type": "string",
+          "description": "The encoding to be used for text transfer. See the RSE API documentation for the values allowed."
+        },
+        "memberMappings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "One member mapping that contains at least transfer and resource values.",
+            "properties": {
+              "extension": {
+                "type": "string",
+                "description": "A local file extension such as cbl or pl1."
+              },
+              "transfer": {
+                "type": "string",
+                "enum": ["text", "binary"],
+                "description": "The transfer mode to be used. Can be 'text' or 'binary'."
+              },
+              "encoding": {
+                "type": "string",
+                "description": "The encoding to be used for text transfer. See the RSE API documentation for the values allowed."
+              },
+              "resource": {
+                "type": "string",
+                "description": "The data set member name to be mapped to. Can use a wildcard such as '**CPY'."
+              }
+            }
+          },
+          "description": "A nested mappings array with resource mappings to members of the data sets that were mapped by the parent mapping."
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/definitions/coreProperties"
+    }
+  ]
+}

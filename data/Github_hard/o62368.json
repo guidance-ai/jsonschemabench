@@ -1,0 +1,245 @@
+{
+  "id": "http://api.datos.gob.mx/v1/schemas/dataset.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for the definition of datasets handled by the BUDA platform",
+  "definitions": {
+    "hotspot": {
+      "type": "object",
+      "title": "Hotspot",
+      "description": "Location used by the agent to receive data packets for processing",
+      "required": [
+        "type",
+        "location"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Type",
+          "description": "Type of endpoint to use, may be any of the supported methods",
+          "default": "tcp",
+          "enum": [
+            "tcp",
+            "unix"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "title": "Location",
+          "description": "Final location used for receiving data, i.e.; port number, socket path, etc...",
+          "default": ""
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "title": "Storage",
+      "description": "Provides all the information required to store the data processed in a desired location",
+      "required": [
+        "collection",
+        "index",
+        "batch"
+      ],
+      "properties": {
+        "collection": {
+          "type": "string",
+          "title": "Collection",
+          "description": "Collection (or table) used to group inside the database the data packets received"
+        },
+        "index": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Index",
+          "description": "Data index(es) used for the data collection"
+        },
+        "batch": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Batch",
+          "description": "Batch size to use for data storage",
+          "default": 1
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "title": "Metadata",
+      "description": "Structured information that describes, explains, locates, or otherwise makes it easier to retrieve, use, or manage the dataset",
+      "required": [
+        "title",
+        "description",
+        "keyword",
+        "language",
+        "license",
+        "organization",
+        "contactName",
+        "contactEmail",
+        "accessLevel"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "Title",
+          "description": "Human-readable name of the asset. Should include sufficient detail to facilitate search and discovery"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description",
+          "description": "Human-readable description (e.g., an abstract) with sufficient detail to enable a user to quickly understand whether the asset is of interest"
+        },
+        "keyword": {
+          "type": "array",
+          "minItems": 1,
+          "_uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 15
+          },
+          "title": "Keyword(s)",
+          "description": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users"
+        },
+        "language": {
+          "type": "array",
+          "minItems": 1,
+          "_uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "title": "Language(s)",
+          "description": "Language(s) (RFC 5646) in which the data is available",
+          "default": [
+            "es-MX"
+          ]
+        },
+        "license": {
+          "type": "string",
+          "_format": "uri",
+          "title": "License",
+          "description": "The license with which the dataset has been published"
+        },
+        "organization": {
+          "type": "string",
+          "title": "Organization",
+          "description": "The plaintext name of the entity publishing this dataset"
+        },
+        "contactName": {
+          "type": "string",
+          "title": "Contact Name",
+          "description": "Name of the person listed as primary contact regarding the data"
+        },
+        "contactEmail": {
+          "type": "string",
+          "_format": "email",
+          "title": "Contact Email",
+          "description": "Email listed as primary contact method regarding the data"
+        },
+        "accessLevel": {
+          "type": "string",
+          "title": "Access Level",
+          "description": "Specify how to distribute the data",
+          "default": "public",
+          "enum": [
+            "public",
+            "non-public"
+          ]
+        },
+        "identifier": {
+          "type": "string",
+          "title": "Identifier",
+          "description": "A unique identifier for the dataset, storage collection will be used by default if no value is provided"
+        },
+        "describedBy": {
+          "type": "string",
+          "title": "Described By",
+          "description": "URL to the data dictionary for the dataset"
+        },
+        "issued": {
+          "type": "string",
+          "title": "Issued Date",
+          "description": "Date the dataset was issued"
+        },
+        "modified": {
+          "type": "string",
+          "title": "Last Modification Date",
+          "description": "Date the dataset was last modified"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "metadata",
+    "data"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "title": "Version",
+      "description": "Schema version used for the zone declaration",
+      "default": "0.1"
+    },
+    "metadata": {
+      "$ref": "#/definitions/metadata"
+    },
+    "data": {
+      "type": "object",
+      "title": "Zone Processing Details",
+      "description": "Configuration parameters used for storage and processing of the data",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "compression",
+        "update",
+        "storage",
+        "hotspot"
+      ],
+      "properties": {
+        "hotspot": {
+          "$ref": "#/definitions/hotspot"
+        },
+        "storage": {
+          "$ref": "#/definitions/storage"
+        },
+        "format": {
+          "type": "string",
+          "title": "Format",
+          "description": "Expected data format, a valid agent must be installed for the data type"
+        },
+        "update": {
+          "type": "string",
+          "title": "Update",
+          "description": "Update strategy to use for the dataset",
+          "default": "merge",
+          "enum": [
+            "merge",
+            "replace"
+          ]
+        },
+        "compression": {
+          "type": "string",
+          "title": "Compression",
+          "description": "Data compression method, if any",
+          "default": "none",
+          "enum": [
+            "none",
+            "gzip"
+          ]
+        },
+        "options": {
+          "type": "object",
+          "title": "Agent Options",
+          "description": "Additional configuration parameters passed to the agent to handle the zone; check agent documentation for specific details",
+          "default": {}
+        }
+      }
+    },
+    "extras": {
+      "type": "object",
+      "title": "Extras",
+      "description": "Optional non-standard additional details",
+      "default": {}
+    }
+  }
+}

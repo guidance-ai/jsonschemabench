@@ -1,0 +1,297 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Diffs",
+    "description": "Diffs Controller",
+    "definitions": {
+        "actions": {
+            "single_commit": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "required": [
+                            "repository"
+                        ],
+                        "properties": {
+                            "repository": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "required": [
+                                            "commit"
+                                        ],
+                                        "properties": {
+                                            "commit": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "diff"
+                                                        ],
+                                                        "properties": {
+                                                            "diff": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "$ref": "#/definitions/diff"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "commit_range": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "required": [
+                            "repository"
+                        ],
+                        "properties": {
+                            "repository": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "required": [
+                                            "diff"
+                                        ],
+                                        "properties": {
+                                            "diff": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/diff"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "errors": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "locations",
+                                "message",
+                                "path"
+                            ],
+                            "properties": {
+                                "locations": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "required": [
+                                            "column",
+                                            "line"
+                                        ],
+                                        "properties": {
+                                            "column": {
+                                                "type": "integer",
+                                                "example": 13,
+                                                "description": "The column of the error in the input data"
+                                            },
+                                            "line": {
+                                                "type": "integer",
+                                                "example": 3,
+                                                "description": "The line of the error in the input data"
+                                            }
+                                        }
+                                    }
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "\"from\" revspec 'mastor' not found",
+                                    "description": "The error message"
+                                },
+                                "path": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "example": "repository",
+                                        "description": "A path segment pointing to the error in the input data"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "diff": {
+            "type": "object",
+            "required": [
+                "deletedFile",
+                "diff",
+                "lineCount",
+                "newFile",
+                "newMode",
+                "newPath",
+                "oldMode",
+                "oldPath",
+                "renamedFile"
+            ],
+            "properites": {
+                "deletedFile": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "True if the file was deleted"
+                },
+                "diff": {
+                    "type": "string",
+                    "example": "--- /dev/null\n+++ b/texts/ontohub_changed.txt\n@@ -0,0 +1 @@\n+The main Ontohub service that serves the data for the frontend and other clients via the GraphQL API.\n",
+                    "description": "The actual diff"
+                },
+                "lineCount": {
+                    "type": "integer",
+                    "example": 4,
+                    "description": "The number of changed lines"
+                },
+                "newFile": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "True if the file was added"
+                },
+                "newMode": {
+                    "type": "string",
+                    "example": "100644",
+                    "description": "The file mode in the new state"
+                },
+                "newPath": {
+                    "type": "string",
+                    "example": "texts/ontohub_changed.txt",
+                    "description": "The new path of the file"
+                },
+                "oldMode": {
+                    "type": "string",
+                    "example": "0",
+                    "description": "The file mode in the old state"
+                },
+                "renamedFile": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "True if the file was renamed"
+                }
+            }
+        },
+        "organizational_unit_id": {
+            "type": "string",
+            "example": "ada",
+            "description": "The id of the organizational unit that owns the repository"
+        },
+        "repository_id": {
+            "type": "string",
+            "example": "fixtures",
+            "description": "The id of the repository"
+        },
+        "revision": {
+            "type": "string",
+            "example": "master~2",
+            "description": "A revision"
+        }
+    },
+    "links": [
+        {
+            "title": "Single commit",
+            "description": "Contains the changes of a single commit",
+            "rel": "self",
+            "method": "GET",
+            "mediaType": "application/json",
+            "href": "/{#/definitions/organizational_unit_id}/{#/definitions/repository_id}/diff/{#/definitions/revision}",
+            "targetSchema": {
+                "$ref": "#/definitions/actions/single_commit"
+            }
+        },
+        {
+            "title": "Commit range",
+            "description": "Contains the changes of a commit range",
+            "rel": "self",
+            "method": "GET",
+            "mediaType": "application/json",
+            "href": "/{#/definitions/organizational_unit_id}/{#/definitions/repository_id}/diff/{#/definitions/revision}..{#/definitions/revision}",
+            "targetSchema": {
+                "$ref": "#/definitions/actions/commit_range"
+            }
+        }
+    ],
+    "properties": {
+        "actions.single_commit": {
+            "$ref": "#/definitions/actions/single_commit"
+        },
+        "actions.commit_range": {
+            "$ref": "#/definitions/actions/commit_range"
+        },
+        "diff.properites.deletedFile": {
+            "$ref": "#/definitions/diff/properites/deletedFile"
+        },
+        "diff.properites.diff": {
+            "$ref": "#/definitions/diff/properites/diff"
+        },
+        "diff.properites.lineCount": {
+            "$ref": "#/definitions/diff/properites/lineCount"
+        },
+        "diff.properites.newFile": {
+            "$ref": "#/definitions/diff/properites/newFile"
+        },
+        "diff.properites.newMode": {
+            "$ref": "#/definitions/diff/properites/newMode"
+        },
+        "diff.properites.newPath": {
+            "$ref": "#/definitions/diff/properites/newPath"
+        },
+        "diff.properites.oldMode": {
+            "$ref": "#/definitions/diff/properites/oldMode"
+        },
+        "diff.properites.renamedFile": {
+            "$ref": "#/definitions/diff/properites/renamedFile"
+        },
+        "organizational_unit_id": {
+            "$ref": "#/definitions/organizational_unit_id"
+        },
+        "repository_id": {
+            "$ref": "#/definitions/repository_id"
+        },
+        "revision": {
+            "$ref": "#/definitions/revision"
+        }
+    },
+    "required": [
+        "actions.single_commit",
+        "actions.commit_range",
+        "diff.properites.deletedFile",
+        "diff.properites.diff",
+        "diff.properites.lineCount",
+        "diff.properites.newFile",
+        "diff.properites.newMode",
+        "diff.properites.newPath",
+        "diff.properites.oldMode",
+        "diff.properites.renamedFile",
+        "organizational_unit_id",
+        "repository_id",
+        "revision"
+    ]
+}

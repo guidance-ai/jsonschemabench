@@ -1,0 +1,368 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "description": "JSON schema for a user.",
+    "properties": {
+        "$schema": {
+            "default": "https://ils.rero.ch/schemas/patrons/patron-v0.0.1.json",
+            "description": "Schema to validate user records against.",
+            "minLength": 9,
+            "title": "Schema",
+            "type": "string"
+        },
+        "barcode": {
+            "form": {
+                "expressionProperties": {
+                    "templateOptions.required": "model.roles.some(v => v === 'patron')"
+                },
+                "hideExpression": "!model.roles.some(v => v === 'patron')",
+                "validation": {
+                    "messages": {
+                        "alreadyTakenMessage": "The barcode is already taken."
+                    },
+                    "validators": {
+                        "valueAlreadyExists": {}
+                    }
+                }
+            },
+            "minLength": 6,
+            "title": "Patron's barcode or card number",
+            "type": "string"
+        },
+        "birth_date": {
+            "_format": "date",
+            "form": {
+                "placeholder": "Example: 1985-12-29",
+                "validation": {
+                    "messages": {
+                        "patternMessage": "Should be in the following format: 2022-12-31 (YYYY-MM-DD)."
+                    }
+                }
+            },
+            "pattern": "\\d{4}-((0[1-9])|(1[0-2]))-(((0[1-9])|[1-2][0-9])|(3[0-1]))$",
+            "title": "Date of birth",
+            "type": "string"
+        },
+        "blocked": {
+            "description": "A patron with a blocked account cannot request and borrow items, but can still renew and check in items.",
+            "title": "Blocking",
+            "type": "boolean"
+        },
+        "blocked_note": {
+            "description": "The reason is displayed in the circulation module and is visible by the patron in his account.",
+            "form": {
+                "expressionProperties": {
+                    "templateOptions.required": "model.blocked === true"
+                },
+                "hideExpression": "field.model.blocked !== true"
+            },
+            "title": "Reason",
+            "type": "string"
+        },
+        "city": {
+            "minLength": 3,
+            "title": "City",
+            "type": "string"
+        },
+        "communication_channel": {
+            "enum": [
+                "email",
+                "mail"
+            ],
+            "form": {
+                "expressionProperties": {
+                    "templateOptions.required": "model.roles.some(v => v === 'patron')"
+                },
+                "hideExpression": "!model.roles.some(v => v === 'patron')",
+                "options": [
+                    {
+                        "label": "email",
+                        "value": "email"
+                    },
+                    {
+                        "label": "mail",
+                        "value": "mail"
+                    }
+                ]
+            },
+            "title": "Communication channel",
+            "type": "string"
+        },
+        "communication_language": {
+            "enum": [
+                "ger",
+                "eng",
+                "fre",
+                "ita"
+            ],
+            "form": {
+                "expressionProperties": {
+                    "templateOptions.required": "model.roles.some(v => v === 'patron')"
+                },
+                "hideExpression": "!model.roles.some(v => v === 'patron')",
+                "options": [
+                    {
+                        "label": "French",
+                        "value": "fre"
+                    },
+                    {
+                        "label": "English",
+                        "value": "eng"
+                    },
+                    {
+                        "label": "German",
+                        "value": "ger"
+                    },
+                    {
+                        "label": "Italian",
+                        "value": "ita"
+                    }
+                ]
+            },
+            "title": "Communication language",
+            "type": "string"
+        },
+        "email": {
+            "_format": "email",
+            "form": {
+                "validation": {
+                    "messages": {
+                        "alreadyTakenMessage": "This email is already taken.",
+                        "patternMessage": "Email should have at least one <code>@</code> and one <code>.</code>."
+                    },
+                    "validators": {
+                        "valueAlreadyExists": {
+                            "remoteRecordType": "patrons/count",
+                            "term": "email"
+                        }
+                    }
+                }
+            },
+            "minLength": 6,
+            "pattern": "^.*@.*\\..*$",
+            "title": "Email",
+            "type": "string"
+        },
+        "first_name": {
+            "form": {
+                "focus": true
+            },
+            "minLength": 2,
+            "title": "First name",
+            "type": "string"
+        },
+        "last_name": {
+            "minLength": 2,
+            "title": "Last name",
+            "type": "string"
+        },
+        "library": {
+            "description": "Library affiliation.",
+            "form": {
+                "expressionProperties": {
+                    "templateOptions.required": "field.parent.model.roles.some(v => (v === 'librarian' || v === 'system_librarian'))"
+                },
+                "fieldMap": "library",
+                "hideExpression": "!field.parent.model.roles.some(v => (v === 'librarian' || v === 'system_librarian'))"
+            },
+            "properties": {
+                "$ref": {
+                    "form": {
+                        "remoteOptions": {
+                            "type": "libraries"
+                        }
+                    },
+                    "pattern": "^https://ils.rero.ch/api/libraries/.*?$",
+                    "title": "Library URI",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "$ref"
+            ],
+            "title": "Library",
+            "type": "object"
+        },
+        "patron_type": {
+            "description": "Patron type in terms of circulation policy.",
+            "form": {
+                "expressionProperties": {
+                    "templateOptions.required": "field.parent.model.roles.some(v => v === 'patron')"
+                },
+                "hideExpression": "!field.parent.model.roles.some(v => v === 'patron')"
+            },
+            "properties": {
+                "$ref": {
+                    "form": {
+                        "remoteOptions": {
+                            "type": "patron_types"
+                        }
+                    },
+                    "pattern": "^https://ils.rero.ch/api/patron_types/.*?$",
+                    "title": "Patron Type URI",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "$ref"
+            ],
+            "title": "Patron Type",
+            "type": "object"
+        },
+        "phone": {
+            "description": "Phone number with the international prefix, without spaces.",
+            "form": {
+                "placeholder": "Example: +41791231212",
+                "validation": {
+                    "messages": {
+                        "patternMessage": "Phone number with the international prefix, without spaces, ie +41221234567."
+                    }
+                }
+            },
+            "pattern": "^\\+[0-9]*$",
+            "title": "Phone number",
+            "type": "string"
+        },
+        "pid": {
+            "title": "User ID",
+            "type": "string"
+        },
+        "postal_code": {
+            "minLength": 4,
+            "title": "Postal code",
+            "type": "string"
+        },
+        "roles": {
+            "default": [
+                "patron"
+            ],
+            "description": "Define the roles of the user.",
+            "form": {
+                "fieldMap": "roles"
+            },
+            "items": {
+                "enum": [
+                    "patron",
+                    "librarian",
+                    "system_librarian"
+                ],
+                "form": {
+                    "options": [
+                        {
+                            "label": "Patron",
+                            "value": "patron"
+                        },
+                        {
+                            "label": "Librarian",
+                            "value": "librarian"
+                        },
+                        {
+                            "label": "System Librarian",
+                            "value": "system_librarian"
+                        }
+                    ]
+                },
+                "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Role",
+            "type": "array",
+            "_uniqueItems": true
+        },
+        "street": {
+            "description": "Street and number of the address, separated by a coma.",
+            "minLength": 3,
+            "title": "Street",
+            "type": "string"
+        },
+        "subscriptions": {
+            "items": {
+                "properties": {
+                    "end_date": {
+                        "_format": "date",
+                        "description": "The subscription end date (selected date excluded).",
+                        "pattern": "\\d{4}-((0[1-9])|(1[0-2]))-(((0[1-9])|[1-2][0-9])|(3[0-1]))$",
+                        "title": "Subscription end date",
+                        "type": "string"
+                    },
+                    "patron_transaction": {
+                        "properties": {
+                            "$ref": {
+                                "pattern": "^https://ils.rero.ch/api/patron_transactions/.*?$",
+                                "title": "Patron transaction URI",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "$ref"
+                        ],
+                        "title": "Patron transaction",
+                        "type": "object"
+                    },
+                    "patron_type": {
+                        "properties": {
+                            "$ref": {
+                                "pattern": "^https://ils.rero.ch/api/patron_types/.*?$",
+                                "title": "Patron Type URI",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "$ref"
+                        ],
+                        "title": "Patron type",
+                        "type": "object"
+                    },
+                    "start_date": {
+                        "_format": "date",
+                        "description": "The subscription start date (selected date included).",
+                        "pattern": "\\d{4}-((0[1-9])|(1[0-2]))-(((0[1-9])|[1-2][0-9])|(3[0-1]))$",
+                        "title": "Subscription start date",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "start_date",
+                    "end_date",
+                    "patron_type",
+                    "patron_transaction"
+                ],
+                "title": "Subscription",
+                "type": "object"
+            },
+            "minItems": 1,
+            "title": "Subscriptions",
+            "type": "array"
+        }
+    },
+    "propertiesOrder": [
+        "first_name",
+        "last_name",
+        "birth_date",
+        "email",
+        "street",
+        "postal_code",
+        "city",
+        "phone",
+        "roles",
+        "barcode",
+        "patron_type",
+        "communication_channel",
+        "communication_language",
+        "library",
+        "blocked",
+        "blocked_note"
+    ],
+    "required": [
+        "$schema",
+        "pid",
+        "first_name",
+        "last_name",
+        "birth_date",
+        "email",
+        "roles"
+    ],
+    "title": "user",
+    "type": "object"
+}

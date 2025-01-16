@@ -1,0 +1,784 @@
+{
+    "title": "dependency-cruiser configuration",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://dependency-cruiser.js.org/schema/configuration.schema.json",
+    "description": "A set of properties describing what dependencies are forbidden and what dependencies are allowed + options on how to cruise through the code",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "forbidden": {
+            "type": "array",
+            "description": "A list of rules that describe dependencies that are not allowed. dependency-cruiser will emit a separate error (warning/ informational) messages for each violated rule.",
+            "items": {
+                "$ref": "#/definitions/ForbiddenRuleType"
+            }
+        },
+        "allowed": {
+            "type": "array",
+            "description": "A list of rules that describe dependencies that are allowed. dependency-cruiser will emit the warning message 'not-in-allowed' for each dependency that does not at least meet one of them.",
+            "items": {
+                "$ref": "#/definitions/AllowedRuleType"
+            }
+        },
+        "allowedSeverity": {
+            "$ref": "#/definitions/SeverityType",
+            "description": "Severity to use when a dependency is not in the 'allowed' set of rules. Defaults to 'warn'"
+        },
+        "required": {
+            "type": "array",
+            "despcription": "A list of rules that describe what dependencies modules _must_ have. E.g. - every controller needs to (directly) depend on a base controller. - each source file should be the dependency of a spec file with the same    base name",
+            "items": {
+                "$ref": "#/definitions/RequiredRuleType"
+            }
+        },
+        "options": {
+            "$ref": "#/definitions/OptionsType"
+        },
+        "extends": {
+            "$ref": "#/definitions/ExtendsType"
+        }
+    },
+    "definitions": {
+        "RuleSetType": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "forbidden": {
+                    "type": "array",
+                    "description": "A list of rules that describe dependencies that are not allowed. dependency-cruiser will emit a separate error (warning/ informational) messages for each violated rule.",
+                    "items": {
+                        "$ref": "#/definitions/ForbiddenRuleType"
+                    }
+                },
+                "allowed": {
+                    "type": "array",
+                    "description": "A list of rules that describe dependencies that are allowed. dependency-cruiser will emit the warning message 'not-in-allowed' for each dependency that does not at least meet one of them.",
+                    "items": {
+                        "$ref": "#/definitions/AllowedRuleType"
+                    }
+                },
+                "allowedSeverity": {
+                    "$ref": "#/definitions/SeverityType",
+                    "description": "Severity to use when a dependency is not in the 'allowed' set of rules. Defaults to 'warn'"
+                },
+                "required": {
+                    "type": "array",
+                    "despcription": "A list of rules that describe what dependencies modules _must_ have. E.g. - every controller needs to (directly) depend on a base controller. - each source file should be the dependency of a spec file with the same    base name",
+                    "items": {
+                        "$ref": "#/definitions/RequiredRuleType"
+                    }
+                }
+            }
+        },
+        "AllowedRuleType": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/RegularAllowedRuleType"
+                },
+                {
+                    "$ref": "#/definitions/ReachabilityAllowedRuleType"
+                }
+            ]
+        },
+        "RegularAllowedRuleType": {
+            "type": "object",
+            "required": [
+                "from",
+                "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "from": {
+                    "$ref": "#/definitions/FromRestrictionType"
+                },
+                "to": {
+                    "$ref": "#/definitions/ToRestrictionType"
+                }
+            }
+        },
+        "ReachabilityAllowedRuleType": {
+            "type": "object",
+            "required": [
+                "from",
+                "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "from": {
+                    "$ref": "#/definitions/ReachabilityFromRestrictionType"
+                },
+                "to": {
+                    "$ref": "#/definitions/ReachabilityToRestrictionType"
+                }
+            }
+        },
+        "ForbiddenRuleType": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/RegularForbiddenRuleType"
+                },
+                {
+                    "$ref": "#/definitions/ReachabilityForbiddenRuleType"
+                }
+            ]
+        },
+        "RegularForbiddenRuleType": {
+            "type": "object",
+            "required": [
+                "from",
+                "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A short name for the rule - will appear in reporters to enable customers to quickly identify a violated rule. Try to keep them short, eslint style. E.g. 'not-to-core' for a rule forbidding dependencies on core modules, or 'not-to-unresolvable' for one that prevents dependencies on modules that probably don't exist."
+                },
+                "severity": {
+                    "$ref": "#/definitions/SeverityType"
+                },
+                "comment": {
+                    "type": "string",
+                    "description": "You can use this field to document why the rule is there."
+                },
+                "from": {
+                    "$ref": "#/definitions/FromRestrictionType"
+                },
+                "to": {
+                    "$ref": "#/definitions/ToRestrictionType"
+                }
+            }
+        },
+        "ReachabilityForbiddenRuleType": {
+            "type": "object",
+            "required": [
+                "from",
+                "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "severity": {
+                    "$ref": "#/definitions/SeverityType"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "from": {
+                    "$ref": "#/definitions/ReachabilityFromRestrictionType"
+                },
+                "to": {
+                    "$ref": "#/definitions/ReachabilityToRestrictionType"
+                }
+            }
+        },
+        "RequiredRuleType": {
+            "type": "object",
+            "required": [
+                "module",
+                "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "severity": {
+                    "$ref": "#/definitions/SeverityType"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "module": {
+                    "$ref": "#/definitions/RequiredModuleRestrictionType"
+                },
+                "to": {
+                    "$ref": "#/definitions/RequiredToRestrictionType"
+                }
+            }
+        },
+        "FromRestrictionType": {
+            "type": "object",
+            "description": "Criteria an end of a dependency should match to be caught by this rule. Leave it empty if you want any module to be matched.",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "pathNot": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should NOT match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "orphan": {
+                    "type": "boolean",
+                    "description": "Whether or not to match when the module is an orphan (= has no incoming or outgoing dependencies). When this property it is part of a rule, dependency-cruiser will ignore the 'to' part."
+                }
+            }
+        },
+        "ReachabilityFromRestrictionType": {
+            "type": "object",
+            "description": "Criteria an end of a dependency should match to be caught by this rule. Leave it empty if you want any module to be matched.",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "pathNot": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should NOT match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                }
+            }
+        },
+        "ToRestrictionType": {
+            "type": "object",
+            "description": "Criteria the 'to' end of a dependency should match to be caught by this rule. Leave it empty if you want any module to be matched.",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "pathNot": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should NOT match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "couldNotResolve": {
+                    "type": "boolean",
+                    "description": "Whether or not to match modules dependency-cruiser could not resolve (and probably aren't on disk). For this one too: leave out if you don't care either way."
+                },
+                "circular": {
+                    "type": "boolean",
+                    "description": "Whether or not to match when following to the to will ultimately end up in the from."
+                },
+                "dynamic": {
+                    "type": "boolean",
+                    "description": "Whether or not to match when the dependency is a dynamic one."
+                },
+                "exoticallyRequired": {
+                    "type": "boolean",
+                    "description": "Whether or not to match when the dependency is exotically required."
+                },
+                "exoticRequire": {
+                    "description": "A regular expression to match against any 'exotic' require strings",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "exoticRequireNot": {
+                    "description": "A regular expression to match against any 'exotic' require strings - when it should NOT be caught by the rule",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "preCompilationOnly": {
+                    "type": "boolean",
+                    "description": "true if this dependency only exists before compilation (like type only imports), false in all other cases. Only returned when the tsPreCompilationDeps is set to 'specify'."
+                },
+                "dependencyTypes": {
+                    "type": "array",
+                    "description": "Whether or not to match modules of any of these types (leaving out matches any of them)",
+                    "items": {
+                        "$ref": "#/definitions/DependencyTypeType"
+                    }
+                },
+                "moreThanOneDependencyType": {
+                    "type": "boolean",
+                    "description": "If true matches dependencies with more than one dependency type (e.g. defined in _both_ npm and npm-dev)"
+                },
+                "license": {
+                    "description": "Whether or not to match modules that were released under one of the mentioned licenses. E.g. to flag GPL-1.0, GPL-2.0 licensed modules (e.g. because your app is not compatible with the GPL) use \"GPL\"",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "licenseNot": {
+                    "description": "Whether or not to match modules that were NOT released under one of the mentioned licenses. E.g. to flag everyting non MIT use \"MIT\" here",
+                    "$ref": "#/definitions/REAsStringsType"
+                }
+            }
+        },
+        "ReachabilityToRestrictionType": {
+            "description": "Criteria the 'to' end of a dependency should match to be caught by this rule. Leave it empty if you want any module to be matched.",
+            "required": [
+                "reachable"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "pathNot": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should NOT match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "reachable": {
+                    "type": "boolean",
+                    "description": "Whether or not to match modules that aren't reachable from the from part of the rule."
+                }
+            }
+        },
+        "RequiredModuleRestrictionType": {
+            "description": "Criteria to select the module(s) this restriction should apply to",
+            "required": [],
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "pathNot": {
+                    "description": "A regular expression or an array of regular expressions an end of a dependency should NOT match to be caught by this rule.",
+                    "$ref": "#/definitions/REAsStringsType"
+                }
+            }
+        },
+        "RequiredToRestrictionType": {
+            "description": "Criteria for modules the associated module must depend on.",
+            "required": [],
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "Criteria at least one dependency of each matching module mustadhere to.",
+                    "$ref": "#/definitions/REAsStringsType"
+                }
+            }
+        },
+        "DependencyTypeType": {
+            "type": "string",
+            "enum": [
+                "aliased",
+                "core",
+                "deprecated",
+                "local",
+                "localmodule",
+                "npm",
+                "npm-bundled",
+                "npm-dev",
+                "npm-no-pkg",
+                "npm-optional",
+                "npm-peer",
+                "npm-unknown",
+                "undetermined",
+                "unknown"
+            ]
+        },
+        "REAsStringsType": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "SeverityType": {
+            "type": "string",
+            "description": "How severe a violation of a rule is. The 'error' severity will make some reporters return a non-zero exit code, so if you want e.g. a build to stop when there's a rule violated: use that.",
+            "enum": [
+                "error",
+                "warn",
+                "info",
+                "ignore"
+            ]
+        },
+        "OptionsType": {
+            "type": "object",
+            "description": "Runtime configuration options",
+            "additionalProperties": false,
+            "properties": {
+                "doNotFollow": {
+                    "description": "a regular expression for modules to include, but not follow further",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/REAsStringsType"
+                        },
+                        {
+                            "$ref": "#/definitions/CompoundDoNotFollowType"
+                        }
+                    ]
+                },
+                "exclude": {
+                    "description": "a regular expression for modules to exclude from being cruised",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/REAsStringsType"
+                        },
+                        {
+                            "$ref": "#/definitions/CompoundExcludeType"
+                        }
+                    ]
+                },
+                "includeOnly": {
+                    "description": "a regular expression for modules to cruise; anything outside it will be skipped",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/REAsStringsType"
+                        },
+                        {
+                            "$ref": "#/definitions/CompoundIncludeOnlyType"
+                        }
+                    ]
+                },
+                "focus": {
+                    "description": "dependency-cruiser will include modules matching this regular expression in its output, as well as their neighbours (direct dependencies and dependents)",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/REAsStringsType"
+                        },
+                        {
+                            "$ref": "#/definitions/CompoundFocusType"
+                        }
+                    ]
+                },
+                "maxDepth": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 99,
+                    "description": "The maximum cruise depth specified. 0 means no maximum specified"
+                },
+                "moduleSystems": {
+                    "$ref": "#/definitions/ModuleSystemsType"
+                },
+                "prefix": {
+                    "type": "string"
+                },
+                "preserveSymlinks": {
+                    "type": "boolean",
+                    "description": "if true leave symlinks untouched, otherwise use the realpath. Defaults to `false` (which is also nodejs's default behavior since version 6)"
+                },
+                "combinedDependencies": {
+                    "type": "boolean",
+                    "description": "if true combines the package.jsons found from the module up to the base folder the cruise is initiated from. Useful for how (some) mono-repos manage dependencies & dependency definitions. Defaults to `false`."
+                },
+                "tsConfig": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "TypeScript project file ('tsconfig.json') to use for (1) compilation and (2) resolution (e.g. with the paths property)",
+                    "properties": {
+                        "fileName": {
+                            "description": "The TypeScript project file to use. The fileName is relative to dependency-cruiser's current working directory. When not provided defaults to './tsconfig.json'.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "tsPreCompilationDeps": {
+                    "description": "if true detect dependencies that only exist before typescript-to-javascript compilation.",
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string",
+                            "enum": [
+                                "specify"
+                            ]
+                        }
+                    ]
+                },
+                "externalModuleResolutionStrategy": {
+                    "type": "string",
+                    "description": "What external module resolution strategy to use. Defaults to 'node_modules'",
+                    "enum": [
+                        "node_modules",
+                        "yarn-pnp"
+                    ]
+                },
+                "webpackConfig": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Webpack configuration to use to get resolve options from",
+                    "properties": {
+                        "fileName": {
+                            "type": "string",
+                            "description": "The webpack conf file to use (typically something like 'webpack.conf.js'). The fileName is relative to dependency-cruiser's current working directory. When not provided defaults to './webpack.conf.js'."
+                        },
+                        "env": {
+                            "description": "Environment to pass if your config file returns a function",
+                            "oneOf": [
+                                {
+                                    "type": "object"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "arguments": {
+                            "type": "object",
+                            "description": "Arguments to pass if your config file returns a function. E.g. {mode: 'production'} if you want to use webpack 4's 'mode' feature"
+                        }
+                    }
+                },
+                "babelConfig": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Babel configuration (e.g. '.babelrc.json') to use.",
+                    "properties": {
+                        "fileName": {
+                            "description": "The Babel configuration file to use. The fileName is relative to dependency-cruiser's current working directory. When not provided defaults to './.babelrc.json'. Dependency-cruiser currently supports only the json variant. Support for (js|cjs|mjs) variants and configuration in package.json might follow in future releases.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "exoticRequireStrings": {
+                    "type": "array",
+                    "description": "List of strings you have in use in addition to cjs/ es6 requires & imports to declare module dependencies. Use this e.g. if you've redeclared require (`const want = require`), use a require-wrapper (like semver-try-require) or use window.require as a hack to workaround something",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "reporterOptions": {
+                    "$ref": "#/definitions/ReporterOptionsType"
+                }
+            }
+        },
+        "ModuleSystemType": {
+            "type": "string",
+            "enum": [
+                "cjs",
+                "es6",
+                "amd",
+                "tsd"
+            ]
+        },
+        "ModuleSystemsType": {
+            "type": "array",
+            "description": "List of module systems to cruise. Defaults to [amd, cjs, es6]",
+            "items": {
+                "$ref": "#/definitions/ModuleSystemType"
+            }
+        },
+        "CompoundExcludeType": {
+            "type": "object",
+            "description": "Criteria for dependencies to exclude",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "a regular expression for modules to exclude from being cruised",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "dynamic": {
+                    "type": "boolean",
+                    "description": "a boolean indicating whether or not to exclude dynamic dependencies"
+                }
+            },
+            "REAsStringsType": {
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "CompoundDoNotFollowType": {
+            "type": "object",
+            "description": "Criteria for modules to include, but not to follow further",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "a regular expression for modules to include, but not follow further",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "dependencyTypes": {
+                    "type": "array",
+                    "description": "an array of dependency types to include, but not follow further",
+                    "items": {
+                        "$ref": "#/definitions/DependencyTypeType"
+                    }
+                }
+            }
+        },
+        "CompoundIncludeOnlyType": {
+            "type": "object",
+            "description": "Criteria for modules to only include",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "dependency-cruiser will include modules matching this regular expression in its output, as well as their neighbours (direct dependencies and dependents)",
+                    "$ref": "#/definitions/REAsStringsType"
+                }
+            },
+            "REAsStringsType": {
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "CompoundFocusType": {
+            "type": "object",
+            "description": "Criteria for modules to 'focus' on",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "description": "dependency-cruiser will include modules matching this regular expression in its output, as well as their neighbours (direct dependencies and dependents)",
+                    "$ref": "#/definitions/REAsStringsType"
+                }
+            },
+            "REAsStringsType": {
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "ReporterOptionsType": {
+            "type": "object",
+            "description": "Options to tweak the output of reporters",
+            "additionalProperties": false,
+            "properties": {
+                "anon": {
+                    "$ref": "#/definitions/AnonReporterOptionsType"
+                },
+                "archi": {
+                    "$ref": "#/definitions/DotReporterOptionsType"
+                },
+                "dot": {
+                    "$ref": "#/definitions/DotReporterOptionsType"
+                },
+                "ddot": {
+                    "$ref": "#/definitions/DotReporterOptionsType"
+                }
+            }
+        },
+        "AnonReporterOptionsType": {
+            "type": "object",
+            "description": "Options to tweak the output of the anonymous reporter",
+            "additionalProperties": false,
+            "properties": {
+                "wordlist": {
+                    "type": "array",
+                    "description": "List of words to use to replace path elements of file names in the output with so the output isn't directly traceable to its intended purpose.When the list is exhausted, the anon reporter will use random strings patterned after the original file name in stead. The list is empty by default. Read more in https://github.com/sverweij/dependency-cruiser/blob/develop/doc/cli.md#anon---obfuscated-json",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "DotReporterOptionsType": {
+            "type": "object",
+            "description": "Options to tweak the output of the dot reporters",
+            "additionalProperties": false,
+            "properties": {
+                "collapsePattern": {
+                    "description": "Regular expressions to collapse to. For the \"dot\" reporter defaults to null, but \"node_modules/[^/]+\" is recommended for most use cases.",
+                    "$ref": "#/definitions/REAsStringsType"
+                },
+                "filters": {
+                    "$ref": "#/definitions/ReporterFiltersType"
+                },
+                "theme": {
+                    "$ref": "#/definitions/DotThemeType"
+                }
+            }
+        },
+        "DotThemeType": {
+            "type": "object",
+            "description": "A bunch of criteria to conditionally theme the dot output",
+            "additionalProperties": false,
+            "properties": {
+                "replace": {
+                    "type": "boolean",
+                    "description": "If passed with the value 'true', the passed theme replaces the default one. In all other cases it extends the default theme."
+                },
+                "graph": {
+                    "description": "Name- value pairs of GraphViz dot (global) attributes.",
+                    "type": "object"
+                },
+                "node": {
+                    "description": "Name- value pairs of GraphViz dot node attributes.",
+                    "type": "object"
+                },
+                "edge": {
+                    "description": "Name- value pairs of GraphViz dot edge attributes.",
+                    "type": "object"
+                },
+                "modules": {
+                    "description": "List of criteria and attributes to apply for modules when the criteria are met. Conditions can use any module attribute. Attributes can be any that are valid in GraphViz dot nodes.",
+                    "$ref": "#/definitions/DotThemeArrayType"
+                },
+                "dependencies": {
+                    "description": "List of criteria and attributes to apply for dependencies when the criteria are met. Conditions can use any dependency attribute. Attributes can be any that are valid in GraphViz dot edges.",
+                    "$ref": "#/definitions/DotThemeArrayType"
+                }
+            }
+        },
+        "DotThemeArrayType": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/DotThemeEntryType"
+            }
+        },
+        "DotThemeEntryType": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "criteria": {
+                    "type": "object"
+                },
+                "attributes": {
+                    "type": "object"
+                }
+            }
+        },
+        "ReporterFiltersType": {
+            "type": "object",
+            "description": "filters to apply to the reporter before rendering it (e.g. to leave out details from the graphical output that are not relevant for the goal of the report)",
+            "additionalProperties": false,
+            "properties": {
+                "exclude": {
+                    "$ref": "#/definitions/CompoundExcludeType"
+                },
+                "includeOnly": {
+                    "$ref": "#/definitions/CompoundIncludeOnlyType"
+                },
+                "focus": {
+                    "$ref": "#/definitions/CompoundFocusType"
+                }
+            }
+        },
+        "ExtendsType": {
+            "description": "A configuration (or an array of configurations) this configuration uses as a base",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+    }
+}

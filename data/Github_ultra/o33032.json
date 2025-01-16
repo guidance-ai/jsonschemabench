@@ -1,0 +1,955 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Geniventure Authoring",
+    "description": "Geniventure's authoring document",
+    "type": "object",
+    "properties": {
+        "application": {
+            "description": "Configuration for the levels and missions that comprise the application",
+            "type": "object",
+            "properties": {
+                "levels": {
+                    "description": "Configuration for the levels that comprise the application",
+                    "type": "array",
+                    "items": {
+                        "description": "Each entry corresponds to a level",
+                        "type": "object",
+                        "properties": {
+                            "missions": {
+                                "description": "Configuration for the missions that comprise the level",
+                                "type": "array",
+                                "items": {
+                                    "description": "Each entry corresponds to a mission",
+                                    "type": "object",
+                                    "properties": {
+                                        "challenges": {
+                                            "description": "The list of challenges provided by this mission",
+                                            "type": "array",
+                                            "items": {
+                                                "description": "Each entry corresponds to a challenge",
+                                                "type": "object",
+                                                "properties": {
+                                                    "about": {
+                                                        "description": "Information about the challenge",
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "description": {
+                                                                "description": "A description of the challenge",
+                                                                "type": "string"
+                                                            },
+                                                            "tip": {
+                                                                "description": "A hint provided to the user",
+                                                                "type": "string"
+                                                            },
+                                                            "type": {
+                                                                "description": "The type of the challenge",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "description",
+                                                            "type"
+                                                        ],
+                                                        "additionalProperties": false
+                                                    },
+                                                    "dialog": {
+                                                        "description": "The dialog spoken by the characters during the challenge",
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "end": {
+                                                                "$ref": "#/definitions/endDialogSequence"
+                                                            },
+                                                            "start": {
+                                                                "$ref": "#/definitions/dialogSequence"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "end",
+                                                            "start"
+                                                        ],
+                                                        "additionalProperties": false
+                                                    },
+                                                    "id": {
+                                                        "description": "The ID of the challenge, which should correspond to an ID in the challenges map",
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "description": "The name of the challenge",
+                                                        "type": "string"
+                                                    },
+                                                    "room": {
+                                                        "$ref": "#/definitions/room"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "about",
+                                                    "dialog",
+                                                    "id",
+                                                    "name",
+                                                    "room"
+                                                ],
+                                                "additionalProperties": false
+                                            }
+                                        },
+                                        "dialog": {
+                                            "description": "The dialog text spoken by the characters in the mission",
+                                            "type": "object",
+                                            "properties": {
+                                                "end": {
+                                                    "$ref": "#/definitions/dialogSequence"
+                                                },
+                                                "middle": {
+                                                    "$ref": "#/definitions/dialogSequence"
+                                                },
+                                                "start": {
+                                                    "$ref": "#/definitions/dialogSequence"
+                                                }
+                                            },
+                                            "required": [
+                                                "end",
+                                                "middle",
+                                                "start"
+                                            ],
+                                            "additionalProperties": false
+                                        },
+                                        "name": {
+                                            "description": "The name of the mission",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "challenges",
+                                        "dialog",
+                                        "name"
+                                    ]
+                                }
+                            },
+                            "name": {
+                                "description": "The name of the mission",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "missions",
+                            "name"
+                        ],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "required": [
+                "levels"
+            ],
+            "additionalProperties": false
+        },
+        "challenges": {
+            "description": "Configuration of the challenges provided by the application",
+            "type": "object",
+            "patternProperties": {
+                "^.+$": {
+                    "description": "Each entry represents a challenge",
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/challenge"
+                        },
+                        {
+                            "$ref": "#/definitions/ClutchGame"
+                        },
+                        {
+                            "$ref": "#/definitions/FVEggGame"
+                        },
+                        {
+                            "$ref": "#/definitions/FVEggSortGame"
+                        },
+                        {
+                            "$ref": "#/definitions/FVGenomeChallenge"
+                        }
+                    ]
+                }
+            }
+        },
+        "rooms": {
+            "description": "Configuration of the locations available within the application",
+            "type": "object",
+            "patternProperties": {
+                "^.+$": {
+                    "description": "Each entry represents a room",
+                    "type": "object",
+                    "properties": {
+                        "defaultCharacter": {
+                            "description": "The narrative character present by default in the room",
+                            "type": "string"
+                        },
+                        "name": {
+                            "description": "The name of the room",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "name"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "application",
+        "challenges",
+        "rooms"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "biologicaAlleles": {
+            "description": "A set of alleles that can be used to specify an organism in the 'a:b:' format used by BioLogica",
+            "comment": "Note that this excludes the A2 allele which is not used by Geniventure.",
+            "type": "string",
+            "pattern": "^(((a|b):(T|Tk|t|M|m|W|w|H|h|C|c|Fl|fl|Hl|hl|A1|a|B|b|D|d|Rh|rh|Bog|bog))|,)*$"
+        },
+        "biologicaDashAlleles": {
+            "description": "A set of alleles that can be used to specify an organism in the 'a-a' format",
+            "comment": "Note that this excludes the A2 allele which is not used by Geniventure.",
+            "type": "string",
+            "pattern": "^(((T|Tk|t)?-(T|Tk|t)?)|((M|m)?-(M|m)?)|((W|w)?-(W|w)?)|((H|h)?-(H|h)?)|((C|c)?-(C|c)?)|((Fl|fl)?-(Fl|fl)?)|((Hl|hl)?-(Hl|hl)?)|((A1|a)?-(A1|a)?)|((B|b)?-(B|b)?)|((D|d)?-(D|d)?)|((Rh|rh)?-(Rh|rh)?)|((Bog|bog)?-(Bog|bog)?)|(, ))*$"
+        },
+        "biologicaSex": {
+            "description": "Numeric value to indicate sex -- 0: male, 1: female",
+            "type": "number",
+            "enum": [
+                0,
+                1
+            ]
+        },
+        "challenge": {
+            "description": "Configuration of an individual challenge",
+            "type": "object",
+            "properties": {
+                "linkedGenes": {
+                    "$ref": "#/definitions/linkedGenes"
+                },
+                "template": {
+                    "$ref": "#/definitions/template"
+                },
+                "patternProperties": {
+                    "^.+$": {
+                        "description": "Challenge properties are defined by the template and vary among challenges."
+                    }
+                }
+            },
+            "required": [
+                "template"
+            ],
+            "additionalProperties": true
+        },
+        "character": {
+            "description": "The name of the character",
+            "type": "string",
+            "enum": [
+                "ELLIS",
+                "HATCH",
+                "HERRERA",
+                "NETANYA",
+                "RAJPUT",
+                "WEAVER",
+                "YEUNG"
+            ]
+        },
+        "ClutchGame": {
+            "description": "A challenge that uses the ClutchGame template",
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "description": "The type of challenge",
+                    "type": "string",
+                    "enum": [
+                        "match-target",
+                        "submit-parents",
+                        "test-cross"
+                    ]
+                },
+                "comment": {
+                    "description": "A description of the challenge",
+                    "type": "string"
+                },
+                "container": {
+                    "description": "The container for the challenge",
+                    "type": "string",
+                    "enum": [
+                        "FVContainer"
+                    ]
+                },
+                "father": {
+                    "description": "Specifies the father's genetics",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashDrakeOrRandomMatched"
+                    }
+                },
+                "goalMoves": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/goalMovesOrArray"
+                    }
+                },
+                "hiddenAlleles": {
+                    "$ref": "#/definitions/hiddenAlleles"
+                },
+                "hiddenParent": {
+                    "description": "Attributes of the hidden parent",
+                    "type": "object",
+                    "properties": {
+                        "hiddenGenotype": {
+                            "description": "Whether to hide the genotype of the parent",
+                            "type": "boolean"
+                        },
+                        "sex": {
+                            "$ref": "#/definitions/biologicaSex"
+                        }
+                    }
+                },
+                "linkedGenes": {
+                    "$ref": "#/definitions/linkedGenes"
+                },
+                "mother": {
+                    "description": "Specifies the mother's genetics",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashDrakeOrRandomMatched"
+                    }
+                },
+                "targetDrakes": {
+                    "description": "Specifies the target drake's genetics",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashDrakeOrRandomMatched"
+                    }
+                },
+                "template": {
+                    "type": "string",
+                    "enum": [
+                        "ClutchGame"
+                    ]
+                },
+                "userChangeableGenes": {
+                    "description": "The genes the user can manipulate for each parent in the trial",
+                    "type": "array",
+                    "items": {
+                        "description": "The genes the user can manipulate within a single trial",
+                        "type": "object",
+                        "properties": {
+                            "father": {
+                                "$ref": "#/definitions/genesString"
+                            },
+                            "mother": {
+                                "$ref": "#/definitions/genesString"
+                            }
+                        },
+                        "required": [
+                            "father",
+                            "mother"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "visibleGenes": {
+                    "$ref": "#/definitions/genes"
+                }
+            },
+            "required": [
+                "challengeType",
+                "container",
+                "father",
+                "goalMoves",
+                "hiddenAlleles",
+                "template",
+                "userChangeableGenes"
+            ],
+            "additionalProperties": false
+        },
+        "dialogSequence": {
+            "description": "A sequence of spoken dialog items",
+            "type": "array",
+            "items": {
+                "description": "Each item corresponds to a piece of dialog from one of the characters",
+                "type": "object",
+                "properties": {
+                    "character": {
+                        "$ref": "#/definitions/character"
+                    },
+                    "text": {
+                        "description": "The text spoken by the character",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "character",
+                    "text"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "dashDrake": {
+            "description": "Specification for a drake using dash alleles format",
+            "type": "object",
+            "properties": {
+                "alleles": {
+                    "$ref": "#/definitions/biologicaDashAlleles"
+                },
+                "sex": {
+                    "$ref": "#/definitions/biologicaSex"
+                }
+            },
+            "required": [
+                "alleles"
+            ],
+            "additionalProperties": false
+        },
+        "dashDrakeOrRandomMatched": {
+            "description": "A drake or a set of drakes from which one is to be randomly selected.",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/dashDrake"
+                },
+                {
+                    "$ref": "#/definitions/dashDrakeRandomMatched"
+                }
+            ]
+        },
+        "dashDrakeRandomMatched": {
+            "description": "Specification for a set of drakes from which one is to be randomly selected.",
+            "type": "object",
+            "properties": {
+                "randomMatched": {
+                    "description": "The set of drakes from which one is to be randomly selected.",
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/dashDrake"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/dashDrake"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "randomMatched"
+            ],
+            "additionalProperties": false
+        },
+        "drake": {
+            "description": "Specification for a drake using BioLogica alleles format",
+            "type": "object",
+            "properties": {
+                "alleles": {
+                    "$ref": "#/definitions/biologicaAlleles"
+                },
+                "sex": {
+                    "$ref": "#/definitions/biologicaSex"
+                }
+            },
+            "required": [
+                "alleles"
+            ],
+            "additionalProperties": false
+        },
+        "drakeOrArray": {
+            "description": "Specification for a single drake or an array of drakes",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/drake"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/drake"
+                    }
+                }
+            ]
+        },
+        "drakeOrRandomMatched": {
+            "description": "A drake or a set of drakes from which one is to be randomly selected.",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/drake"
+                },
+                {
+                    "$ref": "#/definitions/drakeRandomMatched"
+                }
+            ]
+        },
+        "drakeRandomMatched": {
+            "description": "Specification for a set of drakes from which one is to be randomly selected.",
+            "type": "object",
+            "properties": {
+                "randomMatched": {
+                    "description": "The set of drakes from which one is to be randomly selected.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/drake"
+                    }
+                }
+            },
+            "required": [
+                "randomMatched"
+            ],
+            "additionalProperties": false
+        },
+        "endDialogSequence": {
+            "description": "Alternative dialog sequences spoken at the end of a challenge or mission",
+            "type": "object",
+            "properties": {
+                "failure": {
+                    "$ref": "#/definitions/dialogSequence"
+                },
+                "success": {
+                    "$ref": "#/definitions/dialogSequence"
+                }
+            },
+            "required": [
+                "failure",
+                "success"
+            ],
+            "additionalProperties": false
+        },
+        "FVEggGame": {
+            "description": "A challenge that uses the FVEggGame template",
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "enum": [
+                        "create-unique",
+                        "match-target"
+                    ]
+                },
+                "comment": {
+                    "description": "A descriptive comment for the challenge",
+                    "type": "string"
+                },
+                "container": {
+                    "description": "The container for the challenge",
+                    "type": "string",
+                    "enum": [
+                        "FVContainer"
+                    ]
+                },
+                "father": {
+                    "$ref": "#/definitions/drakeOrRandomMatched"
+                },
+                "gameteCounts": {
+                    "description": "Array of gamete counts for each trial. Each entry is number of parent gametes in form [father, mother].",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "instructions": {
+                    "description": "Instructions presented to the user",
+                    "type": "string"
+                },
+                "interactionType": {
+                    "description": "Whether the user is to select chromosomes or gametes.",
+                    "type": "string",
+                    "enum": [
+                        "select-chromosomes",
+                        "select-gametes"
+                    ]
+                },
+                "mother": {
+                    "$ref": "#/definitions/drakeOrRandomMatched"
+                },
+                "numTrials": {
+                    "description": "The number of trials in this challenge",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "showIntroductionAnimations": {
+                    "description": "Whether to show/hide the introductory animations",
+                    "type": "boolean"
+                },
+                "showUserDrake": {
+                    "description": "Whether the user drake is shown or hidden",
+                    "type": "boolean"
+                },
+                "targetDrakes": {
+                    "description": "Constraints on the generated target drakes",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/drakeOrRandomMatched"
+                    }
+                },
+                "template": {
+                    "type": "string",
+                    "enum": [
+                        "FVEggGame"
+                    ]
+                },
+                "visibleGenes": {
+                    "$ref": "#/definitions/genes"
+                }
+            },
+            "required": [
+                "challengeType",
+                "container",
+                "father",
+                "interactionType",
+                "mother",
+                "numTrials",
+                "showUserDrake",
+                "template",
+                "visibleGenes"
+            ],
+            "additionalProperties": false
+        },
+        "FVEggSortGame": {
+            "description": "A challenge that uses the FVEggSortGame template",
+            "type": "object",
+            "properties": {
+                "baskets": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "alleles": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/biologicaAlleles"
+                                }
+                            },
+                            "label": {
+                                "type": "string"
+                            },
+                            "sex": {
+                                "$ref": "#/definitions/biologicaSex"
+                            }
+                        },
+                        "required": [
+                            "alleles",
+                            "label"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "container": {
+                    "type": "string",
+                    "enum": [
+                        "FVContainer"
+                    ]
+                },
+                "template": {
+                    "description": "The template identifies the React component that implements the challenge",
+                    "type": "string",
+                    "enum": [
+                        "FVEggSortGame"
+                    ]
+                },
+                "trialGenerator": {
+                    "type": "object",
+                    "properties": {
+                        "baseDrake": {
+                            "$ref": "#/definitions/biologicaAlleles"
+                        },
+                        "drakes": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/drake"
+                            }
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "randomize-order"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "baseDrake",
+                        "drakes",
+                        "type"
+                    ],
+                    "additionalProperties": false
+                },
+                "visibleGenes": {
+                    "$ref": "#/definitions/genes"
+                }
+            },
+            "required": [
+                "baskets",
+                "container",
+                "template",
+                "trialGenerator"
+            ],
+            "additionalProperties": false
+        },
+        "FVGenomeChallenge": {
+            "description": "A challenge that uses the FVGenomeChallenge template",
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "enum": [
+                        "create-unique",
+                        "match-target"
+                    ]
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "container": {
+                    "type": "string",
+                    "enum": [
+                        "FVContainer"
+                    ]
+                },
+                "hiddenAlleles": {
+                    "$ref": "#/definitions/hiddenAlleles"
+                },
+                "initialDrake": {
+                    "description": "Specifies a single drake or an array of drakes",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/drake"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/drake"
+                            }
+                        }
+                    ]
+                },
+                "instructions": {
+                    "description": "Instructions displayed to the user",
+                    "type": "string"
+                },
+                "linkedGenes": {
+                    "$ref": "#/definitions/linkedGenes"
+                },
+                "numTrials": {
+                    "description": "The number of trials",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "randomizeTrials": {
+                    "description": "Whether the order of the trials should be randomized",
+                    "type": "boolean"
+                },
+                "showDrakeColorHint": {
+                    "description": "Whether to show text next to a drake image to describe the color (copper, lava, etc)",
+                    "type": "boolean"
+                },
+                "showUserDrake": {
+                    "description": "Whether the user's drake should be visible",
+                    "type": "boolean"
+                },
+                "targetDrakes": {
+                    "description": "Specifies the target drakes to be matched",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/drake"
+                    }
+                },
+                "template": {
+                    "type": "string",
+                    "enum": [
+                        "FVGenomeChallenge"
+                    ]
+                },
+                "trialGenerator": {
+                    "description": "Specifies the randomization of the trials",
+                    "type": "object",
+                    "properties": {
+                        "baseDrake": {
+                            "$ref": "#/definitions/biologicaAlleles"
+                        },
+                        "initialDrakeCombos": {
+                            "description": "Specifies the combinations of alleles used to generated the initial drakes",
+                            "type": "array",
+                            "items": {
+                                "description": "Specifies a set of alleles, one of which is to be randomly selected",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/biologicaAlleles"
+                                }
+                            }
+                        },
+                        "targetDrakeCombos": {
+                            "description": "Specifies the combinations of alleles used to generated the target drakes",
+                            "type": "array",
+                            "items": {
+                                "description": "Specifies a set of alleles, one of which is to be randomly selected",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/biologicaAlleles"
+                                }
+                            }
+                        },
+                        "type": {
+                            "description": "The type of randomization used to generate the trials",
+                            "type": "string",
+                            "enum": [
+                                "all-combinations"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "baseDrake",
+                        "initialDrakeCombos",
+                        "targetDrakeCombos",
+                        "type"
+                    ],
+                    "additionalProperties": false
+                },
+                "userChangeableGenes": {
+                    "$ref": "#/definitions/genes"
+                },
+                "visibleGenes": {
+                    "$ref": "#/definitions/genes"
+                }
+            },
+            "required": [
+                "challengeType",
+                "container",
+                "showUserDrake",
+                "template",
+                "userChangeableGenes"
+            ],
+            "additionalProperties": false
+        },
+        "genes": {
+            "description": "An array of gene strings or a string containing a comma-separated list of genes",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/genesArray"
+                },
+                {
+                    "$ref": "#/definitions/genesString"
+                }
+            ]
+        },
+        "genesArray": {
+            "description": "An array of gene strings",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "tail",
+                    "metallic",
+                    "wings",
+                    "horns",
+                    "color",
+                    "black",
+                    "forelimbs",
+                    "hindlimbs",
+                    "armor",
+                    "dilute",
+                    "bogbreath",
+                    "nose"
+                ]
+            }
+        },
+        "genesString": {
+            "description": "A comma-separated list of gene strings",
+            "type": "string",
+            "pattern": "^(tail|metallic|wings|horns|color|black|forelimbs|hindlimbs|armor|dilute|bogbreath|nose|(, ))*$"
+        },
+        "goalMovesArray": {
+            "description": "The number of moves required to match multiple targets",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/goalMovesSingle"
+            }
+        },
+        "goalMovesOrArray": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/goalMovesSingle"
+                },
+                {
+                    "$ref": "#/definitions/goalMovesArray"
+                }
+            ]
+        },
+        "goalMovesSingle": {
+            "description": "The number of moves required to match the target",
+            "type": "integer",
+            "minimum": 0
+        },
+        "hiddenAlleles": {
+            "description": "A list of alleles that should not be selectable by the user",
+            "type": "string",
+            "pattern": "^((T|Tk|t|M|m|W|w|H|h|C|c|Fl|fl|Hl|hl|A1|A2|a|B|b|D|d|Rh|rh|Bog|bog)|,)*$"
+        },
+        "linkedGenes": {
+            "description": "Specifies genes that should be synchronized between multiple drakes for one or more trials",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/linkedGenesTrial"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/linkedGenesTrial"
+                    }
+                }
+            ]
+        },
+        "linkedGenesTrial": {
+            "description": "Specifies genes that should be synchronized between multiple drakes",
+            "type": "object",
+            "properties": {
+                "drakes": {
+                    "description": "Specifies the drakes that should be linked by their indices",
+                    "type": "array",
+                    "items": {
+                        "description": "Indices of the drakes to be linked",
+                        "type": "number"
+                    }
+                },
+                "genes": {
+                    "$ref": "#/definitions/genes"
+                },
+                "minChanges": {
+                    "description": "The minimum number of allele changes required to match the drakes after linking genes",
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "room": {
+            "description": "The room/location of the challenge",
+            "type": "string",
+            "enum": [
+                "breedingbarn",
+                "hatchery",
+                "home",
+                "simroom",
+                "zoomroom"
+            ]
+        },
+        "template": {
+            "description": "The template identifies the React component that implements the challenge",
+            "type": "string",
+            "enum": [
+                "EggGame",
+                "EggSortGame",
+                "GenomeChallenge",
+                "GenomePlayground",
+                "ZoomChallenge"
+            ]
+        }
+    }
+}

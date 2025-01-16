@@ -1,0 +1,347 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Annotation Model",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "overrides": {
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/HttpEndpointOverride"
+                    },
+                    {
+                        "$ref": "#/definitions/HttpParameterOverride"
+                    }
+                ]
+            }
+        },
+        "inputs": {
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/DirectListInput"
+                    },
+                    {
+                        "$ref": "#/definitions/CsvInput"
+                    },
+                    {
+                        "$ref": "#/definitions/ExtractedInput"
+                    },
+                    {
+                        "$ref": "#/definitions/CounterInput"
+                    }
+                ]
+            }
+        },
+        "endpoint-annotations": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/EndpointAnnotation"
+            }
+        }
+    },
+    "definitions": {
+        "EndpointAnnotation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "endpoint": {
+                    "type": "string"
+                },
+                "overrides": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/HttpEndpointOverride"
+                            },
+                            {
+                                "$ref": "#/definitions/HttpParameterOverride"
+                            }
+                        ]
+                    }
+                },
+                "parameter-annotations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ParameterAnnotation"
+                    }
+                }
+            },
+            "required": [
+                "endpoint"
+            ]
+        },
+        "ParameterAnnotation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "parameter": {
+                    "type": "string"
+                },
+                "input": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/DirectListInput"
+                        },
+                        {
+                            "$ref": "#/definitions/CsvInput"
+                        },
+                        {
+                            "$ref": "#/definitions/ExtractedInput"
+                        },
+                        {
+                            "$ref": "#/definitions/CounterInput"
+                        }
+                    ]
+                },
+                "overrides": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/HttpParameterOverride"
+                            }
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "parameter",
+                "input"
+            ]
+        },
+        "DirectListInput": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "direct"
+                    ],
+                    "default": "direct"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "associated": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/DirectListInput"
+                            },
+                            {
+                                "$ref": "#/definitions/CsvInput"
+                            }
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "data"
+            ]
+        },
+        "CsvInput": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "csv"
+                    ],
+                    "default": "csv"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "file": {
+                    "type": "string"
+                },
+                "column": {
+                    "type": "integer"
+                },
+                "separator": {
+                    "type": "string",
+                    "default": ";"
+                },
+                "associated": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/DirectListInput"
+                            },
+                            {
+                                "$ref": "#/definitions/CsvInput"
+                            }
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "file",
+                "column"
+            ]
+        },
+        "ExtractedInput": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "extracted"
+                    ],
+                    "default": "extracted"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "initial": {
+                    "type": "string"
+                },
+                "extractions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/RegExExtraction"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "extractions"
+            ]
+        },
+        "RegExExtraction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "response-key": {
+                    "type": "string",
+                    "default": "<default>"
+                },
+                "template": {
+                    "type": "string",
+                    "default": "(1)"
+                },
+                "match-number": {
+                    "type": "integer",
+                    "default": 1
+                },
+                "fallback": {
+                    "type": "string",
+                    "default": "NOT FOUND"
+                }
+            },
+            "required": [
+                "from",
+                "pattern"
+            ]
+        },
+        "CounterInput": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "counter"
+                    ],
+                    "default": "counter"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "format": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "GLOBAL",
+                        "USER",
+                        "USER_ITERATION"
+                    ]
+                },
+                "start": {
+                    "type": "integer"
+                },
+                "increment": {
+                    "type": "integer"
+                },
+                "maximum": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "@type",
+                "scope",
+                "start",
+                "increment",
+                "maximum"
+            ]
+        },
+        "HttpEndpointOverride": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "HttpEndpoint.domain": {
+                    "type": "string"
+                },
+                "HttpEndpoint.port": {
+                    "type": "string"
+                },
+                "HttpEndpoint.encoding": {
+                    "type": "string"
+                },
+                "HttpEndpoint.protocol": {
+                    "type": "string"
+                },
+                "HttpEndpoint.header": {
+                    "type": "string"
+                }
+            }
+        },
+        "HttpParameterOverride": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "HttpParameter.encoded": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

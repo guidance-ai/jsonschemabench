@@ -1,0 +1,251 @@
+{
+    "definitions": {
+        "absolute_path": {
+            "pattern": "^/[^\u0000]+$",
+            "type": "string"
+        },
+        "bytes": {
+            "pattern": "^\\d+([KMGT]i?B|B)$",
+            "type": "string"
+        },
+        "no_partitions": {
+            "additionalProperties": false,
+            "properties": {
+                "root": {
+                    "$ref": "#/definitions/partition"
+                },
+                "type": {
+                    "enum": [
+                        "none"
+                    ]
+                }
+            },
+            "required": [
+                "root"
+            ],
+            "type": "object"
+        },
+        "partition": {
+            "properties": {
+                "filesystem": {
+                    "enum": [
+                        "ext2",
+                        "ext3",
+                        "ext4",
+                        "xfs"
+                    ]
+                },
+                "size": {
+                    "$ref": "#/definitions/bytes"
+                }
+            },
+            "required": [
+                "size",
+                "filesystem"
+            ],
+            "type": "object"
+        },
+        "partition_table": {
+            "additionalProperties": false,
+            "properties": {
+                "boot": {
+                    "$ref": "#/definitions/partition"
+                },
+                "root": {
+                    "$ref": "#/definitions/partition"
+                },
+                "swap": {
+                    "properties": {
+                        "size": {
+                            "$ref": "#/definitions/bytes"
+                        }
+                    },
+                    "required": [
+                        "size"
+                    ],
+                    "type": "object"
+                },
+                "type": {
+                    "enum": [
+                        "msdos",
+                        "gpt"
+                    ]
+                }
+            },
+            "required": [
+                "root"
+            ],
+            "type": "object"
+        },
+        "path": {
+            "pattern": "^[^\u0000]+$",
+            "type": "string"
+        }
+    },
+    "properties": {
+        "bootstrapper": {
+            "properties": {
+                "mirror": {
+                    "_format": "uri",
+                    "type": "string"
+                },
+                "tarball": {
+                    "type": "boolean"
+                },
+                "workspace": {
+                    "$ref": "#/definitions/path"
+                }
+            },
+            "required": [
+                "workspace"
+            ],
+            "type": "object"
+        },
+        "image": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "type": "object"
+        },
+        "packages": {
+            "additionalProperties": false,
+            "properties": {
+                "install": {
+                    "items": {
+                        "anyOf": [
+                            {
+                                "pattern": "^[^/]+(/[^/]+)?$"
+                            },
+                            {
+                                "$ref": "#/definitions/absolute_path"
+                            }
+                        ]
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "mirror": {
+                    "_format": "uri",
+                    "type": "string"
+                },
+                "sources": {
+                    "additionalProperties": false,
+                    "minItems": 1,
+                    "patternProperties": {
+                        "^\\w+$": {
+                            "items": {
+                                "pattern": "^(deb|deb-src)\\s+(\\[\\s*(.+\\S)?\\s*\\]\\s+)?\\S+\\s+\\S+(\\s+(.+\\S))?\\s*$",
+                                "type": "string"
+                            },
+                            "minItems": 1,
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                "trusted-keys": {
+                    "items": {
+                        "$ref": "#/definitions/absolute_path"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "plugins": {
+            "additionalProperties": false,
+            "patternProperties": {
+                "^\\w+$": {
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "provider": {
+            "type": "string"
+        },
+        "system": {
+            "properties": {
+                "architecture": {
+                    "enum": [
+                        "i386",
+                        "amd64"
+                    ]
+                },
+                "bootloader": {
+                    "enum": [
+                        "pvgrub",
+                        "grub",
+                        "extlinux"
+                    ]
+                },
+                "charmap": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "release": {
+                    "enum": [
+                        "wheezy",
+                        "testing",
+                        "unstable"
+                    ]
+                },
+                "sections": {
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "timezone": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "release",
+                "architecture",
+                "bootloader",
+                "timezone",
+                "locale",
+                "charmap"
+            ],
+            "type": "object"
+        },
+        "volume": {
+            "properties": {
+                "backing": {
+                    "type": "string"
+                },
+                "partitions": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/no_partitions"
+                        },
+                        {
+                            "$ref": "#/definitions/partition_table"
+                        }
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "partitions"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "provider",
+        "bootstrapper",
+        "system",
+        "packages",
+        "volume"
+    ],
+    "title": "Generic manifest",
+    "type": "object"
+}

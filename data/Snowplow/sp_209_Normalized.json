@@ -1,0 +1,230 @@
+{
+    "additionalProperties": false,
+    "description": "Schema for Igluctl's configuration",
+    "properties": {
+        "actions": {
+            "description": "Configuration for s3cp and push commands",
+            "items": {
+                "anyOf": [
+                    {
+                        "description": "Configuration for static push command",
+                        "properties": {
+                            "action": {
+                                "enum": [
+                                    "push"
+                                ],
+                                "type": "string"
+                            },
+                            "apikey": {
+                                "oneOf": [
+                                    {
+                                        "format": "uuid"
+                                    },
+                                    {
+                                        "pattern": "^\\$[A-Z0-9-_]+"
+                                    }
+                                ]
+                            },
+                            "isPublic": {
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "registry": {
+                                "_format": "uri",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "action",
+                            "registry",
+                            "isPublic",
+                            "apikey"
+                        ],
+                        "type": "object"
+                    },
+                    {
+                        "description": "Configuration for static s3cp command",
+                        "properties": {
+                            "action": {
+                                "enum": [
+                                    "s3cp"
+                                ],
+                                "type": "string"
+                            },
+                            "bucketPath": {
+                                "pattern": "^s3://",
+                                "type": "string"
+                            },
+                            "profile": {
+                                "description": "AWS profile",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "region": {
+                                "default": "us-west-2",
+                                "description": "AWS region",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "uploadFormat": {
+                                "enum": [
+                                    "jsonpath",
+                                    "jsonschema"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "action",
+                            "uploadFormat",
+                            "bucketPath",
+                            "profile",
+                            "region"
+                        ],
+                        "type": "object"
+                    }
+                ],
+                "type": "object"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        },
+        "description": {
+            "description": "Human-readable & short description the configuration",
+            "type": "string"
+        },
+        "generate": {
+            "description": "Configuration for static generate command",
+            "properties": {
+                "dbschema": {
+                    "default": "atomic",
+                    "description": "Redshift database schema (e.g. 'atomic')",
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "force": {
+                    "default": false,
+                    "description": "Force overwrite existing manually-edited files",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "noHeader": {
+                    "default": false,
+                    "description": "Place header comments into output DDL or not",
+                    "type": "boolean"
+                },
+                "output": {
+                    "default": ".",
+                    "description": "Directory to put generated data",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "owner": {
+                    "description": "Redshift table owner",
+                    "maxLength": 128,
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "varcharSize": {
+                    "default": 4096,
+                    "description": "Redshift varchar size",
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "withJsonPaths": {
+                    "default": true,
+                    "description": "Produce JSON Paths files with DDL or not",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "output",
+                "dbschema",
+                "owner",
+                "varcharSize",
+                "withJsonPaths",
+                "noHeader",
+                "force"
+            ],
+            "type": "object"
+        },
+        "input": {
+            "_format": "uri",
+            "description": "Path to input schemas",
+            "type": "string"
+        },
+        "lint": {
+            "description": "Configuration for lint command",
+            "properties": {
+                "includedChecks": {
+                    "description": "Lint using provided linters",
+                    "items": {
+                        "enum": [
+                            "rootObject",
+                            "unknownFormats",
+                            "numericMinMax",
+                            "stringLength",
+                            "optionalNull",
+                            "description",
+                            "stringMaxLengthRange"
+                        ],
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "skipWarnings": {
+                    "default": false,
+                    "description": "Don't output messages with log level less than ERROR",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "skipWarnings",
+                "includedChecks"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "input",
+        "lint",
+        "generate",
+        "actions"
+    ],
+    "self": {
+        "format": "jsonschema",
+        "name": "igluctl_config",
+        "vendor": "com.snowplowanalytics.iglu",
+        "version": "1-0-0"
+    },
+    "type": "object"
+}

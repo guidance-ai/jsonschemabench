@@ -1,0 +1,518 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "additionalProperties": false,
+    "definitions": {
+        "dataset": {
+            "description": "Files in the archive that contain the data of interest",
+            "items": {
+                "description": "Use 'data:<mime-type>[;base64],<...>' for data URIs, 'file:<...>' for file references, and 'http://<host>/<file>' for external references.",
+                "title": "Data-URI encoded reference.",
+                "type": "string"
+            },
+            "minitems": "1",
+            "title": "A set of files",
+            "type": "array"
+        },
+        "date": {
+            "_format": "date-time",
+            "description": "ISO 8601 date.",
+            "title": "Datestamp",
+            "type": "string"
+        },
+        "description": {
+            "description": "The detailed description of the data element",
+            "title": "Description",
+            "type": "string"
+        },
+        "geometry": {
+            "description": "The geometry of the data element",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dataset"
+                },
+                "type": {
+                    "description": "The pseudo-mime type of the geometry.  E.g. 'text/x-ewkt'.  The type controls the interpretation of the 'data' elements.",
+                    "enum": [
+                        "text/x-ewkt"
+                    ],
+                    "title": "Geometry type",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "data",
+                "type"
+            ],
+            "title": "Data geometry",
+            "type": "object"
+        },
+        "georeference": {
+            "description": "A georeference object that locates the element in space.",
+            "properties": {
+                "elevation": {
+                    "description": "The elevation of the object.",
+                    "title": "Georeference elevation",
+                    "type": "number"
+                },
+                "latitude": {
+                    "description": "The latitude of the object.",
+                    "title": "Georeference latitude",
+                    "type": "number"
+                },
+                "longitude": {
+                    "description": "The longitude of the object.",
+                    "title": "Georeference longitude",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "latitude",
+                "longitude"
+            ],
+            "title": "Georeference",
+            "type": "object"
+        },
+        "imagegeoref": {
+            "description": "GeoReference in structured format",
+            "properties": {
+                "pixel_height": {
+                    "type": "number"
+                },
+                "pixel_units": {
+                    "type": "string"
+                },
+                "pixel_width": {
+                    "type": "number"
+                },
+                "rotation_x": {
+                    "type": "number"
+                },
+                "rotation_y": {
+                    "type": "number"
+                },
+                "upperleft": {
+                    "$ref": "#/definitions/georeference"
+                }
+            },
+            "required": [
+                "pixel_width",
+                "pixel_height",
+                "pixel_units",
+                "rotation_x",
+                "rotation_y",
+                "upperleft"
+            ],
+            "title": "GeoReference of an image",
+            "type": "object"
+        },
+        "imagegeoref_wf": {
+            "description": "GeoReference in worldfile format",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dataset"
+                },
+                "type": {
+                    "description": "The type of the bounds data.  E.g. 'text/x-worldfile'.",
+                    "enum": [
+                        "text/x-worldfile"
+                    ],
+                    "title": "Bounds type",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "data",
+                "type"
+            ],
+            "title": "GeoReference in worldfile format",
+            "type": "object"
+        },
+        "name": {
+            "description": "The display name of the data element",
+            "title": "Content name",
+            "type": "string"
+        }
+    },
+    "id": "https://aptomar.com/pub/dev/apt.schema.json",
+    "minProperties": 4,
+    "properties": {
+        "area": {
+            "additionalProperties": false,
+            "properties": {
+                "created": {
+                    "$ref": "#/definitions/date"
+                },
+                "description": {
+                    "$ref": "#/definitions/description"
+                },
+                "geometry": {
+                    "$ref": "#/definitions/geometry"
+                },
+                "name": {
+                    "$ref": "#/definitions/name"
+                },
+                "oil_spill": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "max_thickness": {
+                            "type": "number"
+                        },
+                        "min_thickness": {
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "required": [
+                "created",
+                "description",
+                "name",
+                "geometry"
+            ],
+            "type": "object"
+        },
+        "asset": {
+            "additionalProperties": false,
+            "properties": {
+                "groups": {
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "patternProperties": {
+                        "group": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "layers": {
+                                    "description": "This is an array of layers that are included in the group.",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "minitems": "1",
+                                    "title": "Group layers",
+                                    "type": "array"
+                                },
+                                "name": {
+                                    "description": "The name of the group.  Required for display purposes.",
+                                    "title": "Group name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "layers",
+                                "name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "layers": {
+                    "additionalProperties": false,
+                    "description": "The data layers included in the .apt archive.",
+                    "minProperties": 1,
+                    "patternProperties": {
+                        "layer": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "geometry": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dataset"
+                                        },
+                                        "type": {
+                                            "enum": [
+                                                "text/x-shapefile"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "type"
+                                    ],
+                                    "type": "object"
+                                },
+                                "name": {
+                                    "description": "The name of the layer.  Required for display purposes.",
+                                    "title": "Layer name",
+                                    "type": "string"
+                                },
+                                "resources": {
+                                    "additionalProperties": false,
+                                    "description": "The resources needed for styling the layer",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dataset"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "title": "Layer resources",
+                                    "type": "object"
+                                },
+                                "style": {
+                                    "additionalProperties": false,
+                                    "description": "The style description for the layer",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dataset"
+                                        },
+                                        "type": {
+                                            "description": "The pseudo-mime type of the styling information.  E.g. 'text/x-sld'",
+                                            "enum": [
+                                                "text/x-sld"
+                                            ],
+                                            "title": "Style type",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "type"
+                                    ],
+                                    "title": "Layer style",
+                                    "type": "object"
+                                }
+                            },
+                            "required": [
+                                "geometry",
+                                "name",
+                                "style"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "title": "Data layers",
+                    "type": "object"
+                }
+            },
+            "required": [
+                "groups",
+                "layers"
+            ],
+            "type": "object"
+        },
+        "date": {
+            "$ref": "#/definitions/date"
+        },
+        "description": {
+            "$ref": "#/definitions/description"
+        },
+        "generator": {
+            "additionalProperties": false,
+            "description": "Contains information about the generating program / organization.",
+            "properties": {
+                "creator": {
+                    "type": "string"
+                },
+                "program": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "creator",
+                "program"
+            ],
+            "title": "Archive generator",
+            "type": "object"
+        },
+        "image": {
+            "additionalProperties": false,
+            "properties": {
+                "bounds": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/imagegeoref_wf"
+                        },
+                        {
+                            "$ref": "#/definitions/imagegeoref"
+                        }
+                    ],
+                    "type": "object"
+                },
+                "created": {
+                    "$ref": "#/definitions/date"
+                },
+                "data": {
+                    "$ref": "#/definitions/dataset"
+                },
+                "description": {
+                    "$ref": "#/definitions/description"
+                },
+                "georeference": {
+                    "$ref": "#/definitions/georeference"
+                },
+                "name": {
+                    "$ref": "#/definitions/name"
+                }
+            },
+            "required": [
+                "created",
+                "description",
+                "name",
+                "data"
+            ],
+            "type": "object"
+        },
+        "manifest_version": {
+            "description": "The version of the manifest schema used to validate the manifest contents.",
+            "title": "Manifest version",
+            "type": "number"
+        },
+        "observation": {
+            "additionalProperties": false,
+            "properties": {
+                "bounds_nw": {
+                    "$ref": "#/definitions/georeference"
+                },
+                "bounds_se": {
+                    "$ref": "#/definitions/georeference"
+                },
+                "date": {
+                    "$ref": "#/definitions/date"
+                }
+            },
+            "required": [
+                "date",
+                "bounds_nw",
+                "bounds_se"
+            ],
+            "type": "object"
+        },
+        "point": {
+            "additionalProperties": false,
+            "description": "A representation of a point-of-interest",
+            "properties": {
+                "created": {
+                    "$ref": "#/definitions/date"
+                },
+                "description": {
+                    "$ref": "#/definitions/description"
+                },
+                "geometry": {
+                    "$ref": "#/definitions/geometry"
+                },
+                "name": {
+                    "$ref": "#/definitions/name"
+                },
+                "object-type": {
+                    "description": "The type of the point-of-interest",
+                    "enum": [
+                        "boat",
+                        "bouy",
+                        "debris",
+                        "fishfarm",
+                        "green",
+                        "oil",
+                        "personnel",
+                        "red",
+                        "unknown",
+                        "vessel",
+                        "yellow"
+                    ],
+                    "title": "Object type",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "created",
+                "description",
+                "name",
+                "geometry",
+                "object-type"
+            ],
+            "title": "Point-of-Interest",
+            "type": "object"
+        },
+        "route": {
+            "additionalProperties": false,
+            "description": "A represtentation of a route generated by or for display in Scope.",
+            "properties": {
+                "created": {
+                    "$ref": "#/definitions/date"
+                },
+                "description": {
+                    "$ref": "#/definitions/description"
+                },
+                "geometry": {
+                    "$ref": "#/definitions/geometry"
+                },
+                "name": {
+                    "$ref": "#/definitions/name"
+                }
+            },
+            "required": [
+                "created",
+                "description",
+                "name",
+                "geometry"
+            ],
+            "title": "Route",
+            "type": "object"
+        },
+        "sensor": {
+            "additionalProperties": false,
+            "properties": {
+                "location_name": {
+                    "type": "string"
+                },
+                "manufacturer_name": {
+                    "type": "string"
+                },
+                "model_number": {
+                    "type": "string"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "shortname": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "shortname",
+                "location_name",
+                "manufacturer_name",
+                "model_number",
+                "serial_number"
+            ],
+            "type": "object"
+        },
+        "video": {
+            "additionalProperties": false,
+            "properties": {
+                "created": {
+                    "$ref": "#/definitions/date"
+                },
+                "data": {
+                    "$ref": "#/definitions/dataset"
+                },
+                "description": {
+                    "$ref": "#/definitions/description"
+                },
+                "georeference": {
+                    "$ref": "#/definitions/georeference"
+                },
+                "name": {
+                    "$ref": "#/definitions/name"
+                }
+            },
+            "required": [
+                "created",
+                "description",
+                "name",
+                "data"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "date",
+        "description",
+        "manifest_version",
+        "generator"
+    ],
+    "type": "object"
+}

@@ -1,0 +1,299 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "SSM model",
+    "description": "Description of a state space model following the grammar of the SSM inference package",
+    "definitions": {
+        "require": {
+            "type": "object",
+            "properties": {
+                "datapackage": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "populations": {
+            "type": "array",
+            "description": "Grouping of the state variables comprised in your compartmental model. For each group, provide a name and the list of corresponding states. By adding an optional remainder field, you will ensure the population size remains positive.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "composition": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "remainder": {
+                        "type": "object",
+                        "description": "Following this instruction, the value of the remainder variable at every time will be determined by the size of the population minus the sum of the other compartments. Note that SSM will discard scenarios where this variable becomes negative.",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "pop_size": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "pop_size"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "composition"
+                ]
+            }
+        },
+        "reactions": {
+            "type": "array",
+            "description": "Description of the dynamics of your compartmental model. We only consider density-dependent reactions: each rate will be multiplied by the size of the compartment individuals are leaving. See the accumulators and white_noise optional fields for additional options.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "from": {
+                        "type": "string"
+                    },
+                    "to": {
+                        "type": "string"
+                    },
+                    "rate": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "white_noise": {
+                        "type": "object",
+                        "description": "In order to cope with the absence or mis-specification of environmental factors in the model, you can multiply the rate of each reaction by a white gamma noise. To correlate these noises, use the same name. For more information, see Breto et al. 2009, Time series analysis via mechanistic models.",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "sd": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "sd"
+                        ]
+                    },
+                    "accumulators": {
+                        "type": "array",
+                        "description": "When your are monitoring or fitting the integrated flow of a given reaction, you can store it in one or several variables defined in this list. If a given flow variable is repeated in several reactions, it will correspond of the sum of the flows of these reactions.",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "keywords": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "from",
+                    "to",
+                    "rate"
+                ]
+            }
+        },
+        "sde": {
+            "type": "object",
+            "description": "System of stochastic differential equations, defined by their drift vector and dispersion matrix",
+            "properties": {
+                "drift": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "State variable which dynamic is determined by this line of the system."
+                            },
+                            "f": {
+                                "type": [
+                                    "number",
+                                    "string"
+                                ],
+                                "description": "Deterministic component of the equation."
+                            },
+                            "transformation": {
+                                "type": "string",
+                                "description": "In case you want to express the equation in terms of a function of X and avoid applying the Ito formula."
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "f"
+                        ]
+                    }
+                },
+                "dispersion": {
+                    "type": "array",
+                    "description": "Dispersion matrix L. It needs to have as many rows as objects in drifts, and as many colums as independent sources of noise.",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": [
+                                "number",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            },
+            "required": [
+                "drift",
+                "dispersion"
+            ]
+        },
+        "ode": {
+            "type": "array",
+            "description": "System of ordinary differential equations.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "State variable which dynamic is determined by this line of the system."
+                    },
+                    "f": {
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Deterministic component of the equation."
+                    },
+                    "transformation": {
+                        "type": "string",
+                        "description": "In case you want to express the equation in terms of a function of X and avoid applying the Ito formula."
+                    }
+                },
+                "required": [
+                    "name",
+                    "f"
+                ]
+            }
+        },
+        "observations": {
+            "type": "array",
+            "description": "Name each of the observed time series, determine when observations started to be collected and what is the distribution of the observation process.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "distribution": {
+                        "type": "string"
+                    },
+                    "mean": {
+                        "type": "string"
+                    },
+                    "sd": {
+                        "type": "string"
+                    },
+                    "n": {
+                        "type": "string"
+                    },
+                    "p": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name",
+                    "start",
+                    "distribution"
+                ]
+            }
+        },
+        "data": {
+            "type": "array",
+            "description": "Link each of the observed variables to a data resource.",
+            "items": {
+                "type": "object",
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            },
+                            "require": {
+                                "$ref": "#/definitions/require"
+                            },
+                            "transformation": {
+                                "description": "When the parameters used in the model are functions of the data resources, specify the relation here.",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "require"
+                        ]
+                    }
+                ]
+            }
+        },
+        "inputs": {
+            "type": "array",
+            "description": "Link each of the parameters or covariates at stake in your model to a data resource.",
+            "items": {
+                "type": "object",
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            },
+                            "require": {
+                                "$ref": "#/definitions/require"
+                            },
+                            "transformation": {
+                                "description": "When the parameters used in the model are functions of the data resources, specify the relation here.",
+                                "type": "string"
+                            },
+                            "to_resource": {
+                                "description": "In order to make predictions after fitting your data, specify how to invert the transformation relation at a later time than t0.",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

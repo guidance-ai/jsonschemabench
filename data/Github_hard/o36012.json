@@ -1,0 +1,512 @@
+{
+    "$id": "https://github.com/devpaul/webserv/tree/master/webserv.schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "webserv configuration",
+    "description": "webserv configuration schema",
+    "type": "object",
+    "properties": {
+        "externals": {
+            "type": "object",
+            "description": "external modules added to the loader factory",
+            "patternProperties": {
+                "^S_": {
+                    "$ref": "#/definitions/external"
+                }
+            }
+        },
+        "logLevel": {
+            "type": "string",
+            "description": "Changes webserv's log level",
+            "enum": [
+                "debug",
+                "info",
+                "warn",
+                "error"
+            ]
+        },
+        "servers": {
+            "type": "array",
+            "description": "a list of servers started by this configuration",
+            "items": {
+                "$ref": "#/definitions/server"
+            },
+            "additionalItems": false
+        }
+    },
+    "required": [
+        "servers"
+    ],
+    "definitions": {
+        "external": {
+            "type": "object",
+            "description": "configuration information for the external loader",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "path to the external module loader, relative to this configuration file"
+                }
+            },
+            "required": [
+                "path"
+            ],
+            "additionalProperties": false
+        },
+        "httpsOptions": {
+            "type": "object",
+            "properties": {
+                "httpsConfig": {
+                    "type": "object",
+                    "description": "configuration for https",
+                    "properties": {
+                        "pfx": {
+                            "description": "PFX or PKCS12 encoded private key and certificate chain. pfx is an alternative to providing key and cert individually. PFX is usually encrypted, if it is, passphrase will be used to decrypt it.",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": [
+                                            "string",
+                                            "object"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "key": {
+                            "description": "Private keys in PEM format. PEM allows the option of private keys being encrypted. Encrypted keys will be decrypted with options.passphrase.",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    }
+                                }
+                            ]
+                        },
+                        "passphrase": {
+                            "type": "string",
+                            "description": "Shared passphrase used for a single private key and/or a PFX"
+                        },
+                        "cert": {
+                            "description": "Cert chains in PEM format. One cert chain should be provided per private key.",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "ca": {
+                            "description": "Optionally override the trusted CA certificates. Default is to trust the well-known CAs curated by Mozilla.",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "ciphers": {
+                            "type": "string",
+                            "description": "Cipher suite specification, replacing the default."
+                        },
+                        "honorCipherOrder": {
+                            "type": "boolean",
+                            "description": "Attempt to use the server's cipher suite preferences instead of the client's"
+                        },
+                        "ecdhCurve": {
+                            "type": "string",
+                            "description": "A string describing a named curve or a colon separated list of curve NIDs or names, for example P-521:P-384:P-256, to use for ECDH key agreement. Set to auto to select the curve automatically."
+                        },
+                        "clientCertEngine": {
+                            "type": "string",
+                            "description": "Name of an OpenSSL engine which can provide the client certificate."
+                        },
+                        "crl": {
+                            "description": "PEM formatted CRLs (Certificate Revocation Lists).",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "dhparam": {
+                            "description": "Diffie Hellman parameters",
+                            "type": "string"
+                        },
+                        "maxVersion": {
+                            "description": "Optionally set the maximum TLS version to allow.",
+                            "type": "string",
+                            "enum": [
+                                "TLSv1.3",
+                                "TLSv1.2",
+                                "TLSv1.1",
+                                "TLSv1"
+                            ]
+                        },
+                        "minVersion": {
+                            "description": "Optionally set the minimum TLS version to allow.",
+                            "type": "string",
+                            "enum": [
+                                "TLSv1.3",
+                                "TLSv1.2",
+                                "TLSv1.1",
+                                "TLSv1"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "server": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "used to uniquely identify the server"
+                },
+                "port": {
+                    "type": "number",
+                    "description": "numeric port to start the server"
+                },
+                "services": {
+                    "type": "array",
+                    "description": "a list of services configured and added to the application server",
+                    "items": {
+                        "$ref": "#/definitions/service"
+                    },
+                    "additionalItems": false
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "http",
+                        "https"
+                    ],
+                    "description": "The type of server to start; defaults to http"
+                }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "https"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/httpsOptions"
+                    }
+                }
+            ]
+        },
+        "service": {
+            "type": "object",
+            "description": "a service to be added to the application",
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "name": {
+                                "const": "chat"
+                            }
+                        }
+                    },
+                    "then": {
+                        "description": "A very basic chat service using websockets"
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "name": {
+                                "const": "crud"
+                            }
+                        }
+                    },
+                    "then": {
+                        "description": "The crud service provides in-memory create, read, update, delete (and list) operations",
+                        "properties": {
+                            "route": {
+                                "type": "string",
+                                "description": "the base route for this service"
+                            },
+                            "loadData": {
+                                "type": "object",
+                                "description": "load CRUD data from disk",
+                                "properties": {
+                                    "path": {
+                                        "type": "string",
+                                        "description": "loads all json files in this path into the data store"
+                                    }
+                                },
+                                "required": [
+                                    "path"
+                                ]
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "description": "a list of records applied to different crud pools",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "description": "identifier for this store used as part of the crud path"
+                                        }
+                                    }
+                                }
+                            },
+                            "operations": {
+                                "type": "array",
+                                "description": "when present defines the list of allowable operations",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "list",
+                                        "create",
+                                        "read",
+                                        "update",
+                                        "delete"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "route"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "name": {
+                                "const": "file"
+                            }
+                        }
+                    },
+                    "then": {
+                        "description": "a simple file service",
+                        "properties": {
+                            "basePath": {
+                                "type": "string",
+                                "description": "the top-level url for this route"
+                            },
+                            "routes": {
+                                "type": "object",
+                                "description": "a map of routes to file paths to serve file and directories"
+                            },
+                            "searchDefaults": {
+                                "type": "array",
+                                "description": "a list of filenames to search for when a url points to a directory. Defaults to index.html.",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "showDirectoryContents": {
+                                "type": "boolean",
+                                "description": "if the files in a directory should be listed. Defaults to true."
+                            },
+                            "trailingSlash": {
+                                "type": "boolean",
+                                "description": "if a url that points to a directory should always end in a slash. Defaults to false."
+                            },
+                            "extensions": {
+                                "type": "array",
+                                "description": "A list of file extensions to append to file names without an extension. Used to make TypeScript transpiled extension-less imports work without an additional parsing step.",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "name": {
+                                "const": "log"
+                            }
+                        }
+                    },
+                    "then": {
+                        "description": "adds console logging and (optionally) a log server",
+                        "properties": {
+                            "respondOK": {
+                                "type": "boolean",
+                                "description": "if the server should return 200 after every request. Useful for quickly logging something to console for visibility."
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "name": {
+                                "const": "proxy"
+                            }
+                        }
+                    },
+                    "then": {
+                        "description": "proxies requests to another server",
+                        "properties": {
+                            "route": {
+                                "type": "string",
+                                "description": "the top-level route for this proxy"
+                            },
+                            "target": {
+                                "type": "string",
+                                "description": "the target url of the request"
+                            },
+                            "forward": {
+                                "type": "string",
+                                "description": "URL string to be parsed with the url module."
+                            },
+                            "ws": {
+                                "type": "boolean",
+                                "description": "if you want to proxy websockets"
+                            },
+                            "xfwd": {
+                                "type": "boolean",
+                                "description": "Adds x- forward headers"
+                            },
+                            "secure": {
+                                "type": "boolean",
+                                "description": "verify SSL certificate"
+                            },
+                            "toProxy": {
+                                "type": "boolean",
+                                "description": "Explicitly specify if we are proxying to another proxy"
+                            },
+                            "prependPath": {
+                                "type": "boolean",
+                                "description": "Specify whether you want to prepend the target's path to the proxy path"
+                            },
+                            "ignorePath": {
+                                "type": "boolean",
+                                "description": "Specify whether you want to ignore the proxy path of the incoming request"
+                            },
+                            "localAddress": {
+                                "type": "boolean",
+                                "description": "Local interface string to bind for outgoing connections"
+                            },
+                            "changeOrigin": {
+                                "type": "boolean",
+                                "description": "Changes the origin of the host header to the target URL"
+                            },
+                            "preserveHeaderKeyCase": {
+                                "type": "boolean",
+                                "description": "specify whether you want to keep letter case of response header key"
+                            },
+                            "auth": {
+                                "type": "string",
+                                "description": "Basic authentication i.e. 'user:password' to compute an Authorization header."
+                            },
+                            "hostRewrite": {
+                                "type": "string",
+                                "description": "Rewrites the location hostname on (301 / 302 / 307 / 308) redirects, Default: null."
+                            },
+                            "autoRewrite": {
+                                "type": "boolean",
+                                "description": "Rewrites the location host/ port on (301 / 302 / 307 / 308) redirects based on requested host/ port.Default: false."
+                            },
+                            "protocolRewrite": {
+                                "type": "string",
+                                "description": "Rewrites the location protocol on (301 / 302 / 307 / 308) redirects to 'http' or 'https'.Default: null."
+                            },
+                            "cookieDomainRewrite": {
+                                "type": "string",
+                                "description": "rewrites domain of set-cookie headers."
+                            },
+                            "cookiePathRewrite": {
+                                "type": "string",
+                                "description": "rewrites path of set-cookie headers. Default: false"
+                            },
+                            "headers": {
+                                "type": "object",
+                                "description": "object with extra headers to be added to target requests."
+                            },
+                            "proxyTimeout": {
+                                "type": "number",
+                                "description": "Timeout (in milliseconds) when proxy receives no response from target. Default: 120000 (2 minutes)"
+                            },
+                            "timeout": {
+                                "type": "number",
+                                "description": "Timeout (in milliseconds) for incoming requests"
+                            },
+                            "followRedirects": {
+                                "type": "boolean",
+                                "description": "Specify whether you want to follow redirects. Default: false"
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "name": {
+                                "const": "upload"
+                            }
+                        }
+                    },
+                    "then": {
+                        "description": "A basic upload service",
+                        "properties": {
+                            "route": {
+                                "type": "string",
+                                "description": "the base route for the upload service"
+                            },
+                            "allowOverwrite": {
+                                "type": "boolean",
+                                "description": "if files should be overwritten on disk"
+                            },
+                            "createUploadDirectory": {
+                                "type": "boolean",
+                                "description": "automatically create the upload directory if it does not exist"
+                            },
+                            "directory": {
+                                "type": "string",
+                                "description": "a relative path to the upload directory"
+                            }
+                        }
+                    }
+                },
+                {
+                    "else": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "the name of the service registered with the loader"
+                            }
+                        },
+                        "required": [
+                            "name"
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

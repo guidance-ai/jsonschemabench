@@ -1,0 +1,887 @@
+{
+    "$id": "http://example.com/root.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "turbobuilder.json schema",
+    "required": [
+        "$schema",
+        "metadata",
+        "build"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "Url to the json schema definition to validate this file",
+            "enum": [
+                "https://raw.githubusercontent.com/edertone/TurboBuilder/master/TurboBuilder-Node/src/main/resources/json-schema/turbobuilder.schema.json"
+            ]
+        },
+        "wildCards": {
+            "type": "object",
+            "description": "Feature that allows us to replace pieces of text on our project code, setup or even filenames with custom values depending on project version, build or release execution",
+            "required": [],
+            "additionalProperties": false,
+            "properties": {
+                "setupWildCards": {
+                    "type": "array",
+                    "description": "Configures the wildcards that will be replaced at the project setup files (turbo***.json)",
+                    "items": {
+                        "type": "object",
+                        "description": "",
+                        "required": [
+                            "enabled",
+                            "wildCard",
+                            "buildValue",
+                            "releaseValue"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean",
+                                "description": "Enables or disables this wildcard replacement"
+                            },
+                            "wildCard": {
+                                "type": "string",
+                                "description": "The name for the wildcard. This string will be searched on all the setup files and replaced with the build or release value"
+                            },
+                            "buildValue": {
+                                "type": "string",
+                                "description": "The value that will be assigned to all the wildcard occurences when the build process is executed"
+                            },
+                            "releaseValue": {
+                                "type": "string",
+                                "description": "The value that will be assigned to all the wildcard occurences when the release process is executed"
+                            }
+                        }
+                    }
+                },
+                "codeWildCards": {
+                    "type": "array",
+                    "description": "Configures the wildcards that will be replaced at the project target files after a build or release have been performed",
+                    "items": {
+                        "type": "object",
+                        "description": "",
+                        "required": [
+                            "enabled",
+                            "wildCard",
+                            "buildValue",
+                            "releaseValue",
+                            "includes"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean",
+                                "description": "Enables or disables this wildcard replacement"
+                            },
+                            "wildCard": {
+                                "type": "string",
+                                "description": "The name for the wildcard. This string will be searched on the source for all the included files and replaced with the build or release value"
+                            },
+                            "buildValue": {
+                                "type": "string",
+                                "description": "The value that will be assigned to all the wildcard occurences when the build process is executed"
+                            },
+                            "releaseValue": {
+                                "type": "string",
+                                "description": "The value that will be assigned to all the wildcard occurences when the release process is executed"
+                            },
+                            "includes": {
+                                "type": "array",
+                                "description": "List of string patterns that will be used to include the files that will be inspected for the wildcard"
+                            },
+                            "excludes": {
+                                "type": "array",
+                                "description": "List of string patterns that will be used to exclude files from the wildcard replacement"
+                            }
+                        }
+                    }
+                },
+                "versionWildCard": {
+                    "type": "object",
+                    "description": "Configures the version wildcard. If enabled, the build version will be inserted into any of the compiled files that we want by replacing our wildcard. We can also add the build number to folders or just before the file extension on any files that we want as part of the build and release processes",
+                    "required": [
+                        "enabled",
+                        "wildCard",
+                        "code",
+                        "files"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enables or disables the version wildCard feature"
+                        },
+                        "wildCard": {
+                            "type": "string",
+                            "description": "A pattern to search inside the files which will be replaced by the project version number"
+                        },
+                        "code": {
+                            "type": "object",
+                            "description": "Defines which files will be inspected to replace the wildcard by the version number on their contents",
+                            "required": [
+                                "includes"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "includes": {
+                                    "type": "array",
+                                    "description": "List of string patterns that will be used to include the files that will be inspected for version injection"
+                                },
+                                "excludes": {
+                                    "type": "array",
+                                    "description": "List of string patterns that will be used to exclude files from version injection"
+                                }
+                            }
+                        },
+                        "files": {
+                            "type": "object",
+                            "description": "Defines which files will be renamed to include the project version just before their extension",
+                            "required": [
+                                "includes"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "includes": {
+                                    "type": "array",
+                                    "description": "List of string patterns that will be used to include the files that will be renamed to contain the project version just before their extension"
+                                },
+                                "excludes": {
+                                    "type": "array",
+                                    "description": "List of string patterns that will be used to exclude files from being renamed to include the project version"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "description": "Contains information about the project",
+            "required": [
+                "builderVersion"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The project name"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The project description"
+                },
+                "builderVersion": {
+                    "type": "string",
+                    "description": "The turbo builder version that is used by this project"
+                }
+            }
+        },
+        "validate": {
+            "type": "object",
+            "description": "The Validate Schema",
+            "additionalProperties": false,
+            "properties": {
+                "runBeforeBuild": {
+                    "type": "boolean",
+                    "description": "The Runbeforebuild Schema"
+                },
+                "projectStructure": {
+                    "type": "object",
+                    "description": "Defines validations related to the project files and folders structure",
+                    "additionalProperties": false,
+                    "properties": {
+                        "readmeFileMandatory": {
+                            "type": "boolean",
+                            "description": "If set to true, the README.md file will be mandatory at the root of the project"
+                        },
+                        "extrasFolderMandatory": {
+                            "type": "boolean",
+                            "description": "If set to true, the extras folder will be mandatory at the root of the project"
+                        },
+                        "extrasSubFoldersMandatory": {
+                            "type": "array",
+                            "description": "Defines a list of folder names that must exist inside the extras folder",
+                            "items": {
+                                "type": "string",
+                                "description": "A sub folder name"
+                            }
+                        },
+                        "extrasTodoExtension": {
+                            "type": "boolean",
+                            "description": "If set to true, all files inside the extras/todo folder must have a .todo extension"
+                        },
+                        "strictSrcFolders": {
+                            "type": "object",
+                            "description": "Defines several rules that will be applied to all the folders contained by the src folder: libs and resources will be only allowed at the root of src/main and src/test",
+                            "required": [
+                                "enabled",
+                                "excludes"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "description": "Enables or disables the strictSrcFolders validation"
+                                },
+                                "excludes": {
+                                    "type": "array",
+                                    "description": "A list of strings. Any file inside the affectedPaths folders which full path contains any of the provided texts will be ignored"
+                                }
+                            }
+                        },
+                        "strictFileExtensionCase": {
+                            "type": "object",
+                            "description": "Defines which project files must have lower case extension",
+                            "required": [
+                                "affectedPaths",
+                                "excludes"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "affectedPaths": {
+                                    "type": "array",
+                                    "description": "List of folders relative to project root that will be scanned for file extension case",
+                                    "examples": [
+                                        "src",
+                                        "extras"
+                                    ]
+                                },
+                                "excludes": {
+                                    "type": "array",
+                                    "description": "A list of strings. Any file inside the affectedPaths folders which full path contains any of the provided texts will be ignored"
+                                }
+                            }
+                        }
+                    }
+                },
+                "filesContent": {
+                    "type": "object",
+                    "description": "Defines validations related to the content of the project files",
+                    "required": [
+                        "copyPasteDetect"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "tabsForbidden": {
+                            "type": "object",
+                            "description": "Contains the setup for the rule that allows us to totally disallow the tabulation characters in the project files",
+                            "additionalProperties": false,
+                            "required": [
+                                "enabled",
+                                "affectedPaths"
+                            ],
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "description": "Enables the forbidden tabs validation rule"
+                                },
+                                "affectedPaths": {
+                                    "type": "array",
+                                    "description": "List of folders relative to project root that will be scanned for tab characters.",
+                                    "examples": [
+                                        "src",
+                                        "extras"
+                                    ]
+                                },
+                                "excludes": {
+                                    "type": "array",
+                                    "description": "A list of strings. Any file inside the affectedPaths folders which full path contains any of the provided texts will be ignored"
+                                }
+                            }
+                        },
+                        "copyPasteDetect": {
+                            "type": "array",
+                            "description": "Contains the setup for the copy paste detection feature that allows us to find duplicate code on several project folders. Each element of the array defines the setup for a specific path relative to the project root",
+                            "items": {
+                                "type": "object",
+                                "description": "Defines each one of the paths where duplicate code will be searched for",
+                                "required": [
+                                    "path",
+                                    "maxPercentErrorLevel",
+                                    "maxPercentErrorDifference",
+                                    "report"
+                                ],
+                                "additionalProperties": false,
+                                "properties": {
+                                    "path": {
+                                        "type": "string",
+                                        "description": "Defines a path based on project root where duplicate code will be looked for"
+                                    },
+                                    "maxPercentErrorLevel": {
+                                        "type": "number",
+                                        "description": "A numeric value from 0 to 100 that defines the maximum allowed percentage of duplicate code to be found on the specified path that will cause a validation error. If the duplicate code exceeds this values, all builds will fail. Set it to -1 to disable the duplicate code limits for this path"
+                                    },
+                                    "maxPercentErrorDifference": {
+                                        "type": "number",
+                                        "description": "A numeric value from 0 to 100 that defines the maximum difference between the real percentage of copy pasted code on the specified path and the maxPercentErrorLevel value. If the difference is bigger that the number specified here, validation will fail. This is used to make sure we keep lowering the maxPercentErrorLevel value after we reduce the effective duplicate code in our project. Set it to -1 to disable this"
+                                    },
+                                    "report": {
+                                        "type": "string",
+                                        "description": "if we want the copy paste detector to output a report inside target/project-name/copypaste report, we will set the project type or types on this field, seppared with comas. For example: html,json,xml"
+                                    }
+                                }
+                            }
+                        },
+                        "copyrightHeaders": {
+                            "type": "array",
+                            "description": "Defines the validation rules that apply to copyright headers that must exist on all the files that meet the configured criteria",
+                            "items": {
+                                "type": "object",
+                                "description": "Defines each one of the copyright headers validation items",
+                                "required": [
+                                    "path",
+                                    "affectedPaths",
+                                    "includes",
+                                    "excludes"
+                                ],
+                                "additionalProperties": false,
+                                "properties": {
+                                    "path": {
+                                        "type": "string",
+                                        "description": "Defines a path based on project root that points to a copyright header template that must exist at the beginning of all the files that meet the configured criteria"
+                                    },
+                                    "affectedPaths": {
+                                        "type": "array",
+                                        "description": "List of folders relative to project root that will be scanned for copyright headers",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "includes": {
+                                        "type": "array",
+                                        "description": "List of string patterns that will be used to include files or folders into the validation",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "excludes": {
+                                        "type": "array",
+                                        "description": "Any included file which full filesystem path contanis any of the provided strings will be excluded from copyright headers validation",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "styleSheets": {
+                    "type": "object",
+                    "description": "Defines validations related to the project css style sheets",
+                    "additionalProperties": false,
+                    "properties": {
+                        "onlyScss": {
+                            "type": "boolean",
+                            "description": "If enabled, only scss files will be allowed for stylesheets on the project"
+                        },
+                        "cssHardcodedColorForbid": {
+                            "type": "boolean",
+                            "description": "If enabled, no hardcoded colors will be accepted on the project css files. Use a palete with variables instead"
+                        }
+                    }
+                },
+                "php": {
+                    "type": "object",
+                    "description": "Defines validation rules that apply to PHP code",
+                    "additionalProperties": false,
+                    "properties": {
+                        "coding": {
+                            "type": "object",
+                            "description": "Defines several rules that will apply to how is the php code written on the project files"
+                        },
+                        "namespaces": {
+                            "type": "object",
+                            "description": "Defines the validation of php namespaces for all the php project files",
+                            "required": [
+                                "enabled",
+                                "mandatory",
+                                "mustContain",
+                                "excludes"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "description": "Enables or disables the php namespaces validation"
+                                },
+                                "mandatory": {
+                                    "type": "boolean",
+                                    "description": "If set to true, all php files on the project (except those which path matches any of the exclude strings) must have a namespace declaration"
+                                },
+                                "mustContain": {
+                                    "type": "array",
+                                    "description": "A list of strings that must appear on namespaces for all files of the project. Wildcards can be used to customize these strings: $path will be replaced with the php file path relative to src folder (For example: main\\php\\model)",
+                                    "items": {
+                                        "type": "string",
+                                        "description": "A pattern that must appear on all the php files namespaces"
+                                    }
+                                },
+                                "excludes": {
+                                    "type": "array",
+                                    "description": "Any php file which full filesystem path contanis any of the provided strings will be excluded from namespace validation",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "javascript": {
+                    "type": "object",
+                    "description": "Defines validation rules that apply to javascript code",
+                    "additionalProperties": false,
+                    "properties": {
+                        "useStrict": {
+                            "type": "object",
+                            "description": "Sets up the requirement of having 'use strict' at the first line of the js files",
+                            "required": [
+                                "enabled",
+                                "includes",
+                                "excludes"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "description": "Enables or disables the 'use strict' rule for javascript files"
+                                },
+                                "includes": {
+                                    "type": "array",
+                                    "description": "List of string patterns that will be used to include files or folders into the validation"
+                                },
+                                "excludes": {
+                                    "type": "array",
+                                    "description": "List of string patterns that will be used to exclude files or folders from the validation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "angularApp": {
+                    "type": "object",
+                    "description": "Defines validation rules that apply to angular applications",
+                    "additionalProperties": false,
+                    "properties": {
+                        "noLegacyFavicon": {
+                            "type": "boolean",
+                            "description": "If enabled, the legacy favicon.ico metadata won't be allowed on index.html file"
+                        },
+                        "forceOverscrollContain": {
+                            "type": "boolean",
+                            "description": "If enabled, the index.html file must contain style=\"overscroll-behavior: contain\" at the opening body tag, which will prevent the mobile browsers from reloading the application when user performs a scrolldown from top"
+                        },
+                        "forceMobileWebAppCapable": {
+                            "type": "boolean",
+                            "description": "If enabled, the index.html file must contain the <meta name=\"mobile-web-app-capable\" content=\"yes\"> metadata tag, which will inform the mobile browsers to treat the application as a mobile app when being added to the desktop as a link"
+                        },
+                        "forceHttpsWithHtaccess": {
+                            "type": "boolean",
+                            "description": "If enabled, the application must have an src/htaccess.txt file that forces the redirect of the url from http to https"
+                        },
+                        "lintEnabled": {
+                            "type": "boolean",
+                            "description": "If enabled, the project validation fase will perform a lint for the angular application"
+                        }
+                    }
+                }
+            }
+        },
+        "build": {
+            "type": "object",
+            "description": "Defines the parameters for the build process",
+            "oneOf": [
+                {
+                    "required": [
+                        "site_php"
+                    ]
+                },
+                {
+                    "required": [
+                        "server_php"
+                    ]
+                },
+                {
+                    "required": [
+                        "lib_php"
+                    ]
+                },
+                {
+                    "required": [
+                        "lib_java"
+                    ]
+                },
+                {
+                    "required": [
+                        "lib_js"
+                    ]
+                },
+                {
+                    "required": [
+                        "lib_ts"
+                    ]
+                },
+                {
+                    "required": [
+                        "lib_angular"
+                    ]
+                },
+                {
+                    "required": [
+                        "app_angular"
+                    ]
+                },
+                {
+                    "required": [
+                        "app_node_cmd"
+                    ]
+                }
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "printTodoFiles": {
+                    "type": "boolean",
+                    "description": "If enabled, the contents of all the files on the extras/todo folder will be displayed as part of the build console output"
+                },
+                "site_php": {
+                    "type": "object",
+                    "description": "A php website project type",
+                    "additionalProperties": false
+                },
+                "server_php": {
+                    "type": "object",
+                    "description": "A subset of the site_php project type. It basically shares the same project structure, folders, files and setup but without all the visual part. This project type can be upgraded at any time to a site_php one",
+                    "additionalProperties": false
+                },
+                "lib_php": {
+                    "type": "object",
+                    "description": "The Lib_php Schema",
+                    "additionalProperties": false,
+                    "properties": {
+                        "createPhar": {
+                            "type": "boolean",
+                            "description": "The Createphar Schema"
+                        }
+                    }
+                },
+                "lib_java": {
+                    "type": "object",
+                    "description": "The Lib_java Schema",
+                    "additionalProperties": false,
+                    "properties": {
+                        "createJar": {
+                            "type": "boolean",
+                            "description": "The Createjar Schema"
+                        }
+                    }
+                },
+                "lib_js": {
+                    "type": "object",
+                    "description": "A project that contains javascript files and generates a reusable js library",
+                    "required": [
+                        "deleteNonMergedJs",
+                        "createMergedFile",
+                        "mergedFileName"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "deleteNonMergedJs": {
+                            "type": "boolean",
+                            "description": "If set to true, no source js files will be copied to the dist folder"
+                        },
+                        "createMergedFile": {
+                            "type": "boolean",
+                            "description": "If set to true, all source js files will be merged into the specified mergedFileName file"
+                        },
+                        "mergedFileName": {
+                            "type": "string",
+                            "description": "Defines the name for the js file that contains all the library merged code. Extension (.js) must not be written here. If left empty, the project name will be used by default"
+                        }
+                    }
+                },
+                "lib_ts": {
+                    "type": "object",
+                    "description": "A typescript library project type",
+                    "additionalProperties": false,
+                    "properties": {
+                        "declaration": {
+                            "type": "boolean",
+                            "description": "The Declaration Schema"
+                        },
+                        "strict": {
+                            "type": "boolean",
+                            "description": "The Strict Schema"
+                        },
+                        "sourceMap": {
+                            "type": "boolean",
+                            "description": "The Sourcemap Schema"
+                        },
+                        "targets": {
+                            "type": "array",
+                            "description": "The Targets Schema",
+                            "items": {
+                                "type": "object",
+                                "description": "The Items Schema",
+                                "required": [
+                                    "folder",
+                                    "jsTarget"
+                                ],
+                                "additionalProperties": false,
+                                "properties": {
+                                    "folder": {
+                                        "type": "string",
+                                        "description": "TODO"
+                                    },
+                                    "jsTarget": {
+                                        "type": "string",
+                                        "description": "TODO"
+                                    },
+                                    "mergedFile": {
+                                        "type": "string",
+                                        "description": "Defines the name for the js file that contains all the library code merged for this specific ES target. Extension (.js) must not be written here"
+                                    },
+                                    "globalVar": {
+                                        "type": "string",
+                                        "description": "Defines the name of the global namespace variable that will be generated to contain the compiled library code. This can then be safely used along with other libraries without danger of collision cause all the classes and methods will be declared under this global variable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "lib_angular": {
+                    "type": "object",
+                    "description": "An angular library project type",
+                    "additionalProperties": false
+                },
+                "app_angular": {
+                    "type": "object",
+                    "description": "An angular application project type",
+                    "additionalProperties": false
+                },
+                "app_node_cmd": {
+                    "type": "object",
+                    "description": "A command line nodejs application project type",
+                    "additionalProperties": false
+                }
+            }
+        },
+        "release": {
+            "type": "object",
+            "description": "The Release Schema",
+            "required": [],
+            "additionalProperties": false,
+            "properties": {
+                "printTodoFiles": {
+                    "type": "boolean",
+                    "description": "If enabled, the contents of all the files on the extras/todo folder will be displayed as part of the release console output"
+                },
+                "gitChangeLog": {
+                    "type": "boolean",
+                    "description": "If enabled, a Changelog.txt file containing the list of recent GIT changes will be generated inside the release folder"
+                },
+                "gitChangeLogCount": {
+                    "type": "integer",
+                    "description": "Defines the number of most recent tags to be included into the GIT change log file"
+                },
+                "optimizePictures": {
+                    "type": "boolean",
+                    "description": "If enabled, all project pictures will be optimized to be as small as possible into the release folder"
+                },
+                "generateCodeDocumentation": {
+                    "type": "boolean",
+                    "description": "If enabled, a docs folder will be created into the release destination containing auto generted code documentation for the project languages"
+                }
+            }
+        },
+        "sync": {
+            "type": "object",
+            "description": "Defines the parameters for the sync process",
+            "anyOf": [
+                {
+                    "type": "object",
+                    "maxProperties": 0
+                },
+                {
+                    "type": "object",
+                    "minProperties": 7,
+                    "additionalProperties": false,
+                    "properties": {
+                        "runAfterBuild": {
+                            "type": "boolean",
+                            "description": "If enabled, this sync task will be executed automatically after each build"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Defines the type of task to execute: an ftp or fileSystem synchronization",
+                            "enum": [
+                                "fileSystem"
+                            ]
+                        },
+                        "excludes": {
+                            "type": "array",
+                            "description": "List of string patterns that will be used to exclude files or folders from the sync task.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "sourcePath": {
+                            "type": "string",
+                            "description": "A path relative to the defined source root where the files to be synced are located"
+                        },
+                        "destPath": {
+                            "type": "string",
+                            "description": "A file system path where the source files will be copied"
+                        },
+                        "remoteUrl": {
+                            "type": "string",
+                            "description": "The root url from where the synchronized files will be accessible via web browser"
+                        },
+                        "deleteDestPathContents": {
+                            "type": "boolean",
+                            "description": "If set to true, all files found on the destPath will be deleted before executing the sync"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "minProperties": 9,
+                    "additionalProperties": false,
+                    "properties": {
+                        "runAfterBuild": {
+                            "type": "boolean",
+                            "description": "If enabled, this sync task will be executed automatically after each build"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Defines the type of task to execute: an ftp or fileSystem synchronization",
+                            "enum": [
+                                "ftp"
+                            ]
+                        },
+                        "excludes": {
+                            "type": "array",
+                            "description": "List of string patterns that will be used to exclude files or folders from the sync task.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "sourcePath": {
+                            "type": "string",
+                            "description": "A path relative to the target compiled folder root (target/project-name/)"
+                        },
+                        "remotePath": {
+                            "type": "string",
+                            "description": "A path relative to the remote host where the files will be synchronized"
+                        },
+                        "remoteUrl": {
+                            "type": "string",
+                            "description": "The root url from where the synchronized files will be accessible via web browser"
+                        },
+                        "host": {
+                            "type": "string",
+                            "description": "A remote host where the files will be synchronized"
+                        },
+                        "user": {
+                            "type": "string",
+                            "description": "The remote user"
+                        },
+                        "psw": {
+                            "type": "string",
+                            "description": "The remote password"
+                        }
+                    }
+                }
+            ]
+        },
+        "test": {
+            "type": "array",
+            "description": "Defines the parameters for the test process",
+            "items": {
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "type",
+                            "testsRoot",
+                            "coverageReport",
+                            "coverageReportOpenAfterTests"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "phpUnit"
+                                ]
+                            },
+                            "testsRoot": {
+                                "type": "string"
+                            },
+                            "coverageReport": {
+                                "type": "boolean"
+                            },
+                            "coverageReportOpenAfterTests": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "type",
+                            "jasmineConfig"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "jasmine"
+                                ]
+                            },
+                            "jasmineConfig": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "type",
+                            "testsRoot",
+                            "httpServerPort",
+                            "targets",
+                            "browsers"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "qunit"
+                                ]
+                            },
+                            "testsRoot": {
+                                "type": "string"
+                            },
+                            "httpServerPort": {
+                                "type": "string"
+                            },
+                            "targets": {
+                                "type": "array"
+                            },
+                            "browsers": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

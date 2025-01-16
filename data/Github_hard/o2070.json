@@ -1,0 +1,551 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "analysis": {
+            "description": "This schema is in the definitions so that it can be referenced for pipeline-generated metadata.",
+            "properties": {
+                "analysis_type": {
+                    "description": "The analysis type needs to be tightly controlled because it is used in the metadata merging script to assign flags.",
+                    "enum": [
+                        "qc",
+                        "sequence_upload",
+                        "sequence_upload_qc_report",
+                        "alignment",
+                        "alignment_qc_report",
+                        "rna_seq_quantification",
+                        "germline_variant_calling",
+                        "somatic_variant_calling",
+                        "immuno_target_pipelines",
+                        "cnv_variant_calling",
+                        "protect_immunology",
+                        "fusion_variant_calling"
+                    ]
+                },
+                "bundle_uuid": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "parent_uuids": {
+                    "description": "parent UUIDs for this workflow",
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "timestamp": {
+                    "$ref": "#/definitions/time_stamp",
+                    "description": "We want this time stamp in detached analysis data, but not required when uploading via upload tool."
+                },
+                "workflow_name": {
+                    "type": "string"
+                },
+                "workflow_outputs": {
+                    "items": {
+                        "properties": {
+                            "file_path": {
+                                "type": "string"
+                            },
+                            "file_type": {
+                                "type": "string"
+                            },
+                            "file_uuid": {
+                                "$ref": "#/definitions/uuid"
+                            }
+                        },
+                        "required": [
+                            "file_path",
+                            "file_type"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "workflow_version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "analysis_type",
+                "bundle_uuid",
+                "workflow_name",
+                "workflow_version",
+                "workflow_outputs"
+            ],
+            "type": "object"
+        },
+        "schema_version": {
+            "description": "The version of this schema is ...",
+            "pattern": "^[0-9]{1}.[0-9]{1}.[0-9]{1}$",
+            "type": "string"
+        },
+        "specimen_type": {
+            "description": "The specimen type needs to be tightly controlled because it is used in the metadata merging script to assign flags.",
+            "oneOf": [
+                {
+                    "pattern": "^Normal -"
+                },
+                {
+                    "pattern": "^Primary tumour -"
+                },
+                {
+                    "pattern": "^Recurrent tumour -"
+                },
+                {
+                    "pattern": "^Metastatic tumour -"
+                },
+                {
+                    "pattern": "^Cell line -"
+                }
+            ],
+            "type": "string"
+        },
+        "time_stamp": {
+            "_format": "date-time",
+            "description": "ISO 8601 / RFC 3339",
+            "type": "string"
+        },
+        "uuid": {
+            "description": "uuid with all lower case or all upper case characters",
+            "oneOf": [
+                {
+                    "description": "lower case",
+                    "pattern": "^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$"
+                },
+                {
+                    "description": "upper case",
+                    "pattern": "^[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}$"
+                }
+            ],
+            "type": "string"
+        }
+    },
+    "description": "This is UCSC Genomics Core's schema for a sample donor's metadata record.",
+    "properties": {
+        "center_name": {
+            "type": "string"
+        },
+        "donor_uuid": {
+            "$ref": "#/definitions/uuid"
+        },
+        "flags": {
+            "description": "Indicate whether or not a workflow is complete",
+            "properties": {
+                "normal_alignment": {
+                    "type": "boolean"
+                },
+                "normal_cnv_variant_calling": {
+                    "type": "boolean"
+                },
+                "normal_cnv_workflow_1_0_x": {
+                    "type": "boolean"
+                },
+                "normal_fusion_variant_calling": {
+                    "type": "boolean"
+                },
+                "normal_fusion_workflow_0_2_x": {
+                    "type": "boolean"
+                },
+                "normal_germline_variants": {
+                    "type": "boolean"
+                },
+                "normal_protect_cgl_workflow_2_3_x": {
+                    "type": "boolean"
+                },
+                "normal_protect_cgl_workflow_2_5_x": {
+                    "type": "boolean"
+                },
+                "normal_protect_prediction": {
+                    "type": "boolean"
+                },
+                "normal_rna_seq_cgl_workflow_3_0_x": {
+                    "type": "boolean"
+                },
+                "normal_rna_seq_cgl_workflow_3_1_x": {
+                    "type": "boolean"
+                },
+                "normal_rna_seq_cgl_workflow_3_2_x": {
+                    "type": "boolean"
+                },
+                "normal_rna_seq_cgl_workflow_3_3_x": {
+                    "type": "boolean"
+                },
+                "normal_rna_seq_quantification": {
+                    "type": "boolean"
+                },
+                "normal_sequence": {
+                    "type": "boolean"
+                },
+                "tumor_alignment": {
+                    "type": "boolean"
+                },
+                "tumor_cnv_variant_calling": {
+                    "type": "boolean"
+                },
+                "tumor_cnv_workflow_1_0_x": {
+                    "type": "boolean"
+                },
+                "tumor_fusion_variant_calling": {
+                    "type": "boolean"
+                },
+                "tumor_fusion_workflow_0_2_x": {
+                    "type": "boolean"
+                },
+                "tumor_protect_cgl_workflow_2_3_x": {
+                    "type": "boolean"
+                },
+                "tumor_protect_cgl_workflow_2_5_x": {
+                    "type": "boolean"
+                },
+                "tumor_protect_prediction": {
+                    "type": "boolean"
+                },
+                "tumor_rna_seq_cgl_workflow_3_0_x": {
+                    "type": "boolean"
+                },
+                "tumor_rna_seq_cgl_workflow_3_1_x": {
+                    "type": "boolean"
+                },
+                "tumor_rna_seq_cgl_workflow_3_2_x": {
+                    "type": "boolean"
+                },
+                "tumor_rna_seq_cgl_workflow_3_3_x": {
+                    "type": "boolean"
+                },
+                "tumor_rna_seq_quantification": {
+                    "type": "boolean"
+                },
+                "tumor_sequence": {
+                    "type": "boolean"
+                },
+                "tumor_somatic_variants": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "normal_sequence",
+                "tumor_sequence",
+                "normal_alignment",
+                "tumor_alignment",
+                "normal_rna_seq_quantification",
+                "tumor_rna_seq_quantification",
+                "normal_germline_variants",
+                "tumor_somatic_variants",
+                "normal_rna_seq_cgl_workflow_3_0_x",
+                "tumor_rna_seq_cgl_workflow_3_0_x",
+                "normal_rna_seq_cgl_workflow_3_1_x",
+                "tumor_rna_seq_cgl_workflow_3_1_x",
+                "normal_rna_seq_cgl_workflow_3_2_x",
+                "tumor_rna_seq_cgl_workflow_3_2_x",
+                "normal_rna_seq_cgl_workflow_3_3_x",
+                "tumor_rna_seq_cgl_workflow_3_3_x",
+                "normal_protect_prediction",
+                "tumor_protect_prediction",
+                "normal_protect_cgl_workflow_2_3_x",
+                "tumor_protect_cgl_workflow_2_3_x",
+                "normal_protect_cgl_workflow_2_5_x",
+                "tumor_protect_cgl_workflow_2_5_x",
+                "normal_cnv_variant_calling",
+                "tumor_cnv_variant_calling",
+                "normal_cnv_workflow_1_0_x",
+                "tumor_cnv_workflow_1_0_x",
+                "normal_fusion_variant_calling",
+                "tumor_fusion_variant_calling",
+                "normal_fusion_workflow_0_2_x",
+                "tumor_fusion_workflow_0_2_x"
+            ],
+            "type": "object"
+        },
+        "missing_items": {
+            "description": "record parent_uuids of missing items",
+            "properties": {
+                "normal_alignment": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_cnv_variant_calling": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_cnv_workflow_1_0_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_fusion_variant_calling": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_fusion_workflow_0_2_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_germline_variants": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_protect_cgl_workflow_2_3_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_protect_cgl_workflow_2_5_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_protect_prediction": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_rna_seq_cgl_workflow_3_0_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_rna_seq_cgl_workflow_3_1_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_rna_seq_cgl_workflow_3_2_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_rna_seq_cgl_workflow_3_3_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_rna_seq_quantification": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "normal_sequence": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_alignment": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_cnv_variant_calling": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_cnv_workflow_1_0_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_fusion_variant_calling": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_fusion_workflow_0_2_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_protect_cgl_workflow_2_3_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_protect_cgl_workflow_2_5_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_protect_prediction": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_rna_seq_cgl_workflow_3_0_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_rna_seq_cgl_workflow_3_1_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_rna_seq_cgl_workflow_3_2_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_rna_seq_cgl_workflow_3_3_x": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_rna_seq_quantification": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_sequence": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                },
+                "tumor_somatic_variants": {
+                    "items": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "normal_sequence",
+                "tumor_sequence",
+                "normal_alignment",
+                "tumor_alignment",
+                "normal_germline_variants",
+                "tumor_somatic_variants",
+                "normal_rna_seq_quantification",
+                "tumor_rna_seq_quantification",
+                "normal_rna_seq_cgl_workflow_3_0_x",
+                "tumor_rna_seq_cgl_workflow_3_0_x",
+                "normal_rna_seq_cgl_workflow_3_1_x",
+                "tumor_rna_seq_cgl_workflow_3_1_x",
+                "normal_rna_seq_cgl_workflow_3_2_x",
+                "tumor_rna_seq_cgl_workflow_3_2_x",
+                "normal_rna_seq_cgl_workflow_3_3_x",
+                "tumor_rna_seq_cgl_workflow_3_3_x",
+                "normal_protect_prediction",
+                "tumor_protect_prediction",
+                "normal_protect_cgl_workflow_2_3_x",
+                "tumor_protect_cgl_workflow_2_3_x",
+                "normal_protect_cgl_workflow_2_5_x",
+                "tumor_protect_cgl_workflow_2_5_x",
+                "normal_cnv_variant_calling",
+                "tumor_cnv_variant_calling",
+                "normal_cnv_workflow_1_0_x",
+                "tumor_cnv_workflow_1_0_x",
+                "normal_fusion_variant_calling",
+                "tumor_fusion_variant_calling",
+                "normal_fusion_workflow_0_2_x",
+                "tumor_fusion_workflow_0_2_x"
+            ],
+            "type": "object"
+        },
+        "program": {
+            "type": "string"
+        },
+        "project": {
+            "type": "string"
+        },
+        "schema_version": {
+            "$ref": "#/definitions/schema_version"
+        },
+        "specimen": {
+            "items": {
+                "properties": {
+                    "samples": {
+                        "items": {
+                            "properties": {
+                                "analysis": {
+                                    "items": {
+                                        "$ref": "#/definitions/analysis"
+                                    },
+                                    "type": "array"
+                                },
+                                "sample_uuid": {
+                                    "$ref": "#/definitions/uuid"
+                                },
+                                "submitter_sample_id": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "submitter_sample_id",
+                                "sample_uuid",
+                                "analysis"
+                            ],
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "specimen_uuid": {
+                        "$ref": "#/definitions/uuid"
+                    },
+                    "submitter_specimen_id": {
+                        "type": "string"
+                    },
+                    "submitter_specimen_type": {
+                        "$ref": "#/definitions/specimen_type"
+                    }
+                },
+                "required": [
+                    "submitter_specimen_id",
+                    "specimen_uuid",
+                    "submitter_specimen_type",
+                    "samples"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "submitter_donor_id": {
+            "type": "string"
+        },
+        "timestamp": {
+            "$ref": "#/definitions/time_stamp"
+        }
+    },
+    "required": [
+        "program",
+        "project",
+        "center_name",
+        "submitter_donor_id",
+        "donor_uuid",
+        "schema_version",
+        "timestamp",
+        "specimen"
+    ],
+    "title": "metadata_schema",
+    "type": "object"
+}

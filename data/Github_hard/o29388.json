@@ -1,0 +1,511 @@
+{
+    "$id": "https://antha.com/actions-schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "JSON Schema for describing actions carried out during liquidhandling",
+    "type": "object",
+    "required": [
+        "version",
+        "actions"
+    ],
+    "properties": {
+        "version": {
+            "description": "the version of the schema, for validation",
+            "const": "1.0"
+        },
+        "actions": {
+            "description": "the actions carried out during the liquidhandling operation",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/transferAction"
+                    },
+                    {
+                        "$ref": "#/definitions/promptAction"
+                    },
+                    {
+                        "$ref": "#/definitions/waitAction"
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "liquid": {
+            "description": "Describe a liquid in a plate well",
+            "type": "object",
+            "required": [
+                "name",
+                "total_volume"
+            ],
+            "properties": {
+                "name": {
+                    "description": "The display name of the liquid",
+                    "type": "string"
+                },
+                "total_volume": {
+                    "description": "The total volume present of the liquid",
+                    "$ref": "#/definitions/measurement"
+                },
+                "components": {
+                    "description": "The sub-components which make up this liquid",
+                    "type": "array",
+                    "items": {
+                        "description": "A sub component",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "concentration",
+                            "unit"
+                        ],
+                        "properties": {
+                            "name": {
+                                "description": "the display name of the sub-component",
+                                "type": "string"
+                            },
+                            "concentration": {
+                                "description": "the concentration of the sub-component",
+                                "type": "number",
+                                "minimum": 0.0
+                            },
+                            "unit": {
+                                "description": "the units in which the concentration is expressed",
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "measurement": {
+            "description": "A measurement, typically of a Volume",
+            "type": "object",
+            "required": [
+                "value",
+                "unit"
+            ],
+            "properties": {
+                "value": {
+                    "description": "The value of the measurement",
+                    "type": "number"
+                },
+                "unit": {
+                    "description": "The units in which the measurement is expressed",
+                    "type": "string"
+                }
+            }
+        },
+        "wellLocation": {
+            "description": "the location of a well within a liquidhandling robot",
+            "type": "object",
+            "required": [
+                "deck_item_id",
+                "row",
+                "col"
+            ],
+            "properties": {
+                "deck_item_id": {
+                    "type": "string",
+                    "description": "The ID of an item (prior to liquidhandling)"
+                },
+                "row": {
+                    "type": "number",
+                    "description": "the row of the location",
+                    "multipleOf": 1.0,
+                    "minimum": 0.0
+                },
+                "col": {
+                    "type": "number",
+                    "description": "the column of the location",
+                    "multipleOf": 1.0,
+                    "minimum": 0.0
+                }
+            },
+            "additionalProperties": false
+        },
+        "contentUpdate": {
+            "description": "updates the contents of a well",
+            "type": "object",
+            "required": [
+                "loc",
+                "new_content"
+            ],
+            "properties": {
+                "loc": {
+                    "$ref": "#/definitions/wellLocation"
+                },
+                "new_content": {
+                    "$ref": "#/definitions/liquid"
+                }
+            },
+            "additionalProperties": false
+        },
+        "height": {
+            "description": "The height of the end of the tip relative to something",
+            "type": "object",
+            "required": [
+                "reference",
+                "value",
+                "unit"
+            ],
+            "properties": {
+                "reference": {
+                    "description": "The datum for the height",
+                    "enum": [
+                        "well_bottom",
+                        "well_top",
+                        "liquid_level"
+                    ]
+                },
+                "value": {
+                    "description": "The value of the height",
+                    "type": "number"
+                },
+                "unit": {
+                    "description": "The units in which the height is expressed",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "singleTransfer": {
+            "description": "Describe a single channel transfer",
+            "type": "object",
+            "required": [
+                "from",
+                "to",
+                "volume",
+                "wasted",
+                "policy",
+                "asp",
+                "dsp",
+                "head"
+            ],
+            "properties": {
+                "from": {
+                    "description": "the source location of the transfer",
+                    "$ref": "#/definitions/contentUpdate"
+                },
+                "to": {
+                    "description": "the destination(s) of the transfer, multiple implies multi-dispense",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contentUpdate"
+                    },
+                    "minItems": 1
+                },
+                "volume": {
+                    "description": "the volume of liquid transferred in this operation",
+                    "$ref": "#/definitions/measurement"
+                },
+                "wasted": {
+                    "description": "the volume of liquid wasted in this operation",
+                    "$ref": "#/definitions/measurement"
+                },
+                "policy": {
+                    "description": "the name of the liquid type for this transfer",
+                    "type": "string"
+                },
+                "asp": {
+                    "description": "Parameters related to the way in which aspiration was performed",
+                    "$ref": "#/definitions/pipettingOptions"
+                },
+                "dsp": {
+                    "description": "Parameters related to the way in which dispensing was performed",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pipettingOptions"
+                        },
+                        {
+                            "type": "object",
+                            "required": [
+                                "touchoff"
+                            ],
+                            "parameters": {
+                                "blowout": {
+                                    "description": "parameters related to a blowout operation",
+                                    "type": "object",
+                                    "required": [
+                                        "volume",
+                                        "height",
+                                        "flow_rate"
+                                    ],
+                                    "properties": {
+                                        "volume": {
+                                            "description": "the volume used for a blowout, if performed",
+                                            "$ref": "#/definitions/measurement"
+                                        },
+                                        "height": {
+                                            "description": "the height from which to perform a blowout",
+                                            "$ref": "#/definitions/height"
+                                        },
+                                        "flow_rate": {
+                                            "description": "the flow rate for the blowout operation",
+                                            "$ref": "#/definitions/measurement"
+                                        }
+                                    }
+                                },
+                                "touchoff": {
+                                    "description": "whether or not a touchoff is performed",
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "head": {
+                    "description": "the head to load tips to or unload tips from",
+                    "type": "number",
+                    "multipleOf": 1.0,
+                    "minimum": 0.0
+                }
+            },
+            "additionalProperties": false
+        },
+        "pipettingOptions": {
+            "description": "describes options about how pipetting was carried out",
+            "type": "object",
+            "required": [
+                "height",
+                "flow_rate",
+                "liquid_level_follow"
+            ],
+            "properties": {
+                "height": {
+                    "$ref": "#/definitions/height"
+                },
+                "flow_rate": {
+                    "$ref": "#/definitions/measurement"
+                },
+                "liquid_level_follow": {
+                    "description": "if true, follow the liquid level during the operation",
+                    "type": "boolean"
+                },
+                "mixing": {
+                    "description": "summarize the properties of an optional mixing operation",
+                    "type": "object",
+                    "required": [
+                        "cycles",
+                        "volume",
+                        "height",
+                        "flow_rate",
+                        "liquid_level_follow"
+                    ],
+                    "properties": {
+                        "cycles": {
+                            "description": "The number of mix cycles that were carried out",
+                            "type": "number",
+                            "multipleOf": 1.0,
+                            "minimum": 0.0
+                        },
+                        "volume": {
+                            "$ref": "#/definitions/measurement"
+                        },
+                        "height": {
+                            "$ref": "#/definitions/height"
+                        },
+                        "flow_rate": {
+                            "$ref": "#/definitions/measurement"
+                        },
+                        "liquid_level_follow": {
+                            "description": "if true, follow the liquid level during the operation",
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "parallelTransfer": {
+            "description": "represents a list of transfers that are carried out simultaneously by a set of channels",
+            "type": "object",
+            "required": [
+                "channels",
+                "kind",
+                "time_estimate",
+                "cumulative_time_estimate"
+            ],
+            "properties": {
+                "kind": {
+                    "const": "parallel_transfer"
+                },
+                "channels": {
+                    "description": "the array of channels, indexed by channel number",
+                    "type": "object",
+                    "patternProperties": {
+                        "^[0-9]+": {
+                            "$ref": "#/definitions/singleTransfer"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "time_estimate": {
+                    "description": "estimate of time taken for this instruction, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "cumulative_time_estimate": {
+                    "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                }
+            },
+            "additionalProperties": false
+        },
+        "tipAction": {
+            "description": "describe the action of loading or unloading tips",
+            "type": "object",
+            "required": [
+                "channels",
+                "kind",
+                "head",
+                "time_estimate",
+                "cumulative_time_estimate"
+            ],
+            "properties": {
+                "kind": {
+                    "enum": [
+                        "load",
+                        "unload"
+                    ]
+                },
+                "head": {
+                    "description": "the head to load tips to or unload tips from",
+                    "type": "number",
+                    "multipleOf": 1.0,
+                    "minimum": 0.0
+                },
+                "channels": {
+                    "description": "the position(s) to load tips from or drop tips to for each channel.",
+                    "type": "object",
+                    "patternProperties": {
+                        "^[0-9]+": {
+                            "$ref": "#/definitions/wellLocation"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "time_estimate": {
+                    "description": "estimate of time taken for this instruction, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "cumulative_time_estimate": {
+                    "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                }
+            }
+        },
+        "transferAction": {
+            "description": "describe an entire transfer action, which is a list of load, unload & parallelTransfer operations that are logically grouped",
+            "type": "object",
+            "required": [
+                "kind",
+                "children",
+                "time_estimate",
+                "cumulative_time_estimate"
+            ],
+            "properties": {
+                "kind": {
+                    "const": "transfer"
+                },
+                "children": {
+                    "description": "the child actions carried out during this transfer",
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/tipAction"
+                            },
+                            {
+                                "$ref": "#/definitions/parallelTransfer"
+                            }
+                        ]
+                    },
+                    "minItems": 1
+                },
+                "time_estimate": {
+                    "description": "estimate of time taken for this instruction, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "cumulative_time_estimate": {
+                    "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                }
+            },
+            "additionalProperties": false
+        },
+        "promptAction": {
+            "description": "describes an on-screen prompt which waits for user input",
+            "type": "object",
+            "required": [
+                "kind",
+                "message",
+                "time_estimate",
+                "cumulative_time_estimate"
+            ],
+            "properties": {
+                "kind": {
+                    "const": "prompt"
+                },
+                "message": {
+                    "description": "the message that is shown to the user",
+                    "type": "string"
+                },
+                "time_estimate": {
+                    "description": "estimate of time taken for this instruction, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "cumulative_time_estimate": {
+                    "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                }
+            },
+            "additionalProperties": false
+        },
+        "waitAction": {
+            "description": "describes an on-screen prompt which waits for user input",
+            "type": "object",
+            "required": [
+                "kind",
+                "duration_seconds",
+                "time_estimate",
+                "cumulative_time_estimate"
+            ],
+            "properties": {
+                "kind": {
+                    "const": "wait"
+                },
+                "duration_seconds": {
+                    "description": "how long to wait for, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "time_estimate": {
+                    "description": "estimate of time taken for this instruction, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "cumulative_time_estimate": {
+                    "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "message": {
+                    "description": "the (optional) message that is shown to the user while waiting",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

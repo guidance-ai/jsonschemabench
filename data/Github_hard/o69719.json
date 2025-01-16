@@ -1,0 +1,367 @@
+{
+    "title": "Configuration schema for aws_bootstrap script",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "LOG_LEVEL": {
+            "type": "string",
+            "description": "The verbosity of logging",
+            "default": "INFO",
+            "enum": [
+                "CRITICAL",
+                "ERROR",
+                "WARNING",
+                "INFO",
+                "DEBUG",
+                "NOTSET",
+                "SILENT"
+            ]
+        },
+        "CLOUDFORMATION_TEMPLATE_S3": {
+            "type": "object",
+            "properties": {
+                "region": {
+                    "type": "string",
+                    "default": "%%AWS_STACK_REGION%%"
+                },
+                "bucket": {
+                    "type": "string",
+                    "default": "%%AWS_S3_DEFAULT_BUCKET%%"
+                },
+                "key": {
+                    "type": "string",
+                    "default": "cloudformation/%%AWS_STACK_PREFIX%%_register%%AWS_STACK_POSTFIX%%.citybridge.com.json"
+                }
+            }
+        },
+        "CLOUDFORMATION_TEMPLATE_LOCAL_OUTPUTFILE": {
+            "type": "string",
+            "description": "A full file path of where to write out the CloudFormation templace createdby aws_bootstrap.py script. Setting to 'stdout' will cause aws_bootstrap.py to output the file to stdout.   If left unset, no file will be written out."
+        },
+        "EXPANDED_CONFIG_FILE_OUTPUTFILE": {
+            "type": "string",
+            "description": "A full file path of where to write out the expanded configuration file used/cretecd by aws_bootstrap.py",
+            "default": "%%temporary_directory%%%%SEP%%%%AWS_STACK_PREFIX%%_register.citybridge.com%%AWS_STACK_POSTFIX%%.json"
+        },
+        "ALARM_EMAIL": {
+            "type": "string",
+            "description": "Email address to send message to if CloudWatch alarm fires. If unset CloudWatch alarms will not emmit an email"
+        },
+        "AWS_S3_DEFAULT_BUCKET": {
+            "type": "string",
+            "description": "Default s3 bucket to use for file uploads",
+            "default": "register.citybridge.com"
+        },
+        "AWS_STACK_PREFIX": {
+            "type": "string",
+            "descripton": "The name of the prefix to apply to the stack service and IAM names",
+            "default": "%%USERNAME%%"
+        },
+        "AWS_STACK_POSTFIX": {
+            "type": "string",
+            "descripton": "The name of the prefix to apply to the stack service and IAM names",
+            "default": "-dev"
+        },
+        "AWS_STACK_NAME": {
+            "type": "string",
+            "descripton": "The name of the stack",
+            "default": "%%AWS_STACK_PREFIX%%_register.citybridge.com%%AWS_STACK_POSTFIX%%"
+        },
+        "AWS_STACK_REGION": {
+            "description": "AWS region that ELK stack lives in. Leave blank to skip monitoring ELK metrics",
+            "type": "string",
+            "default": "us-west-2",
+            "enum": [
+                "us-west-2",
+                "us-west-1"
+            ]
+        },
+        "EMAIL_ENCRYPTION_KEY": {
+            "description": "Infomration about the key pair used for encrypting and decrypting client details",
+            "default": {
+                "key_name_format": "%%AWS_STACK_NAME%%_grr_email",
+                "iam_server_certificate_name": "%%AWS_STACK_NAME%%_grr_email"
+            },
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/existingrsakeypair"
+                },
+                {
+                    "$ref": "#/definitions/newrsakeypair"
+                }
+            ]
+        },
+        "AWS_ELB_SSL_KEY": {
+            "description": "Infomration about the key pair used for HTTPS handling by the AWS Elastic Beanstalk Service. If AWS_ELB_ASSERT_SSL is true Leaving this raise an error",
+            "default": {
+                "key_name_format": "%%AWS_STACK_NAME%%_grr_ssl",
+                "iam_server_certificate_name": "%%AWS_STACK_NAME%%_grr_ssl",
+                "iam_server_certificate_overwrite": true
+            },
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/existingrsakeypair"
+                },
+                {
+                    "$ref": "#/definitions/newrsakeypair"
+                }
+            ]
+        },
+        "AWS_STACK_ELEMENTS": {
+            "type": "object",
+            "description": "The name of the role and elements to deploy. Override default values to use existing services",
+            "default": {},
+            "properties": {
+                "AWS_IAM_LAMBDA_ROLE": {
+                    "type": "string",
+                    "description": "IAM Role for Lambda function running globalreach_registration_sqsdrain",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_lambda_role%%AWS_STACK_POSTFIX%%"
+                },
+                "AWS_IAM_ELASTIC_BEANSTALK_ROLE": {
+                    "type": "string",
+                    "description": "IAM Role for Elastic Beanstalk application running globalreach_registration",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_elasticbeanstalk_role%%AWS_STACK_POSTFIX%%"
+                },
+                "AWS_SERVICE_LAMBDA": {
+                    "default": {
+                        "sourcebundle_files": [
+                            "globalreach_registration_sqsdrain.py",
+                            "globalreach_registration_sqsdrain.json"
+                        ],
+                        "name": "%%AWS_STACK_PREFIX%%_grr_lambda%%AWS_STACK_POSTFIX%%",
+                        "sourcebundle_s3_key": "source/%%AWS_STACK_PREFIX%%_register%%AWS_STACK_POSTFIX%%.citybridge.lambda.zip",
+                        "function_handler": "globalreach_registration_sqsdrain.lambda_handler"
+                    },
+                    "$ref": "#/definitions/sourcebundle"
+                },
+                "AWS_SERVICE_ELASTIC_BEANSTALK": {
+                    "default": {
+                        "sourcebundle_files": [
+                            "globalreach_registration.py",
+                            "registrationutils.py",
+                            "requirements.txt",
+                            "aws_utils.py",
+                            "schemas/globalreach_registration.requestschema.json",
+                            "schemas/globalreach_registration.responseschema.json",
+                            ".ebextensions/environment.config"
+                        ],
+                        "name": "%%AWS_STACK_PREFIX%%_grr_elasticbeanstalk%%AWS_STACK_POSTFIX%%",
+                        "sourcebundle_s3_key": "source/%%AWS_STACK_PREFIX%%_register%%AWS_STACK_POSTFIX%%.citybridge.com.zip"
+                    },
+                    "$ref": "#/definitions/sourcebundle"
+                },
+                "AWS_SERVICE_ELASTIC_LOAD_BALANCER": {
+                    "type": "string",
+                    "description": "Elastic Load Balancer HTTPS / HTTP frontend",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_elb%%AWS_STACK_POSTFIX%%"
+                },
+                "AWS_SERVICE_SQS": {
+                    "type": "string",
+                    "description": "SQS queue to mediate between AWS Lambda and AWS Elastic Beanstalk",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_queue%%AWS_STACK_POSTFIX%%"
+                },
+                "AWS_SERVICE_DYNAMO_TABLE": {
+                    "type": "string",
+                    "description": "DynamoDB table to store client details",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_table%%AWS_STACK_POSTFIX%%"
+                },
+                "AWS_SERVICE_CLOUDWATCH_ALARM": {
+                    "type": "string",
+                    "description": "AWS CloudWatch alarm to monitor SQS health metrics",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_cwalarm_queuehealth%%AWS_STACK_POSTFIX%%"
+                },
+                "AWS_SERVICE_APIGATEWAY_KEYS": {
+                    "type": "string",
+                    "description": "API Access tokens stored and manged by AWS API Gateway",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_apikeys%%AWS_STACK_POSTFIX%%"
+                },
+                "AWS_SERVICE_S3_BUCKET": {
+                    "type": "string",
+                    "description": "S3 Bucket where configuration and runtime data is stored",
+                    "default": "%%AWS_STACK_PREFIX%%-grr-bucket%%AWS_STACK_POSTFIX%%"
+                }
+            }
+        },
+        "temporary_directory": {
+            "type": "string",
+            "default": "%%PWD%%%%SEP%%tmp%%SEP%%%%DATE%%-grrawsbootstrap/",
+            "description": "A directory that can be used to create tempoaraty files"
+        }
+    },
+    "required": [],
+    "additionalproperties": false,
+    "definitions": {
+        "sourcebundle": {
+            "type": "object",
+            "description": "Elastic Beanstalk function running globalreach_registration",
+            "default": {},
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of the resource",
+                    "default": "%%AWS_STACK_PREFIX%%_grr_sourcebundle%%AWS_STACK_POSTFIX%%"
+                },
+                "sourcebundle_s3_bucket": {
+                    "type": "string",
+                    "description": "The S3 bucket that the source code for the web application will be uploaded to",
+                    "default": "%%AWS_S3_DEFAULT_BUCKET%%"
+                },
+                "sourcebundle_s3_key": {
+                    "type": "string",
+                    "description": "The key in the sourcebundle_s3_bucket where the source bundle will be uploaded to. in the format /path/to/file/filename.zip",
+                    "default": "source/%%AWS_STACK_PREFIX%%_register%%AWS_STACK_POSTFIX%%.citybridge.com.zip"
+                },
+                "sourcebundle_app_root": {
+                    "type": "string",
+                    "default": "%%PWD%%%%SEP%%",
+                    "description": "The directory that is the top of the application on the file system. Defaults to pwd"
+                },
+                "sourcebundle_s3_bucket_region": {
+                    "type": "string",
+                    "description": "The region the S3 bucket will be in",
+                    "default": "%%AWS_STACK_REGION%%"
+                },
+                "sourcebundle_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            }
+        },
+        "existingrsakeypair": {
+            "type": "object",
+            "properties": {
+                "iam_server_certificate_name": {
+                    "type": "string",
+                    "description": "Full file path the the public key file"
+                },
+                "X509_key_file_path": {
+                    "type": "string",
+                    "description": "Full file path the the signed certificate for this key"
+                },
+                "public_key_file_path": {
+                    "type": "string",
+                    "description": "Full file path the the public key file"
+                },
+                "private_key_file_path": {
+                    "type": "string",
+                    "description": "Full file path the the private key file"
+                },
+                "publickey_s3_bucket": {
+                    "type": "string",
+                    "description": "The S3 bucket that the source code for the web application will be uploaded to",
+                    "default": "%%AWS_S3_DEFAULT_BUCKET%%"
+                },
+                "publickey_s3_key": {
+                    "type": "string",
+                    "description": "The key in the sourcebundle_s3_bucket where the source bundle will be uploaded to. in the format /path/to/file/filename.zip",
+                    "default": "keys/%%AWS_STACK_PREFIX%%_register%%AWS_STACK_POSTFIX%%.citybridge.com.email.pub"
+                },
+                "publickey_s3_bucket_region": {
+                    "type": "string",
+                    "description": "The region the S3 bucket will be in",
+                    "default": "%%AWS_STACK_REGION%%"
+                },
+                "no_passphrase": {
+                    "type": "boolean",
+                    "description": "FOR TESTING ONLY. Don't prompt for a passphrase on unlocking private key. Private keys with a passphrase will fail if set to true. Deafults to false.",
+                    "default": false
+                }
+            },
+            "additioalProperties": false,
+            "required": [
+                "public_key_file_path",
+                "private_key_file_path"
+            ]
+        },
+        "newrsakeypair": {
+            "type": "object",
+            "properties": {
+                "iam_server_certificate_name": {
+                    "type": "string",
+                    "description": "Full file path the the public key file",
+                    "default": "grr"
+                },
+                "key_name_format": {
+                    "type": "string",
+                    "description": "The format of the key pair naming. Will product [key_name_format].pub and [key_name_format].pem",
+                    "default": "grr_%%DATE%%"
+                },
+                "key_directory": {
+                    "type": "string",
+                    "description": "The directory to put the key files",
+                    "default": "%%temporary_directory%%%%SEP%%/keys"
+                },
+                "key_size": {
+                    "type": "number",
+                    "description": "The key size in bits. Defaults to 2048",
+                    "minimum": 1024,
+                    "multipleOf": 256,
+                    "default": 2048
+                },
+                "private_key_has_passphrase": {
+                    "type": "boolean",
+                    "description": "Use a passphrase to lock the private key. User will be prompted. Defaults to true",
+                    "default": true
+                },
+                "publickey_s3_bucket": {
+                    "type": "string",
+                    "description": "The S3 bucket that the source code for the web application will be uploaded to",
+                    "default": "%%AWS_S3_DEFAULT_BUCKET%%"
+                },
+                "publickey_s3_key": {
+                    "type": "string",
+                    "description": "The key in the sourcebundle_s3_bucket where the source bundle will be uploaded to. in the format /path/to/file/filename.zip",
+                    "default": "keys/%%AWS_STACK_PREFIX%%_register%%AWS_STACK_POSTFIX%%.citybridge.com.email.pub"
+                },
+                "publickey_s3_bucket_region": {
+                    "type": "string",
+                    "description": "The region the S3 bucket will be in",
+                    "default": "%%AWS_STACK_REGION%%"
+                },
+                "signature": {
+                    "type": "object",
+                    "description": "Details to use to create a self signed certificate",
+                    "default": {},
+                    "properties": {
+                        "countryName": {
+                            "type": "string",
+                            "default": "US"
+                        },
+                        "stateOrProvinceName": {
+                            "type": "string",
+                            "default": "New Jersey"
+                        },
+                        "organizationName": {
+                            "type": "string",
+                            "default": "Banzai Institue"
+                        },
+                        "organizationUnit": {
+                            "type": "string",
+                            "default": "Stragtegic Information"
+                        },
+                        "localityName": {
+                            "type": "string",
+                            "default": "Holland"
+                        },
+                        "serialNumber": {
+                            "type": [
+                                "integer",
+                                "string"
+                            ],
+                            "default": "%%DATE_UTC_EPOCH%%"
+                        },
+                        "domainComponent": {
+                            "type": "string",
+                            "default": "*"
+                        }
+                    }
+                }
+            },
+            "additioalProperties": false,
+            "required": []
+        }
+    }
+}

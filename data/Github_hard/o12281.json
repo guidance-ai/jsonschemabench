@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "OSVR Display Descriptor (v1)",
+  "description": "This schema documents and guides creation of a display descriptor, that describes properties of a head-mounted display",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "title": "JSON Schema metadata",
+      "description": "Details about the JSON display descriptor schema.",
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "title": "Schema Version",
+          "description": "Version number of the display descriptor JSON schema. If you're using this schema, the value should be 1",
+          "type": "number",
+          "default": 1
+        }
+      }
+    },
+    "hmd": {
+      "title": "HMD",
+      "description": "Properties of a head-mounted display.",
+      "type": "object",
+      "properties": {
+        "device": {
+          "title": "HMD Device Description",
+          "description": "Describes HMD hardware and metadata.",
+          "type": "object",
+          "properties": {
+            "vendor": {
+              "title": "Device vendor/manufacturer",
+              "type": "string"
+            },
+            "model": {
+              "title": "Device model",
+              "type": "string"
+            },
+            "Version": {
+              "title": "Device version",
+              "type": "string"
+            },
+            "num_displays": {
+              "title": "Number of physical screens (NOT USED)",
+              "description": "This is redundant with information elsewhere in the schema and should not be used.",
+              "type": "integer",
+              "default": 1
+            },
+            "Note": {
+              "title": "Notes about the device",
+              "type": "string"
+            }
+          },
+          "required": [
+            "vendor",
+            "model"
+          ]
+        },
+        "field_of_view": {
+          "title": "HMD Field of View Description",
+          "description": "Defines the optical parameters of the HMD. Since some HMDs have partial overlap – meaning that the viewing direction of the left and right eye are not identical – we define the field of view of just one eye and then the overlap between them.",
+          "type": "object",
+          "properties": {
+            "monocular_horizontal": {
+              "title": "Monocular Horizontal FOV in degrees",
+              "type": "number"
+            },
+            "monocular_vertical": {
+              "title": "Monocular Vertical FOV in degrees",
+              "type": "number"
+            },
+            "overlap_percent": {
+              "title": "Percentage of horizontal FOV that is 'overlapped'.",
+              "type": "number"
+            },
+            "pitch_tilt": {
+              "title": "Pitch tilt in degrees (NOT HANDLED)",
+              "description": "Some HMDs have their field of view tilted downwards. In this case, pitch_tilt would have a non-zero value in degrees, where positive is a downward tilt.",
+              "type": "number",
+              "default": 0
+            }
+          },
+          "required": [
+            "monocular_horizontal",
+            "monocular_vertical",
+            "overlap_percent"
+          ]
+        },
+        "resolutions": {
+          "title": "Supported resolutions",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "title": "HMD Resolution Description",
+            "description": "Describes HMD properties related to resolution.",
+            "type": "object",
+            "properties": {
+              "width": {
+                "title": "Horizontal size, in pixels, of a video input.",
+                "type": "integer"
+              },
+              "height": {
+                "title": "Vertical size, in pixels, of a video input.",
+                "type": "integer"
+              },
+              "video_inputs": {
+                "title": "Number of distinct video inputs",
+                "description": "Some HMDs have 2 separate inputs, one for each eye.",
+                "type": "integer",
+                "default": 1
+              },
+              "display_mode": {
+                "title": "Display Mode",
+                "description": "If a single input is used in side-by-side mode, width and height show the entire width and height of both sides combined.",
+                "enum": [
+                  "horz_side_by_side",
+                  "vert_side_by_side",
+                  "full_screen"
+                ],
+                "default": "horz_side_by_side"
+              }
+            },
+            "required": [
+              "width",
+              "height",
+              "video_inputs",
+              "display_mode"
+            ]
+          }
+        },
+        "distortion": {
+          "title": "HMD Distortion Description",
+          "description": "Describes HMD properties related to distortion shader.",
+          "type": "object",
+          "properties": {
+            "k1_red": {
+              "title": "K1 Red distortion value",
+              "type": "number",
+              "default": 0
+            },
+            "k1_green": {
+              "title": "K1 Green distortion value",
+              "type": "number",
+              "default": 0
+            },
+            "k1_blue": {
+              "title": "K1 Blue distortion value",
+              "type": "number",
+              "default": 0
+            }
+          },
+          "required": [
+            "k1_red",
+            "k1_green",
+            "k1_blue"
+          ]
+        },
+        "rendering": {
+          "title": "HMD Rendering Description (NOT HANDLED)",
+          "description": "Describes HMD properties related to rendering. These parameters are not used - please use the per-eye rotate_180 parameter for now",
+          "type": "object",
+          "properties": {
+            "right_roll": {
+              "title": "Right eye roll amount (degrees)",
+              "type": "number",
+              "default": 0
+            },
+            "left_roll": {
+              "title": "Left eye roll amount (degrees)",
+              "type": "number",
+              "default": 0
+            }
+          },
+          "required": [
+            "right_roll",
+            "left_roll"
+          ]
+        },
+        "eyes": {
+          "title": "HMD Eyes Description",
+          "description": "Describes HMD properties related to eyes.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "center_proj_x": {
+                "title": "Horizontal center of projection",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "center_proj_y": {
+                "title": "Vertical center of projection",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "rotate_180": {
+                "anyOf": [
+                  {
+                    "title": "Flip Display Rotation",
+                    "description": "Indicates if the view needs to flipped 180 degrees on the z axis (that is, in the plane of the screen) - 1 for true, 0 for false.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "title": "Flip Display Rotation",
+                    "description": "Indicates if the view needs to flipped 180 degrees on the z axis (that is, in the plane of the screen)",
+                    "type": "boolean",
+                    "default": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "center_proj_y",
+              "center_proj_x"
+            ]
+          }
+        }
+      },
+      "required": [
+        "device",
+        "field_of_view",
+        "resolutions",
+        "distortion",
+        "rendering",
+        "eyes"
+      ]
+    }
+  }
+}

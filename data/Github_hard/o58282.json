@@ -1,0 +1,552 @@
+{
+    "content": {
+        "MediaType": {
+            "description": "Media type",
+            "properties": {
+                "codecs": {
+                    "description": "Media codec",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Media type MIME designatation",
+                    "format": "MIME",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "MediaTypes": {
+            "description": "Array of media types",
+            "items": {
+                "$ref": "#/content/MediaType"
+            },
+            "type": "array"
+        }
+    },
+    "definitions": {
+        "Audio": {
+            "description": "Audio options",
+            "properties": {
+                "formats": {
+                    "default": [
+                        "mp3",
+                        "mp4",
+                        "m4a",
+                        "aac",
+                        "flac",
+                        "wav",
+                        "ogg",
+                        "3gpp"
+                    ],
+                    "description": "Supported audio formats",
+                    "items": {
+                        "type": "string",
+                        "_uniqueItems": true
+                    },
+                    "type": "array"
+                },
+                "mute": {
+                    "default": false,
+                    "description": "Toggle audio output",
+                    "type": "boolean"
+                },
+                "volume": {
+                    "default": 0.5,
+                    "description": "Playback volume (0 = silent, 1 = maximum)",
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "Download": {
+            "additionalProperties": false,
+            "description": "Download manager options",
+            "properties": {
+                "concurrency": {
+                    "default": 1,
+                    "description": "Limits the number of concurrent operations.",
+                    "maximum": 10,
+                    "minimum": 1,
+                    "type": "number"
+                },
+                "force": {
+                    "default": false,
+                    "description": "Force overwrite without prompt when output file name already exists",
+                    "type": "boolean"
+                },
+                "notifications": {
+                    "description": "Notification options",
+                    "properties": {
+                        "completed": {
+                            "default": true,
+                            "description": "Notify when download has finished",
+                            "type": "boolean"
+                        },
+                        "error": {
+                            "default": true,
+                            "description": "Notify when download has failed",
+                            "type": "boolean"
+                        }
+                    },
+                    "type": "object"
+                },
+                "preview": {
+                    "description": "Media preview options",
+                    "properties": {
+                        "bufferDuration": {
+                            "default": 30,
+                            "description": "Buffer duration, in seconds",
+                            "minimum": 1
+                        }
+                    },
+                    "type": "object"
+                },
+                "rename": {
+                    "default": null,
+                    "description": "Custom file naming rules",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "savePath": {
+                    "$ref": "#/definitions/Path",
+                    "default": "downloads",
+                    "description": "The output directory to hold the downloaded files"
+                },
+                "tempPath": {
+                    "$ref": "#/definitions/Path",
+                    "default": "temp",
+                    "description": "Temporary output directory directory"
+                },
+                "transcode": {
+                    "default": false,
+                    "description": "Media transcoding options",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Transcoder"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "savePath",
+                "tempPath"
+            ],
+            "type": "object"
+        },
+        "FileExtensions": {
+            "default": [
+                "mp3",
+                "mp4",
+                "m4a",
+                "aac",
+                "flac",
+                "wav",
+                "ogg",
+                "3gpp"
+            ],
+            "description": "Supported audio input formats",
+            "items": {
+                "type": "string",
+                "_uniqueItems": true
+            },
+            "type": "array"
+        },
+        "FileFormat": {
+            "description": "File format filter",
+            "properties": {
+                "extensions": {
+                    "default": [
+                        "*"
+                    ],
+                    "description": "Valid extensions without wildcards or dots",
+                    "items": {
+                        "type": "string",
+                        "_uniqueItems": true
+                    },
+                    "type": "array"
+                },
+                "name": {
+                    "default": "All Files",
+                    "description": "Format name",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Inspector": {
+            "description": "Inspector options",
+            "properties": {
+                "autofocus": {
+                    "default": true,
+                    "type": "boolean"
+                },
+                "indentUnit": {
+                    "default": 2,
+                    "type": "number"
+                },
+                "keyMap": {
+                    "default": "sublime",
+                    "type": "string"
+                },
+                "lineNumbers": {
+                    "default": true,
+                    "type": "boolean"
+                },
+                "matchBrackets": {
+                    "default": true,
+                    "type": "boolean"
+                },
+                "mode": {
+                    "default": "javascript",
+                    "type": "string"
+                },
+                "styleActiveLine": {
+                    "default": true,
+                    "type": "boolean"
+                },
+                "theme": {
+                    "default": "monokai",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Path": {
+            "description": "Default download save path",
+            "oneOf": [
+                {
+                    "enum": [
+                        "home",
+                        "temp",
+                        "desktop",
+                        "documents",
+                        "downloads",
+                        "music",
+                        "pictures",
+                        "videos"
+                    ],
+                    "resolve": true,
+                    "type": "string",
+                    "_uniqueItems": true
+                },
+                {
+                    "exists": {
+                        "root": "/",
+                        "type": "isDirectory"
+                    },
+                    "format": "path",
+                    "type": "string"
+                }
+            ]
+        },
+        "PlayList": {
+            "description": "PlayList options",
+            "properties": {
+                "current": {
+                    "description": "Current playlist file",
+                    "exists": {
+                        "root": "/",
+                        "type": "isFile"
+                    },
+                    "format": "path",
+                    "type": "string"
+                },
+                "formats": {
+                    "default": [
+                        "json"
+                    ],
+                    "description": "Supported playlist formats",
+                    "items": {
+                        "type": "string",
+                        "_uniqueItems": true
+                    },
+                    "type": "array"
+                },
+                "recent": {
+                    "description": "Recently playlists",
+                    "items": {
+                        "$ref": "#/definitions/Path"
+                    },
+                    "type": "array"
+                },
+                "savePath": {
+                    "$ref": "#/definitions/Path",
+                    "default": "music",
+                    "description": "Default path for music libraries"
+                },
+                "scanDirs": {
+                    "default": [
+                        "music",
+                        "videos"
+                    ],
+                    "description": "Default folders to search for playlist files",
+                    "items": {
+                        "$ref": "#/definitions/Path"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "Player": {
+            "description": "Player options",
+            "properties": {
+                "autoPlay": {
+                    "default": false,
+                    "description": "If true will automatically start playing",
+                    "type": "boolean"
+                },
+                "preload": {
+                    "description": "Preload remote content",
+                    "properties": {
+                        "active": {
+                            "default": false,
+                            "description": "enables preload",
+                            "type": "boolean"
+                        },
+                        "concurrency": {
+                            "default": 1,
+                            "description": "Number of parallel operations",
+                            "maximum": 10,
+                            "minimum": 1,
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "Plugins": {
+            "description": "Plugin manager options",
+            "properties": {
+                "checkForUpdates": {
+                    "default": true,
+                    "description": "Automatically check for newer versions",
+                    "type": "boolean"
+                },
+                "force": {
+                    "default": false,
+                    "description": "Force application reload after successful update",
+                    "type": "boolean"
+                },
+                "interval": {
+                    "default": 18000000,
+                    "description": "Plugin update interval",
+                    "maximum": 86400000,
+                    "minimum": 3600000,
+                    "type": "number"
+                },
+                "pluginsDir": {
+                    "$ref": "#/definitions/Path",
+                    "default": "userData",
+                    "description": "Default folders to search for plugins"
+                }
+            },
+            "required": [
+                "pluginsDir"
+            ],
+            "type": "object"
+        },
+        "Preset": {
+            "additionalProperties": false,
+            "anyOf": [
+                {
+                    "required": [
+                        "quality",
+                        "format"
+                    ]
+                },
+                {
+                    "required": [
+                        "bitrate",
+                        "format"
+                    ]
+                }
+            ],
+            "description": "Transcode preset",
+            "properties": {
+                "bitrate": {
+                    "default": 128,
+                    "description": "Audio bitrate in kbps",
+                    "maximum": 320,
+                    "minimum": 32,
+                    "type": "number"
+                },
+                "channels": {
+                    "default": 2,
+                    "description": "Audio channel count",
+                    "maximum": 99,
+                    "minimum": 1,
+                    "type": "number"
+                },
+                "codec": {
+                    "description": "Audio codec name",
+                    "type": "string"
+                },
+                "format": {
+                    "description": "Audio output format",
+                    "enum": [
+                        "aac",
+                        "mp3",
+                        "mp4",
+                        "wav",
+                        "webm",
+                        "mpeg"
+                    ],
+                    "type": "string"
+                },
+                "frequency": {
+                    "default": 44100,
+                    "description": "Audio frequency in Hz",
+                    "enum": [
+                        8000,
+                        11025,
+                        12000,
+                        16000,
+                        22050,
+                        24000,
+                        32000,
+                        44100,
+                        48000
+                    ],
+                    "maximum": 48000,
+                    "minimum": 8000,
+                    "type": "number"
+                },
+                "options": {
+                    "description": "Custom output options",
+                    "type": "string"
+                },
+                "quality": {
+                    "default": 1,
+                    "description": "Audio quality factor",
+                    "maximum": 32767,
+                    "minimum": 1,
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "Provider": {
+            "description": "Service provider",
+            "properties": {
+                "name": {
+                    "description": "Provider name",
+                    "type": "string"
+                },
+                "security": {
+                    "description": "Provider security",
+                    "type": "object"
+                },
+                "settings": {
+                    "description": "Provider settings",
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "Transcoder": {
+            "description": "Transcoder options",
+            "properties": {
+                "keep": {
+                    "default": false,
+                    "description": "Keep original files",
+                    "type": "boolean"
+                },
+                "preset": {
+                    "default": null,
+                    "description": "Available transcoding presets",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Preset"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "priority": {
+                    "default": 0,
+                    "description": "Process priority",
+                    "maximum": 20,
+                    "minimum": -20,
+                    "type": "number"
+                },
+                "savePath": {
+                    "default": null,
+                    "description": "Directory to hold the transcoded files",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Path"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "type": "object"
+        }
+    },
+    "description": "Application settings and user preferences",
+    "properties": {
+        "audio": {
+            "$ref": "#/definitions/Audio",
+            "default": {},
+            "description": "Audio options"
+        },
+        "createdAt": {
+            "default": null,
+            "description": "File creation date",
+            "format": "date-time",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "download": {
+            "$ref": "#/definitions/Download",
+            "default": {},
+            "description": "Download manager options"
+        },
+        "inspector": {
+            "$ref": "#/definitions/Inspector",
+            "default": {},
+            "description": "Inspector options"
+        },
+        "modifiedAt": {
+            "default": null,
+            "description": "File modification date",
+            "format": "date-time",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "player": {
+            "$ref": "#/definitions/Player",
+            "default": {},
+            "description": "Player options"
+        },
+        "playlist": {
+            "$ref": "#/definitions/PlayList",
+            "default": {},
+            "description": "Playlist options"
+        },
+        "plugins": {
+            "$ref": "#/definitions/Plugins",
+            "default": {},
+            "description": "Plugin manager options"
+        }
+    },
+    "title": "Settings Schema",
+    "type": "object"
+}

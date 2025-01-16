@@ -1,0 +1,240 @@
+{
+    "id": "http://github.com/micro-webapps/webconf-spec-schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "schema for webconf-spec",
+    "type": "object",
+    "required": [
+        "version"
+    ],
+    "properties": {
+        "certificate": {
+            "type": "string",
+            "description": "The full path to file containing the certificate to be used for the virtualhost or server or the certificate data itself. When using raw certificate data, the new lines MUST be escaped to \"\n\" string."
+        },
+        "certificate_key": {
+            "type": "string",
+            "description": "The full path to file containing the certificate key to be used for the virtualhost or server or the certificate key data itself. When using raw certificate data, the new lines MUST be escaped to \"\n\" string."
+        },
+        "document_root": {
+            "type": "string",
+            "description": "The full path to directory acting as root directory for the virtualhost or server."
+        },
+        "index": {
+            "type": "string",
+            "description": "Name of the file served by default when found in directory (\"index.html\" for example). It can be also set to value `disabled` to disable to the index file completely. The value of `autoindex` will enable automatic generation of indexes similar to the Unix ls command or the Win32 dir shell command."
+        },
+        "version": {
+            "type": "string",
+            "description": "The version of the webconf-spec used in this configuration file. For the development version of webconf-spec, the value of this option should be set to \"dev\". This field MUST be always included."
+        },
+        "virtualhost": {
+            "type": "string",
+            "description": "Virtual host on which the web application should run."
+        },
+        "locations": {
+            "type": "object",
+            "$ref": "#/definitions/locations",
+            "description": "Locations are used to configure the non-real paths on the webserver as they are used in the HTTP requests. Per-location configuration set by this option is applied to all sub-locations of the main location. The format of locations option is following: `\"locations\": { \"/first/location\": { \"option1\": \"value\", ... }, ... }`"
+        },
+        "redirects": {
+            "type": "object",
+            "$ref": "#/definitions/redirects",
+            "description": "Redirects are used to redirect from one URL or path to another URL. The format of redirects option is following: `\"redirects\": { \"/from/url\": { \"option1\": \"value\", ... }, ... }`"
+        },
+        "proxy": {
+            "type": "object",
+            "$ref": "#/definitions/proxy",
+            "description": "Proxy object is used to define HTTP proxy server related configuration."
+        },
+        "error_pages": {
+            "type": "object",
+            "$ref": "#/definitions/error-pages",
+            "description": "Error pages are used to define error page showed to the HTTP client on particular HTTP error. The format of error_pages option is following: `\"error_pages\": { \"404\": \"/error/404.html\", ... }`"
+        },
+        "raw_config": {
+            "type": "object",
+            "$ref": "#/definitions/raw-config",
+            "description": "Raw config is used to define the raw config for the particular webserver. This can be used to specify special directives per webserver implementation. The format of raw_config option is following: `\"raw_config\": { \"httpd >= 2.4.0\": [ \"<IfModule mod_fcgid.c>\", ... ], ... }`"
+        },
+        "match": {
+            "type": "object",
+            "$ref": "#/definitions/match",
+            "description": "This option is used to match files served by the webserver based on their names and configure the way webserver handles them. The format of locations option is following: `\"match\": { \"\\.php$\": { \"option1\": \"value\", ... }, ... }`"
+        },
+        "balancers": {
+            "type": "object",
+            "$ref": "#/definitions/balancers",
+            "description": "This option is used to define the load balancing. The format of balancers option is following: `\"balancers\": { \"balancer-name\": { \"option1\": \"value\", ... }, ... }`"
+        }
+    },
+    "definitions": {
+        "proxy": {
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "description": "The URL on which the backend servers listens to requests. The path part of the URL can contain special `$1` string. When used in the `match` option, the implementation MUST configure the webserver to replace `$1` with the name of file matching the `match` options. When the `match` option is used in the `locations` option, the file name used as replacement for `$1` MUST also include the path to the file starting at the location configured in this particular `locations` option."
+                },
+                "alias": {
+                    "type": "string",
+                    "description": "The alias location of the web application on the frontend server. If the web application should be accessible on `http://domain.tld/blog`, then the value of this option should be `/blog`."
+                },
+                "uds": {
+                    "type": "string",
+                    "description": "The full path to UNIX Domain Socket which should be used to connect the backend. When both hostname/port and uds options are specified, the uds MUST be used prioritely."
+                }
+            }
+        },
+        "match-entry": {
+            "properties": {
+                "proxy": {
+                    "type": "object",
+                    "$ref": "#/definitions/proxy"
+                },
+                "allow": {
+                    "enum": [
+                        "all",
+                        "local",
+                        "none"
+                    ]
+                }
+            }
+        },
+        "match": {
+            "patternProperties": {
+                "^.*$": {
+                    "$ref": "#/definitions/match-entry"
+                }
+            }
+        },
+        "locations-entry": {
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "description": "When used in locations, sets the real directory as an alias for the location. If the content of `/var/www/html` directory should be accessible as `http://domain.tld/blog`, then the value of this option should be `/var/www/html`."
+                },
+                "index": {
+                    "type": "string",
+                    "description": "Name of the file served by default when found in directory (\"index.html\" for example). It can be also set to value `disabled` to disable to the index file completely. The value of `autoindex` will enable automatic generation of indexes similar to the Unix ls command or the Win32 dir shell command."
+                },
+                "match": {
+                    "type": "object",
+                    "$ref": "#/definitions/match",
+                    "description": "This option is used to match files served by the webserver based on their names and configure the way webserver handles them. The format of locations option is following: `\"match\": { \"\\\\.php$\": { \"option1\": \"value\", ... }, ... }`"
+                },
+                "proxy": {
+                    "type": "object",
+                    "$ref": "#/definitions/proxy"
+                }
+            }
+        },
+        "locations": {
+            "patternProperties": {
+                "^(/[^/]+)+$": {
+                    "$ref": "#/definitions/locations-entry"
+                }
+            },
+            "additionalProperties": false
+        },
+        "balancers-persistence": {
+            "properties": {
+                "method": {
+                    "enum": [
+                        "generate_cookie",
+                        "use_cookie_or_url"
+                    ],
+                    "description": "Defines the method used to achieve the session persistence. When set to generate_cookie, the webserver SHOULD generate the cookie to route requests to proper backends. When set to use_cookie_or_url, the webserver SHOULD use the cookie or URL id generated by the backend. When set to none, no session persistence is kept. In all cases, the first request is forwarded to one of the backends according to load balancing method."
+                },
+                "cookie_name": {
+                    "type": "string",
+                    "description": "Defines the name of the cookie used to achive the session persistence."
+                },
+                "url_id": {
+                    "type": "string",
+                    "description": "Defines the name of the URL-based parameter used to achieve the session persistence."
+                }
+            }
+        },
+        "balancers-member": {
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "description": "URL on which the backend servers listens to requests. The path part of the URL is ignored."
+                },
+                "weight": {
+                    "type": "number",
+                    "description": "Number between 1 and 100 which defines the normalized weighted load applied to the backend. The requests are divided between balancer members in the ratio defined by their weights. When no weight is defined, the webconf-spec implementation MUST use 1 as default. When there are for example 3 balancer members with weights 3, 1 and 1, then every 5 new requests MUST be distributed across the backends as the following: 3 requests will be directed to member1, one request will go to member2, and another one to member3."
+                }
+            }
+        },
+        "balancers-entry": {
+            "properties": {
+                "method": {
+                    "enum": [
+                        "round-robin",
+                        "least-connected"
+                    ],
+                    "description": "Defines the load balancing method. When set to round-robin, the requests to the application servers SHOULD be distributed in a round-robin fashion. When set to least-connected \u2014 next request SHOULD be assigned to the server with the least number of active connections. When not defined, the round-robin is used as a default method."
+                },
+                "persistence": {
+                    "type": "object",
+                    "$ref": "#/definitions/balancers-persistence"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/balancers-member"
+                    }
+                }
+            }
+        },
+        "balancers": {
+            "patternProperties": {
+                "^.*$": {
+                    "$ref": "#/definitions/balancers-entry"
+                }
+            }
+        },
+        "redirects-entry": {
+            "required": [
+                "to"
+            ],
+            "properties": {
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "redirects": {
+            "patternProperties": {
+                "^(/[^/]+)+$": {
+                    "$ref": "#/definitions/redirects-entry"
+                },
+                "^/$": {
+                    "$ref": "#/definitions/redirects-entry"
+                }
+            },
+            "additionalProperties": false
+        },
+        "error-pages": {
+            "patternProperties": {
+                "^[0-9][0-9][0-9]$": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "raw-config": {
+            "patternProperties": {
+                "^.*$": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

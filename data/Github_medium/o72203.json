@@ -1,0 +1,249 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Metric",
+    "description": "User metrics establish how aggregate functions can be used to update a custom user field with respect to an event.",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Identifier",
+            "description": "A unique identifier for this metric. This should be an ObjectId."
+        },
+        "customFieldKey": {
+            "type": "string",
+            "title": "Custom Field",
+            "description": "The name of the custom field associated with this metric. "
+        },
+        "aggregateId": {
+            "type": "string",
+            "title": "Aggregate Identifier",
+            "description": "An unique identifier for the aggregate operation to perform.",
+            "enum": [
+                "SUM",
+                "COUNT",
+                "FIRST_SEEN",
+                "FIRST_VALUE",
+                "LAST_VALUE",
+                "THROTTLED_LAST_NUMERIC_VALUE"
+            ]
+        },
+        "dateTriggeredWindow": {
+            "type": "string",
+            "title": "Date Triggered Window",
+            "description": "An ISO 8601 interval. The aggregate operation will only be performed between this window."
+        },
+        "eventKey": {
+            "type": "string",
+            "title": "Event Key",
+            "description": "The event that will be aggregated by this metric."
+        },
+        "fieldsFilters": {
+            "type": "array",
+            "title": "Metric Fields Filters",
+            "description": "The aggregate operation will only be performed for events matching these filters",
+            "items": {
+                "$ref": "#/definitions/filter"
+            }
+        },
+        "filter": {
+            "type": "string",
+            "title": "Filter",
+            "description": "A JSONata expression which will filter out non-matching events"
+        }
+    },
+    "required": [
+        "id",
+        "customFieldKey",
+        "aggregateId",
+        "eventKey"
+    ],
+    "dependencies": {
+        "aggregateId": {
+            "oneOf": [
+                {
+                    "properties": {
+                        "aggregateId": {
+                            "enum": [
+                                "SUM"
+                            ]
+                        },
+                        "aggregateRules": {
+                            "$ref": "#/definitions/singleFieldAggregate"
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "aggregateId": {
+                            "enum": [
+                                "COUNT"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "aggregateId": {
+                            "enum": [
+                                "FIRST_SEEN"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "aggregateId": {
+                            "enum": [
+                                "FIRST_VALUE"
+                            ]
+                        },
+                        "aggregateRules": {
+                            "$ref": "#/definitions/singleFieldAggregate"
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "aggregateId": {
+                            "enum": [
+                                "LAST_VALUE"
+                            ]
+                        },
+                        "aggregateRules": {
+                            "$ref": "#/definitions/singleFieldAggregate"
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "aggregateId": {
+                            "enum": [
+                                "THROTTLED_LAST_NUMERIC_VALUE"
+                            ]
+                        },
+                        "aggregateRules": {
+                            "type": "object",
+                            "properties": {
+                                "fieldName": {
+                                    "$ref": "#/definitions/fieldName"
+                                },
+                                "diff": {
+                                    "type": "string",
+                                    "title": "Throttle Interval",
+                                    "description": "The minimum interval time that can elapse between recording the value of field name. Default is milliseconds per hour."
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "fieldName"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "singleFieldAggregate": {
+            "type": "object",
+            "properties": {
+                "fieldName": {
+                    "$ref": "#/definitions/fieldName"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "fieldName"
+            ]
+        },
+        "fieldName": {
+            "type": "string",
+            "title": "Field Name",
+            "description": "The field on which this aggregate will be performed."
+        },
+        "filter": {
+            "type": "object",
+            "title": "Filter",
+            "description": "Aggregate operator filter",
+            "properties": {
+                "operator": {
+                    "type": "string",
+                    "title": "Operator",
+                    "description": "The operator that will be used in applying the filter",
+                    "enum": [
+                        "eq",
+                        "gt",
+                        "gte",
+                        "lt",
+                        "lte",
+                        "exists",
+                        "or"
+                    ]
+                }
+            },
+            "required": [
+                "operator"
+            ],
+            "dependencies": {
+                "operator": {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "operator": {
+                                    "enum": [
+                                        "or"
+                                    ]
+                                },
+                                "value": {
+                                    "type": "array",
+                                    "title": "OR Filters",
+                                    "description": "Filters provided will be evaluated using the OR conditional.",
+                                    "items": {
+                                        "$ref": "#/definitions/filter"
+                                    }
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "value"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "operator": {
+                                    "enum": [
+                                        "eq",
+                                        "gt",
+                                        "gte",
+                                        "lt",
+                                        "lte",
+                                        "exists"
+                                    ]
+                                },
+                                "field": {
+                                    "type": "string",
+                                    "title": "Field Name",
+                                    "description": "The filter operator will be applied to this event field"
+                                },
+                                "value": {
+                                    "type": [
+                                        "string",
+                                        "integer",
+                                        "boolean"
+                                    ],
+                                    "title": "Field Value",
+                                    "description": "The value the filter operator will match on"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "operator",
+                                "value"
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

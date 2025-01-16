@@ -1,0 +1,505 @@
+{
+  "title": "DstackConfiguration",
+  "discriminator": {
+    "propertyName": "type",
+    "mapping": {
+      "dev-environment": "#/definitions/DevEnvironmentConfiguration",
+      "task": "#/definitions/TaskConfiguration",
+      "service": "#/definitions/ServiceConfiguration"
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/DevEnvironmentConfiguration"
+    },
+    {
+      "$ref": "#/definitions/TaskConfiguration"
+    },
+    {
+      "$ref": "#/definitions/ServiceConfiguration"
+    }
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "RegistryAuth": {
+      "title": "RegistryAuth",
+      "type": "object",
+      "properties": {
+        "username": {
+          "title": "Username",
+          "description": "Username",
+          "type": "string"
+        },
+        "password": {
+          "title": "Password",
+          "description": "Password or access token",
+          "type": "string"
+        }
+      },
+      "required": [
+        "password"
+      ],
+      "additionalProperties": false
+    },
+    "PythonVersion": {
+      "title": "PythonVersion",
+      "description": "An enumeration.",
+      "enum": [
+        "3.7",
+        "3.8",
+        "3.9",
+        "3.10",
+        "3.11"
+      ],
+      "type": "string"
+    },
+    "PortMapping": {
+      "title": "PortMapping",
+      "type": "object",
+      "properties": {
+        "local_port": {
+          "title": "Local Port",
+          "exclusiveMinimum": 0,
+          "maximum": 65536,
+          "type": "integer"
+        },
+        "container_port": {
+          "title": "Container Port",
+          "exclusiveMinimum": 0,
+          "maximum": 65536,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "container_port"
+      ],
+      "additionalProperties": false
+    },
+    "DevEnvironmentConfiguration": {
+      "title": "DevEnvironmentConfiguration",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "default": "dev-environment",
+          "enum": [
+            "dev-environment"
+          ],
+          "type": "string"
+        },
+        "image": {
+          "title": "Image",
+          "description": "The name of the Docker image to run",
+          "type": "string"
+        },
+        "entrypoint": {
+          "title": "Entrypoint",
+          "description": "The Docker entrypoint",
+          "type": "string"
+        },
+        "home_dir": {
+          "title": "Home Dir",
+          "description": "The absolute path to the home directory inside the container",
+          "default": "/root",
+          "type": "string"
+        },
+        "registry_auth": {
+          "title": "Registry Auth",
+          "description": "Credentials for pulling a private container",
+          "allOf": [
+            {
+              "$ref": "#/definitions/RegistryAuth"
+            }
+          ]
+        },
+        "python": {
+          "description": "The major version of Python\nMutually exclusive with the image",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PythonVersion"
+            }
+          ]
+        },
+        "env": {
+          "title": "Env",
+          "description": "The mapping or the list of environment variables",
+          "default": {},
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*=.*$"
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "build": {
+          "title": "Build",
+          "description": "The bash commands to run during build stage",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "setup": {
+          "title": "Setup",
+          "description": "The bash commands to run on the boot",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cache": {
+          "title": "Cache",
+          "description": "The directories to be cached between configuration runs",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ports": {
+          "title": "Ports",
+          "description": "Port numbers/mapping to expose",
+          "default": [],
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 65536
+              },
+              {
+                "type": "string",
+                "pattern": "^(?:[0-9]+|\\*):[0-9]+$"
+              },
+              {
+                "$ref": "#/definitions/PortMapping"
+              }
+            ]
+          }
+        },
+        "ide": {
+          "title": "Ide",
+          "description": "The IDE to run",
+          "enum": [
+            "vscode"
+          ],
+          "type": "string"
+        },
+        "init": {
+          "title": "Init",
+          "description": "The bash commands to run",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ide"
+      ],
+      "additionalProperties": false
+    },
+    "Artifact": {
+      "title": "Artifact",
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "description": "The path to the folder that must be stored as an output artifact",
+          "type": "string"
+        },
+        "mount": {
+          "title": "Mount",
+          "description": "Must be set to `true` if the artifact files must be saved in real-time",
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "TaskConfiguration": {
+      "title": "TaskConfiguration",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "default": "task",
+          "enum": [
+            "task"
+          ],
+          "type": "string"
+        },
+        "image": {
+          "title": "Image",
+          "description": "The name of the Docker image to run",
+          "type": "string"
+        },
+        "entrypoint": {
+          "title": "Entrypoint",
+          "description": "The Docker entrypoint",
+          "type": "string"
+        },
+        "home_dir": {
+          "title": "Home Dir",
+          "description": "The absolute path to the home directory inside the container",
+          "default": "/root",
+          "type": "string"
+        },
+        "registry_auth": {
+          "title": "Registry Auth",
+          "description": "Credentials for pulling a private container",
+          "allOf": [
+            {
+              "$ref": "#/definitions/RegistryAuth"
+            }
+          ]
+        },
+        "python": {
+          "description": "The major version of Python\nMutually exclusive with the image",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PythonVersion"
+            }
+          ]
+        },
+        "env": {
+          "title": "Env",
+          "description": "The mapping or the list of environment variables",
+          "default": {},
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*=.*$"
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "build": {
+          "title": "Build",
+          "description": "The bash commands to run during build stage",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "setup": {
+          "title": "Setup",
+          "description": "The bash commands to run on the boot",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cache": {
+          "title": "Cache",
+          "description": "The directories to be cached between configuration runs",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ports": {
+          "title": "Ports",
+          "description": "Port numbers/mapping to expose",
+          "default": [],
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 65536
+              },
+              {
+                "type": "string",
+                "pattern": "^(?:[0-9]+|\\*):[0-9]+$"
+              },
+              {
+                "$ref": "#/definitions/PortMapping"
+              }
+            ]
+          }
+        },
+        "commands": {
+          "title": "Commands",
+          "description": "The bash commands to run",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "title": "Artifacts",
+          "description": "The list of output artifacts",
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Artifact"
+          }
+        }
+      },
+      "required": [
+        "commands"
+      ],
+      "additionalProperties": false
+    },
+    "ServiceConfiguration": {
+      "title": "ServiceConfiguration",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "default": "service",
+          "enum": [
+            "service"
+          ],
+          "type": "string"
+        },
+        "image": {
+          "title": "Image",
+          "description": "The name of the Docker image to run",
+          "type": "string"
+        },
+        "entrypoint": {
+          "title": "Entrypoint",
+          "description": "The Docker entrypoint",
+          "type": "string"
+        },
+        "home_dir": {
+          "title": "Home Dir",
+          "description": "The absolute path to the home directory inside the container",
+          "default": "/root",
+          "type": "string"
+        },
+        "registry_auth": {
+          "title": "Registry Auth",
+          "description": "Credentials for pulling a private container",
+          "allOf": [
+            {
+              "$ref": "#/definitions/RegistryAuth"
+            }
+          ]
+        },
+        "python": {
+          "description": "The major version of Python\nMutually exclusive with the image",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PythonVersion"
+            }
+          ]
+        },
+        "env": {
+          "title": "Env",
+          "description": "The mapping or the list of environment variables",
+          "default": {},
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*=.*$"
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "build": {
+          "title": "Build",
+          "description": "The bash commands to run during build stage",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "setup": {
+          "title": "Setup",
+          "description": "The bash commands to run on the boot",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cache": {
+          "title": "Cache",
+          "description": "The directories to be cached between configuration runs",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "commands": {
+          "title": "Commands",
+          "description": "The bash commands to run",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "port": {
+          "title": "Port",
+          "description": "The port, that application listens to or the mapping",
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 65536
+            },
+            {
+              "type": "string",
+              "pattern": "^[0-9]+:[0-9]+$"
+            },
+            {
+              "$ref": "#/definitions/PortMapping"
+            }
+          ]
+        },
+        "gateway": {
+          "title": "Gateway",
+          "description": "The gateway IP address or domain to publish the service",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commands",
+        "port",
+        "gateway"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

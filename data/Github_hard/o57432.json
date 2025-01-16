@@ -1,0 +1,418 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "enum": [
+                "https://raw.githubusercontent.com/lmazuel/swagger-to-sdk/master/swagger_to_sdk_config.schema.json"
+            ]
+        },
+        "meta": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "enum": [
+                        "0.2.0"
+                    ],
+                    "description": "The version must be 0.2.0"
+                },
+                "after_scripts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "description": "List of commands to execute after the generation is done. Will be executed in the order of the list. Current working directory will be the cloned path. See also \"envs\" node."
+                },
+                "autorest_options": {
+                    "$ref": "#/definitions/autorest_options"
+                },
+                "envs": {
+                    "type": "object",
+                    "patternProperties": {
+                        "sdkrel:.*": {
+                            "type": "string",
+                            "description": "All options prefixed by \"sdkrel:\" can be a relative path that will be solved against SDK folder before being sent to Autorest."
+                        }
+                    },
+                    "additionalProperties": {
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "description": "Environment variables for after_scripts. All options prefixed by \"sdkrel:\" can be a relative path that will be solved against SDK folder before being sent to the scripts."
+                },
+                "advanced_options": {
+                    "type": "object",
+                    "properties": {
+                        "clone_dir": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Add more layers of folders to clone the repo, if necessary. Right now, useful for Go only. \"sdkrel:\" will consider this as the final folder path."
+                        }
+                    },
+                    "patternProperties": {
+                        "sdkrel:.*": {
+                            "$ref": "#/definitions/sdkrelProperty"
+                        }
+                    },
+                    "description": ""
+                },
+                "wrapper_filesOrDirs": {
+                    "$ref": "#/definitions/wrapper_filesOrDirs"
+                },
+                "delete_filesOrDirs": {
+                    "$ref": "#/definitions/delete_filesOrDirs"
+                },
+                "generated_relative_base_directory": {
+                    "$ref": "#/definitions/generated_relative_base_directory"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "version"
+            ]
+        },
+        "projects": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "markdown": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "This is an optional parameter which specificy the Autorest MD file path for this project. This is relative to the rest-folder paramter."
+                    },
+                    "autorest_options": {
+                        "$ref": "#/definitions/autorest_options"
+                    },
+                    "wrapper_filesOrDirs": {
+                        "$ref": "#/definitions/wrapper_filesOrDirs"
+                    },
+                    "delete_filesOrDirs": {
+                        "$ref": "#/definitions/delete_filesOrDirs"
+                    },
+                    "generated_relative_base_directory": {
+                        "$ref": "#/definitions/generated_relative_base_directory"
+                    },
+                    "output_dir": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "This is the folder in your SDK repository where you want to put the generated files."
+                    },
+                    "build_dir": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "This is an optional folder where to put metadata about the generation (Autorest version, date of generation, etc.). This can be used by our monitoring system to detect package that needs an update. Be sure this folder is unique in the entire file, to avoid overwritting a file from another project."
+                    }
+                },
+                "additionalProperties": false,
+                "description": ""
+            },
+            "description": "It's a dict where keys are a project id. The project id has no constraint, but it's recommended to use namespace style, like \"datalake.store.account\" to provide the best flexibility for the --project parameter."
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "meta"
+    ],
+    "definitions": {
+        "autorest_options": {
+            "properties": {
+                "verbose": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nShow verbose output information."
+                },
+                "debug": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nShow internal debug information."
+                },
+                "quiet": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nSuppress output."
+                },
+                "list-installed": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nShow all installed versions of AutoRest tools."
+                },
+                "list-available": {
+                    "type": "number",
+                    "minimum": 1,
+                    "default": 10,
+                    "description": "An option that will be passed to autorest.\nLists the last nn releases available from github."
+                },
+                "version": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nUses specified version of AutoRest (installing if necessary.)\nFor version you can use a version label (see --list-available) or\n-latest: Get latest nightly build.\n-latest-release: Get latest release version."
+                },
+                "reset": {
+                    "enum": [
+                        ""
+                    ],
+                    "description": "An option that will be passed to autorest.\nRemove all installed versions of AutoRest tools and install the latest (override with --version)."
+                },
+                "runtime-id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nOverrides the platform detection for the dotnet runtime (special case). Refer to the Runtime Identifier (RID) catalog for more details."
+                },
+                "input-file": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nAdds the given file to the list of input files for generation process."
+                },
+                "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nSets the namespace to use for the generated code."
+                },
+                "license-header": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nText to include as a header comment in generated files. Use NONE to suppress the default header."
+                },
+                "add-credentials": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nIf specified, the generated client includes a ServiceClientCredentials property and constructor parameter. Authentication behaviors are implemented by extending the ServiceClientCredentials type."
+                },
+                "package-name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nName of the package."
+                },
+                "package-version": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nVersion of the package."
+                },
+                "sync-methods": {
+                    "enum": [
+                        "essential",
+                        "all",
+                        "none"
+                    ],
+                    "description": "An option that will be passed to autorest.\nSpecifies mode for generating sync wrappers. Supported value are:\nessential - generates only one sync returning body or header (default)\nall - generates one sync method for each async method\nnone - does not generate any sync methods"
+                },
+                "payload-flattening-threshold": {
+                    "type": "number",
+                    "minimum": 1,
+                    "description": "An option that will be passed to autorest.\nThe maximum number of properties in the request body. If the number of properties in the request body is less than or equal to this value, these properties will be represented as method arguments."
+                },
+                "override-client-name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nName to use for the generated client type. By default, uses the value of the 'Title' field from the input files."
+                },
+                "use-internal-constructors": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nIndicates whether generated constructors will have an internal protection level."
+                },
+                "use-datetimeoffset": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nIndicates whether to use DateTimeOffset instead of DateTime to model date-time types."
+                },
+                "models-name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nName to use for the generated client models namespace and folder name. By default, uses the value of 'Models'. This is not currently supported by all code generators."
+                },
+                "output-file": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An option that will be passed to autorest.\nIf set, will cause generated code to be output to a single file. Not supported by all code generators."
+                },
+                "message-format": {
+                    "enum": [
+                        "regular",
+                        "json"
+                    ],
+                    "description": "An option that will be passed to autorest.\nSpecifies the format, messages will be printed as. JSON format is easier to process programmatically."
+                },
+                "azure-validator": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nIf set, runs the Azure specific validator plugin."
+                },
+                "openapi-type": {
+                    "enum": [
+                        "arm",
+                        "default",
+                        "data-plane"
+                    ],
+                    "description": "An option that will be passed to autorest.\nIndicates the type of configuration file being passed to the azure-validator so that it can run the appropriate class of validation rules accordingly."
+                },
+                "model-validator": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nIf set, validates the provided OpenAPI definition(s) against provided examples."
+                },
+                "semantic-validator": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nIf set, semantically verifies the provided OpenAPI definition(s), e.g. checks that a parameter's specified default value matches the parameter's declared type."
+                },
+                "csharp": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the C# code generator."
+                },
+                "nodejs": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the Node.js JavaScript code generator."
+                },
+                "python": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the Python code generator."
+                },
+                "java": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the Java code generator."
+                },
+                "ruby": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the Ruby code generator."
+                },
+                "go": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the Go code generator."
+                },
+                "typescript": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the TypeScript code generator."
+                },
+                "azureresourceschema": {
+                    "enum": [
+                        "",
+                        true,
+                        false
+                    ],
+                    "description": "An option that will be passed to autorest.\nRuns the Azure Resource Schema code generator."
+                },
+                "azure-arm": {
+                    "type": "boolean",
+                    "description": "An option that will be passed to autorest.\nUses the Azure version of the specified code generator."
+                }
+            },
+            "patternProperties": {
+                "sdkrel:.*": {
+                    "$ref": "#/definitions/sdkrelProperty"
+                }
+            },
+            "additionalProperties": {
+                "oneOf": [
+                    {
+                        "type": "string",
+                        "description": "An option that will be passed to autorest."
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "An option that will be passed to autorest."
+                    },
+                    {
+                        "type": "number",
+                        "description": "An option that will be passed to autorest."
+                    }
+                ]
+            },
+            "description": "An optional dictionary of options you want to pass to Autorest. This will be passed in any call, but can be override by \"autorest_options\" in each data. Note that you CAN'T override \"--output-folder\" which is filled contextually. All options prefixed by \"sdkrel:\" can be a relative path that will be solved against SDK folder before being sent to Autorest."
+        },
+        "wrapper_filesOrDirs": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "A file/directory that will be kept from the generated SDK."
+            },
+            "description": "An optional list of files/directory to keep when we generate new SDK. This support a Bash-like wildcard syntax (i.e. '*/myfile?.py'). This applies to every Swagger files."
+        },
+        "delete_filesOrDirs": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "A file/directory that will be deleted from the generated SDK."
+            },
+            "description": "An optional list of files/directory to delete from the generated SDK. This support a Bash-like wildcard syntax (i.e. '*/myfile?.py') This applies to every Swagger files."
+        },
+        "generated_relative_base_directory": {
+            "type": "string",
+            "minLength": 1,
+            "description": "If the data to consider generated by Autorest are not directly in the root folder. For instance, if Autorest generates a networkclient folder and you want to consider this folder as the root of data. This parameter is applied before 'delete_filesOrDirs', consider it in your paths. This applies to every Swagger files."
+        },
+        "sdkrelProperty": {
+            "type": "string",
+            "description": "All options prefixed by \"sdkrel:\" can be a relative path that will be solved against SDK folder before being sent to Autorest."
+        }
+    }
+}

@@ -1,0 +1,176 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "compilerArguments": {
+            "type": "object",
+            "help": "Compiler arguments are applied to all compilers, unless explicitly modified in post processing",
+            "properties": {
+                "entry": {
+                    "type": "string",
+                    "help": "main entry point for your program, across all contexts"
+                },
+                "out": {
+                    "type": "string",
+                    "help": "destination for compiled bundle. If there are multiple, the destination of specific bundles will be decided by the --combinator"
+                },
+                "watch": {
+                    "help": "monitor source files for changes and recompile.",
+                    "type": "boolean"
+                },
+                "hot": {
+                    "help": "enable hot module replacement",
+                    "type": "boolean"
+                },
+                "chunkFilename": {
+                    "help": "If provided, enables code splitting with webpack.require. Examples patterns include  '[id].chunk.js', '[name].chunk.js'",
+                    "type": "string"
+                },
+                "babelPresets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "help": "add a preset to the babel loader, between es2015 and stage-0"
+                },
+                "outCombinator": {
+                    "type": "string",
+                    "help": "string to combine arguments that \"define\" a compiler (environment, environment)",
+                    "default": "_"
+                },
+                "outPrefix": {
+                    "type": "string",
+                    "help": "prefix for generated contextual modules. Appended to `out` directory"
+                },
+                "modules": {
+                    "type": "string",
+                    "help": "where to look for modules"
+                }
+            }
+        },
+        "cartesianArguments": {
+            "type": "object",
+            "help": "Cartesian arguments are array arguments that generate compilers equal to the unorderd cartesian product between them",
+            "properties": {
+                "environments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "help": "an application lifecycle environment {DEVELOPMENT, PRODUCTION, etc} this distribution will run in"
+                },
+                "contexts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "help": "a context {NODE, BROWSER, etc} this distribution will run in. "
+                }
+            }
+        },
+        "managerArguments": {
+            "type": "object",
+            "help": "Task arguments are arguments that are fed to the task manager ",
+            "properties": {
+                "task": {
+                    "help": "the task to run. If non is specified, it will be inferred from other arguments.",
+                    "type": "string"
+                },
+                "run": {
+                    "help": "Which context to run on compilation, if any",
+                    "type": "string"
+                },
+                "runner": {
+                    "help": "Which runner to run the selected compiler with, if any",
+                    "type": "string"
+                },
+                "logLevel": {
+                    "default": "ERROR",
+                    "help": "VERBOSE will output webpack stats and warnings"
+                }
+            }
+        },
+        "compilerList": {
+            "type": "object",
+            "properties": {
+                "compilers": {
+                    "type": "array",
+                    "help": "List of simple compiler definitions, in case there are little or no shared compiler arguments.",
+                    "items": {
+                        "type": "object",
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/compilerArguments"
+                            },
+                            {
+                                "properties": {
+                                    "environment": {
+                                        "type": "string",
+                                        "help": "an application lifecycle environment {DEVELOPMENT, PRODUCTION, etc} this distribution will run in. "
+                                    },
+                                    "context": {
+                                        "type": "string",
+                                        "help": "a context {NODE, BROWSER, etc} this distribution will run in. "
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "presets": {
+            "type": "object",
+            "help": "Presets are functions that apply default or derived arguments at various stages of parsing, loaded from the module given as an argument from the export of the given preset.",
+            "properties": {
+                "compilerPreset": {
+                    "help": "Preset for compiler arguments, both simple and cartesian, applied before any other process",
+                    "type": "string"
+                },
+                "managerPreset": {
+                    "help": "Preset for manager arguments, applied after compilerPresets are run",
+                    "type": "string"
+                },
+                "argumentPreset": {
+                    "help": "combination of managerPreset and compilerPreset, runs after both are completed. If the given module doesn't export an argumentPreset, it's compilerPreset and managerPresets will be used in succession instead.",
+                    "type": "string"
+                },
+                "compilerListPreset": {
+                    "help": "Preset for the compiler list, applied after the list has been generated",
+                    "type": "string"
+                },
+                "postPreset": {
+                    "help": "Preset applied after all parsing processes have run",
+                    "type": "string"
+                },
+                "preset": {
+                    "help": "module from which to import ALL of the potential presets (any missing presets will be identities)",
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "allOf": [
+        {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/compilerArguments"
+                },
+                {
+                    "$ref": "#/definitions/cartesianArguments"
+                }
+            ]
+        },
+        {
+            "$ref": "#/definitions/compilerList"
+        },
+        {
+            "$ref": "#/definitions/managerArguments"
+        },
+        {
+            "$ref": "#/definitions/presets"
+        }
+    ]
+}

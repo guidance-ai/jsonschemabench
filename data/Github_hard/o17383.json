@@ -1,0 +1,465 @@
+{
+    "$id": "http://iccl.inf.tu-dresden.de/marpl/schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MARPL rules",
+    "definitions": {
+        "object-variable": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "variable"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "type",
+                "name"
+            ]
+        },
+        "object-literal": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "literal"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "type",
+                "name"
+            ]
+        },
+        "literal-expression": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "literal-expression"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "type",
+                "name"
+            ]
+        },
+        "object-term": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/object-variable"
+                },
+                {
+                    "$ref": "#/definitions/object-literal"
+                },
+                {
+                    "$ref": "#/definitions/literal-expression"
+                }
+            ]
+        },
+        "set-literal": {
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "set-term"
+                },
+                "assignments": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "attribute": {
+                                "$ref": "#/definitions/object-term"
+                            },
+                            "value": {
+                                "$ref": "#/definitions/object-term"
+                            }
+                        },
+                        "required": [
+                            "attribute",
+                            "value"
+                        ]
+                    },
+                    "_uniqueItems": true
+                }
+            },
+            "required": [
+                "type",
+                "assignments"
+            ]
+        },
+        "set-literal-with-dots": {
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "set-term"
+                },
+                "assignments": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "attribute": {
+                                "$ref": "#/definitions/object-term"
+                            },
+                            "value": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/object-term"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/dot"
+                                    }
+                                ]
+                            }
+                        },
+                        "required": [
+                            "attribute",
+                            "value"
+                        ]
+                    },
+                    "_uniqueItems": true
+                }
+            },
+            "required": [
+                "type",
+                "assignments"
+            ]
+        },
+        "set-variable": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "set-variable"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "type",
+                "name"
+            ]
+        },
+        "set-term": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/set-literal"
+                },
+                {
+                    "$ref": "#/definitions/set-variable"
+                }
+            ]
+        },
+        "set-atom": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "set-atom"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/object-term"
+                },
+                "value": {
+                    "$ref": "#/definitions/object-term"
+                },
+                "set": {
+                    "$ref": "#/definitions/set-term"
+                }
+            },
+            "required": [
+                "type",
+                "attribute",
+                "value",
+                "set"
+            ]
+        },
+        "relational-atom-base": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "relational-atom"
+                },
+                "predicate": {
+                    "$ref": "#/definitions/object-term"
+                },
+                "arguments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/object-term"
+                    }
+                },
+                "annotation": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "type",
+                "predicate",
+                "arguments",
+                "annotation"
+            ]
+        },
+        "function-term": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "function-term"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "arguments": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/object-term"
+                            },
+                            {
+                                "$ref": "#/definitions/set-term"
+                            }
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "name",
+                "arguments"
+            ]
+        },
+        "relational-atom": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/relational-atom-base"
+                },
+                {
+                    "properties": {
+                        "annotation": {
+                            "$ref": "#/definitions/set-term"
+                        }
+                    }
+                }
+            ]
+        },
+        "relational-atom-with-dots": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/relational-atom-base"
+                },
+                {
+                    "properties": {
+                        "annotation": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/set-literal-with-dots"
+                                },
+                                {
+                                    "$ref": "#/definitions/set-variable"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "relational-atom-with-function-term": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/relational-atom-base"
+                },
+                {
+                    "properties": {
+                        "annotation": {
+                            "$ref": "#/definitions/function-term"
+                        }
+                    }
+                }
+            ]
+        },
+        "placeholder": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "star",
+                        "plus"
+                    ]
+                }
+            },
+            "required": [
+                "type"
+            ]
+        },
+        "assignment": {
+            "type": "object",
+            "properties": {
+                "attribute": {
+                    "$ref": "#/definitions/object-term"
+                },
+                "value": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/object-term"
+                        },
+                        {
+                            "$ref": "#/definitions/placeholder"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "attribute",
+                "value"
+            ]
+        },
+        "dot": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "dot"
+                },
+                "fromSpecifier": {
+                    "$ref": "#/definitions/set-variable"
+                },
+                "item": {
+                    "$ref": "#/definitions/object-literal"
+                }
+            }
+        },
+        "specifier": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "open-specifier",
+                        "closed-specifier"
+                    ]
+                },
+                "assigmnents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/assignment"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "assignments"
+            ]
+        },
+        "specifier-expression": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "union",
+                        "intersection",
+                        "difference"
+                    ]
+                },
+                "specifiers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/specifier-term"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "type",
+                "specifiers"
+            ]
+        },
+        "specifier-term": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/specifier"
+                },
+                {
+                    "$ref": "#/definitions/specifier-expression"
+                }
+            ]
+        },
+        "specifier-atom": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "specifier-atom"
+                },
+                "specifier": {
+                    "$ref": "#/definitions/specifier-term"
+                },
+                "set": {
+                    "$ref": "#/definitions/set-variable"
+                }
+            },
+            "required": [
+                "specifier",
+                "set"
+            ]
+        }
+    },
+    "type": "object",
+    "properties": {
+        "type": {
+            "type": "string",
+            "const": "rule"
+        },
+        "body": {
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/relational-atom"
+                    },
+                    {
+                        "$ref": "#/definitions/set-atom"
+                    },
+                    {
+                        "$ref": "#/definitions/specifier-atom"
+                    }
+                ]
+            }
+        },
+        "head": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/relational-atom-with-dots"
+                },
+                {
+                    "$ref": "#/definitions/relational-atom-with-function-term"
+                }
+            ]
+        }
+    },
+    "required": [
+        "body",
+        "head"
+    ]
+}

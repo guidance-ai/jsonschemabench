@@ -1,0 +1,631 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Query",
+    "description": "A JSON format to support searching for collections in the CMR.",
+    "additionalProperties": false,
+    "type": "object",
+    "properties": {
+        "condition": {
+            "$ref": "#/definitions/QueryCondition"
+        }
+    },
+    "definitions": {
+        "QueryCondition": {
+            "description": "Condition used to filter collection search results from the CMR. If multiple properties are provided in a single condition they will be implicitly AND'ed.",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "type": "object",
+            "properties": {
+                "and": {
+                    "description": "Groups together conditions to return the intersection of the results.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/QueryCondition"
+                    },
+                    "minItems": 1
+                },
+                "or": {
+                    "description": "Groups together conditions to return the union of the results.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/QueryCondition"
+                    },
+                    "minItems": 1
+                },
+                "not": {
+                    "description": "Negates the provided condition.",
+                    "$ref": "#/definitions/QueryCondition"
+                },
+                "entry_title": {
+                    "description": "UMM Entry Title",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "entry_id": {
+                    "description": "UMM Entry ID",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "provider": {
+                    "description": "UMM Provider",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "short_name": {
+                    "description": "UMM Short Name",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "updated_since": {
+                    "description": "Revisions with revision date later than provided value",
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "UMM Version",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "processing_level_id": {
+                    "description": "UMM Processing Level ID",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "concept_id": {
+                    "description": "CMR concept ID",
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "Concept ID searches are always case sensitive",
+                            "properties": {
+                                "value": {
+                                    "type": "string"
+                                },
+                                "pattern": {
+                                    "$ref": "#/definitions/PatternOption"
+                                }
+                            },
+                            "required": [
+                                "value"
+                            ]
+                        }
+                    ]
+                },
+                "tag": {
+                    "description": "Search against the subfields of associated tag.",
+                    "$ref": "#/definitions/TagCondition"
+                },
+                "platform": {
+                    "description": "Search against any of the subfields in the platform hierarchy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                        "category": {
+                            "description": "Top level classification of platforms.",
+                            "type": "string"
+                        },
+                        "series_entity": {
+                            "description": "Second level classification under category. These keywords usually (but not always) refer to a series of Earth or space observing satellites.",
+                            "type": "string"
+                        },
+                        "short_name": {
+                            "description": "Abbreviated name of the platform (source) used to acquire the data.",
+                            "type": "string"
+                        },
+                        "long_name": {
+                            "description": "Full name of the platform (source) used to acquire the data.",
+                            "type": "string"
+                        },
+                        "uuid": {
+                            "description": "Unique identifier for the platform within the GCMD Keyword Management System.",
+                            "type": "string"
+                        },
+                        "ignore_case": {
+                            "$ref": "#/definitions/IgnoreCaseOption"
+                        },
+                        "pattern": {
+                            "$ref": "#/definitions/PatternOption"
+                        },
+                        "any": {
+                            "description": "Search against any of the platform subfields (category, series_entity, etc.) for the provided value.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "instrument": {
+                    "description": "Search against any of the subfields in the instrument hierarchy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                        "category": {
+                            "description": "Top level classification of instruments.",
+                            "type": "string"
+                        },
+                        "class": {
+                            "description": "Second level classification under category.",
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "Third level classification under class.",
+                            "type": "string"
+                        },
+                        "subtype": {
+                            "description": "Fourth level classification under type.",
+                            "type": "string"
+                        },
+                        "short_name": {
+                            "description": "Abbreviated name of the instrument used to acquire the data.",
+                            "type": "string"
+                        },
+                        "long_name": {
+                            "description": "Full name of the instrument used to acquire the data.",
+                            "type": "string"
+                        },
+                        "uuid": {
+                            "description": "Unique identifier for the instrument within the GCMD Keyword Management System.",
+                            "type": "string"
+                        },
+                        "ignore_case": {
+                            "$ref": "#/definitions/IgnoreCaseOption"
+                        },
+                        "pattern": {
+                            "$ref": "#/definitions/PatternOption"
+                        },
+                        "any": {
+                            "description": "Search against any of the instrument subfields (category, class, etc.) for the provided value.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "sensor": {
+                    "description": "UMM sensor short name",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "project": {
+                    "description": "UMM project short name",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "data_center": {
+                    "description": "Search for data centers of any type (archive, distribution, processing, and originating are all searched.)",
+                    "$ref": "#/definitions/DataCenterCondition"
+                },
+                "archive_center": {
+                    "description": "Search for data centers with a type of archive center.",
+                    "$ref": "#/definitions/DataCenterCondition"
+                },
+                "spatial_keyword": {
+                    "description": "UMM spatial keyword",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "location_keyword": {
+                    "description": "Search against any of the subfields in the UMM location keyword hierarchy",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                        "category": {
+                            "description": "Top level classification of locations.",
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "Second level classification under category.",
+                            "type": "string"
+                        },
+                        "subregion_1": {
+                            "description": "Third level classification under type.",
+                            "type": "string"
+                        },
+                        "subregion_2": {
+                            "description": "Fourth level classification under subregion_1.",
+                            "type": "string"
+                        },
+                        "subregion_3": {
+                            "description": "Fifth level classification under subregion_2.",
+                            "type": "string"
+                        },
+                        "uuid": {
+                            "description": "Unique identifier for the location keyword within the GCMD Keyword Management System.",
+                            "type": "string"
+                        },
+                        "detailed_location": {
+                            "description": "Filter collections by the detailed location subfield within UMM location keywords.",
+                            "type": "string"
+                        },
+                        "ignore_case": {
+                            "$ref": "#/definitions/IgnoreCaseOption"
+                        },
+                        "pattern": {
+                            "$ref": "#/definitions/PatternOption"
+                        },
+                        "any": {
+                            "description": "Search against any of the location keyword subfields (category, type, etc.) for the provided value.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "two_d_coordinate_system_name": {
+                    "description": "UMM two dimensional coordinate system name",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "keyword": {
+                    "description": "Used for free text search across most search fields. Refer to the section 'Find collections by keyword search' on https://cmr.earthdata.nasa.gov/search/site/search_api_docs.html for a list of all fields searched against. Searches are always case insensitive and treat '?' and '*' as wild-cards.",
+                    "type": "string"
+                },
+                "science_keywords": {
+                    "description": "UMM Science keywords",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                        "category": {
+                            "type": "string"
+                        },
+                        "topic": {
+                            "type": "string"
+                        },
+                        "term": {
+                            "type": "string"
+                        },
+                        "variable_level_1": {
+                            "type": "string"
+                        },
+                        "variable_level_2": {
+                            "type": "string"
+                        },
+                        "variable_level_3": {
+                            "type": "string"
+                        },
+                        "detailed_variable": {
+                            "type": "string"
+                        },
+                        "uuid": {
+                            "description": "Unique identifier for the science keyword within the GCMD Keyword Management System.",
+                            "type": "string"
+                        },
+                        "ignore_case": {
+                            "$ref": "#/definitions/IgnoreCaseOption"
+                        },
+                        "pattern": {
+                            "$ref": "#/definitions/PatternOption"
+                        },
+                        "any": {
+                            "description": "Search against any of the science keyword subfields (category, term, etc.) for the provided value.",
+                            "type": "string"
+                        }
+                    }
+                },
+                "bounding_box": {
+                    "description": "Specifies a bounding rectangle search.",
+                    "$ref": "#/definitions/BoundingBoxCondition"
+                },
+                "doi": {
+                    "description": "Specifies a Digital Object Identifier search.",
+                    "$ref": "#/definitions/StringCondition"
+                },
+                "temporal": {
+                    "description": "Specifies a temporal search.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "properties": {
+                        "start_date": {
+                            "description": "The temporal coverage start date.",
+                            "format": "date-time",
+                            "type": "string"
+                        },
+                        "end_date": {
+                            "description": "The temporal coverage end date.",
+                            "format": "date-time",
+                            "type": "string"
+                        },
+                        "recurring_start_day": {
+                            "description": "An integer representing the day to get collections with a temporal extent over a recurring annual period starting on or after the given day.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 366
+                        },
+                        "recurring_end_day": {
+                            "description": "An integer representing the day to get collections with a temporal extent over a recurring annual period ending on or before the given day.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 366
+                        },
+                        "exclude_boundary": {
+                            "description": "If set to true, the search will not include the boundary date times. It has no impact on periodic temporal searches. Defaults to false.",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "additional_attribute_name": {
+                    "description": "Search for additional attributes by name and/or group. One of name or group is required.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/AttributeNameCondition"
+                        },
+                        "group": {
+                            "$ref": "#/definitions/AttributeGroupCondition"
+                        },
+                        "pattern": {
+                            "$ref": "#/definitions/PatternOption"
+                        }
+                    }
+                },
+                "additional_attribute_value": {
+                    "description": "Search for additional attributes by an exact value.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/AttributeNameCondition"
+                        },
+                        "group": {
+                            "$ref": "#/definitions/AttributeGroupCondition"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/AttributeTypeCondition"
+                        },
+                        "value": {
+                            "description": "Search for an exact value.",
+                            "$ref": "#/definitions/AttributeValueCondition"
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "type",
+                        "value"
+                    ]
+                },
+                "additional_attribute_range": {
+                    "description": "Search for additional attributes by range. One of min_value or max_value are required in addition to name and type.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/AttributeNameCondition"
+                        },
+                        "group": {
+                            "$ref": "#/definitions/AttributeGroupCondition"
+                        },
+                        "type": {
+                            "$ref": "#/definitions/AttributeTypeCondition"
+                        },
+                        "min_value": {
+                            "description": "Search for values for an additional attribute which are greater than the provided value.",
+                            "$ref": "#/definitions/AttributeValueCondition"
+                        },
+                        "max_value": {
+                            "description": "Search for values for an additional attribute which are less than the provided value.",
+                            "$ref": "#/definitions/AttributeValueCondition"
+                        },
+                        "exclude_boundary": {
+                            "description": "If set to true, the search will not include the boundary values for min and max values. Defaults to false.",
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "type"
+                    ]
+                }
+            }
+        },
+        "StringCondition": {
+            "description": "String searches can take either a string or an object with a value to search for and options to apply for the search.",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "description": "Used to specify the value and options to apply when searching against a particular field. 'value' is required.",
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "description": "The value to search for the given field.",
+                            "type": "string"
+                        },
+                        "ignore_case": {
+                            "$ref": "#/definitions/IgnoreCaseOption"
+                        },
+                        "pattern": {
+                            "$ref": "#/definitions/PatternOption"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "value"
+                    ]
+                }
+            ]
+        },
+        "CaseInsensitiveStringCondition": {
+            "description": "String searches can take either a string or an object with a value to search for and options to apply for the search. This is similar to StringCondition, but it does not support ignore_case options.",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "description": "Used to specify the value and options to apply when searching against a particular field. 'value' is required.",
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "description": "The value to search for the given field.",
+                            "type": "string"
+                        },
+                        "pattern": {
+                            "$ref": "#/definitions/PatternOption"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "value"
+                    ]
+                }
+            ]
+        },
+        "BoundingBoxCondition": {
+            "description": "Specifies a bounding rectangle search.",
+            "oneOf": [
+                {
+                    "type": "array",
+                    "description": "Must contain 4 numbers in the following order: west, south, east, north. West and east represent longitudes (-180 to 180), south and north represent latitudes (-90 to 90).",
+                    "items": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "north": {
+                            "type": "number",
+                            "description": "Northern latitude (-90 to 90).",
+                            "minimum": -90,
+                            "maximum": 90
+                        },
+                        "south": {
+                            "type": "number",
+                            "description": "Southern latitude (-90 to 90).",
+                            "minimum": -90,
+                            "maximum": 90
+                        },
+                        "east": {
+                            "type": "number",
+                            "description": "Eastern longitude (-180 to 180).",
+                            "minimum": -180,
+                            "maximum": 180
+                        },
+                        "west": {
+                            "type": "number",
+                            "description": "Western longitude (-180 to 180).",
+                            "minimum": -180,
+                            "maximum": 180
+                        }
+                    },
+                    "required": [
+                        "north",
+                        "south",
+                        "east",
+                        "west"
+                    ]
+                }
+            ]
+        },
+        "AttributeNameCondition": {
+            "description": "Additional attribute name.",
+            "type": "string"
+        },
+        "AttributeGroupCondition": {
+            "description": "Additional attribute group, which is generally a namespace.",
+            "type": "string"
+        },
+        "AttributeTypeCondition": {
+            "description": "The data type of the attribute being searched against.",
+            "enum": [
+                "string",
+                "boolean",
+                "time",
+                "date",
+                "datetime",
+                "int",
+                "float"
+            ]
+        },
+        "AttributeValueCondition": {
+            "description": "An attribute value to search against.",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "number"
+                }
+            ]
+        },
+        "DataCenterCondition": {
+            "description": "Search against any of the subfields in the data center hierarchy",
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+                "level_0": {
+                    "description": "Top level classification of data centers.",
+                    "type": "string"
+                },
+                "level_1": {
+                    "description": "Second level classification under level 0.",
+                    "type": "string"
+                },
+                "level_2": {
+                    "description": "Third level classification under level 1.",
+                    "type": "string"
+                },
+                "level_3": {
+                    "description": "Fourth level classification under level 2.",
+                    "type": "string"
+                },
+                "short_name": {
+                    "description": "Abbreviated name of the data center.",
+                    "type": "string"
+                },
+                "long_name": {
+                    "description": "The full name of the data center.",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "The Uniform Resource Locator (URL) of the data center.",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "Unique identifier for the data center within the GCMD Keyword Management System.",
+                    "type": "string"
+                },
+                "ignore_case": {
+                    "$ref": "#/definitions/IgnoreCaseOption"
+                },
+                "pattern": {
+                    "$ref": "#/definitions/PatternOption"
+                },
+                "any": {
+                    "description": "Search against any of the data center subfields (level0, url, etc.) for the provided value.",
+                    "type": "string"
+                }
+            }
+        },
+        "TagCondition": {
+            "description": "Search against the subfields of tags associated with the collection",
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+                "tag_key": {
+                    "description": "Key of the associated tag.",
+                    "type": "string"
+                },
+                "originator_id": {
+                    "description": "Originator id of the associated tag.",
+                    "type": "string"
+                },
+                "pattern": {
+                    "$ref": "#/definitions/PatternOption"
+                }
+            }
+        },
+        "IgnoreCaseOption": {
+            "description": "If set to true, the search will be case insensitive and if set to false, the search will be case sensitive. Defaults to true.",
+            "type": "boolean"
+        },
+        "PatternOption": {
+            "description": "If set to true, the search will treat the value provided for the given field as a pattern with wild-cards, in which '*' matches zero or more characters and '?' matches any single character. ",
+            "type": "boolean"
+        }
+    }
+}

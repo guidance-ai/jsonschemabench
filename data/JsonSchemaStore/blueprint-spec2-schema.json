@@ -1,0 +1,561 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/Torque-Blueprint-Spec2",
+    "definitions": {
+        "Torque-Blueprint-Spec2": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "spec_version": {
+                    "type": "integer",
+                    "enum": [
+                        2
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                },
+                "instructions": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "text": {
+                            "type": "string"
+                        },
+                        "source": {
+                            "$ref": "#/definitions/InstructionsSourceObject"
+                        }
+                    },
+                    "oneOf": [
+                    {
+                        "required": [
+                            "text"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "source"
+                        ]
+                    }
+                    ],
+                    "title": "instructions"
+                },
+                "inputs": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[a-zA-Z0-9-_ ().]{3,45}$": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/BlueprintInputObject"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    "title": "Inputs"
+                },
+                "outputs": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[a-zA-Z0-9-_ ().]{3,45}$": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/BlueprintOutputObject"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    "title": "Outputs"
+                },
+                "grains": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[a-zA-Z0-9-_ ().]{3,45}$": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/GrainObject"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    "title": "Grains"
+                }
+            },
+            "required": [
+                "spec_version"
+            ],
+            "title": "Torque Blueprint Spec 2"
+        },
+        "GrainObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "terraform",
+                        "helm",
+                        "ansible",
+                        "blueprint",
+                        "arm",
+                        "cloudformation",
+                        "kubernetes",
+                        "shell",
+                        "cloudshell"
+                    ]
+                },
+                "spec": {
+                    "$ref": "#/definitions/GrainSpecObject"
+                },
+                "depends-on": {
+                    "type": "string",
+                    "pattern": "^((.+)(,\\s*)?)+[^,]$"
+                },
+                "tf-version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind",
+                "spec"
+            ],
+            "title": "Grain Object"
+        },
+        "GrainScripts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "pre-tf-init": {
+                    "$ref": "#/definitions/ScriptObject"
+                },
+                "pre-tf-destroy": {
+                    "$ref": "#/definitions/ScriptObject"
+                },
+                "post-helm-install": {
+                    "$ref": "#/definitions/ScriptOutputsObject"
+                },
+                "post-kubernetes-install": {
+                    "$ref": "#/definitions/ScriptOutputsObject"
+                }
+            }
+        },
+        "ScriptSource": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "store": {
+                    "type": "string"
+                }
+            }
+        },
+        "ScriptObject": {
+            "type": "object",
+            "properties": {
+                "source": {
+                    "$ref": "#/definitions/ScriptSource"
+                },
+                "arguments": {
+                    "type": "string"
+                }
+            }
+        },
+        "Backend": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "bucket": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "storage-account-name": {
+                    "type": "string"
+                },
+                "container-name": {
+                    "type": "string"
+                },
+                "base-address": {
+                    "type": "string"
+                },
+                "key-prefix": {
+                    "type": "string"
+                }
+            }
+        },
+        "ScriptOutputsObject": {
+            "type": "object",
+            "properties": {
+                "outputs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "source": {
+                    "$ref": "#/definitions/ScriptSource"
+                },
+                "arguments": {
+                    "type": "string"
+                }
+            }
+        },
+        "GrainTag": {
+            "type": "object",
+            "properties": {
+                "auto-tag": {
+                    "type": "boolean"
+                },
+                "disable-tags-for": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "EnvironementVariable": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[A-Z0-9_]+": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                }
+            },
+            "title": "Envrironment Variable"
+        },
+        "GrainSpecObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "sources": {
+                    "$ref": "#/definitions/GrainSpecSources"
+                },
+                "source": {
+                    "$ref": "#/definitions/GrainSpecSourceObject"
+                },
+                "agent": {
+                    "$ref": "#/definitions/GrainSpecHostObject"
+                },
+                "host": {
+                    "$ref": "#/definitions/GrainSpecHostObject"
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GrainInput"
+                    }
+                },
+                "outputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GrainOutput"
+                    }
+                },
+                "commands": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GrainCommand"
+                    }
+                },
+                "scripts": {
+                    "$ref": "#/definitions/GrainScripts"
+                },
+                "tags": {
+                    "$ref": "#/definitions/GrainTag"
+                },
+                "env-vars": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/EnvironementVariable"
+                    }
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "authentication": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "backend": {
+                    "$ref": "#/definitions/Backend"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "activities": {
+                    "$ref": "#/definitions/ActivitiesObject"
+                },
+                "release": {
+                    "type": "string"
+                },
+                "inventory-file": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "tfvars-files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TfVarsFileSourceObject"
+                    }
+                }
+            },
+            "oneOf": [
+                {
+                    "required": [
+                        "agent"
+                    ]
+                },
+                {
+                    "required": [
+                        "host"
+                    ]
+                },
+                {
+                    "required": [
+                        "region"
+                    ]
+                }
+            ],
+            "title": "Grain Spec Object"
+        },
+        "ActivitiesObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "deploy": {
+                    "type": "object",
+                    "$ref": "#/definitions/ActivityObject"
+                },
+                "destroy": {
+                    "type": "object",
+                    "$ref": "#/definitions/ActivityObject"
+                }
+            }
+        },
+        "ActivityObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "commands": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/CommandObject"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CommandObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "command": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "GrainInput": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[\\w\\-\\.]+$": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                }
+            },
+            "title": "Grain Input"
+        },
+        "GrainOutput": {
+            "type": "string",
+            "additionalProperties": true,
+            "title": "Grain Output"
+        },
+        "GrainCommand": {
+            "type": "string",
+            "additionalProperties": true,
+            "title": "Grain Command"
+        },
+        "GrainSpecHostObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "service-account": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "kubernetes": {
+                    "type": "string"
+                }
+            },
+            "title": "Spec Host Properties"
+        },
+        "GrainSpecSourceObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "store": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "path"
+            ],
+            "title": "PurpleSource"
+        },
+        "GrainSpecSources": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/GrainSpecSourceObject"
+            }
+        },
+        "TfVarsFileSourceObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "store": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "path"
+            ],
+            "title": "TfVarsFileSource"
+        },
+        "BlueprintInputObject": {
+            "title": "Blueprint Input Object",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "string",
+                        "execution-host",
+                        "agent"
+                    ]
+                },
+                "display-style": {
+                    "type": "string",
+                    "enum": [
+                        "multiline",
+                        "normal",
+                        "masked"
+                    ],
+                    "default": "normal"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "In the relevant UI field, enter a description to be displayed to the user."
+                },
+                "default": {
+                    "type": [
+                        "integer",
+                        "string",
+                        "boolean"
+                    ]
+                },
+                "sensitive": {
+                    "type": "boolean"
+                },
+                "allowed-values": {
+                    "type": "array",
+                    "items": {
+                        "type": [
+                            "string",
+                            "integer",
+                            "boolean"
+                        ]
+                    }
+                }
+            }
+        },
+        "BlueprintOutputObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "value": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "regular",
+                        "link"
+                    ]
+                },
+                "quick": {
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "title": "Blueptint Output Object"
+        },
+        "InstructionsSourceObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "store": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "path", "store"
+            ],
+            "title": "InstructionsSource"
+        }       
+    }
+}

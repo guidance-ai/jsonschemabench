@@ -1,0 +1,761 @@
+{
+    "definitions": {
+        "associatedData": {
+            "description": "associated data source",
+            "properties": {
+                "name": {
+                    "description": "unique data name which references the associated data source",
+                    "type": "string"
+                },
+                "transforms": {
+                    "$ref": "#/definitions/transformArray",
+                    "description": "list of data transformations to apply to the data"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "type": "object"
+        },
+        "axis": {
+            "description": "chart axis schema",
+            "properties": {
+                "label": {
+                    "description": "axis label",
+                    "type": "string"
+                },
+                "scale": {
+                    "description": "name of corresponding scale",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "scale",
+                "label"
+            ],
+            "type": "object"
+        },
+        "brush": {
+            "description": "schema for a chart brush",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/associatedData",
+                    "description": "brush data"
+                },
+                "description": {
+                    "description": "brush description",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "data"
+            ],
+            "type": "object"
+        },
+        "colorScale": {
+            "description": "specifies how to map data values to colors",
+            "properties": {
+                "description": {
+                    "description": "scale description",
+                    "type": "string"
+                },
+                "domain": {
+                    "description": "specifies the scale domain",
+                    "type": "array"
+                },
+                "range": {
+                    "$ref": "#/definitions/stringArray",
+                    "description": "list of possible colors to which data values may be mapped"
+                },
+                "type": {
+                    "description": "specifies the scale type (ordinal)",
+                    "enum": [
+                        "ordinal"
+                    ]
+                }
+            },
+            "required": [
+                "type",
+                "domain",
+                "range"
+            ],
+            "type": "object"
+        },
+        "dataFormat": {
+            "description": "schema for describing a loaded data format",
+            "properties": {
+                "fields": {
+                    "description": "for JSON data, maps a JSON path to canonical data fields (if not provided, will assume that the JSON path directly corresponds to the canonical fields)",
+                    "properties": {
+                        "colnames": {
+                            "type": "string"
+                        },
+                        "rownames": {
+                            "type": "string"
+                        },
+                        "values": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": {
+                    "description": "specifies the format of the loaded data (needed for proper parsing)",
+                    "enum": [
+                        "json",
+                        "csv",
+                        "tsv"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "type": "object"
+        },
+        "dataInline": {
+            "description": "a data item which includes the raw chart data directly in the chart specification",
+            "properties": {
+                "colnames": {
+                    "$ref": "#/definitions/stringArray",
+                    "description": "a list of column names"
+                },
+                "description": {
+                    "description": "description of the data",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "unique data name",
+                    "type": "string"
+                },
+                "rownames": {
+                    "$ref": "#/definitions/stringArray",
+                    "description": "a list of row names"
+                },
+                "transforms": {
+                    "$ref": "#/definitions/transformArray",
+                    "description": "a list of transformations to apply to the data"
+                },
+                "values": {
+                    "$ref": "#/definitions/rowArray",
+                    "description": "an array of rows containing column values"
+                }
+            },
+            "required": [
+                "name",
+                "rownames",
+                "colnames",
+                "values"
+            ],
+            "type": "object"
+        },
+        "dataItem": {
+            "description": "a data array item specifying how to access chart data",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/dataInline"
+                },
+                {
+                    "$ref": "#/definitions/dataURL"
+                },
+                {
+                    "$ref": "#/definitions/dataSource"
+                }
+            ]
+        },
+        "dataSource": {
+            "description": "a data item which references another named data item in the chart specification",
+            "properties": {
+                "description": {
+                    "description": "description of the data",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "unique data name",
+                    "type": "string"
+                },
+                "source": {
+                    "description": "referenced data item name",
+                    "type": "string"
+                },
+                "transforms": {
+                    "$ref": "#/definitions/transformArray",
+                    "description": "list of transformations to apply to the data"
+                }
+            },
+            "required": [
+                "name",
+                "source"
+            ],
+            "type": "object"
+        },
+        "dataURL": {
+            "description": "a data item which specifies how to access a remote chart data",
+            "properties": {
+                "description": {
+                    "description": "description of the data",
+                    "type": "string"
+                },
+                "format": {
+                    "$ref": "#/definitions/dataFormat",
+                    "description": "loaded data formatting"
+                },
+                "name": {
+                    "description": "unique data name",
+                    "type": "string"
+                },
+                "transforms": {
+                    "$ref": "#/definitions/transformArray",
+                    "description": "list of transformations to apply to the data"
+                },
+                "url": {
+                    "_format": "uri",
+                    "description": "a URL specifying where to access",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "url"
+            ],
+            "type": "object"
+        },
+        "layoutNullable": {
+            "description": "layout settings set to null should be computed by the chart generator",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/positiveInteger"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "mark": {
+            "description": "visual encoding associated with chart data",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/rect"
+                }
+            ]
+        },
+        "nullOrNumber": {
+            "type": [
+                "null",
+                "number"
+            ]
+        },
+        "positiveInteger": {
+            "minimum": 0,
+            "type": "integer"
+        },
+        "positiveIntegerArray": {
+            "description": "an array of positive integers",
+            "items": {
+                "$ref": "#/definitions/positiveInteger"
+            },
+            "minItems": 0,
+            "type": "array"
+        },
+        "rect": {
+            "description": "rectangle visual encoding",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/associatedData",
+                    "description": "specifies the data associated with the visual encoding"
+                },
+                "description": {
+                    "description": "mark description",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "unique mark name",
+                    "type": "string"
+                },
+                "properties": {
+                    "description": "specifies associated rectangle properties",
+                    "properties": {
+                        "fill": {
+                            "description": "rectangle fill color",
+                            "properties": {
+                                "field": {
+                                    "description": "specifies the datum field to map to a fill color",
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "null"
+                                    ]
+                                },
+                                "scale": {
+                                    "description": "associated scale (color)",
+                                    "enum": [
+                                        "color"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "scale",
+                                "field"
+                            ],
+                            "type": "object"
+                        },
+                        "fillOpacity": {
+                            "description": "rectangle fill-opacity",
+                            "properties": {
+                                "field": {
+                                    "description": "specifies the datum field to map to a fill-opacity",
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "null"
+                                    ]
+                                },
+                                "scale": {
+                                    "description": "associated scale (z)",
+                                    "enum": [
+                                        "z"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "scale",
+                                "field"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "fill",
+                        "fillOpacity"
+                    ],
+                    "type": "object"
+                },
+                "type": {
+                    "description": "mark type (rect)",
+                    "enum": [
+                        "rect"
+                    ]
+                }
+            },
+            "required": [
+                "type",
+                "data",
+                "properties"
+            ],
+            "type": "object"
+        },
+        "rowArray": {
+            "description": "an array of rows",
+            "items": {
+                "type": "array"
+            },
+            "minItems": 1,
+            "type": "array"
+        },
+        "stringArray": {
+            "description": "an array of strings",
+            "items": {
+                "type": "string"
+            },
+            "minItems": 0,
+            "type": "array"
+        },
+        "transform": {
+            "description": "schema for data transformations",
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "type": "object"
+        },
+        "transformArray": {
+            "description": "an array of data transforms",
+            "items": {
+                "$ref": "#/definitions/transform"
+            },
+            "minItems": 0,
+            "type": "array"
+        },
+        "xScale": {
+            "description": "schema which specifies how to map column data to pixel values",
+            "properties": {
+                "description": {
+                    "description": "scale description",
+                    "type": "string"
+                },
+                "domain": {
+                    "$ref": "#/definitions/positiveIntegerArray",
+                    "description": "list of column indices defining the column order"
+                },
+                "range": {
+                    "description": "pixel range to which columns are mapped (the full width)",
+                    "enum": [
+                        "width"
+                    ]
+                },
+                "type": {
+                    "description": "specifies the scale type (ordinal)",
+                    "enum": [
+                        "ordinal"
+                    ]
+                }
+            },
+            "required": [
+                "type",
+                "domain",
+                "range"
+            ],
+            "type": "object"
+        },
+        "yScale": {
+            "description": "schema which specifies how to map rows to pixel values",
+            "properties": {
+                "description": {
+                    "description": "scale description",
+                    "type": "string"
+                },
+                "domain": {
+                    "$ref": "#/definitions/positiveIntegerArray",
+                    "description": "list of row indices defining the row order"
+                },
+                "range": {
+                    "description": "pixel range to which rows are mapped (the full height)",
+                    "enum": [
+                        "height"
+                    ]
+                },
+                "type": {
+                    "description": "specifies the scale type (ordinal)",
+                    "enum": [
+                        "ordinal"
+                    ]
+                }
+            },
+            "required": [
+                "type",
+                "domain",
+                "range"
+            ],
+            "type": "object"
+        },
+        "zScale": {
+            "description": "schema which specifies how to map data values to fill opacities",
+            "properties": {
+                "description": {
+                    "description": "scale description",
+                    "type": "string"
+                },
+                "domain": {
+                    "description": "specifies the scale domain (min and max values)",
+                    "properties": {
+                        "max": {
+                            "$ref": "#/definitions/nullOrNumber",
+                            "description": "maximum data value limit; if `null`, automatically calculated from data values"
+                        },
+                        "min": {
+                            "$ref": "#/definitions/nullOrNumber",
+                            "description": "minimum data value limit; if `null`, automatically calculated from data values"
+                        }
+                    },
+                    "required": [
+                        "min",
+                        "max"
+                    ],
+                    "type": "object"
+                },
+                "range": {
+                    "description": "specifies the range of allowed fill opacity values",
+                    "properties": {
+                        "max": {
+                            "description": "maximum fill opacity",
+                            "maximum": 1,
+                            "minimum": 0,
+                            "type": "number"
+                        },
+                        "min": {
+                            "description": "minimum fill opacity",
+                            "maximum": 1,
+                            "minimum": 0,
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "min",
+                        "max"
+                    ],
+                    "type": "object"
+                },
+                "type": {
+                    "description": "specifies the scale type (linear)",
+                    "enum": [
+                        "linear"
+                    ]
+                }
+            },
+            "required": [
+                "type",
+                "domain",
+                "range"
+            ],
+            "type": "object"
+        }
+    },
+    "description": "Schema for matrix diagram chart configurations.",
+    "properties": {
+        "axes": {
+            "description": "schema for chart axes",
+            "properties": {
+                "x": {
+                    "$ref": "#/definitions/axis",
+                    "description": "x-axis"
+                },
+                "y": {
+                    "$ref": "#/definitions/axis",
+                    "description": "y-axis"
+                }
+            },
+            "required": [
+                "x",
+                "y"
+            ],
+            "type": "object"
+        },
+        "brushes": {
+            "description": "schema for chart brushes",
+            "properties": {
+                "x": {
+                    "$ref": "#/definitions/brush",
+                    "description": "x-axis brush"
+                },
+                "y": {
+                    "$ref": "#/definitions/brush",
+                    "description": "y-axis brush"
+                }
+            },
+            "type": "object"
+        },
+        "canvas": {
+            "description": "schema for chart layout settings",
+            "properties": {
+                "height": {
+                    "$ref": "#/definitions/layoutNullable",
+                    "description": "chart height; if `null`, should be calculated by chart generator based on parent dimensions"
+                },
+                "padding": {
+                    "description": "chart padding; i.e., the distance between the canvas edge and graphical elements",
+                    "properties": {
+                        "bottom": {
+                            "$ref": "#/definitions/layoutNullable",
+                            "description": "bottom padding; if `null`, should be determined by chart generator based on existence of legend entries and other chart elements"
+                        },
+                        "left": {
+                            "$ref": "#/definitions/layoutNullable",
+                            "description": "left padding; if `null`, should be determined by chart generator based on row name length, existence of a y-label, et cetera"
+                        },
+                        "right": {
+                            "$ref": "#/definitions/layoutNullable",
+                            "description": "right padding; if `null`, should be determined by chart generator"
+                        },
+                        "top": {
+                            "$ref": "#/definitions/layoutNullable",
+                            "description": "top padding; if `null`, should be determined by chart generator based on column name length, existence of an x-label, et cetera"
+                        }
+                    },
+                    "required": [
+                        "left",
+                        "right",
+                        "top",
+                        "bottom"
+                    ],
+                    "type": "object"
+                },
+                "width": {
+                    "$ref": "#/definitions/layoutNullable",
+                    "description": "chart width; if `null`, should be calculated by chart generator based on parent dimensions"
+                }
+            },
+            "required": [
+                "width",
+                "height",
+                "padding"
+            ],
+            "type": "object"
+        },
+        "data": {
+            "description": "list of chart data sources",
+            "items": {
+                "$ref": "#/definitions/dataItem",
+                "description": "data source"
+            },
+            "minItems": 1,
+            "type": "array"
+        },
+        "legend": {
+            "description": "schema for legend entries",
+            "properties": {
+                "fill": {
+                    "description": "legend entry for fill color",
+                    "properties": {
+                        "label": {
+                            "description": "entry label",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "label"
+                    ],
+                    "type": "object"
+                },
+                "fillOpacity": {
+                    "description": "legend entry for fill opacity",
+                    "properties": {
+                        "label": {
+                            "description": "entry label",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "label"
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "fill",
+                "fillOpacity"
+            ],
+            "type": "object"
+        },
+        "marks": {
+            "description": "schema for visual encodings associated with chart data",
+            "items": {
+                "$ref": "#/definitions/mark"
+            },
+            "minItems": 1,
+            "type": "array"
+        },
+        "meta": {
+            "description": "associated chart meta data which aids in the contextual understanding of the chart",
+            "properties": {
+                "description": {
+                    "description": "chart description",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "chart title",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "name": {
+            "description": "unique chart specification name",
+            "type": "string"
+        },
+        "scales": {
+            "description": "schema for chart scales",
+            "properties": {
+                "color": {
+                    "$ref": "#/definitions/colorScale",
+                    "description": "scale mapping data values to fill colors"
+                },
+                "x": {
+                    "$ref": "#/definitions/xScale",
+                    "description": "scale mapping columns to pixel values"
+                },
+                "y": {
+                    "$ref": "#/definitions/yScale",
+                    "description": "scale mapping rows to pixel values"
+                },
+                "z": {
+                    "$ref": "#/definitions/zScale",
+                    "description": "scale mapping data values to fill opacities"
+                }
+            },
+            "required": [
+                "x",
+                "y",
+                "z",
+                "color"
+            ],
+            "type": "object"
+        },
+        "settings": {
+            "description": "schema for chart generator settings",
+            "properties": {
+                "autoResize": {
+                    "description": "specifies if a chart should automatically resize whenever the window resizes",
+                    "type": "boolean"
+                },
+                "autoUpdate": {
+                    "description": "specifies if a chart should update whenever a chart setting changes",
+                    "type": "boolean"
+                },
+                "interactions": {
+                    "description": "schema for interaction settings",
+                    "properties": {
+                        "brushable": {
+                            "description": "specifies if a chart should be brushable",
+                            "type": "boolean"
+                        },
+                        "brushableCols": {
+                            "description": "specifies if a chart should have a brushable x-axis",
+                            "type": "boolean"
+                        },
+                        "brushableRows": {
+                            "description": "specifies if a chart should have a brushable y-axis",
+                            "type": "boolean"
+                        },
+                        "resizable": {
+                            "description": "specifies if a chart can be resized manually",
+                            "type": "boolean"
+                        },
+                        "sortableCols": {
+                            "description": "specifies if a chart should have sortable columns",
+                            "type": "boolean"
+                        },
+                        "sortableRows": {
+                            "description": "specifies if a chart should have sortable rows",
+                            "type": "boolean"
+                        }
+                    },
+                    "type": "object"
+                },
+                "transitions": {
+                    "description": "schema for transition settings",
+                    "properties": {
+                        "duration": {
+                            "description": "transition duration in milliseconds",
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "type": {
+            "description": "chart specification type (matrix-diagram)",
+            "enum": [
+                "matrix-diagram"
+            ]
+        }
+    },
+    "required": [
+        "name",
+        "type",
+        "meta",
+        "data",
+        "canvas",
+        "scales",
+        "axes",
+        "marks",
+        "legend"
+    ],
+    "type": "object"
+}

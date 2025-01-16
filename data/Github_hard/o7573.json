@@ -1,0 +1,284 @@
+{
+  "title": "Schema for JSON-Lang",
+  "id": "http://json-lang.org/latest/schema.json#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "encoding": {
+      "type": "string"
+    },
+    "comments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Comment"
+      }
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Author"
+      }
+    },
+    "variables": {
+      "type": "object",
+      "patternProperties": {
+        "^(/[^/]+)+$": {
+          "$ref": "#/definitions/Variable"
+        }
+      }
+    },
+    "strings": {
+      "type": "object",
+      "patternProperties": {
+        "^(/[^/]+)+$": {
+          "$ref": "#/definitions/String"
+        }
+      }
+    },
+    "points": {
+      "type": "object",
+      "patternProperties": {
+        "^(/[^/]+)+$": {
+          "$ref": "#/definitions/Point"
+        }
+      }
+    }
+  },
+  "required": [
+    "strings",
+    "points"
+  ],
+  "definitions": {
+    "Comment": {
+      "id": "Comment",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Author"
+            },
+            {
+              "$ref": "#/definitions/AuthorPath"
+            }
+          ]
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    },
+    "AuthorPath": {
+      "id": "AuthorPath",
+      "type": "object",
+      "properties": {
+        "$ref": {
+          "type": "object",
+          "properties": {
+            "$ref": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "Author": {
+      "id": "Author",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "last_modification": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Variable": {
+      "id": "Variable",
+      "type": "object",
+      "patternProperties": {
+        "^(/[^/]+)+$": {
+          "type": "string"
+        }
+      }
+    },
+    "Context": {
+      "id": "Context",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Translation"
+        },
+        {
+          "description": "String object reference. JSON-Lang parser MUST automatically take the related language translation of this String object. If this Context is in tr-TR `language`, then the parser must retrieve tr-TR Translation of the String.",
+          "type": "object",
+          "properties": {
+            "$ref": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      ]
+    },
+    "Translation": {
+      "id": "Translation",
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "alternatives": {
+          "description": "This is mostly for editing and archiving purposes. You can keep a track of previous translations under this property.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Translation"
+          }
+        },
+        "author": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Author"
+            },
+            {
+              "$ref": "#/definitions/AuthorPath"
+            }
+          ]
+        },
+        "contexts": {
+          "description": "A `Context` is a variation of this string in a different form, such as plural, gendered, (in)definite. Its keys accept `Translation` objects.",
+          "type": "object",
+          "patternProperties": {
+            "^(/[^/]+)+$": {
+              "$ref": "#/definitions/Context"
+            }
+          }
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Comment"
+          }
+        },
+        "status": {
+          "description": "Status values are taken from XLIFF specification.",
+          "type": "string",
+          "enum": [
+            "initial",
+            "translated",
+            "reviewed",
+            "final"
+          ]
+        }
+      },
+      "required": [
+        "language",
+        "text"
+      ]
+    },
+    "String": {
+      "id": "String",
+      "type": "object",
+      "properties": {
+        "translations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Translation"
+          }
+        },
+        "variables": {
+          "description": "Variables are the dynamic values that you can use in your Strings. They should be replaced by JSON-Lang parsers with the values you provide dynamically. Variables have two scopes: String, global. When you specify a variable inside a `String` object, that variable can override a global variable if available and if not, that variable will only be searched for that String. However, global variables will be searched and replaced by your JSON-Lang parser in all of your Strings.",
+          "type": "object",
+          "properties": {
+            "variable": {
+              "$ref": "#/definitions/Variable"
+            }
+          }
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Comment"
+          }
+        },
+        "author": {
+          "type": "object",
+          "items": {
+            "$ref": "#/definitions/Author"
+          }
+        }
+      },
+      "required": [
+        "translations"
+      ]
+    },
+    "PathPoint": {
+      "id": "PathPoint",
+      "type": "object",
+      "properties": {
+        "$ref": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "ArrayPoint": {
+      "id": "ArrayPoint",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/String"
+      }
+    },
+    "SubPoint": {
+      "id": "SubPoint",
+      "type": "object",
+      "patternProperties": {
+        "^(/[^/]+)+$": {
+          "$ref": "#/definitions/Point"
+        }
+      }
+    },
+    "Point": {
+      "description": "Points are public keys for your Strings. They are basically locations in your real applications and are related to `Strings` or have `String` objects. The purpose of this structure is to eliminate duplicate Strings and instead use the same String in multiple locations but under different names. The possible values are 1) a JSONPath string, 2) String object, 3) another Point object which allows you to have nested public keys.",
+      "id": "Point",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PathPoint"
+        },
+        {
+          "$ref": "#/definitions/ArrayPoint"
+        },
+        {
+          "type": "object",
+          "patternProperties": {
+            "^(/[^/]+)+$": {
+              "$ref": "#/definitions/Point"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

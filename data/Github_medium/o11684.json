@@ -1,0 +1,88 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Cluster Config",
+    "description": "Configuration for forwarding metrics from Atlas LWC to AWS CloudWatch",
+    "type": "object",
+    "required": [
+        "email",
+        "expressions"
+    ],
+    "properties": {
+        "email": {
+            "description": "Email address of the service owner",
+            "type": "string",
+            "format": "email"
+        },
+        "expressions": {
+            "description": "List of metric expressions",
+            "type": "array",
+            "_uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": [
+                    "metricName",
+                    "atlasUri",
+                    "account"
+                ],
+                "properties": {
+                    "metricName": {
+                        "description": "Name of the metric that will be created in CloudWatch",
+                        "type": "string",
+                        "pattern": "^(?:(?:[\\w\\-\\.\\s]+)|(?:\\$\\([\\w\\-\\.]+\\)))+$"
+                    },
+                    "atlasUri": {
+                        "description": "Atlas query",
+                        "type": "string",
+                        "pattern": "^(https?://)?[\\w-]+(\\.[\\w-]+)*(:\\d+)?/api/v(\\d+){1}/graph\\?.+$"
+                    },
+                    "comment": {
+                        "type": "string"
+                    },
+                    "dimensions": {
+                        "description": "Details about AWS CloudWatch dimension that will be created",
+                        "type": "array",
+                        "_uniqueItems": true,
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "name",
+                                "value"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the CloudWatch dimension",
+                                    "type": "string",
+                                    "pattern": "^[\\w\\-\\.]+$"
+                                },
+                                "value": {
+                                    "description": "Atlas tag. Example: $(nf.asg)",
+                                    "type": "string",
+                                    "pattern": "^(?:(?:[\\w\\-\\.]+)|(?:\\$\\([\\w\\-\\.]+\\)))+$"
+                                }
+                            }
+                        }
+                    },
+                    "account": {
+                        "description": "AWS account to send the metric to. Typically $(nf.account)",
+                        "type": "string",
+                        "pattern": "^([\\d]+|\\$\\([\\w\\-\\.]+\\))$"
+                    },
+                    "region": {
+                        "description": "AWS region to send the metric to",
+                        "type": "string",
+                        "pattern": "^([\\w\\-\\.]+|\\$\\([\\w\\-\\.]+\\))$"
+                    }
+                }
+            }
+        },
+        "checksToSkip": {
+            "description": "The list of validations to skip",
+            "type": "array",
+            "_uniqueItems": true,
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        }
+    }
+}

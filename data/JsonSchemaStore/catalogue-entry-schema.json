@@ -1,0 +1,304 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://dwp.gov.uk/exchange/publishing-tools/apigw/catalogue-entry-schema.json",
+  "title": "Catalogue entry",
+  "type": "object",
+  "required": [
+    "description",
+    "primaryContact",
+    "filters",
+    "searchTags"
+  ],
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 200
+    },
+    "primaryContact": {
+      "type": "object",
+      "title": "Primary contact",
+      "description": "Contact details for the owner of the asset, i.e. the Product Owner.These details will be used when customers make enquiries or request access to the asset through the portal.",
+      "required": [
+        "emailAddress"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 35
+        },
+        "emailAddress": {
+          "type": "string",
+          "description": "must end with `gov.uk`",
+          "pattern": "^.*@.*gov\\.uk$"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 2
+        }
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "name": "Jo Doe",
+          "emailAddress": "jo.doe@dwp.gov.uk",
+          "role": "PO"
+        }
+      ]
+    },
+    "technical_documentation": {
+      "type": "object",
+      "title": "Technical documentation",
+      "description": "Allows you to provide paths to technical documentation to be published to the portal.",
+      "required": [
+        "oas_path"
+      ],
+      "properties": {
+        "oas_path": {
+          "type": "string",
+          "description": "Path to the technical documentation, relative to the current working directory.",
+          "pattern": "((?:[^\/]*\/)*)(?=\\.(yaml|yml|json))"
+        }
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "oas_path": "../oas/pet-store.yaml"
+        }
+      ]
+    },
+    "filters": {
+      "title": "Filters",
+      "type": "object",
+      "description": "A list of filtering options to improve searchability on the portal. Please check the README file to check the valid combinations of `lifecycle`, `profile`, and `access`.",
+      "required": [
+        "asset_type",
+        "owner",
+        "categories",
+        "visibility",
+        "lifecycle",
+        "profile",
+        "access"
+      ],
+      "allOf": [
+        {"$ref": "#/properties/filters/definitions/active-lifecycle"},
+        {"$ref": "#/properties/filters/definitions/deprecated-lifecycle"}
+      ],
+      "definitions": {
+        "active-lifecycle": {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "enum": [
+                  "In Development",
+                  "Pre-Prod",
+                  "Prod"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "profile": {
+                "enum": [
+                  "Strategic",
+                  "Transitional"
+                ]
+              },
+              "access": {
+                "enum": [
+                  "Open",
+                  "Closed"
+                ]
+              }
+            }
+          }
+        },
+        "deprecated-lifecycle": {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "enum": [
+                  "Deprecated",
+                  "Removed"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "profile": {
+                "const": "Legacy"
+              },
+              "access": {
+                "const": "Closed"
+              }
+            }
+          }
+        }
+      },
+      "properties": {
+        "asset_type": {
+          "type": "string",
+          "enum": [
+            "REST API",
+            "SOAP API",
+            "Event",
+            "Datasets"
+          ],
+          "examples": [
+            "REST API"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "enum": [
+            "AME Payments",
+            "Citizen Income",
+            "Citizen Information",
+            "Document Repository Services",
+            "Integration",
+            "Legacy Bridge",
+            "Notifications Platform",
+            "Personal Independence Payment",
+            "Reference Data Service",
+            "Retirement, Bereavement & Care",
+            "Common Capabilities",
+            "Other"
+          ],
+          "examples": [
+            "Integration"
+          ]
+        },
+        "categories": {
+          "title": "Categories",
+          "type": "array",
+          "minLength": 1,
+          "maxLength": 3,
+          "items": {
+            "type": "string",
+            "enum": [
+              "Address",
+              "Awards",
+              "Citizen",
+              "Data",
+              "Document Services",
+              "Financial",
+              "GUID",
+              "SMS",
+              "Other"
+            ]
+          },
+          "examples": [
+            [
+              "Address"
+            ]
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "Internal",
+            "Public"
+          ],
+          "examples": [
+            "Internal"
+          ]
+        },
+        "lifecycle": {
+          "type": "string",
+          "enum": [
+            "In Development",
+            "Pre-Prod",
+            "Prod",
+            "Deprecated",
+            "Removed"
+          ],
+          "examples": [
+            "In Development"
+          ]
+        },
+        "profile": {
+          "type": "string",
+          "title": "The profile Schema",
+          "enum": [
+            "Strategic",
+            "Transitional",
+            "Legacy"
+          ],
+          "examples": [
+            "Strategic"
+          ]
+        },
+        "access": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "Closed"
+          ],
+          "examples": [
+            "Open"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "asset_type": "REST API",
+          "owner": "Integration",
+          "categories": [
+            "Address"
+          ],
+          "visibility": "Internal",
+          "lifecycle": "Prod",
+          "profile": "Transitional",
+          "access": "Open"
+        }
+      ]
+    },
+    "searchTags": {
+      "type": "string",
+      "description": "Tags to label the asset in order to increase discoverability. Minimum of 3 in CSV format.",
+      "pattern": "^([^,]+(,|$)){3,}$",
+      "examples": [
+        "tag1, tag2, tag3"
+      ]
+    },
+    "relatedAssets": {
+      "title": "Related assets",
+      "description": "A list of other assets that are related to the asset being published. Must match the Asset ID on the related asset's business documentation page on the portal at https://gitlab.com/dwp/integration/api-exchange/exchange-content/-/tree/main/output/dwp/portal/workspaces/primary/content/_catalogueEntries.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": [
+          "integration-alive-check-service-v1"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "description": "This is an example service",
+      "primaryContact": {
+        "emailAddress": "test@gov.uk"
+      },
+      "technical_documentation": {
+        "oas_path": "../oas/path-to-spec.yml"
+      },
+      "filters": {
+        "asset_type": "REST API",
+        "owner": "Integration",
+        "categories": [
+          "Address"
+        ],
+        "visibility": "Internal",
+        "lifecycle": "Pre-Prod",
+        "profile": "Transitional",
+        "access": "Closed"
+      },
+      "searchTags": "test1,test2,test3"
+    }
+  ]
+}

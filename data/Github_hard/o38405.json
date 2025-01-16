@@ -1,0 +1,325 @@
+{
+    "$id": "http://example.com/root.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "turbosite.json schema",
+    "required": [
+        "$schema",
+        "errorSetup",
+        "homeView",
+        "baseURL",
+        "singleParameterView",
+        "locales",
+        "translationLocations",
+        "globalCDNS",
+        "globalJs",
+        "globalCss",
+        "globalComponents",
+        "globalHtml",
+        "viewComponents",
+        "webServices"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "Url to the json schema definition to validate this file",
+            "enum": [
+                "https://raw.githubusercontent.com/edertone/TurboBuilder/master/TurboBuilder-Node/src/main/resources/json-schema/turbosite.schema.json"
+            ]
+        },
+        "errorSetup": {
+            "type": "object",
+            "description": "Defines how errors and warnings are handled by the application",
+            "required": [
+                "exceptionsToBrowser",
+                "exceptionsToLog",
+                "exceptionsToMail",
+                "warningsToBrowser",
+                "warningsToLog",
+                "warningsToMail",
+                "tooMuchTimeWarning",
+                "tooMuchMemoryWarning"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "exceptionsToBrowser": {
+                    "type": "boolean",
+                    "description": "If set to true, all application exceptions information will be written directly to the browser output."
+                },
+                "exceptionsToLog": {
+                    "type": "string",
+                    "description": "A log filename or relative path where the exceptions must be written. If not specified, no log will be output. The filename or relative path must be based on the depot logs setup"
+                },
+                "exceptionsToMail": {
+                    "type": "string",
+                    "description": "The Exceptionstomail Schema"
+                },
+                "warningsToBrowser": {
+                    "type": "boolean",
+                    "description": "The Warningstobrowser Schema"
+                },
+                "warningsToLog": {
+                    "type": "string",
+                    "description": "A log filename or relative path where the warnings must be written. If not specified, no log will be output. The filename or relative path must be based on the depot logs setup"
+                },
+                "warningsToMail": {
+                    "type": "string",
+                    "description": "The Warningstomail Schema"
+                },
+                "tooMuchTimeWarning": {
+                    "type": "integer",
+                    "description": "When running time on any of the site urls exceeds the number of miliseconds defined here, a warning will be launched. If set to zero, this feature will be disabled"
+                },
+                "tooMuchMemoryWarning": {
+                    "type": "integer",
+                    "description": "When allocated memory on any of the site urls exceeds the number of bytes defined here, a warning will be launched. If set to zero, this feature will be disabled"
+                }
+            }
+        },
+        "homeView": {
+            "type": "string",
+            "description": "Contains the name of the view that is used by the root url. Leave it empty if there's no home view",
+            "examples": [
+                "home",
+                "some-other-view"
+            ]
+        },
+        "baseURL": {
+            "type": "string",
+            "description": "If the project is not deployed at the root of its host, we must place here the relative path where it is located. For example, if we deploy our site into http://somehost.com/somefolder, we must define the baseURL as \"somefolder\""
+        },
+        "singleParameterView": {
+            "type": "string",
+            "description": "This is the view that will be called by default when the current url contains only a single parameter like: http://host/this-is-a-parameter. Leave it empty if there's no single parameter view"
+        },
+        "locales": {
+            "type": "array",
+            "description": "The list of locales that will be available on the site. Sorted by preference",
+            "items": {
+                "type": "string"
+            }
+        },
+        "translationLocations": {
+            "type": "array",
+            "description": "List of locations where the resource bundles containing the site translation are located. Each array item must be an object with three properties: label, path and bundles.",
+            "items": {
+                "type": "object",
+                "required": [
+                    "label",
+                    "path",
+                    "bundles"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "description": "The name that is used to define the translations location, so it can be referenced when requesting a translation",
+                        "examples": [
+                            "resources-locales"
+                        ]
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "A path relative to src/main that defines the file structure to reach the translation files inside a folder. Wilcards must be used for $bundle and $locale",
+                        "examples": [
+                            "resources/locales/$bundle/$bundle_$locale.properties"
+                        ]
+                    },
+                    "bundles": {
+                        "type": "array",
+                        "description": "The list of bundles that will be initially loaded from the provided path. This list can be empty here and bundles added later as required.",
+                        "examples": [
+                            "home",
+                            "footer"
+                        ]
+                    }
+                }
+            }
+        },
+        "globalCDNS": {
+            "type": "array",
+            "description": "List of js files that will be loaded from CDN urls. These files are loaded first on the view documents, before any other global js files. They will be loaded in the same order as provided here. Each array item must be an object with 3 properties: url (direct url to the CDN file), fallbackVerify (a sentence that must evaluate to true to check that CDN is correctly loaded) and fallbackResource (A path inside src/main to load the local CDN file if remote not possible)",
+            "items": {
+                "type": "object",
+                "description": "The Items Schema",
+                "required": [
+                    "url",
+                    "fallbackVerify",
+                    "fallbackResource"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The Url Schema",
+                        "examples": [
+                            "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+                        ]
+                    },
+                    "fallbackVerify": {
+                        "type": "string",
+                        "description": "A javascript sentence that must evaluate to true. If it evaluates to false it means that the CDN was not reachable and the fallback resource will be loaded",
+                        "examples": [
+                            "window.jQuery"
+                        ]
+                    },
+                    "fallbackResource": {
+                        "type": "string",
+                        "description": "The project path inside src/main from where the library fallback resource will be loaded if CDN is not available",
+                        "examples": [
+                            "libs/jquery/jquery.js"
+                        ]
+                    }
+                }
+            },
+            "examples": [
+                "TODO"
+            ]
+        },
+        "globalJs": {
+            "type": "array",
+            "description": "List of js file paths (relative to src/main) that will be included globally on all the project views. All the specified files will be merged into a single global js file to optimize performance. The merge order will be exactly the same as the one defined here",
+            "items": {
+                "type": "string",
+                "examples": [
+                    "libs/turbocommons-es5/turbocommons-es5.js"
+                ]
+            }
+        },
+        "globalCss": {
+            "type": "array",
+            "description": "List of css file paths that will be included globally on all the project views. All the specified files will be merged into a single global css file to optimize performance. The merge order will be exactly the same as the one defined here",
+            "items": {
+                "type": "string",
+                "description": "The Items Schema"
+            },
+            "examples": [
+                "libs/normalize/normalize.css",
+                "view/css/global-styles.scss",
+                "view/components/main-menu/main-menu.scss",
+                "view/components/footer/footer.scss"
+            ]
+        },
+        "globalComponents": {
+            "type": "array",
+            "description": "A list of components that will be globally loaded right after the globalJs and globalCss. Each array element is a string with the path to a component (based on src/main) without a file extension",
+            "items": {
+                "type": "string",
+                "description": "A path to the component (based on src/main) without the file extension"
+            },
+            "examples": [
+                "view/components/main-menu/main-menu",
+                "view/components/footer/footer"
+            ]
+        },
+        "globalHtml": {
+            "type": "object",
+            "description": "Defines extra fragments of html that will be added globally to all the project views",
+            "required": [
+                "afterBodyOpen",
+                "beforeBodyClose"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "afterBodyOpen": {
+                    "type": "array",
+                    "description": "List of paths to files containing html code that will be added just after the <body> tag on all the project views, sorted in the same order as here",
+                    "items": {
+                        "type": "string",
+                        "description": "Path to a file containing some html code"
+                    },
+                    "examples": [
+                        "view/components/google-analytics/google-analytics.html"
+                    ]
+                },
+                "beforeBodyClose": {
+                    "type": "array",
+                    "description": "List of paths to files containing html code that will be added just before the </body> tag on all the project views, sorted in the same order as here",
+                    "items": {
+                        "type": "string",
+                        "description": "Path to a file containing some html code"
+                    },
+                    "examples": [
+                        "view/components/google-analytics/google-analytics.html"
+                    ]
+                }
+            }
+        },
+        "viewComponents": {
+            "type": "array",
+            "description": "A list of components that will be loaded with specific views. They will be loaded after the global css, js and global elements. Each array item is an object with two properties: view (the name of the view that will load the component) and components (a list of paths based on src/main to the components to load with the view, without file extension)",
+            "items": {
+                "type": "object",
+                "required": [
+                    "view",
+                    "components"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "view": {
+                        "type": "string",
+                        "description": "A view name",
+                        "examples": [
+                            "home"
+                        ]
+                    },
+                    "components": {
+                        "type": "array",
+                        "description": "A list of paths to the components based on src/main, without file extension",
+                        "examples": [
+                            "view/components/main-menu/main-menu"
+                        ]
+                    }
+                }
+            }
+        },
+        "webServices": {
+            "type": "object",
+            "description": "Defines the setup related to the web services exposed by the site at sitedomain.com/api",
+            "required": [
+                "crossOriginCORS",
+                "api"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "crossOriginCORS": {
+                    "type": "string",
+                    "description": "Defines the Cross Origin Resource Sharing policy that applies to all the web services. restrict means only same domain is allowed, and allow means access is granted from anywhere",
+                    "enum": [
+                        "restrict",
+                        "allow"
+                    ]
+                },
+                "api": {
+                    "type": "array",
+                    "description": "List of API definitions. Each element links a URL services path to the code namespace where the respective webservice classes can be found",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "uri",
+                            "namespace"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "uri": {
+                                "type": "string",
+                                "description": "A fragment of the URL that calls the services which defines the services API path. Must start with api/ and no ending slash must exist",
+                                "examples": [
+                                    "api/site"
+                                ]
+                            },
+                            "namespace": {
+                                "type": "string",
+                                "description": "The namespace where the webservice classes that relate to the specified URI can be found. Namespace must point to the root of the service classes folder that matches the specified URI fragment. No ending slash must exist",
+                                "examples": [
+                                    "project/src/main/api/site"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

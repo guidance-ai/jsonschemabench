@@ -1,0 +1,603 @@
+{
+    "additionalProperties": false,
+    "definitions": {
+        "additionalHostnamesList": {
+            "items": {
+                "minLength": 1,
+                "type": "string"
+            },
+            "type": "array",
+            "_uniqueItems": true
+        },
+        "buildArgList": {
+            "additionalProperties": {
+                "type": "string"
+            },
+            "type": "object"
+        },
+        "capabilityList": {
+            "items": {
+                "oneOf": [
+                    {
+                        "enum": [
+                            "AUDIT_CONTROL",
+                            "AUDIT_READ",
+                            "AUDIT_WRITE",
+                            "BLOCK_SUSPEND",
+                            "CHOWN",
+                            "DAC_OVERRIDE",
+                            "DAC_READ_SEARCH",
+                            "FOWNER",
+                            "FSETID",
+                            "IPC_LOCK",
+                            "IPC_OWNER",
+                            "KILL",
+                            "LEASE",
+                            "LINUX_IMMUTABLE",
+                            "MAC_ADMIN",
+                            "MAC_OVERRIDE",
+                            "MKNOD",
+                            "NET_ADMIN",
+                            "NET_BIND_SERVICE",
+                            "NET_BROADCAST",
+                            "NET_RAW",
+                            "SETGID",
+                            "SETFCAP",
+                            "SETPCAP",
+                            "SETUID",
+                            "SYS_ADMIN",
+                            "SYS_BOOT",
+                            "SYS_CHROOT",
+                            "SYS_MODULE",
+                            "SYS_NICE",
+                            "SYS_PACCT",
+                            "SYS_PTRACE",
+                            "SYS_RAWIO",
+                            "SYS_RESOURCE",
+                            "SYS_TIME",
+                            "SYS_TTY_CONFIG",
+                            "SYSLOG",
+                            "WAKE_ALARM",
+                            "ALL"
+                        ],
+                        "type": "string"
+                    }
+                ]
+            },
+            "type": "array"
+        },
+        "configVariable": {
+            "additionalProperties": false,
+            "description": "Definition of a single config variable",
+            "properties": {
+                "default": {
+                    "description": "Default value of the variable if one is not provided elsewhere",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Human-readable description of the purpose of the variable",
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "configVariablesList": {
+            "additionalProperties": {
+                "$ref": "#/definitions/configVariable"
+            },
+            "description": "Definitions for each of the config variables used to configure your tasks and containers",
+            "type": "object"
+        },
+        "container": {
+            "additionalProperties": false,
+            "oneOf": [
+                {
+                    "not": {
+                        "required": [
+                            "build_args",
+                            "dockerfile"
+                        ]
+                    },
+                    "required": [
+                        "image"
+                    ]
+                },
+                {
+                    "required": [
+                        "build_directory"
+                    ]
+                }
+            ],
+            "properties": {
+                "additional_hostnames": {
+                    "$ref": "#/definitions/additionalHostnamesList",
+                    "description": "Hostnames to associate with this container in addition to the default hostname"
+                },
+                "additional_hosts": {
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Additional hostnames to add to /etc/hosts in the container",
+                    "type": "object"
+                },
+                "build_args": {
+                    "$ref": "#/definitions/buildArgList",
+                    "description": "List of build args to use when building the image in build_directory"
+                },
+                "build_directory": {
+                    "description": "Path (relative to the configuration file's directory) to a directory containing a Dockerfile to build and use as an image for this container",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "capabilities_to_add": {
+                    "$ref": "#/definitions/capabilityList",
+                    "description": "List of additional capabilities to add to the container"
+                },
+                "capabilities_to_drop": {
+                    "$ref": "#/definitions/capabilityList",
+                    "description": "List of additional capabilities to remove from the container"
+                },
+                "command": {
+                    "description": "Command to run when the container starts",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "dependencies": {
+                    "$ref": "#/definitions/containerDependencyList",
+                    "description": "List of other containers that should be started and healthy before starting this container"
+                },
+                "dockerfile": {
+                    "description": "Dockerfile (relative to build_directory) to use when building the image. Defaults to Dockerfile` if not set.",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "enable_init_process": {
+                    "description": "Set to `true` to run an init process inside the container that forwards signals and reaps processes",
+                    "type": "boolean"
+                },
+                "entrypoint": {
+                    "description": "Entrypoint to use to run the command",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "environment": {
+                    "$ref": "#/definitions/environmentVariableList",
+                    "description": "List of environment variables for the container"
+                },
+                "health_check": {
+                    "$ref": "#/definitions/healthCheckOptions",
+                    "description": "Overrides health check configuration specified in the image or Dockerfile"
+                },
+                "image": {
+                    "description": "Image name (in standard Docker image reference format) to use for this container",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "log_driver": {
+                    "description": "Docker log driver to use",
+                    "type": "string"
+                },
+                "log_options": {
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Additional options to pass to Docker log driver",
+                    "type": "object"
+                },
+                "ports": {
+                    "$ref": "#/definitions/portMappingList",
+                    "description": "List of ports to make available to the host machine"
+                },
+                "privileged": {
+                    "description": "Enable privileged mode for the container",
+                    "type": "boolean"
+                },
+                "run_as_current_user": {
+                    "$ref": "#/definitions/runAsCurrentUserOptions"
+                },
+                "setup_commands": {
+                    "$ref": "#/definitions/setupCommandsList",
+                    "description": "Commands to run after the container reports as healthy but before dependency containers start"
+                },
+                "volumes": {
+                    "$ref": "#/definitions/volumeMountList",
+                    "description": "List of volume mounts to create for the container"
+                },
+                "working_directory": {
+                    "description": "Working directory to start the container in",
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "containerDependencyList": {
+            "items": {
+                "minLength": 1,
+                "type": "string"
+            },
+            "type": "array",
+            "_uniqueItems": true
+        },
+        "containers": {
+            "additionalProperties": {
+                "$ref": "#/definitions/container"
+            },
+            "description": "Definitions for each of the containers that make up your various environments",
+            "type": "object"
+        },
+        "environmentVariableList": {
+            "additionalProperties": {
+                "type": "string"
+            },
+            "type": "object"
+        },
+        "healthCheckOptions": {
+            "additionalProperties": false,
+            "properties": {
+                "command": {
+                    "description": "The command to run to check the health of the container. If this command exits with code 0, the container is considered healthy.",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "interval": {
+                    "description": "The interval between runs of the health check. Accepts values such as `2s` (two seconds) or `1m` (one minute).",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "retries": {
+                    "description": "The number of times to perform the health check before considering the container unhealthy",
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "start_period": {
+                    "description": "The time to wait before failing health checks count against the retry count. The health check is still run during this period, and if the check succeeds, the container is immediately considered healthy. Accepts values such as `2s` (two seconds) or `1m` (one minute).",
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "includesList": {
+            "description": "List of configuration files to include in this project",
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "portMappingList": {
+            "items": {
+                "oneOf": [
+                    {
+                        "pattern": "^\\d+(-\\d+)?:\\d+(-\\d+)?(/.*)?$",
+                        "type": "string"
+                    },
+                    {
+                        "additionalProperties": false,
+                        "properties": {
+                            "container": {
+                                "description": "Port inside the container to map",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "local": {
+                                "description": "Port on the host machine to map",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "protocol": {
+                                "description": "Protocol to use (eg. TCP or UDP)",
+                                "minLength": 1,
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "local",
+                            "container"
+                        ],
+                        "type": "object"
+                    },
+                    {
+                        "additionalProperties": false,
+                        "properties": {
+                            "container": {
+                                "description": "Ports inside the container to map",
+                                "pattern": "^\\d+-\\d+$",
+                                "type": "string"
+                            },
+                            "local": {
+                                "description": "Ports on the host machine to map",
+                                "pattern": "^\\d+-\\d+$",
+                                "type": "string"
+                            },
+                            "protocol": {
+                                "description": "Protocol to use (eg. TCP or UDP)",
+                                "minLength": 1,
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "local",
+                            "container"
+                        ],
+                        "type": "object"
+                    }
+                ]
+            },
+            "type": "array"
+        },
+        "runAsCurrentUserOptions": {
+            "oneOf": [
+                {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "description": "Set to `true` to enable 'run as current user' mode",
+                            "enum": [
+                                false
+                            ],
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "enabled"
+                    ],
+                    "type": "object"
+                },
+                {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "description": "Set to `true` to enable 'run as current user' mode",
+                            "enum": [
+                                true
+                            ],
+                            "type": "boolean"
+                        },
+                        "home_directory": {
+                            "description": "Directory to use as home directory for user inside container",
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "enabled",
+                        "home_directory"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        "setupCommandsList": {
+            "items": {
+                "additionalProperties": false,
+                "properties": {
+                    "command": {
+                        "description": "Command to execute",
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "working_directory": {
+                        "description": "Working directory to start the command in (defaults to container working directory if not set)",
+                        "minLength": 1,
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "command"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "task": {
+            "additionalProperties": false,
+            "anyOf": [
+                {
+                    "required": [
+                        "run"
+                    ]
+                },
+                {
+                    "not": {
+                        "required": [
+                            "dependencies",
+                            "run"
+                        ]
+                    },
+                    "required": [
+                        "prerequisites"
+                    ]
+                }
+            ],
+            "description": "Definition of a single task",
+            "properties": {
+                "dependencies": {
+                    "$ref": "#/definitions/containerDependencyList",
+                    "description": "List of other containers that should be started and healthy before starting the task container given in `run`"
+                },
+                "description": {
+                    "description": "Description shown when running `batect --list-tasks`",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "group": {
+                    "description": "Name used to group tasks when running `batect --list-tasks`",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "prerequisites": {
+                    "description": "List of other tasks that should be run before running this task",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array",
+                    "_uniqueItems": true
+                },
+                "run": {
+                    "$ref": "#/definitions/taskRunOptions"
+                }
+            },
+            "type": "object"
+        },
+        "taskRunOptions": {
+            "additionalProperties": false,
+            "description": "Specifies what to do when this task starts",
+            "properties": {
+                "command": {
+                    "description": "Command to run for this task",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "container": {
+                    "description": "Container to run for this task",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "entrypoint": {
+                    "description": "Entrypoint to use to run the command for this task",
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "environment": {
+                    "$ref": "#/definitions/environmentVariableList",
+                    "description": "List of environment variables to pass to the container, in addition to those defined on the container itself"
+                },
+                "ports": {
+                    "$ref": "#/definitions/portMappingList",
+                    "description": "List of port mappings to create for the container, in addition to those defined on the container itself"
+                },
+                "working_directory": {
+                    "description": "Working directory to start the container in",
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "required": [
+                "container"
+            ],
+            "type": "object"
+        },
+        "tasks": {
+            "additionalProperties": {
+                "$ref": "#/definitions/task"
+            },
+            "description": "Definitions for each of your tasks, the actions you launch through batect",
+            "type": "object"
+        },
+        "volumeMountList": {
+            "items": {
+                "oneOf": [
+                    {
+                        "pattern": "^.+:.+(:.+)?$",
+                        "type": "string"
+                    },
+                    {
+                        "additionalProperties": false,
+                        "properties": {
+                            "container": {
+                                "description": "Path inside the container to mount the host path at",
+                                "minLength": 1,
+                                "type": "string"
+                            },
+                            "local": {
+                                "description": "Path on the host machine to mount",
+                                "minLength": 1,
+                                "type": "string"
+                            },
+                            "options": {
+                                "description": "Docker volume mount options to use when creating mount",
+                                "enum": [
+                                    "cached",
+                                    "delegated",
+                                    "consistent",
+                                    "default",
+                                    "ro"
+                                ],
+                                "type": "string"
+                            },
+                            "type": {
+                                "description": "Type of volume mount",
+                                "enum": [
+                                    "local"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "local",
+                            "container"
+                        ],
+                        "type": "object"
+                    },
+                    {
+                        "additionalProperties": false,
+                        "properties": {
+                            "container": {
+                                "description": "Path inside the container to mount the cache at",
+                                "minLength": 1,
+                                "type": "string"
+                            },
+                            "name": {
+                                "description": "Name of the cache",
+                                "minLength": 1,
+                                "type": "string"
+                            },
+                            "options": {
+                                "description": "Docker volume mount options to use when creating mount",
+                                "enum": [
+                                    "cached",
+                                    "delegated",
+                                    "consistent",
+                                    "default",
+                                    "ro"
+                                ],
+                                "type": "string"
+                            },
+                            "type": {
+                                "description": "Type of volume mount",
+                                "enum": [
+                                    "cache"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "name",
+                            "container"
+                        ],
+                        "type": "object"
+                    }
+                ]
+            },
+            "type": "array"
+        }
+    },
+    "patternProperties": {
+        "^\\.": {}
+    },
+    "properties": {
+        "config_variables": {
+            "$ref": "#/definitions/configVariablesList"
+        },
+        "containers": {
+            "$ref": "#/definitions/containers"
+        },
+        "include": {
+            "$ref": "#/definitions/includesList"
+        },
+        "project_name": {
+            "description": "The name of your project. Used to label any images built.",
+            "minLength": 1,
+            "type": "string"
+        },
+        "tasks": {
+            "$ref": "#/definitions/tasks"
+        }
+    },
+    "title": "JSON schema for batect configuration files",
+    "type": "object"
+}

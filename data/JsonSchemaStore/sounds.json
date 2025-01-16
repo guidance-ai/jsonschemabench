@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Minecraft Sounds",
+  "description": "A File defining what sounds play when sound event is triggered",
+  "type": "object",
+  "definitions": {
+    "string": {
+      "type": "string",
+      "default": ""
+    },
+    "soundPath": {
+      "$ref": "#/definitions/string",
+      "description": "The path to a sound file from the \"namespace/sounds\" folder (excluding the .ogg file extension). Uses forward slashes.\nThe namespace defaults to minecraft but it can be changed by prepending a namespace and separating it with a :"
+    }
+  },
+  "properties": {
+    "$schema": {
+      "description": "Allow $schema because additionalProperties is false",
+      "$ref": "#/definitions/string"
+    }
+  },
+  "additionalProperties": {
+    "description": "A sound event. The name is usually separated in categories (such as \"entity.enderman.stare\")",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "replace": {
+        "description": "Used only in resource packs.\nTrue if the sounds listed in sounds should replace the sounds listed in the default sounds.json for this sound event\nFalse if the sounds listed should be added to the list of default sounds.\nDefault is false",
+        "type": "boolean",
+        "default": false
+      },
+      "subtitle": {
+        "description": "Translated as the subtitle of the sound if Show Subtitles is enabled ingame.",
+        "$ref": "#/definitions/string"
+      },
+      "sounds": {
+        "description": "The sound files this sound event uses. One of the listed sounds is randomly selected to play when this sound event is triggered.",
+        "type": "array",
+        "if": {
+          "items": {
+            "type": "string"
+          }
+        },
+        "then": {
+          "items": {
+            "$ref": "#/definitions/soundPath"
+          }
+        },
+        "else": {
+          "items": {
+            "description": "A sound file. This Object is used only when the sound requires additional Strings.",
+            "properties": {
+              "name": {
+                "$ref": "#/definitions/soundPath"
+              },
+              "volume": {
+                "description": "The volume for playing this sound. Value is a decimal between 0.0 and 1.0\nDefault is 1.0",
+                "type": "number",
+                "default": 1.0,
+                "minimum": 0.0,
+                "maximum": 1.0
+              },
+              "pitch": {
+                "description": "Plays the pitch at the specified value.\nDefault is 1.0",
+                "type": "number",
+                "default": 1.0
+              },
+              "weight": {
+                "description": "The chance that this sound is selected to play when this sound event is triggered.\nExample: putting 2 in for the value would be like placing in the name twice.\nDefault is 1",
+                "type": "integer",
+                "default": 1
+              },
+              "stream": {
+                "description": "True if this sound should be streamed from its file. It is recommended that this is set to \"true\" for sounds that have a duration longer than a few seconds to avoid lag. Used for all sounds in the \"music\" and \"record\" categories (except Note Block sounds), as (almost) all the sounds that belong to those categories are over a minute long. Setting this to false allows many more instances of the sound to be ran at the same time while setting it to true only allows 4 instances (of that type) to be ran at the same time.\nDefault is false",
+                "type": "boolean",
+                "default": false
+              },
+              "attenuation_distance": {
+                "description": "Modify sound reduction rate based on distance. Used by portals, beacons, and conduits.\nDefault is 16",
+                "type": "integer",
+                "default": 16
+              },
+              "preload": {
+                "description": "True if this sound should be loaded when loading the pack instead of when the sound is played. Used by the underwater ambience.\nDefault is false",
+                "type": "boolean",
+                "default": false
+              },
+              "type": {
+                "description": "\"sound\" causes the value of \"name\" to be interpreted as the name of a file\n\"event\" causes the value of \"name\" to be interpreted as the name of an already defined event.\nDefault is \"sound\"",
+                "type": "string",
+                "default": "sound",
+                "enum": ["sound", "event"]
+              }
+            }
+          }
+        },
+        "items": {
+          "type": ["string", "object"],
+          "default": "",
+          "additionalItems": false
+        }
+      }
+    }
+  }
+}

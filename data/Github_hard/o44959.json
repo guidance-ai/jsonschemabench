@@ -1,0 +1,257 @@
+{
+    "id": "http://grycap.upv.es/radl/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "RADL JSON scheme",
+    "definitions": {
+        "aspect": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/configure"
+                },
+                {
+                    "$ref": "#/definitions/contextualize"
+                },
+                {
+                    "$ref": "#/definitions/deploy"
+                },
+                {
+                    "$ref": "#/definitions/cfeatures"
+                }
+            ]
+        },
+        "idString": {
+            "type": "string",
+            "pattern": "^[a-zA-Z._\\-][a-zA-Z0-9._\\-]*$"
+        },
+        "configure": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "type": "string",
+                    "pattern": "^configure$"
+                },
+                "id": {
+                    "$ref": "#/definitions/idString"
+                },
+                "recipe": {
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "class",
+                "id",
+                "recipe"
+            ]
+        },
+        "contextualize": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "type": "string",
+                    "pattern": "^contextualize$"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contextualizeItem"
+                    }
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "class"
+            ]
+        },
+        "contextualizeItem": {
+            "type": "object",
+            "properties": {
+                "system": {
+                    "$ref": "#/definitions/idString"
+                },
+                "configure": {
+                    "$ref": "#/definitions/idString"
+                },
+                "step": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "system",
+                "configure"
+            ]
+        },
+        "deploy": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "type": "string",
+                    "pattern": "^deploy$"
+                },
+                "system": {
+                    "$ref": "#/definitions/idString"
+                },
+                "vm_number": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "cloud_id": {
+                    "$ref": "#/definitions/idString"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "system",
+                "vm_number"
+            ]
+        },
+        "class": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "$ref": "#/definitions/idString"
+                },
+                "id": {
+                    "$ref": "#/definitions/idString"
+                }
+            },
+            "required": [
+                "class",
+                "id"
+            ]
+        },
+        "reference": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "$ref": "#/definitions/idString"
+                },
+                "id": {
+                    "$ref": "#/definitions/idString"
+                },
+                "reference": {
+                    "type": "boolean",
+                    "enum": [
+                        true
+                    ]
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "class",
+                "id",
+                "reference"
+            ]
+        },
+        "cfeatures": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/reference"
+                },
+                {
+                    "$ref": "#/definitions/cfeaturesNoReference"
+                }
+            ]
+        },
+        "cfeaturesNoReference": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/class"
+                },
+                {
+                    "$ref": "#/definitions/features"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "softs": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/softFeatures"
+                            }
+                        },
+                        "reference": {
+                            "type": "boolean",
+                            "enum": [
+                                false
+                            ]
+                        }
+                    }
+                }
+            ],
+            "not": {
+                "$ref": "#/definitions/configure"
+            }
+        },
+        "features": {
+            "type": "object",
+            "patternProperties": {
+                "^[a-zA-Z._\\-][a-zA-Z0-9._\\-]*$": {
+                    "oneOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "$ref": "#/definitions/features"
+                        },
+                        {
+                            "$ref": "#/definitions/reference"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/features"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/reference"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "softFeatures": {
+            "type": "object",
+            "properties": {
+                "weight": {
+                    "type": "number",
+                    "default": 0
+                },
+                "items": {
+                    "$ref": "#/definitions/features"
+                }
+            }
+        }
+    },
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/aspect"
+    },
+    "minItems": 1
+}

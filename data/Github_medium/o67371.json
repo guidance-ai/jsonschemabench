@@ -1,0 +1,155 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "definitions": {
+        "entry": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "definitions": {
+                "diskDevice": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "device": {
+                            "pattern": "^/dev/[^/]+(/[^/]+)*$",
+                            "type": "string"
+                        },
+                        "type": {
+                            "enum": [
+                                "disk"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "device"
+                    ]
+                },
+                "diskUUID": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "label": {
+                            "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                            "type": "string"
+                        },
+                        "type": {
+                            "enum": [
+                                "disk"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "label"
+                    ]
+                },
+                "nfs": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "remotePath": {
+                            "pattern": "^(/[^/]+)+$",
+                            "type": "string"
+                        },
+                        "server": {
+                            "anyOf": [
+                                {
+                                    "format": "host-name"
+                                },
+                                {
+                                    "format": "ipv4"
+                                },
+                                {
+                                    "format": "ipv6"
+                                }
+                            ],
+                            "type": "string"
+                        },
+                        "type": {
+                            "enum": [
+                                "nfs"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "server",
+                        "remotePath"
+                    ]
+                },
+                "tmpfs": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "sizeInMB": {
+                            "maximum": 512,
+                            "minimum": 16,
+                            "type": "integer"
+                        },
+                        "type": {
+                            "enum": [
+                                "tmpfs"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "sizeInMB"
+                    ]
+                }
+            },
+            "description": "schema for an fstab entry",
+            "properties": {
+                "fstype": {
+                    "enum": [
+                        "ext3",
+                        "ext4",
+                        "btrfs"
+                    ]
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array",
+                    "_uniqueItems": true
+                },
+                "readonly": {
+                    "type": "boolean"
+                },
+                "storage": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/entry/definitions/diskDevice"
+                        },
+                        {
+                            "$ref": "#/definitions/entry/definitions/diskUUID"
+                        },
+                        {
+                            "$ref": "#/definitions/entry/definitions/nfs"
+                        },
+                        {
+                            "$ref": "#/definitions/entry/definitions/tmpfs"
+                        }
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "storage"
+            ],
+            "type": "object"
+        }
+    },
+    "patternProperties": {
+        "^(/[^/]+)+$": {
+            "$ref": "#/definitions/entry"
+        }
+    },
+    "properties": {
+        "/": {
+            "$ref": "#/definitions/entry"
+        }
+    },
+    "required": [
+        "/"
+    ],
+    "type": "object"
+}

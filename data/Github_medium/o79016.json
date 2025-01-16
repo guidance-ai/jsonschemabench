@@ -1,0 +1,120 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "AMQP 0-9-1 Channel Binding Object",
+    "description": "This object contains information about the channel representation in AMQP.\nSee https://github.com/asyncapi/bindings/tree/master/amqp#channel-binding-object.",
+    "type": "object",
+    "properties": {
+        "is": {
+            "description": "Defines what type of channel is it. Can be either `queue` or `routingKey` (default).",
+            "type": "string",
+            "enum": [
+                "routingKey",
+                "queue"
+            ],
+            "default": "routingKey"
+        },
+        "exchange": {
+            "$ref": "#/definitions/exchange"
+        },
+        "queue": {
+            "$ref": "#/definitions/queue"
+        },
+        "bindingVersion": {
+            "description": "The version of this binding. If omitted, \"latest\" MUST be assumed.",
+            "type": "string",
+            "enum": [
+                "0.1.0",
+                "latest"
+            ]
+        }
+    },
+    "allOf": [
+        {
+            "description": "Queue and exchange are mutually exclusive.",
+            "not": {
+                "required": [
+                    "queue",
+                    "exchange"
+                ]
+            }
+        }
+    ],
+    "oneOf": [
+        {
+            "properties": {
+                "is": {
+                    "const": "queue"
+                }
+            },
+            "required": [
+                "queue"
+            ]
+        },
+        {
+            "properties": {
+                "is": {
+                    "const": "routingKey"
+                }
+            },
+            "required": [
+                "exchange"
+            ]
+        }
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "exchange": {
+            "description": "When `is`=`routingKey`, this object defines the exchange properties.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The name of the exchange. It MUST NOT exceed 255 characters long.",
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "type": {
+                    "description": "The type of the exchange. Can be either `topic`, `direct`, `fanout`, `default` or `headers`.",
+                    "type": "string",
+                    "enum": [
+                        "topic",
+                        "direct",
+                        "fanout",
+                        "default",
+                        "headers"
+                    ]
+                },
+                "durable": {
+                    "description": "Whether the exchange should survive broker restarts or not.",
+                    "type": "boolean"
+                },
+                "autoDelete": {
+                    "description": "Whether the exchange should be deleted when the last queue is unbound from it.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "queue": {
+            "description": "When `is`=`queue`, this object defines the queue properties.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The name of the queue. It MUST NOT exceed 255 characters long.",
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "durable": {
+                    "description": "Whether the queue should survive broker restarts or not.",
+                    "type": "boolean"
+                },
+                "exclusive": {
+                    "description": "Whether the queue should be used only by one connection or not.",
+                    "type": "boolean"
+                },
+                "autoDelete": {
+                    "description": "Whether the queue should be deleted when the last consumer unsubscribes.",
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}

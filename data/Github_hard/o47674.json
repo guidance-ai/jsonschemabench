@@ -1,0 +1,280 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "DS2PlusPlus Schema",
+    "type": "object",
+    "definitions": {
+        "uuid": {
+            "type": "string",
+            "pattern": "^([0-9A-Z]{8})-([0-9A-Z]{4})-([0-9A-Z]{4})-([0-9A-Z]{4})-([0-9A-Z]{12})$"
+        },
+        "result_type": {
+            "enum": [
+                "string",
+                "6bit-string",
+                "hex_string",
+                "boolean",
+                "byte",
+                "signed_byte",
+                "short",
+                "signed_short",
+                "short_vin"
+            ]
+        },
+        "display_type": {
+            "enum": [
+                "string",
+                "raw",
+                "float",
+                "int",
+                "hex_string",
+                "hex_int",
+                "enum"
+            ]
+        },
+        "ecu_result": {
+            "type": "object",
+            "properties": {
+                "uuid": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "parent_id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "type": {
+                    "$ref": "#/definitions/result_type"
+                },
+                "display": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/display_type"
+                        },
+                        {
+                            "type": "string",
+                            "pattern": "^string_table\\:(([0-9A-Z]{8})-([0-9A-Z]{4})-([0-9A-Z]{4})-([0-9A-Z]{4})-([0-9A-Z]{12}))$"
+                        }
+                    ]
+                },
+                "start_pos": {
+                    "type": "integer"
+                },
+                "length": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "mask": {
+                    "type": "string"
+                },
+                "levels": {
+                    "type": "object"
+                },
+                "rpn": {
+                    "type": "string"
+                },
+                "units": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "uuid"
+            ],
+            "anyOf": [
+                {
+                    "required": [
+                        "parent_id"
+                    ]
+                },
+                {
+                    "required": [
+                        "type",
+                        "display",
+                        "start_pos",
+                        "length",
+                        "units"
+                    ]
+                }
+            ],
+            "additionalProperties": false
+        },
+        "ecu_operation": {
+            "type": "object",
+            "properties": {
+                "uuid": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "parent_id": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "command": {
+                    "type": "array"
+                },
+                "results": {
+                    "patternProperties": {
+                        "[a-z_0-9\\.\\-]*": {
+                            "$ref": "#/definitions/ecu_result"
+                        }
+                    }
+                }
+            },
+            "required": [
+                "uuid"
+            ],
+            "anyOf": [
+                {
+                    "required": [
+                        "parent_id"
+                    ]
+                },
+                {
+                    "required": [
+                        "command",
+                        "results"
+                    ]
+                }
+            ],
+            "additionalProperties": false
+        },
+        "ecu": {
+            "type": "object",
+            "properties": {
+                "dpp_version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1
+                },
+                "file_version": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "file_mtime": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.0Z$"
+                },
+                "file_type": {
+                    "type": "string",
+                    "pattern": "^ecu$"
+                },
+                "uuid": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "family": {
+                    "type": "string"
+                },
+                "hardware_number": {
+                    "type": "string"
+                },
+                "software_number": {
+                    "type": "string"
+                },
+                "part_number": {
+                    "type": "integer"
+                },
+                "coding_index": {
+                    "type": "string"
+                },
+                "endian": {
+                    "enum": [
+                        "big",
+                        "little"
+                    ]
+                },
+                "parent_id": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "operations": {
+                    "patternProperties": {
+                        "[a-z_0-9\\.\\-]*": {
+                            "$ref": "#/definitions/ecu_operation"
+                        }
+                    }
+                }
+            },
+            "additionalProperties": false,
+            "anyOf": [
+                {
+                    "properties": {
+                        "parent_id": {
+                            "type": "null"
+                        }
+                    },
+                    "required": [
+                        "parent_id"
+                    ]
+                },
+                {
+                    "properties": {
+                        "parent_id": {
+                            "$ref": "#/definitions/uuid"
+                        }
+                    },
+                    "required": [
+                        "address",
+                        "family",
+                        "parent_id",
+                        "part_number",
+                        "coding_index",
+                        "hardware_number",
+                        "software_number",
+                        "endian"
+                    ]
+                }
+            ]
+        },
+        "string_table": {
+            "properties": {
+                "dpp_version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1
+                },
+                "file_version": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "file_mtime": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.0Z$"
+                },
+                "file_type": {
+                    "type": "string",
+                    "pattern": "^string_table$"
+                },
+                "uuid": {
+                    "$ref": "#/definitions/uuid"
+                },
+                "table_name": {
+                    "type": "string"
+                },
+                "strings": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "dpp_version",
+                "file_version",
+                "file_mtime",
+                "file_type",
+                "uuid",
+                "strings",
+                "table_name"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "oneOf": [
+        {
+            "$ref": "#/definitions/ecu"
+        },
+        {
+            "$ref": "#/definitions/string_table"
+        }
+    ]
+}

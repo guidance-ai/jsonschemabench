@@ -1,0 +1,467 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Speriment Schema",
+    "definitions": {
+        "id": {
+            "description": "Unique identifier for a component of the experiment.",
+            "type": "string"
+        },
+        "text": {
+            "description": "The text to display for a component of the experiment. Can also be a sampler.",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "$ref": "#/definitions/sampler"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "$ref": "#/definitions/sampler"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "feedback": {
+            "description": "The feedback to display after this page/if this option is chosen. Can also be a sampler.",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "$ref": "#/definitions/sampler"
+                },
+                {
+                    "$ref": "#/definitions/page"
+                }
+            ]
+        },
+        "correct": {
+            "description": "Either whether this option is correct, or a regular expression that any correct response will match.",
+            "type": [
+                "string",
+                "boolean"
+            ]
+        },
+        "tag": {
+            "description": "A descriptor for a page or option that is not acted upon, but passed into the record of the experiment for purposes of analysis.",
+            "type": "string"
+        },
+        "resource": {
+            "description": "Object with fields describing an image, audio, or video file and how it should behave.",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "source": {
+                            "type": "string"
+                        },
+                        "mediaType": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "autoplay": {
+                            "type": "boolean"
+                        },
+                        "controls": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "source"
+                    ]
+                },
+                {
+                    "type": "string"
+                },
+                {
+                    "$ref": "#/definitions/sampler"
+                }
+            ]
+        },
+        "resources": {
+            "description": "Array of filenames of images, audio, or video to be displayed on the page.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/resource"
+            }
+        },
+        "sampler": {
+            "description": "An object that occurs in place of a string as a property of a page or option, indicating that the property should be sampled from a bank.",
+            "type": "object",
+            "properties": {
+                "sampleFrom": {
+                    "description": "Name of the bank to sample the property from.",
+                    "type": "string"
+                },
+                "variable": {
+                    "type": "number"
+                },
+                "notVariable": {
+                    "type": "number"
+                },
+                "field": {
+                    "type": "string"
+                },
+                "withReplacement": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "sampleFrom"
+            ],
+            "additionalProperties": false
+        },
+        "bank": {
+            "description": "A list of pieces of information to be used as page or option properties.",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "description": "A piece of information to be used as a page or option property.",
+                        "type": "string"
+                    },
+                    {
+                        "description": "An object containing related pieces of information, each to be used as a page or option property.",
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "banks": {
+            "description": "A mapping from bank names to arrays of data.",
+            "type": "object",
+            "properties": {
+                "additionalProperties": {
+                    "description": "Banks can contain any number of members with any unique strings as keys. But they must always have arrays of strings as values.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/bank"
+                    }
+                }
+            }
+        },
+        "exchangeable": {
+            "description": "IDs of blocks that can swap positions with each other. For instance, if I have blocks 1, 2, and 3 and blocks 1 and 3 are exchangeable, the possible orders are 1, 2, 3 and 3, 2, 1.",
+            "type": "array",
+            "items": {
+                "description": "Block ID",
+                "type": "string"
+            }
+        },
+        "counterbalance": {
+            "description": "IDs of blocks that can swap positions with each other. For instance, if I have blocks 1, 2, and 3 and blocks 1 and 3 are counterbalance blocks, the possible orders are 1, 2, 3 and 3, 2, 1.",
+            "type": "array",
+            "items": {
+                "description": "Block ID",
+                "type": "string"
+            }
+        },
+        "pseudorandom": {
+            "description": "",
+            "type": "string"
+        },
+        "pageID": {
+            "description": "",
+            "type": "string"
+        },
+        "runIf": {
+            "description": "",
+            "type": "object",
+            "oneOf": [
+                {
+                    "properties": {
+                        "pageID": {
+                            "$ref": "#/definitions/pageID"
+                        },
+                        "optionID": {
+                            "description": "",
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "pageID"
+                    ]
+                },
+                {
+                    "properties": {
+                        "pageID": {
+                            "$ref": "#/definitions/pageID"
+                        },
+                        "regex": {
+                            "description": "",
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "pageID"
+                    ]
+                },
+                {
+                    "properties": {
+                        "permutation": {
+                            "type": "number"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "permutation"
+                    ]
+                }
+            ]
+        },
+        "criterion": {
+            "description": "",
+            "type": "number"
+        },
+        "option": {
+            "description": "Option for user response.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/id"
+                },
+                "text": {
+                    "$ref": "#/definitions/text"
+                },
+                "feedback": {
+                    "$ref": "#/definitions/feedback"
+                },
+                "correct": {
+                    "$ref": "#/definitions/correct"
+                },
+                "resources": {
+                    "$ref": "#/definitions/resources"
+                },
+                "tags": {
+                    "description": "Mapping of tag names to tags. Has no effect on the running of the experiment. Options needn't have the same tag names, but each tag name will form a column in the output.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "description": "Pieces of information the experimenter wants to associate with pages in the analysis.",
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "text"
+            ]
+        },
+        "page": {
+            "description": "A unit of the experiment to be showed at once, such as instructions or a question. The answer given for a page or its options will be shown separately.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/id"
+                },
+                "text": {
+                    "$ref": "#/definitions/text"
+                },
+                "feedback": {
+                    "$ref": "#/definitions/feedback"
+                },
+                "correct": {
+                    "$ref": "#/definitions/correct"
+                },
+                "resources": {
+                    "$ref": "#/definitions/resources"
+                },
+                "condition": {
+                    "description": "The experimental condition that this item belongs to. Used for constrained randomization, to keep items of the same condition from being adjacent.",
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "Mapping of tag names to tags. Has no effect on the running of the experiment. Pages needn't have the same tag names, but each tag name will form a column in the output.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "description": "Pieces of information the experimenter wants to associate with pages in the analysis.",
+                        "type": "string"
+                    }
+                },
+                "ordered": {
+                    "description": "Are the options for this question ordered? Used to decide how to randomize the order of the options. Defaults to false.",
+                    "type": "boolean"
+                },
+                "exclusive": {
+                    "description": "Can only one of these options be chosen? Defaults to true.",
+                    "type": "boolean"
+                },
+                "freetext": {
+                    "description": "Does this question have a text box option, as opposed to discrete choices? Defaults to false.",
+                    "type": "boolean"
+                },
+                "keyboard": {
+                    "description": "Whether and how to use keybindings to choose options.",
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "text"
+            ]
+        },
+        "block": {
+            "description": "A grouping of blocks, pages, or groups of pages. Blocks appear in the order in which they're defined, except that exchangeable blocks within the same container can swap places with each other.",
+            "type": "object",
+            "oneOf": [
+                {
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "pages": {
+                            "description": "",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/page"
+                            }
+                        },
+                        "pseudorandom": {
+                            "$ref": "#/definitions/pseudorandom"
+                        },
+                        "runIf": {
+                            "$ref": "#/definitions/runIf"
+                        },
+                        "criterion": {
+                            "$ref": "#/definitions/criterion"
+                        },
+                        "banks": {
+                            "$ref": "#/definitions/banks"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "id",
+                        "pages"
+                    ]
+                },
+                {
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "groups": {
+                            "description": "",
+                            "type": "array",
+                            "items": {
+                                "description": "",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/page"
+                                }
+                            }
+                        },
+                        "latinSquare": {
+                            "description": "",
+                            "type": "boolean"
+                        },
+                        "pseudorandom": {
+                            "$ref": "#/definitions/pseudorandom"
+                        },
+                        "runIf": {
+                            "$ref": "#/definitions/runIf"
+                        },
+                        "criterion": {
+                            "$ref": "#/definitions/criterion"
+                        },
+                        "banks": {
+                            "$ref": "#/definitions/banks"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "id",
+                        "groups"
+                    ]
+                },
+                {
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/id"
+                        },
+                        "blocks": {
+                            "description": "",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/block"
+                            }
+                        },
+                        "exchangeable": {
+                            "$ref": "#/definitions/exchangeable"
+                        },
+                        "counterbalance": {
+                            "$ref": "#/definitions/counterbalance"
+                        },
+                        "runIf": {
+                            "$ref": "#/definitions/runIf"
+                        },
+                        "criterion": {
+                            "$ref": "#/definitions/criterion"
+                        },
+                        "banks": {
+                            "$ref": "#/definitions/banks"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "id",
+                        "blocks"
+                    ]
+                }
+            ]
+        }
+    },
+    "properties": {
+        "breakoff": {
+            "description": "Does the experiment allow people to quit early and submit incomplete data?",
+            "type": "boolean"
+        },
+        "exchangeable": {
+            "$ref": "#/definitions/exchangeable"
+        },
+        "counterbalance": {
+            "$ref": "#/definitions/counterbalance"
+        },
+        "banks": {
+            "$ref": "#/definitions/banks"
+        },
+        "blocks": {
+            "description": "Experiments are made up of blocks. Blocks are made up of either smaller blocks, or pages. Blocks are run in the order in which you specify them, unless they're exchangeable.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/block"
+            }
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "blocks"
+    ]
+}

@@ -1,0 +1,3422 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Configuring-your-actions",
+  "definitions": {
+    "commonTypes": {
+      "description": "Some of the reusable base types",
+      "definitions": {
+        "charSet": {
+          "description": "Standard character sets.",
+          "type": "string",
+          "enum": [
+            "ISO-8859-1",
+            "US-ASCII",
+            "UTF-16",
+            "UTF-16BE",
+            "UTF-16LE",
+            "UTF-8"
+          ],
+          "additionalItems": false
+        },
+        "chronoUnit": {
+          "description": "The chrono unit we want to use.",
+          "type": "string",
+          "enum": [
+            "NANOS",
+            "MICROS",
+            "MILLIS",
+            "SECONDS",
+            "MINUTES",
+            "HOURS",
+            "HALF_DAYS",
+            "DAYS",
+            "WEEKS",
+            "MONTHS",
+            "YEARS",
+            "DECADES",
+            "CENTURIES",
+            "MILLENNIA",
+            "ERAS",
+            "FOREVER"
+          ],
+          "additionalItems": false
+        },
+        "httpHeaders": {
+          "type": "object",
+          "description": "HTTP header map.",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "httpMethod": {
+          "description": "Supported HTTP methods.",
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST"
+          ],
+          "additionalItems": false
+        },
+        "jsonPath": {
+          "$comment": "https://github.com/json-path/JsonPath",
+          "description": "A JSON Path selecting one or more nodes of the parsed JSON document.",
+          "type": "string",
+          "pattern": "^[$@](((\\.|\\.\\.)([$_a-zA-Z]+[$a-zA-Z0-9\\-_]*|\\*))|\\[\\*]|\\[[0-9]+((, [0-9]+)*|:[0-9]+)]|\\['[$_a-zA-Z]+[$a-zA-Z0-9\\-_]*'(, '[$_a-zA-Z]+[$a-zA-Z0-9\\-_]*')*]|\\[\\?\\(.+\\)])*$"
+        },
+        "name": {
+          "description": "A single JSON key name",
+          "type": "string",
+          "pattern": "^[$_a-zA-Z]+[$a-zA-Z0-9\\-_]*$"
+        }
+      }
+    },
+    "functionTypes": {
+      "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions",
+      "description": "Definition of known function types",
+      "definitions": {
+        "functionAbsoluteValue": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#absolute-value-function",
+          "description": "Absolute value function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "absoluteValue",
+              "description": "The name of the component."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "functionAdd": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#decimal-add-function",
+          "description": "Decimal add function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "add",
+              "description": "The name of the component."
+            },
+            "operand": {
+              "type": "number",
+              "description": "Second operand of the calculation."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "operand",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "functionChangeCase": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#change-case",
+          "description": "Change case",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "changeCase",
+              "description": "The name of the component."
+            },
+            "to": {
+              "description": "Defines what is the desired case change operation we want to do.",
+              "type": "string",
+              "enum": [
+                "CAPITALIZED",
+                "UNCAPITALIZED",
+                "LOWER_CASE",
+                "UPPER_CASE"
+              ],
+              "additionalItems": false
+            }
+          },
+          "required": [
+            "name",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        "functionCloneKey": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#clone-key-function",
+          "description": "Clone key function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "cloneKey",
+              "description": "The name of the component."
+            },
+            "from": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/name"
+                },
+                {
+                  "description": "The name of the key we need to duplicate."
+                }
+              ]
+            },
+            "to": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/name"
+                },
+                {
+                  "description": "The name of the destination key."
+                }
+              ]
+            }
+          },
+          "required": [
+            "from",
+            "name",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        "functionDivide": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#decimal-divide-function",
+          "description": "Decimal divide function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "divide",
+              "description": "The name of the component."
+            },
+            "operand": {
+              "type": "number",
+              "description": "Second operand of the calculation."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "operand",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "functionDividend": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#decimal-dividend-function",
+          "description": "Decimal dividend function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "dividend",
+              "description": "The name of the component."
+            },
+            "operand": {
+              "type": "number",
+              "description": "First operand of the calculation."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "operand",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "functionEpochMillisDateAdd": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#epoch-millis-date-add-function",
+          "description": "Epoch millis date add function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "epochMillisDateAdd",
+              "description": "The name of the component."
+            },
+            "amount": {
+              "type": "integer",
+              "description": "The amount of time units we need to add to the date time."
+            },
+            "unit": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/chronoUnit"
+                },
+                {
+                  "description": "The time unit we want to use to interpret the amount."
+                }
+              ]
+            }
+          },
+          "required": [
+            "amount",
+            "name",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "functionHttpResource": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#http-resource-content-map-function",
+          "description": "HTTP resource content map function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "httpResource",
+              "description": "The name of the component."
+            },
+            "uriFunction": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/functionTypes/definitions/stringObjectMapToStringFunctionType"
+                },
+                {
+                  "description": "The function that is calculating the request URI based on the input map."
+                }
+              ]
+            },
+            "methodFunction": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/functionTypes/definitions/stringObjectMapToStringFunctionType"
+                },
+                {
+                  "description": "The function that is calculating the request method based on the input map."
+                }
+              ]
+            },
+            "headerFunction": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/functionTypes/definitions/anyFunctionType"
+                },
+                {
+                  "description": "The function that is calculating the request headers based on the input map."
+                }
+              ]
+            },
+            "uri": {
+              "type": "string",
+              "description": "The default request URI as a fallback."
+            },
+            "httpMethod": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/httpMethod"
+                },
+                {
+                  "description": "The default request method as a fallback. Defaults to GET."
+                }
+              ]
+            },
+            "httpHeaders": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/httpHeaders"
+                },
+                {
+                  "description": "The default request headers as a fallback."
+                }
+              ]
+            },
+            "charset": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/charSet"
+                },
+                {
+                  "description": "The charset used to read the response. Defaults to UTF-8."
+                }
+              ]
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "minProperties": 2,
+          "additionalProperties": false
+        },
+        "functionHttpResourceByUri": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#http-resource-by-uri-function",
+          "description": "HTTP resource by URI function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "httpResourceByUri",
+              "description": "The name of the component."
+            },
+            "uriFunction": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/functionTypes/definitions/stringToStringFunctionType"
+                },
+                {
+                  "description": "The function that is calculating the request URI based on the input map."
+                }
+              ]
+            },
+            "uri": {
+              "type": "string",
+              "description": "The default request URI as a fallback."
+            },
+            "httpMethod": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/httpMethod"
+                },
+                {
+                  "description": "The default request method as a fallback. Defaults to GET."
+                }
+              ]
+            },
+            "httpHeaders": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/httpHeaders"
+                },
+                {
+                  "description": "The default request headers as a fallback."
+                }
+              ]
+            },
+            "charset": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/charSet"
+                },
+                {
+                  "description": "The charset used to read the response. Defaults to UTF-8."
+                }
+              ]
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "minProperties": 2,
+          "additionalProperties": false
+        },
+        "functionJsonParse": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#json-parse-function",
+          "description": "JSON parse function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "jsonParse",
+              "description": "The name of the component."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "functionMultiply": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#decimal-multiply-function",
+          "description": "Decimal multiply function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "multiply",
+              "description": "The name of the component."
+            },
+            "operand": {
+              "type": "number",
+              "description": "Second operand of the calculation."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "operand",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "functionRegex": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#regex-replace-function",
+          "description": "RegEx replace function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "regex",
+              "description": "The name of the component."
+            },
+            "pattern": {
+              "type": "string",
+              "description": "A regex pattern that will be matched against the input, capturing certain named groups for later use."
+            },
+            "replacement": {
+              "type": "string",
+              "description": "Defines how the captured groups should be used to piece together the output value using EL-like syntax."
+            }
+          },
+          "required": [
+            "name",
+            "pattern",
+            "replacement"
+          ],
+          "additionalProperties": false
+        },
+        "functionReplace": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#literal-replace-function",
+          "description": "Literal replace function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "replace",
+              "description": "The name of the component."
+            },
+            "find": {
+              "type": "string",
+              "description": "A literal we need to find in the input String."
+            },
+            "replace": {
+              "type": "string",
+              "description": "The replacement we need to use."
+            }
+          },
+          "required": [
+            "find",
+            "name",
+            "replace"
+          ],
+          "additionalProperties": false
+        },
+        "functionRoundDecimal": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#round-decimal-function",
+          "description": "Round decimal function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "roundDecimal",
+              "description": "The name of the component."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "functionStringDateAdd": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#string-date-add-function",
+          "description": "String date add function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "stringDateAdd",
+              "description": "The name of the component."
+            },
+            "formatter": {
+              "type": "string",
+              "description": "The format String we need to use for date time parsing. [See](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html)"
+            },
+            "amount": {
+              "type": "integer",
+              "description": "The amount of time units we need to add to the date time."
+            },
+            "unit": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/chronoUnit"
+                },
+                {
+                  "description": "The time unit we want to use to interpret the amount."
+                }
+              ]
+            }
+          },
+          "required": [
+            "amount",
+            "formatter",
+            "name",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "functionSubtract": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#decimal-subtract-function",
+          "description": "Decimal subtract function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "subtract",
+              "description": "The name of the component."
+            },
+            "operand": {
+              "type": "number",
+              "description": "Second operand of the calculation."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "operand",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "functionSubtractFrom": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-functions#decimal-subtract-from-function",
+          "description": "Decimal subtract from function",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "subtractFrom",
+              "description": "The name of the component."
+            },
+            "operand": {
+              "type": "number",
+              "description": "First operand of the calculation."
+            },
+            "scale": {
+              "type": "integer",
+              "description": "The number of digits we want to keep right of the decimal point."
+            }
+          },
+          "required": [
+            "name",
+            "operand",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "stringToObjectFunctionType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "changeCase",
+                    "httpResourceByUri",
+                    "jsonParse",
+                    "regex",
+                    "replace",
+                    "stringDateAdd"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "changeCase"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionChangeCase"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "httpResourceByUri"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionHttpResourceByUri"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "jsonParse"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionJsonParse"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "regex"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionRegex"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "replace"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionReplace"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "stringDateAdd"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionStringDateAdd"
+              }
+            }
+          ]
+        },
+        "stringToStringFunctionType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "changeCase",
+                    "httpResourceByUri",
+                    "regex",
+                    "replace",
+                    "stringDateAdd"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "changeCase"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionChangeCase"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "httpResourceByUri"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionHttpResourceByUri"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "regex"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionRegex"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "replace"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionReplace"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "stringDateAdd"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionStringDateAdd"
+              }
+            }
+          ]
+        },
+        "bigDecimalToBigDecimalFunctionType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "absoluteValue",
+                    "add",
+                    "divide",
+                    "dividend",
+                    "epochMillisDateAdd",
+                    "multiply",
+                    "roundDecimal",
+                    "subtract",
+                    "subtractFrom"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "absoluteValue"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionAbsoluteValue"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "add"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionAdd"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "divide"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionDivide"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "dividend"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionDividend"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "epochMillisDateAdd"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionEpochMillisDateAdd"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "multiply"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionMultiply"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "roundDecimal"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionRoundDecimal"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "subtract"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionSubtract"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "subtractFrom"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionSubtractFrom"
+              }
+            }
+          ]
+        },
+        "stringObjectMapToStringObjectMapFunctionType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "cloneKey"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "cloneKey"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionCloneKey"
+              }
+            }
+          ]
+        },
+        "stringObjectMapToStringFunctionType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "httpResource"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "httpResource"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionHttpResource"
+              }
+            }
+          ]
+        },
+        "anyFunctionType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "absoluteValue",
+                    "add",
+                    "changeCase",
+                    "cloneKey",
+                    "divide",
+                    "dividend",
+                    "epochMillisDateAdd",
+                    "httpResource",
+                    "httpResourceByUri",
+                    "jsonParse",
+                    "multiply",
+                    "regex",
+                    "replace",
+                    "roundDecimal",
+                    "stringDateAdd",
+                    "subtract",
+                    "subtractFrom"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "absoluteValue"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionAbsoluteValue"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "add"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionAdd"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "changeCase"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionChangeCase"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "cloneKey"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionCloneKey"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "divide"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionDivide"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "dividend"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionDividend"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "epochMillisDateAdd"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionEpochMillisDateAdd"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "httpResource"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionHttpResource"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "httpResourceByUri"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionHttpResourceByUri"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "jsonParse"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionJsonParse"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "multiply"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionMultiply"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "regex"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionRegex"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "replace"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionReplace"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "roundDecimal"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionRoundDecimal"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "stringDateAdd"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionStringDateAdd"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "subtract"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionSubtract"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "subtractFrom"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/functionTypes/definitions/functionSubtractFrom"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "predicateTypes": {
+      "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates",
+      "description": "Definition of known predicate types",
+      "definitions": {
+        "predicateAllMatch": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#all-match-predicate",
+          "description": "All Match predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "allMatch",
+              "description": "The name of the component."
+            },
+            "from": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+              },
+              "minItems": 1,
+              "additionalItems": false
+            }
+          },
+          "required": [
+            "from",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "predicateAnyMatch": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#any-match-predicate",
+          "description": "Any Match predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "anyMatch",
+              "description": "The name of the component."
+            },
+            "from": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+              },
+              "minItems": 1,
+              "additionalItems": false
+            }
+          },
+          "required": [
+            "from",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "predicateAnyString": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#any-string-predicate",
+          "description": "Any String predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "anyString",
+              "description": "The name of the component."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "predicateContainsKey": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#contains-key-predicate",
+          "description": "Contains key predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "containsKey",
+              "description": "The name of the component."
+            },
+            "key": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/name"
+                },
+                {
+                  "description": "The name of the key we want to check."
+                }
+              ]
+            }
+          },
+          "required": [
+            "key",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "predicateEvalOn": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#eval-on-predicate",
+          "description": "Eval on predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "evalOn",
+              "description": "The name of the component."
+            },
+            "childPath": {
+              "description": "The desired navigation we want to perform relative to the Map/Object we operate on.",
+              "type": "string",
+              "pattern": "^([$_a-zA-Z]+[$a-zA-Z0-9\\-_]+)(.[$_a-zA-Z]+[$a-zA-Z0-9\\-_]+)*$"
+            },
+            "predicate": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                },
+                {
+                  "description": "The Predicate we need to evaluate after the navigation is done."
+                }
+              ]
+            }
+          },
+          "required": [
+            "childPath",
+            "name",
+            "predicate"
+          ],
+          "additionalProperties": false
+        },
+        "predicateIsNull": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#is-null-predicate",
+          "description": "Is null predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "isNull",
+              "description": "The name of the component."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "predicateNoneMatch": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#none-match-predicate",
+          "description": "None Match predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "noneMatch",
+              "description": "The name of the component."
+            },
+            "from": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+              },
+              "minItems": 1,
+              "additionalItems": false
+            }
+          },
+          "required": [
+            "from",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "predicateNotNull": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#not-null-predicate",
+          "description": "Not null predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "notNull",
+              "description": "The name of the component."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "predicateRegex": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#regex-predicate",
+          "description": "RegEx predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "regex",
+              "description": "The name of the component."
+            },
+            "pattern": {
+              "type": "string",
+              "description": "The regular expression we want to match."
+            }
+          },
+          "required": [
+            "name",
+            "pattern"
+          ],
+          "additionalProperties": false
+        },
+        "predicateSpEL": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-predicates#spel-predicate",
+          "description": "SpEL predicate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "SpEL",
+              "description": "The name of the component."
+            },
+            "expression": {
+              "type": "string",
+              "description": "The SpEL expression we want to match."
+            }
+          },
+          "required": [
+            "expression",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "stringPredicateType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "SpEL",
+                    "allMatch",
+                    "anyMatch",
+                    "anyString",
+                    "isNull",
+                    "noneMatch",
+                    "notNull",
+                    "regex"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "anyString"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAnyString"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "regex"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateRegex"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "allMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAllMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "anyMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAnyMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "isNull"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateIsNull"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "noneMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateNoneMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "notNull"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateNotNull"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "SpEL"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateSpEL"
+              }
+            }
+          ]
+        },
+        "stringObjectMapPredicateType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "SpEL",
+                    "allMatch",
+                    "anyMatch",
+                    "containsKey",
+                    "evalOn",
+                    "isNull",
+                    "noneMatch",
+                    "notNull"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "containsKey"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateContainsKey"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "evalOn"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateEvalOn"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "allMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAllMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "anyMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAnyMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "isNull"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateIsNull"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "noneMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateNoneMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "notNull"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateNotNull"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "SpEL"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateSpEL"
+              }
+            }
+          ]
+        },
+        "anyPredicateType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "SpEL",
+                    "allMatch",
+                    "anyMatch",
+                    "anyString",
+                    "containsKey",
+                    "evalOn",
+                    "isNull",
+                    "noneMatch",
+                    "notNull",
+                    "regex"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "allMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAllMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "anyMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAnyMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "anyString"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateAnyString"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "containsKey"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateContainsKey"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "evalOn"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateEvalOn"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "isNull"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateIsNull"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "noneMatch"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateNoneMatch"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "notNull"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateNotNull"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "regex"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateRegex"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "SpEL"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/predicateTypes/definitions/predicateSpEL"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "supplierTypes": {
+      "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers",
+      "description": "Definition of known supplier types",
+      "definitions": {
+        "supplierConverting": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#converting-supplier",
+          "description": "Converting supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "converting",
+              "description": "The name of the component."
+            },
+            "stringSource": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                },
+                {
+                  "description": "The supplier of the raw String data we will use as input."
+                }
+              ]
+            },
+            "converter": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/functionTypes/definitions/stringToObjectFunctionType"
+                },
+                {
+                  "description": "The function that will convert the string data."
+                }
+              ]
+            }
+          },
+          "required": [
+            "converter",
+            "name",
+            "stringSource"
+          ],
+          "additionalProperties": false
+        },
+        "supplierEpochMillisRelativeDate": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#epoch-millis-relative-date-supplier",
+          "description": "Epoch Millis Relative Date supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "epochMillisRelativeDate",
+              "description": "The name of the component."
+            },
+            "amount": {
+              "type": "integer",
+              "description": "The amount of time units we need to add to the current date time."
+            },
+            "unit": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/chronoUnit"
+                },
+                {
+                  "description": "The time unit we want to use to interpret the amount."
+                }
+              ]
+            },
+            "relativeTo": {
+              "type": "integer",
+              "description": "The value we want to be relative to (in case it is not the current time)."
+            }
+          },
+          "required": [
+            "amount",
+            "name",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "supplierFile": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#file-content-supplier",
+          "description": "File content supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "file",
+              "description": "The name of the component."
+            },
+            "path": {
+              "type": "string",
+              "description": "The path of the file we want to use as input."
+            },
+            "charset": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/charSet"
+                },
+                {
+                  "description": "The charset used for reading the contents of the file. Defaults to UTF-8."
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "supplierHttpResource": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#http-resource-content-supplier",
+          "description": "HTTP resource content supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "httpResource",
+              "description": "The name of the component."
+            },
+            "uri": {
+              "type": "string",
+              "description": "The URI we want to send the request to."
+            },
+            "httpMethod": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/httpMethod"
+                },
+                {
+                  "description": "The HTTP request method we want to use. Defaults to GET."
+                }
+              ]
+            },
+            "httpHeaders": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/httpHeaders"
+                },
+                {
+                  "description": "HTTP headers we want to send with our request."
+                }
+              ]
+            },
+            "charset": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/charSet"
+                },
+                {
+                  "description": "The charset used for reading the contents of the response. Defaults to UTF-8."
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "uri"
+          ],
+          "additionalProperties": false
+        },
+        "supplierJsonSchema": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#json-schema-supplier",
+          "description": "JSON schema supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "jsonSchema",
+              "description": "The name of the component."
+            },
+            "source": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                },
+                {
+                  "description": "The supplier of the String of the JSON Schema which we will use as input."
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "supplierRelativeStringDate": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#relative-string-date-supplier",
+          "description": "Relative String Date supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "relativeStringDate",
+              "description": "The name of the component."
+            },
+            "formatter": {
+              "type": "string",
+              "description": "The format String we need to use for date time parsing. [See](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html)"
+            },
+            "amount": {
+              "type": "integer",
+              "description": "The amount of time units we need to add to the current date time."
+            },
+            "unit": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/commonTypes/definitions/chronoUnit"
+                },
+                {
+                  "description": "The time unit we want to use to interpret the amount."
+                }
+              ]
+            },
+            "relativeTo": {
+              "type": "string",
+              "description": "The value we want to be relative to (in case it is not the current time)."
+            }
+          },
+          "required": [
+            "amount",
+            "formatter",
+            "name",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "supplierSchemaStore": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#schemastore-schema-supplier",
+          "description": "SchemaStore schema supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "schemaStore",
+              "description": "The name of the component."
+            },
+            "schemaName": {
+              "type": "string",
+              "description": "The name of the JSON schema as found in the SchemaStore.org catalog."
+            }
+          },
+          "required": [
+            "name",
+            "schemaName"
+          ],
+          "additionalProperties": false
+        },
+        "supplierStaticBoolean": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#static-boolean-supplier",
+          "description": "Static Boolean supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "staticBoolean",
+              "description": "The name of the component."
+            },
+            "value": {
+              "type": "boolean",
+              "description": "The static value that must be returned each time the supplier is called."
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "supplierStaticDecimal": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#static-bigdecimal-supplier",
+          "description": "Static BigDecimal supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "staticDecimal",
+              "description": "The name of the component."
+            },
+            "value": {
+              "type": "number",
+              "description": "The static value that must be returned each time the supplier is called."
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "supplierStaticInteger": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#static-biginteger-supplier",
+          "description": "Static BigInteger supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "staticInteger",
+              "description": "The name of the component."
+            },
+            "value": {
+              "type": "integer",
+              "description": "The static value that must be returned each time the supplier is called."
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "supplierStaticJson": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#static-json-supplier",
+          "description": "Static JSON supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "staticJson",
+              "description": "The name of the component."
+            },
+            "value": {
+              "type": "string",
+              "description": "The static JSON value we want to supply every time our supplier is called."
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "supplierStaticString": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-suppliers#static-string-supplier",
+          "description": "Static String supplier",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "staticString",
+              "description": "The name of the component."
+            },
+            "value": {
+              "type": "string",
+              "description": "The static value that must be returned each time the supplier is called."
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "jsonSchemaSupplierType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "jsonSchema"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "jsonSchema"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierJsonSchema"
+              }
+            }
+          ]
+        },
+        "stringSupplierType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "file",
+                    "httpResource",
+                    "relativeStringDate",
+                    "schemaStore",
+                    "staticString"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "file"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierFile"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "httpResource"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierHttpResource"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "relativeStringDate"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierRelativeStringDate"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "schemaStore"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierSchemaStore"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "staticString"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierStaticString"
+              }
+            }
+          ]
+        },
+        "bigDecimalSupplierType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "staticDecimal"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "staticDecimal"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierStaticDecimal"
+              }
+            }
+          ]
+        },
+        "anySupplierType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "converting",
+                    "epochMillisRelativeDate",
+                    "file",
+                    "httpResource",
+                    "jsonSchema",
+                    "relativeStringDate",
+                    "schemaStore",
+                    "staticBoolean",
+                    "staticDecimal",
+                    "staticInteger",
+                    "staticJson",
+                    "staticString"
+                  ],
+                  "additionalItems": false
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "converting"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierConverting"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "epochMillisRelativeDate"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierEpochMillisRelativeDate"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "file"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierFile"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "httpResource"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierHttpResource"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "jsonSchema"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierJsonSchema"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "relativeStringDate"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierRelativeStringDate"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "schemaStore"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierSchemaStore"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "staticBoolean"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierStaticBoolean"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "staticDecimal"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierStaticDecimal"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "staticInteger"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierStaticInteger"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "staticJson"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierStaticJson"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "staticString"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/supplierTypes/definitions/supplierStaticString"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ruleTypes": {
+      "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules",
+      "description": "Definition of known rule types",
+      "definitions": {
+        "ruleAdd": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#add",
+          "description": "Add",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "add",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                    },
+                    {
+                      "description": "The supplier that will define the key of the new node."
+                    }
+                  ]
+                },
+                "value": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                    },
+                    {
+                      "description": "The supplier that will define the value assigned to the new node identified by the key."
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleCalculate": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#calculate",
+          "description": "Calculate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "calculate",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "predicate": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "The predicate that will determine whether we should apply the function."
+                    }
+                  ]
+                },
+                "numberFunction": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/functionTypes/definitions/bigDecimalToBigDecimalFunctionType"
+                    },
+                    {
+                      "description": "The function that will tell the rule what kind of calculation needs to be done."
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "numberFunction"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleCopy": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#copy",
+          "description": "Copy",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "copy",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                    },
+                    {
+                      "description": "The supplier that will define the key we want to copy."
+                    }
+                  ]
+                },
+                "to": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+                        },
+                        {
+                          "description": "The destination path where this rule will attempt to create the copied node."
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "value"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "key",
+                "to"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleDelete": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#delete",
+          "description": "Delete",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "delete",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            }
+          },
+          "required": [
+            "name",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleDeleteFrom": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#delete-from",
+          "description": "Delete from",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "deleteFrom",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "predicate": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "Determines whether any deletion should be performed for the matching node"
+                    }
+                  ]
+                },
+                "keepKey": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "The predicate that will be used to test whether a key should be kept, keeping only the matching keys."
+                    }
+                  ]
+                },
+                "deleteKey": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "The predicate that will be used to test whether a key should be deleted, deleting all the matching keys."
+                    }
+                  ]
+                },
+                "keepValue": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "The predicate that will be used to test whether a key should be kept, keeping only the matching keys."
+                    }
+                  ]
+                },
+                "deleteValue": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "The predicate that will be used to test whether an entry should be deleted, deleting all of them with matching values."
+                    }
+                  ]
+                }
+              },
+              "minProperties": 1,
+              "maxProperties": 5,
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleRename": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#rename",
+          "description": "Rename",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "rename",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "oldKey": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                    },
+                    {
+                      "description": "Provides the name of the key we want to rename under the node matching the `path` parameter at the time of evaluation."
+                    }
+                  ]
+                },
+                "newKey": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                    },
+                    {
+                      "description": "Provides the new name we want to use after the child node was renamed."
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "newKey",
+                "oldKey"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleReplace": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#replace",
+          "description": "Replace",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "replace",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "predicate": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "Adds an opportunity to filter by value before we apply the replace `stringFunction`."
+                    }
+                  ]
+                },
+                "stringFunction": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/functionTypes/definitions/stringToStringFunctionType"
+                    },
+                    {
+                      "description": "Defines how the existing value needs to change during the operation."
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "stringFunction"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleReplaceMap": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#replace-map",
+          "description": "Replace map",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "replaceMap",
+              "description": "The name of the component."
+            },
+            "path": {
+              "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "predicate": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/predicateTypes/definitions/anyPredicateType"
+                    },
+                    {
+                      "description": "The predicate that will determine whether we need to run the rule on the matching path."
+                    }
+                  ]
+                },
+                "mapFunction": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/functionTypes/definitions/stringObjectMapToStringObjectMapFunctionType"
+                    },
+                    {
+                      "description": "The function that defines the transformation which needs to be done on the selected map/object."
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "mapFunction"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "ruleValidate": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Built-in-rules#json-schema-validate",
+          "description": "JSON Schema validate",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "const": "validate",
+              "description": "The name of the component."
+            },
+            "path": {
+              "type": "string",
+              "const": "$",
+              "description": "Must be the root JSON Path as the validator cannot work on sub-schema."
+            },
+            "params": {
+              "description": "Additional parameters of the rule.",
+              "type": "object",
+              "properties": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/supplierTypes/definitions/anySupplierType"
+                    },
+                    {
+                      "description": "The supplier providing the schema we will use for validation."
+                    }
+                  ]
+                },
+                "onFailure": {
+                  "type": "object",
+                  "properties": {
+                    "transformation": {
+                      "description": "Defines how the transformation should handle a validation failure.",
+                      "type": "string",
+                      "enum": [
+                        "ABORT",
+                        "SKIP_REST",
+                        "CONTINUE"
+                      ],
+                      "additionalItems": false
+                    },
+                    "violation": {
+                      "description": "Defines how the rule should document/report the violations.",
+                      "type": "string",
+                      "enum": [
+                        "LOG_ONLY",
+                        "COMMENT_JSON",
+                        "IGNORE"
+                      ],
+                      "additionalItems": false
+                    }
+                  },
+                  "required": [
+                    "transformation",
+                    "violation"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "onFailure",
+                "schema"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "params",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "anyRuleType": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The name of the rule.",
+                  "type": "string",
+                  "enum": [
+                    "add",
+                    "calculate",
+                    "copy",
+                    "delete",
+                    "deleteFrom",
+                    "rename",
+                    "replace",
+                    "replaceMap",
+                    "validate"
+                  ],
+                  "additionalItems": false
+                },
+                "path": {
+                  "$ref": "#/definitions/commonTypes/definitions/jsonPath"
+                },
+                "params": {
+                  "type": "object",
+                  "description": "The optional parameter map to allow configuration of the selected rule."
+                }
+              },
+              "required": [
+                "name",
+                "path"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "add"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleAdd"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "calculate"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleCalculate"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "copy"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleCopy"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "delete"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleDelete"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "deleteFrom"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleDeleteFrom"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "rename"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleRename"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "replace"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleReplace"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "replaceMap"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleReplaceMap"
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "const": "validate"
+                  }
+                }
+              },
+              "then": {
+                "$ref": "#/definitions/ruleTypes/definitions/ruleValidate"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "actionTypes": {
+      "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Configuring-your-actions",
+      "definitions": {
+        "actionName": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/commonTypes/definitions/name"
+            },
+            {
+              "description": "The name of the action (rule list) to allow selecting it when we want to start transformation."
+            }
+          ]
+        },
+        "action": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/definitions/actionTypes/definitions/actionName"
+            },
+            "rules": {
+              "description": "The array of rules representing the sequentially triggered steps of the transformation action.",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ruleTypes/definitions/anyRuleType"
+              },
+              "minItems": 1,
+              "additionalItems": false
+            }
+          },
+          "required": [
+            "name",
+            "rules"
+          ],
+          "additionalProperties": false
+        },
+        "actions": {
+          "$comment": "https://github.com/nagyesta/yippee-ki-json/wiki/Configuring-your-actions",
+          "description": "The array of transformation action we will be able to select from at startup.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/actionTypes/definitions/action"
+          },
+          "minItems": 1,
+          "additionalItems": false
+        }
+      }
+    }
+  },
+  "properties": {
+    "actions": {
+      "$ref": "#/definitions/actionTypes/definitions/actions"
+    }
+  },
+  "required": [
+    "actions"
+  ],
+  "additionalProperties": false
+}

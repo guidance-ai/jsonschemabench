@@ -1,0 +1,789 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "definitions": {
+        "absolute_path": {
+            "description": "A path only. Query string and/or fragment are not allowed.",
+            "pattern": "^/(([a-zA-Z0-9._~!$&'()*+,;=:@-]|%[0-9a-fA-F]{2})+(/([a-zA-Z0-9._~!$&'()*+,;=:@-]|%[0-9a-fA-F]{2})*)*)?$",
+            "type": "string"
+        },
+        "analytics_identifier": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "description": "A short identifier we send to Google Analytics for multi-valued fields. This means we avoid the truncated values we would get if we sent the path or slug of eg organisations."
+        },
+        "body": {
+            "description": "The main content provided as HTML rendered from govspeak",
+            "type": "string"
+        },
+        "brexit_no_deal_notice": {
+            "description": "A list of URLs and titles for a brexit no deal notice.",
+            "items": {
+                "additionalProperties": false,
+                "properties": {
+                    "href": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "title",
+                    "href"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "change_history": {
+            "items": {
+                "additionalProperties": false,
+                "properties": {
+                    "note": {
+                        "description": "A summary of the change",
+                        "type": "string"
+                    },
+                    "public_timestamp": {
+                        "_format": "date-time",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "public_timestamp",
+                    "note"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "description": {
+            "type": "string"
+        },
+        "description_optional": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/description"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "details": {
+            "additionalProperties": false,
+            "properties": {
+                "archive_notice": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "archived_at": {
+                            "format": "date-time"
+                        },
+                        "explanation": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "body": {
+                    "$ref": "#/definitions/body"
+                },
+                "brexit_no_deal_notice": {
+                    "$ref": "#/definitions/brexit_no_deal_notice"
+                },
+                "change_history": {
+                    "$ref": "#/definitions/change_history"
+                },
+                "emphasised_organisations": {
+                    "$ref": "#/definitions/emphasised_organisations"
+                },
+                "first_public_at": {
+                    "$ref": "#/definitions/first_public_at"
+                },
+                "format_display_type": {
+                    "enum": [
+                        "case_study"
+                    ],
+                    "type": "string"
+                },
+                "image": {
+                    "$ref": "#/definitions/image"
+                },
+                "tags": {
+                    "$ref": "#/definitions/tags"
+                }
+            },
+            "required": [
+                "body"
+            ],
+            "type": "object"
+        },
+        "emphasised_organisations": {
+            "description": "The content ids of the organisations that should be displayed first in the list of organisations related to the item, these content ids must be present in the item organisation links hash.",
+            "items": {
+                "$ref": "#/definitions/guid"
+            },
+            "type": "array"
+        },
+        "first_public_at": {
+            "_format": "date-time",
+            "description": "DEPRECATED. The date the content was first published. Used in details. Deprecated in favour of top level `first_published_at`.",
+            "type": "string"
+        },
+        "first_published_at": {
+            "_format": "date-time",
+            "description": "The date the content was first published.  Automatically determined by the publishing-api, unless overridden by the publishing application.",
+            "type": "string"
+        },
+        "frontend_links": {
+            "items": {
+                "additionalProperties": true,
+                "properties": {
+                    "analytics_identifier": {
+                        "$ref": "#/definitions/analytics_identifier"
+                    },
+                    "api_path": {
+                        "$ref": "#/definitions/absolute_path"
+                    },
+                    "api_url": {
+                        "_format": "uri",
+                        "description": "DEPRECATED: api_path should be used instead of api_url. This is due to values of api_url being tied to an environment which can cause problems when data is synced between environments. In time this field will be removed by the Publishing Platform team.",
+                        "type": "string"
+                    },
+                    "base_path": {
+                        "$ref": "#/definitions/absolute_path"
+                    },
+                    "content_id": {
+                        "$ref": "#/definitions/guid"
+                    },
+                    "document_type": {
+                        "type": "string"
+                    },
+                    "links": {
+                        "patternProperties": {
+                            "^[a-z_]+$": {
+                                "$ref": "#/definitions/frontend_links"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "locale": {
+                        "$ref": "#/definitions/locale"
+                    },
+                    "public_updated_at": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/public_updated_at"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "schema_name": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "web_url": {
+                        "_format": "uri",
+                        "description": "DEPRECATED: base_path should be used instead of web_url. This is due to values of web_url being tied to an environment which can cause problems when data is synced between environments. In time this field will be removed by the Publishing Platform team.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "content_id",
+                    "locale",
+                    "title"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "frontend_links_with_base_path": {
+            "items": {
+                "additionalProperties": true,
+                "properties": {
+                    "analytics_identifier": {
+                        "$ref": "#/definitions/analytics_identifier"
+                    },
+                    "api_path": {
+                        "$ref": "#/definitions/absolute_path"
+                    },
+                    "api_url": {
+                        "_format": "uri",
+                        "description": "DEPRECATED: api_path should be used instead of api_url. This is due to values of api_url being tied to an environment which can cause problems when data is synced between environments. In time this field will be removed by the Publishing Platform team.",
+                        "type": "string"
+                    },
+                    "base_path": {
+                        "$ref": "#/definitions/absolute_path"
+                    },
+                    "content_id": {
+                        "$ref": "#/definitions/guid"
+                    },
+                    "document_type": {
+                        "type": "string"
+                    },
+                    "links": {
+                        "patternProperties": {
+                            "^[a-z_]+$": {
+                                "$ref": "#/definitions/frontend_links_with_base_path"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "locale": {
+                        "$ref": "#/definitions/locale"
+                    },
+                    "public_updated_at": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/public_updated_at"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "schema_name": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "web_url": {
+                        "_format": "uri",
+                        "description": "DEPRECATED: base_path should be used instead of web_url. This is due to values of web_url being tied to an environment which can cause problems when data is synced between environments. In time this field will be removed by the Publishing Platform team.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "base_path",
+                    "content_id",
+                    "locale",
+                    "title"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "guid": {
+            "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$",
+            "type": "string"
+        },
+        "image": {
+            "additionalProperties": false,
+            "properties": {
+                "alt_text": {
+                    "type": "string"
+                },
+                "caption": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "credit": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "high_resolution_url": {
+                    "_format": "uri",
+                    "description": "URL to a high resolution version of the image, for use by third parties such as Twitter, Facebook or Slack. Used by the machine readable metadata component. Don't use this on user-facing web pages, as it might be very large.",
+                    "type": "string"
+                },
+                "url": {
+                    "_format": "uri",
+                    "description": "URL to the image. The image should be in a suitable resolution for display on the page.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "url"
+            ],
+            "type": "object"
+        },
+        "locale": {
+            "enum": [
+                "ar",
+                "az",
+                "be",
+                "bg",
+                "bn",
+                "cs",
+                "cy",
+                "da",
+                "de",
+                "dr",
+                "el",
+                "en",
+                "es",
+                "es-419",
+                "et",
+                "fa",
+                "fi",
+                "fr",
+                "gd",
+                "he",
+                "hi",
+                "hr",
+                "hu",
+                "hy",
+                "id",
+                "is",
+                "it",
+                "ja",
+                "ka",
+                "kk",
+                "ko",
+                "lt",
+                "lv",
+                "ms",
+                "mt",
+                "nl",
+                "no",
+                "pl",
+                "ps",
+                "pt",
+                "ro",
+                "ru",
+                "si",
+                "sk",
+                "sl",
+                "so",
+                "sq",
+                "sr",
+                "sv",
+                "sw",
+                "ta",
+                "th",
+                "tk",
+                "tr",
+                "uk",
+                "ur",
+                "uz",
+                "vi",
+                "zh",
+                "zh-hk",
+                "zh-tw"
+            ],
+            "type": "string"
+        },
+        "public_updated_at": {
+            "_format": "date-time",
+            "description": "When the content was last significantly changed (a major update). Shown to users.  Automatically determined by the publishing-api, unless overridden by the publishing application.",
+            "type": "string"
+        },
+        "publishing_app_name": {
+            "description": "The application that published this item.",
+            "enum": [
+                "calculators",
+                "calendars",
+                "collections-publisher",
+                "contacts",
+                "content-publisher",
+                "content-tagger",
+                "email-alert-frontend",
+                "external-link-tracker",
+                "feedback",
+                "frontend",
+                "government-frontend",
+                "hmrc-manuals-api",
+                "info-frontend",
+                "licencefinder",
+                "local-links-manager",
+                "manuals-frontend",
+                "manuals-publisher",
+                "maslow",
+                "performanceplatform-big-screen-view",
+                "publisher",
+                "rummager",
+                "search-admin",
+                "search-api",
+                "service-manual-publisher",
+                "share-sale-publisher",
+                "short-url-manager",
+                "smartanswers",
+                "special-route-publisher",
+                "specialist-publisher",
+                "static",
+                "tariff",
+                "travel-advice-publisher",
+                "whitehall"
+            ],
+            "type": "string"
+        },
+        "publishing_request_id": {
+            "description": "A unique identifier used to track publishing requests to rendered content",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "publishing_scheduled_at": {
+            "_format": "date-time",
+            "description": "When this content was last scheduled for publishing. Determined by the publishing intent sent by the publishing API.",
+            "type": "string"
+        },
+        "rendering_app": {
+            "description": "The application that renders this item.",
+            "enum": [
+                "calculators",
+                "calendars",
+                "collections",
+                "content-store",
+                "email-alert-frontend",
+                "email-campaign-frontend",
+                "feedback",
+                "finder-frontend",
+                "frontend",
+                "government-frontend",
+                "info-frontend",
+                "licencefinder",
+                "manuals-frontend",
+                "performanceplatform-big-screen-view",
+                "rummager",
+                "search-api",
+                "service-manual-frontend",
+                "smartanswers",
+                "spotlight",
+                "static",
+                "tariff",
+                "whitehall-admin",
+                "whitehall-frontend"
+            ],
+            "type": "string"
+        },
+        "scheduled_publishing_delay_seconds": {
+            "description": "The delay between the most recent scheduled and actual publishing times. Determined by the content store based on the publishing intent.",
+            "type": "integer"
+        },
+        "tags": {
+            "additionalProperties": false,
+            "description": "Field used by email-alert-api to trigger email alerts for subscriptions to topics (gov.uk/topic) and policies (gov.uk/policies).",
+            "properties": {
+                "additional_topics": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "browse_pages": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "policies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "primary_topic": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "topics": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "title": {
+            "type": "string"
+        },
+        "withdrawn_notice": {
+            "additionalProperties": false,
+            "properties": {
+                "explanation": {
+                    "type": "string"
+                },
+                "withdrawn_at": {
+                    "format": "date-time"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "properties": {
+        "analytics_identifier": {
+            "$ref": "#/definitions/analytics_identifier"
+        },
+        "base_path": {
+            "$ref": "#/definitions/absolute_path"
+        },
+        "content_id": {
+            "$ref": "#/definitions/guid"
+        },
+        "description": {
+            "$ref": "#/definitions/description_optional"
+        },
+        "details": {
+            "$ref": "#/definitions/details"
+        },
+        "document_type": {
+            "enum": [
+                "case_study"
+            ],
+            "type": "string"
+        },
+        "first_published_at": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/first_published_at"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "links": {
+            "additionalProperties": false,
+            "properties": {
+                "available_translations": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "child_taxons": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "children": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "document_collections": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "facet_groups": {
+                    "$ref": "#/definitions/frontend_links",
+                    "description": "Prototype-stage metadata tagging tree roots for this content item. A content item my belong to many facet groups without having any specific facet_values links."
+                },
+                "facet_values": {
+                    "$ref": "#/definitions/frontend_links",
+                    "description": "Prototype-stage metadata tagging values for this content item, a content item can be linked to many facet values from varying facet groups."
+                },
+                "finder": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Powers links from content back to finders the content is surfaced on"
+                },
+                "government": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "The government associated with this document",
+                    "maxItems": 1
+                },
+                "lead_organisations": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "DEPRECATED: A subset of organisations that should be emphasised in relation to this content item. All organisations specified here should also be part of the organisations array."
+                },
+                "level_one_taxons": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "mainstream_browse_pages": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Powers the /browse section of the site. These are known as sections in some legacy apps."
+                },
+                "meets_user_needs": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "The user needs this piece of content meets."
+                },
+                "ministers": {
+                    "$ref": "#/definitions/frontend_links",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "ordered_related_items": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Related items, can be any page on GOV.UK. Mostly used for mainstream content to power the sidebar. Ordering of the links is determined by the editor in Content Tagger."
+                },
+                "ordered_related_items_overrides": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Related items, can be any page on GOV.UK. Overrides 'more like this' automatically generated links in the beta navigation."
+                },
+                "organisations": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "All organisations linked to this content item. This should include lead organisations."
+                },
+                "original_primary_publishing_organisation": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "The organisation that published the original version of the page. Corresponds to the first of the 'Lead organisations' in Whitehall for the first edition, and is empty for all other publishing applications."
+                },
+                "parent": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "The parent content item.",
+                    "maxItems": 1
+                },
+                "part_of_step_navs": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "policies": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "policy_areas": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "A largely deprecated tag currently only used to power email alerts."
+                },
+                "primary_publishing_organisation": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "The organisation that published the page. Corresponds to the first of the 'Lead organisations' in Whitehall, and is empty for all other publishing applications.",
+                    "maxItems": 1
+                },
+                "related_policies": {
+                    "$ref": "#/definitions/frontend_links_with_base_path"
+                },
+                "related_to_step_navs": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "role_appointments": {
+                    "$ref": "#/definitions/frontend_links",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "secondary_to_step_navs": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "suggested_ordered_related_items": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "New A/B test suggestions for related items. Used for displaying related content on most pages, except for step-by-step and fatality notices. Links and their ordering are determined by the machine learning algorithms included in this A/B test."
+                },
+                "taxons": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Prototype-stage taxonomy label for this content item"
+                },
+                "topic_taxonomy_taxons": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Link type automatically added by Publishing API"
+                },
+                "topics": {
+                    "$ref": "#/definitions/frontend_links_with_base_path",
+                    "description": "Powers the /topic section of the site. These are known as specialist sectors in some legacy apps."
+                },
+                "world_locations": {
+                    "$ref": "#/definitions/frontend_links"
+                },
+                "worldwide_organisations": {
+                    "$ref": "#/definitions/frontend_links_with_base_path"
+                }
+            },
+            "type": "object"
+        },
+        "locale": {
+            "$ref": "#/definitions/locale"
+        },
+        "need_ids": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "phase": {
+            "description": "The service design phase of this content item - https://www.gov.uk/service-manual/phases",
+            "enum": [
+                "alpha",
+                "beta",
+                "live"
+            ],
+            "type": "string"
+        },
+        "public_updated_at": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/public_updated_at"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "publishing_app": {
+            "$ref": "#/definitions/publishing_app_name"
+        },
+        "publishing_request_id": {
+            "$ref": "#/definitions/publishing_request_id"
+        },
+        "publishing_scheduled_at": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/publishing_scheduled_at"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "rendering_app": {
+            "$ref": "#/definitions/rendering_app"
+        },
+        "scheduled_publishing_delay_seconds": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/scheduled_publishing_delay_seconds"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "schema_name": {
+            "enum": [
+                "case_study"
+            ],
+            "type": "string"
+        },
+        "title": {
+            "$ref": "#/definitions/title"
+        },
+        "updated_at": {
+            "_format": "date-time",
+            "type": "string"
+        },
+        "withdrawn_notice": {
+            "$ref": "#/definitions/withdrawn_notice"
+        }
+    },
+    "required": [
+        "base_path",
+        "content_id",
+        "description",
+        "details",
+        "document_type",
+        "links",
+        "locale",
+        "public_updated_at",
+        "schema_name",
+        "title",
+        "updated_at"
+    ],
+    "type": "object"
+}

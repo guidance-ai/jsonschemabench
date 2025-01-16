@@ -1,0 +1,356 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "description": "JSON schema for an item.",
+    "properties": {
+        "$schema": {
+            "default": "https://ils.rero.ch/schema/items/item-v0.0.1.json",
+            "description": "Schema to validate item records against.",
+            "minLength": 9,
+            "title": "Schema",
+            "type": "string"
+        },
+        "barcode": {
+            "form": {
+                "expressionProperties": {
+                    "templateOptions.required": "false"
+                },
+                "focus": true,
+                "validation": {
+                    "messages": {
+                        "alreadyTakenMessage": "The barcode is already taken."
+                    },
+                    "validators": {
+                        "valueAlreadyExists": {}
+                    }
+                }
+            },
+            "minLength": 4,
+            "title": "Barcode",
+            "type": "string"
+        },
+        "call_number": {
+            "minLength": 4,
+            "title": "Call number",
+            "type": "string"
+        },
+        "document": {
+            "properties": {
+                "$ref": {
+                    "default": "https://ils.rero.ch/api/documents/",
+                    "pattern": "^https://ils.rero.ch/api/documents/.+?$",
+                    "title": "Document URI",
+                    "type": "string"
+                }
+            },
+            "title": "Document",
+            "type": "object"
+        },
+        "holding": {
+            "description": "Holding record for the item.",
+            "properties": {
+                "$ref": {
+                    "pattern": "^https://ils.rero.ch/api/holdings/.+?$",
+                    "title": "Holding URI",
+                    "type": "string"
+                }
+            },
+            "title": "Holding",
+            "type": "object"
+        },
+        "issue": {
+            "additionalProperties": false,
+            "form": {
+                "hideExpression": "field.parent.model.type !== 'issue'"
+            },
+            "properties": {
+                "display_text": {
+                    "minLength": 1,
+                    "title": "displayed text",
+                    "type": "string"
+                },
+                "expected_date": {
+                    "_format": "date",
+                    "form": {
+                        "hideExpression": "field.parent.model.regular",
+                        "type": "datepicker",
+                        "validation": {
+                            "messages": {
+                                "pattern": "Should be in the ISO 8601, YYYY-MM-DD."
+                            }
+                        },
+                        "wrappers": [
+                            "form-field"
+                        ]
+                    },
+                    "pattern": "\\d{4}-((0[1-9])|(1[0-2]))-(((0[1-9])|[1-2][0-9])|(3[0-1]))$",
+                    "title": "Expected date",
+                    "type": "string",
+                    "validationMessage": "Should be in the following format: 2022-12-31 (YYYY-MM-DD)."
+                },
+                "received_date": {
+                    "_format": "date",
+                    "form": {
+                        "type": "datepicker",
+                        "validation": {
+                            "messages": {
+                                "pattern": "Should be in the ISO 8601, YYYY-MM-DD."
+                            }
+                        },
+                        "wrappers": [
+                            "form-field"
+                        ]
+                    },
+                    "pattern": "\\d{4}-((0[1-9])|(1[0-2]))-(((0[1-9])|[1-2][0-9])|(3[0-1]))$",
+                    "title": "Date of reception",
+                    "type": "string",
+                    "validationMessage": "Should be in the following format: 2022-12-31 (YYYY-MM-DD)."
+                },
+                "regular": {
+                    "default": true,
+                    "form": {
+                        "hideExpression": "true"
+                    },
+                    "title": "Regularity",
+                    "type": "boolean"
+                },
+                "status": {
+                    "default": "received",
+                    "enum": [
+                        "received",
+                        "claimed",
+                        "deleted"
+                    ],
+                    "title": "Issue status",
+                    "type": "string"
+                }
+            },
+            "propertiesOrder": [
+                "display_text",
+                "received_date",
+                "expected_date",
+                "regular",
+                "status"
+            ],
+            "required": [
+                "display_text",
+                "received_date",
+                "expected_date",
+                "regular",
+                "status"
+            ],
+            "title": "Issue",
+            "type": "object"
+        },
+        "item_type": {
+            "form": {
+                "hideExpression": "field.parent.model.type === 'issue'"
+            },
+            "properties": {
+                "$ref": {
+                    "form": {
+                        "remoteOptions": {
+                            "type": "item_types"
+                        }
+                    },
+                    "pattern": "^https://ils.rero.ch/api/item_types/.+?$",
+                    "title": "Item Type URI",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "$ref"
+            ],
+            "title": "Circulation category of the item",
+            "type": "object"
+        },
+        "location": {
+            "form": {
+                "hideExpression": "field.parent.model.type === 'issue'"
+            },
+            "properties": {
+                "$ref": {
+                    "form": {
+                        "fieldMap": "location"
+                    },
+                    "pattern": "^https://ils.rero.ch/api/locations/.+?$",
+                    "title": "Location URI",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "$ref"
+            ],
+            "title": "Location",
+            "type": "object"
+        },
+        "notes": {
+            "form": {
+                "validation": {
+                    "messages": {
+                        "uniqueValueKeysInObjectMessage": "Only one note per type is allowed"
+                    },
+                    "validators": {
+                        "uniqueValueKeysInObject": {
+                            "keys": [
+                                "type"
+                            ]
+                        }
+                    }
+                }
+            },
+            "items": {
+                "properties": {
+                    "content": {
+                        "form": {
+                            "templateOptions": {
+                                "rows": 3
+                            },
+                            "type": "textarea"
+                        },
+                        "maxLength": 2000,
+                        "minLength": 3,
+                        "title": "Content",
+                        "type": "string"
+                    },
+                    "type": {
+                        "enum": [
+                            "public_note",
+                            "staff_note",
+                            "checkin_note",
+                            "checkout_note"
+                        ],
+                        "form": {
+                            "options": [
+                                {
+                                    "label": "public note",
+                                    "value": "public_note"
+                                },
+                                {
+                                    "label": "staff note",
+                                    "value": "staff_note"
+                                },
+                                {
+                                    "label": "checkin note",
+                                    "value": "checkin_note"
+                                },
+                                {
+                                    "label": "checkout note",
+                                    "value": "checkout_note"
+                                }
+                            ]
+                        },
+                        "title": "Type",
+                        "type": "string"
+                    }
+                },
+                "propertiesOrder": [
+                    "type",
+                    "content"
+                ],
+                "required": [
+                    "type",
+                    "content"
+                ],
+                "title": "Note",
+                "type": "object"
+            },
+            "title": "Notes",
+            "type": "array"
+        },
+        "organisation": {
+            "properties": {
+                "$ref": {
+                    "pattern": "^https://ils.rero.ch/api/organisations/.*?$",
+                    "title": "Organisation URI",
+                    "type": "string"
+                }
+            },
+            "title": "Organisation",
+            "type": "object"
+        },
+        "pid": {
+            "minLength": 1,
+            "title": "Item ID",
+            "type": "string"
+        },
+        "status": {
+            "default": "on_shelf",
+            "enum": [
+                "on_shelf",
+                "on_loan",
+                "missing",
+                "in_transit",
+                "at_desk",
+                "excluded"
+            ],
+            "form": {
+                "hideExpression": "true",
+                "options": [
+                    {
+                        "label": "on_shelf",
+                        "value": "on_shelf"
+                    },
+                    {
+                        "label": "on_loan",
+                        "value": "on_loan"
+                    },
+                    {
+                        "label": "missing",
+                        "value": "missing"
+                    },
+                    {
+                        "label": "in_transit",
+                        "value": "in_transit"
+                    },
+                    {
+                        "label": "at_desk",
+                        "value": "at_desk"
+                    },
+                    {
+                        "label": "excluded",
+                        "value": "excluded"
+                    }
+                ]
+            },
+            "readOnly": true,
+            "title": "circulation status",
+            "type": "string"
+        },
+        "type": {
+            "default": "standard",
+            "enum": [
+                "standard",
+                "issue"
+            ],
+            "form": {
+                "hideExpression": "true"
+            },
+            "title": "Item type",
+            "type": "string"
+        }
+    },
+    "propertiesOrder": [
+        "barcode",
+        "call_number",
+        "item_type",
+        "location",
+        "status",
+        "type",
+        "status",
+        "issue",
+        "notes"
+    ],
+    "required": [
+        "$schema",
+        "pid",
+        "location",
+        "barcode",
+        "item_type",
+        "type",
+        "document",
+        "status"
+    ],
+    "title": "Item",
+    "type": "object"
+}

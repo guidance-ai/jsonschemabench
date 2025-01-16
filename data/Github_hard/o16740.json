@@ -1,0 +1,323 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "#/vox/shop/product",
+    "type": "object",
+    "title": "Product Definition Schema",
+    "properties": {
+        "category": {
+            "type": "string",
+            "title": "product category",
+            "pattern": "^[a-zA-Z_]{1}[a-zA-Z0-9_-]+$"
+        },
+        "presentation": {
+            "type": "integer",
+            "title": "product ordering, 1000=featured",
+            "minimum": 0
+        },
+        "name": {
+            "$ref": "#/definitions/name"
+        },
+        "imageUrl": {
+            "$ref": "#/definitions/links"
+        },
+        "description": {
+            "$ref": "#/definitions/description"
+        },
+        "supplier": {
+            "$ref": "#/definitions/supplier"
+        },
+        "commodity": {
+            "$ref": "#/definitions/commodity"
+        },
+        "prices": {
+            "$ref": "#/definitions/prices"
+        },
+        "leadtime": {
+            "$ref": "#/definitions/days",
+            "title": "lead time in days"
+        },
+        "_exclude": {
+            "$ref": "#/definitions/condition",
+            "title": "MVEL expression"
+        },
+        "sample": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "$ref": "#/definitions/price",
+                    "title": "sample price"
+                }
+            }
+        },
+        "origins": {
+            "type": "array",
+            "title": "origins where the product can be shipped from",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/definitions/port"
+            }
+        },
+        "packaging": {
+            "type": "object",
+            "title": "packaging spec",
+            "properties": {
+                "dimensions": {
+                    "$ref": "#/definitions/dimensions"
+                },
+                "weight": {
+                    "type": "number",
+                    "title": "weight of a single packaged product"
+                },
+                "containers": {
+                    "type": "object",
+                    "title": "packaging variants for the product",
+                    "additionalProperties": {
+                        "type": "object",
+                        "title": "package variant",
+                        "properties": {
+                            "weight": {
+                                "type": "number",
+                                "title": "container only weight"
+                            },
+                            "fits": {
+                                "type": "number",
+                                "title": "volume of the product that fits in a single container"
+                            },
+                            "dimensions": {
+                                "$ref": "#/definitions/dimensions"
+                            }
+                        },
+                        "required": [
+                            "weight",
+                            "fits",
+                            "dimensions"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "weight",
+                "dimensions"
+            ]
+        },
+        "types": {
+            "type": "array",
+            "title": "",
+            "minItems": 1,
+            "_uniqueItems": true,
+            "items": {
+                "id": "#/definitions/type",
+                "type": "object",
+                "title": "",
+                "properties": {
+                    "name": {
+                        "$ref": "#/definitions/name"
+                    },
+                    "imageUrl": {
+                        "$ref": "#/definitions/links"
+                    },
+                    "description": {
+                        "$ref": "#/definitions/description"
+                    },
+                    "supplier": {
+                        "$ref": "#/definitions/supplier"
+                    },
+                    "commodity": {
+                        "$ref": "#/definitions/commodity"
+                    },
+                    "prices": {
+                        "$ref": "#/definitions/prices"
+                    },
+                    "leadtime": {
+                        "$ref": "#/definitions/days",
+                        "title": "lead time in days"
+                    },
+                    "_exclude": {
+                        "$ref": "#/definitions/condition",
+                        "title": "MVEL expression"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            }
+        },
+        "properties": {
+            "type": "array",
+            "title": "",
+            "minItems": 1,
+            "_uniqueItems": true,
+            "items": {
+                "id": "#/definitions/product_property",
+                "type": "object",
+                "title": "",
+                "properties": {
+                    "name": {
+                        "$ref": "#/definitions/name"
+                    },
+                    "options": {
+                        "$ref": "#/definitions/propertyOptions"
+                    },
+                    "_exclude": {
+                        "$ref": "#/definitions/condition",
+                        "title": "MVEL expression"
+                    }
+                },
+                "required": [
+                    "name",
+                    "options"
+                ]
+            }
+        }
+    },
+    "required": [
+        "name",
+        "imageUrl"
+    ],
+    "definitions": {
+        "name": {
+            "type": "string",
+            "title": "",
+            "minLength": 2
+        },
+        "links": {
+            "type": "array",
+            "minItems": 1,
+            "title": "",
+            "items": {
+                "$ref": "#/definitions/link"
+            }
+        },
+        "link": {
+            "type": "string",
+            "title": "",
+            "pattern": "^(http|https)://[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?$"
+        },
+        "description": {
+            "type": "string",
+            "title": "",
+            "minLength": 0
+        },
+        "supplier": {
+            "type": "string",
+            "title": "supplier definition",
+            "minLength": 1
+        },
+        "commodity": {
+            "type": "string",
+            "title": "commodity code",
+            "minLength": 1
+        },
+        "prices": {
+            "type": "array",
+            "title": "price definitions",
+            "minItems": 1,
+            "_uniqueItems": true,
+            "items": {
+                "$ref": "#/definitions/price"
+            }
+        },
+        "price": {
+            "id": "#/definitions/price",
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "$ref": "#/definitions/currency",
+                    "title": "price currency"
+                },
+                "cost": {
+                    "id": "#/definitions/cost",
+                    "title": "cost for specified amount",
+                    "type": "number"
+                },
+                "moq": {
+                    "$ref": "#/definitions/quantity",
+                    "title": "minimum order quantity for this price"
+                }
+            }
+        },
+        "cash": {
+            "type": "object",
+            "title": "cash amount",
+            "properties": {
+                "currency": {
+                    "$ref": "#/definitions/currency",
+                    "title": "price currency"
+                },
+                "cost": {
+                    "id": "#/definitions/cost",
+                    "title": "cost for specified amount",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "currency",
+                "cost"
+            ]
+        },
+        "currency": {
+            "type": "string",
+            "title": "3 letter currency code",
+            "pattern": "^[A-Z]{3}$"
+        },
+        "quantity": {
+            "type": "number",
+            "title": "quantity",
+            "minimum": 0
+        },
+        "days": {
+            "type": "number",
+            "title": "days",
+            "minimum": 0
+        },
+        "condition": {
+            "type": "string",
+            "title": "condition",
+            "minLength": 1
+        },
+        "propertyOptions": {
+            "type": "array",
+            "title": "possible selections for a property",
+            "minItems": 1,
+            "_uniqueItems": true,
+            "items": {
+                "id": "#/definitions/propertyOption",
+                "type": "object",
+                "title": "property option definition",
+                "properties": {
+                    "name": {
+                        "$ref": "#/definitions/name"
+                    },
+                    "description": {
+                        "$ref": "#/definitions/description"
+                    },
+                    "prices": {
+                        "$ref": "#/definitions/prices"
+                    },
+                    "_exclude": {
+                        "$ref": "#/definitions/condition",
+                        "title": "MVEL expression"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            }
+        },
+        "port": {
+            "type": "string",
+            "title": "air or sea port",
+            "minLength": 3,
+            "maxLength": 5
+        },
+        "dimensions": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "title": "[length, width, height]",
+            "items": {
+                "type": "number"
+            }
+        }
+    }
+}

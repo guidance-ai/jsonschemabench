@@ -1,0 +1,373 @@
+{
+    "additionalProperties": false,
+    "definitions": {
+        "brandData": {
+            "additionalProperties": false,
+            "properties": {
+                "brand": {
+                    "description": "Brand/manufacturer name",
+                    "type": "string"
+                },
+                "brandId": {
+                    "description": "An array of manufacture numbers pertaining to a given labware",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "links": {
+                    "description": "URLs for manufacturer page(s)",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "brand"
+            ],
+            "type": "object"
+        },
+        "displayCategory": {
+            "enum": [
+                "tipRack",
+                "tubeRack",
+                "reservoir",
+                "trash",
+                "wellPlate",
+                "aluminumBlock",
+                "other"
+            ],
+            "type": "string"
+        },
+        "positiveNumber": {
+            "minimum": 0,
+            "type": "number"
+        },
+        "safeString": {
+            "description": "a string safe to use for loadName / namespace. Lowercase-only.",
+            "pattern": "^[a-z0-9._]+$",
+            "type": "string"
+        }
+    },
+    "properties": {
+        "brand": {
+            "$ref": "#/definitions/brandData",
+            "description": "Real-world labware that the definition is modeled from and/or compatible with"
+        },
+        "cornerOffsetFromSlot": {
+            "additionalProperties": false,
+            "description": "Distance from left-front-bottom corner of slot to left-front-bottom corner of labware bounding box. Used for labware that spans multiple slots. For labware that does not span multiple slots, x/y/z should all be zero.",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "z": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "x",
+                "y",
+                "z"
+            ],
+            "type": "object"
+        },
+        "dimensions": {
+            "additionalProperties": false,
+            "description": "Outer dimensions of a labware",
+            "properties": {
+                "xDimension": {
+                    "$ref": "#/definitions/positiveNumber"
+                },
+                "yDimension": {
+                    "$ref": "#/definitions/positiveNumber"
+                },
+                "zDimension": {
+                    "$ref": "#/definitions/positiveNumber"
+                }
+            },
+            "required": [
+                "xDimension",
+                "yDimension",
+                "zDimension"
+            ],
+            "type": "object"
+        },
+        "groups": {
+            "description": "Logical well groupings for metadata/display purposes; changes in groups do not affect protocol execution",
+            "items": {
+                "additionalProperties": false,
+                "properties": {
+                    "brand": {
+                        "$ref": "#/definitions/brandData",
+                        "description": "Brand data for the well group (e.g. for tubes)"
+                    },
+                    "metadata": {
+                        "additionalProperties": false,
+                        "description": "Metadata specific to a grid of wells in a labware",
+                        "properties": {
+                            "displayCategory": {
+                                "$ref": "#/definitions/displayCategory",
+                                "description": "Label(s) used in UI to categorize well groups"
+                            },
+                            "displayName": {
+                                "description": "User-readable name for the well group",
+                                "type": "string"
+                            },
+                            "wellBottomShape": {
+                                "description": "Bottom shape of the well for UI purposes",
+                                "enum": [
+                                    "flat",
+                                    "u",
+                                    "v"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "required": [],
+                        "type": "object"
+                    },
+                    "wells": {
+                        "description": "An array of wells that contain the same metadata",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "wells",
+                    "metadata"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "metadata": {
+            "additionalProperties": false,
+            "description": "Properties used for search and display",
+            "properties": {
+                "displayCategory": {
+                    "$ref": "#/definitions/displayCategory",
+                    "description": "Label(s) used in UI to categorize labware"
+                },
+                "displayName": {
+                    "description": "Easy to remember name of labware",
+                    "type": "string"
+                },
+                "displayVolumeUnits": {
+                    "description": "Volume units for display",
+                    "enum": [
+                        "\u00b5L",
+                        "mL",
+                        "L"
+                    ],
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "List of descriptions for a given labware",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "displayName",
+                "displayCategory",
+                "displayVolumeUnits"
+            ],
+            "type": "object"
+        },
+        "namespace": {
+            "$ref": "#/definitions/safeString"
+        },
+        "ordering": {
+            "description": "Generated array that keeps track of how wells should be ordered in a labware",
+            "items": {
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+            },
+            "type": "array"
+        },
+        "parameters": {
+            "additionalProperties": false,
+            "description": "Internal describers used to determine pipette movement to labware",
+            "properties": {
+                "format": {
+                    "description": "Property to determine compatibility with multichannel pipette",
+                    "enum": [
+                        "96Standard",
+                        "384Standard",
+                        "trough",
+                        "irregular",
+                        "trash"
+                    ],
+                    "type": "string"
+                },
+                "isMagneticModuleCompatible": {
+                    "description": "Flag marking whether a labware is compatible by default with the Magnetic Module",
+                    "type": "boolean"
+                },
+                "isTiprack": {
+                    "description": "Flag marking whether a labware is a tiprack or not",
+                    "type": "boolean"
+                },
+                "loadName": {
+                    "$ref": "#/definitions/safeString",
+                    "description": "Name used to reference a labware definition"
+                },
+                "magneticModuleEngageHeight": {
+                    "$ref": "#/definitions/positiveNumber",
+                    "description": "Distance to move magnetic module magnets to engage"
+                },
+                "quirks": {
+                    "description": "Property to classify a specific behavior this labware should have",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "tipLength": {
+                    "$ref": "#/definitions/positiveNumber",
+                    "description": "Required if labware is tiprack, specifies length of tip from drawing or as measured with calipers"
+                },
+                "tipOverlap": {
+                    "$ref": "#/definitions/positiveNumber",
+                    "description": "Required if labware is tiprack, specifies the length of the area of the tip that overlaps the nozzle of the pipette"
+                }
+            },
+            "required": [
+                "format",
+                "isTiprack",
+                "loadName",
+                "isMagneticModuleCompatible"
+            ],
+            "type": "object"
+        },
+        "schemaVersion": {
+            "description": "Which schema version a labware is using",
+            "enum": [
+                2
+            ],
+            "type": "number"
+        },
+        "version": {
+            "description": "Version of the labware definition itself (eg myPlate v1/v2/v3). An incrementing integer",
+            "minimum": 1,
+            "type": "integer"
+        },
+        "wells": {
+            "additionalProperties": false,
+            "description": "Unordered object of well objects with position and dimensional information",
+            "minProperties": 1,
+            "patternProperties": {
+                "[A-Z]+[0-9]+": {
+                    "additionalProperties": false,
+                    "not": {
+                        "anyOf": [
+                            {
+                                "required": [
+                                    "diameter",
+                                    "xDimension"
+                                ]
+                            },
+                            {
+                                "required": [
+                                    "diameter",
+                                    "yDimension"
+                                ]
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "required": [
+                                "xDimension",
+                                "yDimension"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "diameter"
+                            ]
+                        }
+                    ],
+                    "properties": {
+                        "depth": {
+                            "$ref": "#/definitions/positiveNumber"
+                        },
+                        "diameter": {
+                            "$ref": "#/definitions/positiveNumber",
+                            "description": "diameter of circular wells"
+                        },
+                        "shape": {
+                            "description": "If 'rectangular', use xDimension and yDimension; if 'circular' use diameter",
+                            "enum": [
+                                "rectangular",
+                                "circular"
+                            ],
+                            "type": "string"
+                        },
+                        "totalLiquidVolume": {
+                            "$ref": "#/definitions/positiveNumber",
+                            "description": "Total well, tube, or tip volume in microliters"
+                        },
+                        "x": {
+                            "$ref": "#/definitions/positiveNumber",
+                            "description": "x location of center-bottom of well in reference to left-front-bottom of labware"
+                        },
+                        "xDimension": {
+                            "$ref": "#/definitions/positiveNumber",
+                            "description": "x dimension of rectangular wells"
+                        },
+                        "y": {
+                            "$ref": "#/definitions/positiveNumber",
+                            "description": "y location of center-bottom of well in reference to left-front-bottom of labware"
+                        },
+                        "yDimension": {
+                            "$ref": "#/definitions/positiveNumber",
+                            "description": "y dimension of rectangular wells"
+                        },
+                        "z": {
+                            "$ref": "#/definitions/positiveNumber",
+                            "description": "z location of center-bottom of well in reference to left-front-bottom of labware"
+                        }
+                    },
+                    "required": [
+                        "depth",
+                        "shape",
+                        "totalLiquidVolume",
+                        "x",
+                        "y",
+                        "z"
+                    ],
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "required": [
+        "schemaVersion",
+        "version",
+        "namespace",
+        "metadata",
+        "brand",
+        "parameters",
+        "cornerOffsetFromSlot",
+        "ordering",
+        "dimensions",
+        "wells",
+        "groups"
+    ],
+    "type": "object"
+}

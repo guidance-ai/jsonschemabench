@@ -1,0 +1,78 @@
+{
+    "id": "https://raw.githubusercontent.com/JSONScript/jsonscript-proxy/master/config_schema.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Configuration",
+    "description": "Schema for proxy server configuration file (and for config passed to proxy middleware)",
+    "type": "object",
+    "required": [
+        "services"
+    ],
+    "properties": {
+        "services": {
+            "title": "proxied services",
+            "description": "each property name will be an executor exposed to JSONScript interpreter",
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[A-Za-z_$][A-Za-z_$0-9]+$": {
+                    "$ref": "#/definitions/service"
+                }
+            }
+        },
+        "jsonscript": {
+            "description": "options passed to JSONScript interpreter",
+            "type": "object"
+        },
+        "processResponse": {
+            "$ref": "#/definitions/processResponse"
+        },
+        "Promise": {
+            "description": "Promise class to use, will be ignored if used from command line",
+            "typeof": "function"
+        }
+    },
+    "definitions": {
+        "service": {
+            "description": "proxied service definition",
+            "required": [
+                "basePath"
+            ],
+            "properties": {
+                "basePath": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "processResponse": {
+                    "$ref": "#/definitions/processResponse"
+                }
+            }
+        },
+        "processResponse": {
+            "description": "defines how response from service is processed",
+            "anyOf": [
+                {
+                    "description": "return only response body if status code is < 300, throw an exception otherwise",
+                    "type": "string",
+                    "enum": [
+                        "body"
+                    ]
+                },
+                {
+                    "description": "uses custom keyword 'typeof', function should return result or throw exception",
+                    "not": {
+                        "type": [
+                            "string",
+                            "number",
+                            "array",
+                            "object",
+                            "boolean",
+                            "null"
+                        ]
+                    },
+                    "typeof": "function"
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,305 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "id": "https://json.schemastore.org/gatewaycore-options-2021-07",
+  "title": "Cloudtoid GatewayCore Options",
+  "description": "Root Schema of options for Cloudtoid GatewayCore",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "system": {
+      "type": "object",
+      "description": "This section that contains all system wide configurations.",
+      "additionalProperties": false,
+      "properties": {
+        "routeCacheMaxCount": {
+          "type": "integer",
+          "default": 100000,
+          "description": "The maximum number of mappings between \"inbound downstream request path\" and \"outbound upstream request URL\" that can be cached in memory."
+        }
+      }
+    },
+    "routes": {
+      "type": "object",
+      "description": "This is the section in which proxy routes are defined.",
+      "additionalProperties": {
+        "type": "object",
+        "description": "This is the url path pattern that if matched, the request is proxied to the address defined by its `to` property.",
+        "additionalProperties": false,
+        "properties": {
+          "proxy": {
+            "type": "object",
+            "description": "The proxy configuration.",
+            "additionalProperties": false,
+            "properties": {
+              "to": {
+                "type": "string",
+                "description": "This is an expression that defines the URL of the upstream server to which the downstream request is forwarded to.",
+                "examples": [
+                  "http://example.com:85/api/"
+                ]
+              },
+              "proxyName": {
+                "type": "string",
+                "description": "This is an expression that defines the name of this proxy. This value is used in the Via HTTP header send on the outbound upstream request, and the outbound downstream response. If a value is specified, an `x-gwcore-proxy-name` header with this value is also added to the outbound upstream request.",
+                "default": "gwcore"
+              },
+              "upstreamRequest": {
+                "type": "object",
+                "description": "The options that control the upstream requests.",
+                "additionalProperties": false,
+                "properties": {
+                  "httpVersion": {
+                    "type": "string",
+                    "description": "An expression that defines the HTTP protocol version of outbound upstream requests.",
+                    "default": "HTTP/2.0"
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "The options that control the upstream request headers.",
+                    "additionalProperties": false,
+                    "properties": {
+                      "discardInboundHeaders": {
+                        "type": "boolean",
+                        "description": "Specifies if downstream inbound request and content headers should be discarded and not forwarded to the upstream.",
+                        "default": false
+                      },
+                      "discardEmpty": {
+                        "type": "boolean",
+                        "description": "Specifies if inbound headers with empty value should be discarded.",
+                        "default": false
+                      },
+                      "discardUnderscore": {
+                        "type": "boolean",
+                        "description": "Specifies if inbound headers with an underscore in their name should be discarded.",
+                        "default": false
+                      },
+                      "addExternalAddress": {
+                        "type": "boolean",
+                        "description": "Specifies if a `x-gwcore-external-address` header with the IP address of the immediate caller should be added to the outbound upstream request.",
+                        "default": false
+                      },
+                      "skipVia": {
+                        "type": "boolean",
+                        "description": "Specifies if the `via` header should be skipped from the outbound request.",
+                        "default": false
+                      },
+                      "skipForwarded": {
+                        "type": "boolean",
+                        "description": "Specifies if `forwarded` header and `x-forwarded-*` headers should be skipped from the outbound requests.",
+                        "default": false
+                      },
+                      "appends": {
+                        "type": "object",
+                        "description": "The headers to be appended to the outbound upstream requests. If the header already exists, it is kept and the new value is appended. The value can be either text or an expression.",
+                        "additionalProperties": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "The value can be either text or an expression."
+                          }
+                        }
+                      },
+                      "overrides": {
+                        "type": "object",
+                        "description": "The headers to be added to the outbound upstream requests. If the header already exists, its value is replaced. The value can be either text or an expression.",
+                        "additionalProperties": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "The value can be either text or an expression."
+                          }
+                        }
+                      },
+                      "discards": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "Specifies the inbound downstream headers that should be discarded."
+                        }
+                      }
+                    }
+                  },
+                  "sender": {
+                    "type": "object",
+                    "description": "The options that control connection to the upstream server.",
+                    "additionalProperties": false,
+                    "properties": {
+                      "httpClientName": {
+                        "type": "string",
+                        "description": "The name of the .NET HttpClient that will be used to send the request. The default value is a system generated unique name."
+                      },
+                      "timeoutInMilliseconds": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ],
+                        "description": "The total timeout in milliseconds to wait for the outbound upstream request to complete. This can be a number or an expression.",
+                        "default": 240000
+                      },
+                      "connectTimeoutInMilliseconds": {
+                        "type": "integer",
+                        "description": "The connect timeout in milliseconds. No timeout is set by default."
+                      },
+                      "expect100ContinueTimeoutInMilliseconds": {
+                        "type": "integer",
+                        "description": "The expect 100 continue timeout in milliseconds.",
+                        "default": 1000
+                      },
+                      "pooledConnectionIdleTimeoutInMilliseconds": {
+                        "type": "integer",
+                        "description": "Specifies how long a connection can be idle in the pool to be considered reusable.",
+                        "default": 2000
+                      },
+                      "pooledConnectionLifetimeInMilliseconds": {
+                        "type": "integer",
+                        "description": "Specifies how long a connection can live in the connection pool. By default, no timeout is set and the connection can stay in the pool."
+                      },
+                      "responseDrainTimeoutInMilliseconds": {
+                        "type": "integer",
+                        "description": "Specifies the response drain timeout.",
+                        "default": 2000
+                      },
+                      "maxAutomaticRedirections": {
+                        "type": "integer",
+                        "description": "The maximum number of allowed HTTP redirects.",
+                        "default": 50
+                      },
+                      "maxConnectionsPerServer": {
+                        "type": "integer",
+                        "description": "The maximum number of simultaneous TCP connections allowed to a single server. No caps are set by default."
+                      },
+                      "maxResponseDrainSizeInBytes": {
+                        "type": "integer",
+                        "description": "The maximum size of data that can be drained from responses in bytes.",
+                        "default": 1048576
+                      },
+                      "maxResponseHeadersLengthInKilobytes": {
+                        "type": "integer",
+                        "description": "The maximum length, in kilobytes (1024 bytes), of the response headers.",
+                        "default": 64
+                      },
+                      "allowAutoRedirect": {
+                        "type": "boolean",
+                        "description": "Indicates whether the HTTP handler used by the outbound upstream request sender should follow redirection responses.",
+                        "default": false
+                      },
+                      "useCookies": {
+                        "type": "boolean",
+                        "description": "Indicates whether the HTTP handler used by the outbound upstream request sender should store server cookies and use these cookies when sending requests.",
+                        "default": false
+                      }
+                    }
+                  }
+                }
+              },
+              "downstreamResponse": {
+                "type": "object",
+                "description": "The options that control the downstream responses sent to the clients.",
+                "additionalProperties": false,
+                "properties": {
+                  "headers": {
+                    "type": "object",
+                    "description": "The options that control the downstream response headers sent to the clients.",
+                    "additionalProperties": false,
+                    "properties": {
+                      "discardInboundHeaders": {
+                        "type": "boolean",
+                        "description": "Specifies if upstream inbound response, content, and trailing headers should be discarded and not forwarded to the downstream client.",
+                        "default": false
+                      },
+                      "discardEmpty": {
+                        "type": "boolean",
+                        "description": "Specifies if inbound headers with empty value should be discarded.",
+                        "default": false
+                      },
+                      "discardUnderscore": {
+                        "type": "boolean",
+                        "description": "Specifies if inbound headers with an underscore in their name should be discarded.",
+                        "default": false
+                      },
+                      "addServer": {
+                        "type": "boolean",
+                        "description": "Specifies if a `server` header should be added. The value of this header is set to `gwcore`.",
+                        "default": false
+                      },
+                      "addVia": {
+                        "type": "boolean",
+                        "description": "Specifies if the `via` header should be added to the outbound response.",
+                        "default": false
+                      },
+                      "cookies": {
+                        "type": "object",
+                        "description": "The options that are applied to the `set-cookie` headers in the inbound upstream response. If the cookie name is symbol '*', then the settings are applied to all `set-cookie` headers.",
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "secure": {
+                              "type": "boolean",
+                              "description": "It limits the scope of the cookie to 'secure' channels. A secure cookie is only sent to the server when a request is made using HTTPS.",
+                              "default": false
+                            },
+                            "httpOnly": {
+                              "type": "boolean",
+                              "description": "It limits the scope of the cookie to HTTP requests, forbidding JavaScript from accessing the cookie.",
+                              "default": false
+                            },
+                            "sameSite": {
+                              "type": "string",
+                              "description": "It asserts that a cookie must not be sent with cross-origin requests, providing some protection against cross-site request forgery attacks. The valid values are `strict`, `lax`, and `none`.",
+                              "enum": [ "none", "lax", "strict" ],
+                              "default": "lax"
+                            },
+                            "domain": {
+                              "type": "string",
+                              "description": "It specifies the hosts to which the cookie will be sent and can be an expression. For example, if the value of the Domain attribute is 'example.com', the user agent will include the cookie in the Cookie header when making HTTP requests to example.com, www.example.com, and www.corp.example.com. Use this property to specify or override the domain attribute. Set this value to an empty string (\"\") to remove the domain attribute from the cookie.",
+                              "examples": [
+                                "example.com"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "appends": {
+                        "type": "object",
+                        "description": "The headers to be appended to the outbound downstream response. If the header already exists, it is kept and the new value is appended. The value can be either text or an expression.",
+                        "additionalProperties": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "The value can be either text or an expression."
+                          }
+                        }
+                      },
+                      "overrides": {
+                        "type": "object",
+                        "description": "The headers to be added to the outbound downstream response. If the header already exists, its value is replaced. The value can be either text or an expression.",
+                        "additionalProperties": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "The value can be either text or an expression."
+                          }
+                        }
+                      },
+                      "discards": {
+                        "type": "array",
+                        "description": "The inbound upstream headers that should be discarded.",
+                        "items": {
+                          "type": "string",
+                          "description": "The name of the header to be discarded."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "to"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

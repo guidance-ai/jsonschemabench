@@ -1,0 +1,144 @@
+{
+    "additionalProperties": false,
+    "description": "Schema for storage loader errors with unknown data, e.g. invalid enriched event",
+    "properties": {
+        "failure": {
+            "description": "Errors that happened when not recognizing the event as an enriched event, provided by Analytics SDK",
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "NotTSV"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ]
+                },
+                {
+                    "properties": {
+                        "fieldCount": {
+                            "maximum": 1024,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "type": {
+                            "enum": [
+                                "FieldNumberMismatch"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "fieldCount"
+                    ]
+                },
+                {
+                    "properties": {
+                        "errors": {
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "key": {
+                                                "maxLength": 32,
+                                                "type": "string"
+                                            },
+                                            "message": {
+                                                "type": "string"
+                                            },
+                                            "type": {
+                                                "enum": [
+                                                    "InvalidValue"
+                                                ]
+                                            },
+                                            "value": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "type",
+                                            "key",
+                                            "value",
+                                            "message"
+                                        ]
+                                    },
+                                    {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "message": {
+                                                "type": "string"
+                                            },
+                                            "type": {
+                                                "enum": [
+                                                    "UnhandledRowDecodingError"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "type",
+                                            "message"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "minItems": 1,
+                            "type": "array"
+                        },
+                        "type": {
+                            "enum": [
+                                "RowDecodingError"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "errors"
+                    ]
+                }
+            ],
+            "type": "object"
+        },
+        "payload": {
+            "description": "Data blob which was not recognized as an enriched event by the storage loader",
+            "type": "string"
+        },
+        "processor": {
+            "additionalProperties": false,
+            "description": "Information about the piece of software responsible for the creation of enrichment failures",
+            "properties": {
+                "artifact": {
+                    "description": "Artifact responsible for the creation of enrichment failures",
+                    "maxLength": 512,
+                    "type": "string"
+                },
+                "version": {
+                    "description": "Version of the artifact responsible for the creation of enrichment failures",
+                    "maxLength": 32,
+                    "pattern": "^(\\d+\\.\\d+\\.\\d+.*)$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "artifact",
+                "version"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "payload",
+        "failure",
+        "processor"
+    ],
+    "self": {
+        "format": "jsonschema",
+        "name": "loader_parsing_error",
+        "vendor": "com.snowplowanalytics.snowplow.badrows",
+        "version": "2-0-0"
+    },
+    "type": "object"
+}

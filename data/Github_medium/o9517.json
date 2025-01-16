@@ -1,0 +1,220 @@
+{
+    "description": "A **PDF Manager batch** represents the asynchronous execution and eventual population of a **PDF Manager template**, resulting in **PDF Manager zip files**.",
+    "links": [
+        {
+            "description": "Display existing batch with download URL.",
+            "href": "/api/v1/user_identities/:user_identity_id/pdf_manager_batches/:pdf_manager_batch_id",
+            "http_header": {
+                "x-api-key": "0123456789abcdef0123456789abcdef"
+            },
+            "method": "GET",
+            "rel": "self",
+            "title": "Show"
+        },
+        {
+            "description": "List existing batches.  As there could potentially be a large number of `download_hrefs`, they are not displayed in this response.",
+            "href": "/api/v1/user_identities/:user_identity_id/pdf_manager_batches",
+            "http_header": {
+                "x-api-key": "0123456789abcdef0123456789abcdef"
+            },
+            "method": "GET",
+            "rel": "instances",
+            "targetSchema": {
+                "properties": {
+                    "href": {
+                        "description": "Hypertext reference to this resource.",
+                        "example": "/api/v1/user_identities/1/pdf_manager_batches",
+                        "pattern": "/api/v1/user_identities/\\d+/pdf_manager_batches",
+                        "type": "string"
+                    },
+                    "pdf_manager_batches": {
+                        "items": {
+                            "properties": {
+                                "href": {
+                                    "example": "/api/v1/user_identities/1/pdf_manager_batches/2",
+                                    "pattern": "/api/v1/user_identities/\\d+/pdf_manager_batches/\\d+",
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "example": 2,
+                                    "type": "integer"
+                                },
+                                "pdf_manager_template": {
+                                    "properties": {
+                                        "href": {
+                                            "example": "/api/v1/user_identities/1/pdf_manager_templates/2",
+                                            "pattern": "/api/v1/user_identities/\\d+/pdf_manager_templates/\\d+",
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "example": 2,
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "example": "Accepted Offers for Review",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "name",
+                                        "href"
+                                    ],
+                                    "type": "object"
+                                },
+                                "state": {
+                                    "enum": [
+                                        "initializing",
+                                        "queued",
+                                        "in_progress",
+                                        "available",
+                                        "success_with_errors",
+                                        "empty_list",
+                                        "failed"
+                                    ],
+                                    "example": "success_with_errors",
+                                    "type": "string"
+                                },
+                                "updated_at": {
+                                    "example": "2016-01-05T16:51:00Z",
+                                    "format": "date-time",
+                                    "pattern": "\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "updated_at",
+                                "state",
+                                "pdf_manager_template"
+                            ],
+                            "type": "object"
+                        },
+                        "type": "array"
+                    }
+                }
+            },
+            "title": "List"
+        },
+        {
+            "description": "Initiate the creation of a batch from a template.  If you attempt to run the same batch several times in close succession, you will receive the id of the already-running instance of that batch. This is a safeguard to prevent many accidental simultaneous runs of the exact same batch: one must finish before a new one can be initiated.",
+            "href": "/api/v1/user_identities/:user_identity_id/pdf_manager_batches",
+            "http_header": {
+                "x-api-key": "0123456789abcdef0123456789abcdef"
+            },
+            "method": "POST",
+            "rel": "create",
+            "schema": {
+                "properties": {
+                    "pdf_manager_batch": {
+                        "properties": {
+                            "callback": {
+                                "description": "When the batch is completed, WebAdMIT will `POST` to this callback URL.  The JSON in the callback body uses the same schema as the GET request.",
+                                "example": "https://example.com/my_callback",
+                                "format": "uri",
+                                "pattern": "^https://",
+                                "type": "string"
+                            },
+                            "pdf_manager_template_id": {
+                                "description": "Unique identifier of the template.",
+                                "example": 2,
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "pdf_manager_template_id"
+                        ],
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "title": "Initiate Run"
+        }
+    ],
+    "properties": {
+        "pdf_manager_batch": {
+            "properties": {
+                "download_hrefs": {
+                    "comment": "FIXME: Include `items`.  See https://github.com/interagent/prmd/issues/275",
+                    "description": "When `state` is `\"available\"` or `\"success_with_errors\"`, this is an array of hrefs that can be requested with an API key for downloading the generated PDF files.  Otherwise, this is `[]`.",
+                    "example": [
+                        "/api/v1/user_identities/1/pdf_manager_zip_files/2/download",
+                        "/api/v1/user_identities/1/pdf_manager_zip_files/3/download"
+                    ],
+                    "type": "array"
+                },
+                "href": {
+                    "description": "Hypertext reference to this resource.",
+                    "example": "/api/v1/user_identities/1/pdf_manager_batches/2",
+                    "pattern": "/api/v1/user_identities/\\d+/pdf_manager_batches/\\d+",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier of this batch.",
+                    "type": "integer"
+                },
+                "pdf_manager_template": {
+                    "properties": {
+                        "href": {
+                            "description": "Hypertext reference to the template.",
+                            "example": "/api/v1/user_identities/1/pdf_manager_templates/2",
+                            "pattern": "/api/v1/user_identities/\\d+/pdf_manager_templates/\\d+",
+                            "type": "string"
+                        },
+                        "id": {
+                            "description": "Unique identifier of the template.",
+                            "example": 2,
+                            "type": "integer"
+                        },
+                        "name": {
+                            "description": "Human-readable name of this PDF Manager template.",
+                            "example": "Accepted Offers for Review",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "name",
+                        "href"
+                    ],
+                    "type": "object"
+                },
+                "state": {
+                    "description": "Current state of this batch.",
+                    "enum": [
+                        "initializing",
+                        "queued",
+                        "in_progress",
+                        "available",
+                        "success_with_errors",
+                        "empty_list",
+                        "failed"
+                    ],
+                    "example": "success_with_errors",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "Time that this batch was last updated.",
+                    "example": "2016-01-05T16:51:00Z",
+                    "format": "date-time",
+                    "pattern": "\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "href",
+                "id",
+                "updated_at",
+                "state",
+                "download_hrefs",
+                "pdf_manager_template"
+            ],
+            "type": "object"
+        }
+    },
+    "stability": "production",
+    "strictProperties": true,
+    "title": "PDF Manager Batch",
+    "type": "object"
+}

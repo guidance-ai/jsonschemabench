@@ -1,0 +1,242 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://github.com/ohadschn/ET4W/src/events-schema.json",
+    "definitions": {
+        "etwNativeType": {
+            "enum": [
+                "Boolean",
+                "Char",
+                "SByte",
+                "Byte",
+                "Int16",
+                "UInt16",
+                "Int32",
+                "UInt32",
+                "Int64",
+                "UInt64",
+                "Single",
+                "Double",
+                "DateTime",
+                "String",
+                "GUID",
+                "IntPtr",
+                "ByteArray"
+            ]
+        },
+        "etwEventLevel": {
+            "enum": [
+                "Verbose",
+                "Informational",
+                "Warning",
+                "Error",
+                "Critical",
+                "LogAlways"
+            ]
+        },
+        "etwOpcode": {
+            "enum": [
+                "Info",
+                "Start",
+                "Stop",
+                "DataCollectionStart",
+                "DataCollectionStop",
+                "Extension",
+                "Reply",
+                "Resume",
+                "Suspend",
+                "Send",
+                "Receive"
+            ]
+        },
+        "etwChannel": {
+            "enum": [
+                "Admin",
+                "Analytic",
+                "Debug",
+                "None",
+                "Operational"
+            ]
+        },
+        "identifier": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "fullyQualifiedIdentifier": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_](\\.?[a-zA-Z0-9_]+)*$"
+        },
+        "identifier-array": {
+            "type": "array",
+            "_uniqueItems": true,
+            "items": {
+                "$ref": "#/definitions/identifier"
+            }
+        },
+        "customType": {
+            "type": "object",
+            "properties": {
+                "fullyQualifiedName": {
+                    "$ref": "#/definitions/fullyQualifiedIdentifier"
+                },
+                "targetType": {
+                    "$ref": "#/definitions/etwNativeType"
+                }
+            },
+            "required": [
+                "fullyQualifiedName",
+                "targetType"
+            ]
+        },
+        "customType-array": {
+            "type": "array",
+            "_uniqueItems": true,
+            "items": {
+                "$ref": "#/definitions/customType"
+            }
+        },
+        "parameter": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "$ref": "#/definitions/identifier"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": {
+                            "$ref": "#/definitions/etwNativeType"
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ]
+                },
+                {
+                    "properties": {
+                        "customType": {
+                            "$ref": "#/definitions/fullyQualifiedIdentifier"
+                        }
+                    },
+                    "required": [
+                        "customType"
+                    ]
+                }
+            ]
+        },
+        "parameter-array": {
+            "type": "array",
+            "_uniqueItems": true,
+            "items": {
+                "$ref": "#/definitions/parameter"
+            }
+        },
+        "commonParameter": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/parameter"
+                },
+                {
+                    "properties": {
+                        "generated": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            ]
+        },
+        "commonParameter-array": {
+            "type": "array",
+            "_uniqueItems": true,
+            "items": {
+                "$ref": "#/definitions/commonParameter"
+            }
+        },
+        "event": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "$ref": "#/definitions/identifier"
+                },
+                "version": {
+                    "type": "integer"
+                },
+                "channel": {
+                    "$ref": "#/definitions/etwChannel"
+                },
+                "level": {
+                    "$ref": "#/definitions/etwEventLevel"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "keywords": {
+                    "$ref": "#/definitions/identifier-array"
+                },
+                "task": {
+                    "$ref": "#/definitions/identifier"
+                },
+                "opcode": {
+                    "$ref": "#/definitions/etwOpcode"
+                },
+                "parameters": {
+                    "$ref": "#/definitions/parameter-array"
+                }
+            },
+            "required": [
+                "id",
+                "name"
+            ]
+        },
+        "event-array": {
+            "type": "array",
+            "_uniqueItems": true,
+            "items": {
+                "$ref": "#/definitions/event"
+            },
+            "minItems": 1
+        }
+    },
+    "type": "object",
+    "properties": {
+        "class": {
+            "$ref": "#/definitions/identifier"
+        },
+        "sourceName": {
+            "type": "string"
+        },
+        "tasks": {
+            "$ref": "#/definitions/identifier-array"
+        },
+        "keywords": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/identifier-array"
+                },
+                {
+                    "maxItems": 44
+                }
+            ]
+        },
+        "customTypes": {
+            "$ref": "#/definitions/customType-array"
+        },
+        "commonParameters": {
+            "$ref": "#/definitions/commonParameter-array"
+        },
+        "events": {
+            "$ref": "#/definitions/event-array"
+        }
+    },
+    "required": [
+        "class",
+        "sourceName",
+        "events"
+    ]
+}

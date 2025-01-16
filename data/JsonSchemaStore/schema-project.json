@@ -1,0 +1,527 @@
+{
+  "title": "JSON schema for Outblocks project configuration files",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$ref": "#/definitions/OutblocksProject",
+  "definitions": {
+    "OutblocksProject": {
+      "title": "Outblocks",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dns": {
+          "description": "Project-wide DNS setup.",
+          "$ref": "#/definitions/DNS"
+        },
+        "state": {
+          "description": "Project-wide state source.",
+          "$ref": "#/definitions/State"
+        },
+        "secrets": {
+          "description": "Project-wide secrets provider.",
+          "$ref": "#/definitions/Secrets"
+        },
+        "dependencies": {
+          "description": "Project-wide dependencies to provision.",
+          "$ref": "#/definitions/Dependencies"
+        },
+        "monitoring": {
+          "description": "Project monitoring setup.",
+          "$ref": "#/definitions/Monitoring"
+        },
+        "plugins": {
+          "description": "Project-wide plugins.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Plugin"
+          }
+        },
+        "defaults": {
+          "description": "Project-wide default app settings.",
+          "$ref": "#/definitions/Defaults"
+        }
+      }
+    },
+    "DNS": {
+      "title": "DNS",
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "plugin": {
+            "type": "string"
+          },
+          "ssl": {
+            "description": "SSL configuration.",
+            "$ref": "#/definitions/SSL"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "domain"
+            ]
+          },
+          {
+            "required": [
+              "domains"
+            ]
+          }
+        ]
+      }
+    },
+    "SSL": {
+      "title": "SSL",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cert_file": {
+          "description": "Public key file path. Required to be in PEM format.",
+          "type": "string"
+        },
+        "key_file": {
+          "description": "Private key file path. Required to be in PEM format.",
+          "type": "string"
+        },
+        "cert": {
+          "description": "Public key value in PEM format.",
+          "type": "string"
+        },
+        "key": {
+          "description": "Private key value in PEM format.",
+          "type": "string"
+        }
+      }
+    },
+    "State": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "description": "State type, plugin specific value e.g. 'gcp' for gcp plugin or use 'local' for local state.",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path of local state, used only when state type is 'local'.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "State"
+    },
+    "Secrets": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "description": "Secrets provider type, plugin specific value e.g. 'gcp' for gcp plugin.",
+          "type": "string"
+        }
+      },
+      "title": "Secrets"
+    },
+    "Dependencies": {
+      "title": "Dependencies",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[_a-zA-Z][a-zA-Z0-9_-]*$": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The type of the dependency.",
+              "type": "string"
+            },
+            "deploy": {
+              "description": "Deploy config.",
+              "$ref": "#/definitions/DependencyDeploy"
+            },
+            "run": {
+              "description": "Run config.",
+              "$ref": "#/definitions/DependencyRun"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "const": "storage"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "versioning": {
+                    "description": "Enables versioning for objects.",
+                    "type": "boolean"
+                  },
+                  "location": {
+                    "description": "Specify location for storage, refer to cloud provider docs for possible options.",
+                    "type": "string"
+                  },
+                  "public": {
+                    "description": "Makes whole storage public so that all objects can be accessed.",
+                    "type": "boolean"
+                  },
+                  "max_versions": {
+                    "description": "Maximum amount of versions to keep.",
+                    "type": "integer"
+                  },
+                  "delete_in_days": {
+                    "description": "Delete new objects after X days.",
+                    "type": "integer"
+                  },
+                  "expire_versions_in_days": {
+                    "description": "Expire archived versions after X days.",
+                    "type": "integer"
+                  },
+                  "cors": {
+                    "description": "CORS settings.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/DependencyStorageCORS"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "type": {
+                        "const": "mysql"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "type": {
+                        "const": "postgresql"
+                      }
+                    }
+                  }
+                ]
+              },
+              "then": {
+                "properties": {
+                  "version": {
+                    "description": "Specify version of database, refer to cloud provider docs for possible options.",
+                    "type": "string"
+                  },
+                  "high_availability": {
+                    "description": "Makes database highly available meaning it will have a read replica available in case of master failure.",
+                    "type": "boolean"
+                  },
+                  "tier": {
+                    "description": "Specify tier of database, refer to cloud provider docs for possible options.",
+                    "type": "string"
+                  },
+                  "flags": {
+                    "description": "Database flags, refer to cloud provider docs for possible options.",
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "users": {
+                    "description": "Database users.",
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/definitions/DependencyDatabaseUser"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "DependencyDatabaseUser": {
+      "title": "Database user",
+      "type": "object",
+      "properties": {
+        "password": {
+          "description": "Explicitly set password, defaults to a randomly generated string.",
+          "type": "string"
+        },
+        "hostname": {
+          "description": "Hostname that user is allowed to connect from. Not all databases may support it.",
+          "type": "string"
+        }
+      }
+    },
+    "DependencyStorageCORS": {
+      "title": "Storage CORS",
+      "type": "object",
+      "properties": {
+        "origins": {
+          "description": "The list of Origins eligible to receive CORS response headers. Note: \"*\" is permitted in the list of origins, and means \"any Origin\".",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "methods": {
+          "description": "The list of HTTP methods on which to include CORS response headers, (GET, OPTIONS, POST, etc) Note: \"*\" is permitted in the list of methods, and means \"any method\".",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "response_headers": {
+          "description": "The list of HTTP headers other than the simple response headers to give permission for the user-agent to share across domains.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_age_in_seconds": {
+          "description": "The value in seconds to return in the Access-Control-Max-Age header used in preflight responses.",
+          "type": "integer"
+        }
+      }
+    },
+    "DependencyRun": {
+      "title": "Run",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "type": "string"
+        }
+      }
+    },
+    "DependencyDeploy": {
+      "title": "Deploy",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "type": "string"
+        }
+      }
+    },
+    "Monitoring": {
+      "title": "Monitoring",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plugin": {
+          "description": "Monitoring plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        },
+        "channels": {
+          "description": "Monitoring notification channels.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MonitoringChannel"
+          }
+        },
+        "targets": {
+          "description": "Monitoring targets.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MonitoringTarget"
+          }
+        }
+      }
+    },
+    "MonitoringChannel": {
+      "title": "Monitoring channels",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "description": "Notification channel type. Possible values: slack, email.",
+          "type": "string",
+          "enum": [
+            "slack",
+            "email"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "slack"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "token": {
+                "description": "Bot user oauth token used for slack notification.",
+                "type": "string"
+              },
+              "channel": {
+                "description": "Channel used for slack notification.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "token",
+              "channel"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "email"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "email": {
+                "description": "Email used for email channel type.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "email"
+            ]
+          }
+        }
+      ]
+    },
+    "MonitoringTarget": {
+      "title": "Monitoring target",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "description": "Target full url.",
+          "type": "string"
+        },
+        "frequency": {
+          "description": "Check frequency in minutes. Defaults to 5 minutes.",
+          "type": "integer",
+          "enum": [
+            1,
+            5,
+            10,
+            15
+          ]
+        },
+        "locations": {
+          "description": "Check locations to use. Defaults to 'all'.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "Plugin": {
+      "title": "Plugin",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Defaults": {
+      "title": "Defaults",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "deploy": {
+          "description": "Deploy config.",
+          "$ref": "#/definitions/DefaultDeploy"
+        },
+        "dns": {
+          "description": "DNS config.",
+          "$ref": "#/definitions/DefaultDNS"
+        },
+        "run": {
+          "description": "Run config.",
+          "$ref": "#/definitions/DefaultRun"
+        }
+      }
+    },
+    "DefaultDeploy": {
+      "title": "Deploy defaults",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "description": "Deploy plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        }
+      },
+      "env": {
+        "description": "Additional environment variables added to every app that supports environment variables.",
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    },
+    "DefaultDNS": {
+      "title": "DNS defaults",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "description": "DNS plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        }
+      }
+    },
+    "DefaultRun": {
+      "title": "Run defaults",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "description": "Run plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        },
+        "env": {
+          "description": "Additional environment variables added to every app that supports environment variables.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

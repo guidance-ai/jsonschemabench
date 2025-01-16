@@ -1,0 +1,231 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "vector3": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    "quaternion": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "quaternion"
+          ]
+        },
+        "w": {
+          "type": "number"
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "w",
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    "euler": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "euler"
+          ]
+        },
+        "order": {
+          "type": "string",
+          "enum": [
+            "xyz",
+            "xzy",
+            "yxz",
+            "yzx",
+            "zxy",
+            "zyx"
+          ]
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "order",
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    "rotation": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/euler"
+        },
+        {
+          "$ref": "#/definitions/quaternion"
+        }
+      ]
+    },
+    "transformable": {
+      "type": "object",
+      "properties": {
+        "translation": {
+          "$ref": "#/definitions/vector3"
+        },
+        "rotation": {
+          "$ref": "#/definitions/rotation"
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "data"
+          ]
+        },
+        "spriteId": {
+          "type": "integer"
+        },
+        "centerX": {
+          "type": "integer"
+        },
+        "centerY": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type",
+        "spriteId",
+        "centerX",
+        "centerY"
+      ]
+    },
+    "use": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "use"
+          ]
+        },
+        "reference": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "type",
+        "reference"
+      ]
+    },
+    "group": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "group"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/part"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "children"
+      ]
+    },
+    "part": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/transformable"
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/data"
+            },
+            {
+              "$ref": "#/definitions/use"
+            },
+            {
+              "$ref": "#/definitions/group"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": [
+        "assembled-1.0.0"
+      ]
+    },
+    "definitions": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "$ref": "#/definitions/part"
+        }
+      },
+      "additionalProperties": false
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/part"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "children"
+  ]
+}

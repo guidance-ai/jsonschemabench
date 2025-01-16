@@ -1,0 +1,1204 @@
+{
+    "additionalProperties": false,
+    "description": "Schema for a bad row resulting from schema violations",
+    "properties": {
+        "failure": {
+            "additionalProperties": false,
+            "description": "Information regarding the schema violations",
+            "properties": {
+                "messages": {
+                    "description": "List of failure messages associated with the tracker protocol violations",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": false,
+                                "description": "String supplied for schema validation was not JSON",
+                                "properties": {
+                                    "error": {
+                                        "description": "Json parsing issue",
+                                        "type": "string"
+                                    },
+                                    "field": {
+                                        "description": "Field which ended up not being json",
+                                        "maxLength": 64,
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "description": "Stringified representation of the value which is not json",
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "field",
+                                    "error"
+                                ],
+                                "type": "object"
+                            },
+                            {
+                                "additionalProperties": false,
+                                "description": "Json supplied for schema validation was not self-describing",
+                                "properties": {
+                                    "error": {
+                                        "description": "Issue which the json which makes it not self-describing",
+                                        "enum": [
+                                            "INVALID_SCHEMAVER",
+                                            "INVALID_IGLUURI",
+                                            "INVALID_DATA_PAYLOAD",
+                                            "INVALID_SCHEMA"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "json": {
+                                        "description": "Supplied JSON which was not self-describing"
+                                    }
+                                },
+                                "required": [
+                                    "json",
+                                    "error"
+                                ],
+                                "type": "object"
+                            },
+                            {
+                                "additionalProperties": false,
+                                "description": "Supplied JSON does not match the associated schema criterion",
+                                "properties": {
+                                    "schemaCriterion": {
+                                        "description": "The schema criterion which was not respected",
+                                        "type": "string"
+                                    },
+                                    "schemaKey": {
+                                        "description": "Supplied schema key",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "schemaKey",
+                                    "schemaCriterion"
+                                ],
+                                "type": "object"
+                            },
+                            {
+                                "additionalProperties": false,
+                                "description": "Supplied JSON did not validate against its schema (or schema was not found)",
+                                "properties": {
+                                    "error": {
+                                        "anyOf": [
+                                            {
+                                                "additionalProperties": false,
+                                                "description": "Resolution error - schema could not be found in the specified repositories, defined by ResolutionError in the Iglu Client",
+                                                "properties": {
+                                                    "error": {
+                                                        "enum": [
+                                                            "ResolutionError"
+                                                        ]
+                                                    },
+                                                    "lookupHistory": {
+                                                        "items": {
+                                                            "properties": {
+                                                                "attempts": {
+                                                                    "description": "Number of attempts which have been made",
+                                                                    "minimum": 0,
+                                                                    "type": "integer"
+                                                                },
+                                                                "errors": {
+                                                                    "description": "Set of errors which happened for this repository",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "error": {
+                                                                                "description": "Type of error (NotFound does not contain a message)",
+                                                                                "enum": [
+                                                                                    "RepoFailure",
+                                                                                    "ClientFailure",
+                                                                                    "NotFound"
+                                                                                ]
+                                                                            },
+                                                                            "message": {
+                                                                                "description": "Optional message in case of ClientFailure or RepoFailure",
+                                                                                "maxLength": 256,
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "error"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "minItems": 1,
+                                                                    "type": "array"
+                                                                },
+                                                                "lastAttempt": {
+                                                                    "_format": "date-time",
+                                                                    "description": "Timestamp of a last attempt being made",
+                                                                    "type": "string"
+                                                                },
+                                                                "repostitory": {
+                                                                    "description": "Name of the repostitory as written in resolver.json",
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "repository",
+                                                                "errors",
+                                                                "attempts",
+                                                                "lastAttempt"
+                                                            ],
+                                                            "type": "object"
+                                                        },
+                                                        "minItems": 1,
+                                                        "type": "array"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "error",
+                                                    "lookupHistory"
+                                                ]
+                                            },
+                                            {
+                                                "additionalProperties": false,
+                                                "description": "Data is invalid against resolved schema",
+                                                "properties": {
+                                                    "dataReports": {
+                                                        "items": {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "keyword": {
+                                                                    "description": "JSON Schema Keywrod caused invalidation",
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "message": {
+                                                                    "description": "Human-readable message describing the issue with the schema",
+                                                                    "type": "string"
+                                                                },
+                                                                "path": {
+                                                                    "description": "JSON Path to an issue in the faulty JSON datum",
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "targets": {
+                                                                    "type": [
+                                                                        "array",
+                                                                        "null"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "path",
+                                                                "message",
+                                                                "keyword",
+                                                                "targets"
+                                                            ]
+                                                        },
+                                                        "minItems": 1,
+                                                        "type": "array"
+                                                    },
+                                                    "error": {
+                                                        "enum": [
+                                                            "ValidationError"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "dataReports"
+                                                ]
+                                            },
+                                            {
+                                                "additionalProperties": false,
+                                                "description": "Schema is invalid and cannot be used to validate an instance",
+                                                "properties": {
+                                                    "error": {
+                                                        "enum": [
+                                                            "ValidationError"
+                                                        ]
+                                                    },
+                                                    "schemaIssues": {
+                                                        "description": "List of problems in resolved JSON schema",
+                                                        "items": {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "message": {
+                                                                    "description": "Human-readable message describing the issue with the schema",
+                                                                    "type": "string"
+                                                                },
+                                                                "path": {
+                                                                    "description": "JSON Path to an issue in the faulty JSON Schema",
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "path",
+                                                                "message"
+                                                            ],
+                                                            "type": "object"
+                                                        },
+                                                        "minItems": 1,
+                                                        "type": "array"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "error"
+                                                ]
+                                            }
+                                        ],
+                                        "description": "Iglu client error"
+                                    },
+                                    "schemaKey": {
+                                        "description": "The iglu schema coordinates to validate against",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "timestamp": {
+                    "_format": "date-time",
+                    "description": "Timestamp at which the failure occurred",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "timestamp",
+                "messages"
+            ],
+            "type": "object"
+        },
+        "payload": {
+            "properties": {
+                "enriched": {
+                    "additionalProperties": false,
+                    "description": "The partially enriched event that resulted in schema violations",
+                    "properties": {
+                        "app_id": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "base_currency": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_colordepth": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_cookies": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_family": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_features_director": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_flash": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_gears": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_java": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_pdf": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_quicktime": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_realplayer": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_silverlight": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_features_windowsmedia": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_lang": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_name": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_renderengine": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_type": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_version": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "br_viewheight": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "br_viewwidth": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "collector_tstamp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "contexts": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "derived_contexts": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "derived_tstamp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "doc_charset": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "doc_height": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "doc_width": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "domain_sessionid": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "domain_sessionidx": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "domain_userid": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "dvce_created_tstamp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "dvce_ismobile": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "dvce_screenheight": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "dvce_screenwidth": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "dvce_sent_tstamp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "dvce_type": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "etl_tags": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "etl_tstamp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "event": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "event_fingerprint": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "event_format": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "event_id": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "event_name": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "event_vendor": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "event_version": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "geo_city": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "geo_country": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "geo_latitude": {
+                            "type": [
+                                "number",
+                                "null"
+                            ]
+                        },
+                        "geo_longitude": {
+                            "type": [
+                                "number",
+                                "null"
+                            ]
+                        },
+                        "geo_region": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "geo_region_name": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "geo_timezone": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "geo_zipcode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ip_domain": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ip_isp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ip_netspeed": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ip_organization": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "mkt_campaign": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "mkt_clickid": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "mkt_content": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "mkt_medium": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "mkt_network": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "mkt_source": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "mkt_term": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "name_tracker": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "network_userid": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "os_family": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "os_manufacturer": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "os_name": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "os_timezone": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_referrer": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_title": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_url": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_urlfragment": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_urlhost": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_urlpath": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_urlport": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "page_urlquery": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "page_urlscheme": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "platform": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "pp_xoffset_max": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "pp_xoffset_min": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "pp_yoffset_max": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "pp_yoffset_min": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "refr_domain_userid": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_dvce_tstamp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_medium": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_source": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_term": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_urlfragment": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_urlhost": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_urlpath": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_urlport": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "refr_urlquery": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "refr_urlscheme": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "se_action": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "se_category": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "se_label": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "se_property": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "se_value": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ti_category": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ti_currency": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ti_name": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ti_orderid": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ti_price": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ti_price_base": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ti_quantity": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
+                        "ti_sku": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_affiliation": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_city": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_country": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_currency": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_orderid": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_shipping": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_shipping_base": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_state": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_tax": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_tax_base": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_total": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "tr_total_base": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "true_tstamp": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "txn_id": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "unstruct_event": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "user_fingerprint": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "user_id": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "user_ipaddress": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "useragent": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "v_collector": {
+                            "type": "string"
+                        },
+                        "v_etl": {
+                            "type": "string"
+                        },
+                        "v_tracker": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "raw": {
+                    "additionalProperties": false,
+                    "description": "The raw event extracted from collector payload",
+                    "properties": {
+                        "contentType": {
+                            "description": "Content type of the payload as detected by the collector",
+                            "maxLength": 256,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "encoding": {
+                            "description": "Encoding of the collector payload",
+                            "maxLength": 32,
+                            "type": "string"
+                        },
+                        "headers": {
+                            "description": "List of the headers part of this collector payload",
+                            "items": {
+                                "maxLength": 8192,
+                                "type": "string"
+                            },
+                            "type": [
+                                "array",
+                                "null"
+                            ]
+                        },
+                        "hostname": {
+                            "description": "Hostname of the payload as detected by the collector",
+                            "maxLength": 8192,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "ipAddress": {
+                            "description": "IP address of the payload as detected by the collector",
+                            "maxLength": 128,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "loaderName": {
+                            "maxLength": 32,
+                            "type": "string"
+                        },
+                        "parameters": {
+                            "description": "Tracker protocol parameters",
+                            "type": "object"
+                        },
+                        "refererUri": {
+                            "description": "Referer of the payload as detected by the collector",
+                            "maxLength": 8192,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "timestamp": {
+                            "_format": "date-time",
+                            "description": "Timestamp at which the payload was collected",
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "userId": {
+                            "_format": "uuid",
+                            "description": "Network user id associated with this payload",
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "useragent": {
+                            "description": "User agent of the payload as detected by the collector",
+                            "maxLength": 4096,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "vendor": {
+                            "description": "Vendor of the adapter that processed this payload, here com.snowplowanalytics.snowplow",
+                            "maxLength": 64,
+                            "type": "string"
+                        },
+                        "version": {
+                            "description": "Version of the adapter that processed this payload",
+                            "maxLength": 16,
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "vendor",
+                        "version",
+                        "loaderName",
+                        "encoding"
+                    ],
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "processor": {
+            "additionalProperties": false,
+            "description": "Information about the piece of software responsible for the creation of schema violations",
+            "properties": {
+                "artifact": {
+                    "description": "Artifact responsible for the creation of schema violations",
+                    "maxLength": 512,
+                    "type": "string"
+                },
+                "version": {
+                    "description": "Version of the artifact responsible for the creation of schema violations",
+                    "maxLength": 32,
+                    "pattern": "^(\\d+\\.\\d+\\.\\d+.*)$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "artifact",
+                "version"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "failure",
+        "payload",
+        "processor"
+    ],
+    "self": {
+        "format": "jsonschema",
+        "name": "schema_violations",
+        "vendor": "com.snowplowanalytics.snowplow.badrows",
+        "version": "1-0-0"
+    },
+    "type": "object"
+}

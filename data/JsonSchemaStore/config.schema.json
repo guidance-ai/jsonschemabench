@@ -1,0 +1,286 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Config",
+  "definitions": {
+    "BazelStep": {
+      "properties": {
+        "build_targets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of bazel targets to build"
+        },
+        "test_targets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of bazel targets to test"
+        },
+        "build_flags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Build flags to use in addition to defined in /etc/bazel.bazelrc"
+        },
+        "test_flags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Test flags to use in addition to defined in /etc/bazel.bazelrc"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "BranchesAndPaths": {
+      "required": [
+        "branches"
+      ],
+      "properties": {
+        "branches": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of branch name masks (doubleglob) to match"
+        },
+        "paths": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of path masks (doubleglob) to match. If not specified, all paths are matched"
+        },
+        "branches-ignore": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of branch name masks (doubleglob) to ignore"
+        },
+        "paths-ignore": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of path masks (doubleglob) to match. If not specified, all paths are ignored"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "BranchesOrTags": {
+      "anyOf": [
+        {
+          "required": [
+            "branches"
+          ]
+        },
+        {
+          "required": [
+            "tags"
+          ]
+        }
+      ],
+      "properties": {
+        "branches": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of branch name masks (doubleglob) to match"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of tag masks (doubleglob) to match"
+        },
+        "branches-ignore": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of branch name masks (doubleglob) to ignore"
+        },
+        "tags-ignore": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of tag masks (doubleglob) to ignore"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Config": {
+      "required": [
+        "workflows"
+      ],
+      "properties": {
+        "workflows": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Workflow"
+          },
+          "type": "array",
+          "description": "The list of FasterCI workflows"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "On": {
+      "anyOf": [
+        {
+          "required": [
+            "push"
+          ]
+        },
+        {
+          "required": [
+            "pull_request"
+          ]
+        }
+      ],
+      "properties": {
+        "push": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/BranchesOrTags",
+          "description": "Run the workflow on code push"
+        },
+        "pull_request": {
+          "$ref": "#/definitions/BranchesAndPaths",
+          "description": "Run the workflow on pull request"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Step": {
+      "anyOf": [
+        {
+          "required": [
+            "github_check_md_file"
+          ]
+        },
+        {
+          "required": [
+            "run"
+          ]
+        },
+        {
+          "required": [
+            "bazel"
+          ]
+        }
+      ],
+      "dependencies": {
+        "github_check": [
+          "name"
+        ],
+        "github_check_md_file": [
+          "name"
+        ]
+      },
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Step name, optional"
+        },
+        "working-directory": {
+          "type": "string",
+          "description": "Directory to run the step instead of default repo directory"
+        },
+        "github_check": {
+          "type": "boolean",
+          "description": "Report the result of the step as a separate github check"
+        },
+        "github_check_md_file": {
+          "type": "string",
+          "description": "After completing the step, report as a separate Github Check, using the content of the file as a report body, optional"
+        },
+        "run": {
+          "type": "string",
+          "description": "Arbitrary command execution; Could be multiline"
+        },
+        "bazel": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/BazelStep",
+          "description": "Bazel step"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Workflow": {
+      "required": [
+        "name",
+        "on"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Workflow name"
+        },
+        "on": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/On",
+          "description": "Event to activate the workflow on"
+        },
+        "image": {
+          "type": "string",
+          "description": "Docker image to run the workflow"
+        },
+        "cleanup": {
+          "type": "string",
+          "description": "optional cleanup command, executed after the workflow"
+        },
+        "max_parallel": {
+          "type": "integer",
+          "description": "optional maximum number of parallel runs of this workflow"
+        },
+        "env": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "description": "Environment variables"
+        },
+        "secrets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of secrets to mount as environment variables"
+        },
+        "hide_from_github": {
+          "type": "boolean",
+          "description": "Do not notify github"
+        },
+        "init": {
+          "type": "string",
+          "description": "Optional command to run before the workflow. Use multiline for multiple commands"
+        },
+        "steps": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Step"
+          },
+          "type": "array",
+          "description": "List of workflow steps to execute"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}

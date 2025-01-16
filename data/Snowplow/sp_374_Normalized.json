@@ -1,0 +1,129 @@
+{
+    "additionalProperties": false,
+    "description": "Message with batch metadata, passed from Shredder to Loader",
+    "properties": {
+        "base": {
+            "_format": "uri",
+            "description": "Blob storage path to the root of the batch",
+            "maxLength": 1024,
+            "type": "string"
+        },
+        "compression": {
+            "description": "File compression type",
+            "enum": [
+                "GZIP",
+                "NONE"
+            ]
+        },
+        "count": {
+            "description": "Count of events in the batch, null means the count could not be calculated",
+            "properties": {
+                "good": {
+                    "description": "Amount of good events in the batch",
+                    "minimum": 0,
+                    "type": "integer"
+                }
+            },
+            "type": [
+                "object",
+                "null"
+            ]
+        },
+        "processor": {
+            "description": "Identificator of a shredder sent the message",
+            "properties": {
+                "artifact": {
+                    "description": "Name of the artifact",
+                    "maxLength": 64,
+                    "type": "string"
+                },
+                "version": {
+                    "description": "Semantic Version of the artifact",
+                    "maxLength": 16,
+                    "type": "string"
+                }
+            },
+            "required": [
+                "artifact",
+                "version"
+            ],
+            "type": "object"
+        },
+        "timestamps": {
+            "description": "Set of timestampts associated with the batch",
+            "properties": {
+                "jobCompleted": {
+                    "_format": "date-time",
+                    "description": "Time when the batch shredding has been finished (and the message being prepared)",
+                    "type": "string"
+                },
+                "jobStarted": {
+                    "_format": "date-time",
+                    "description": "Time when the batch started being shredded",
+                    "type": "string"
+                },
+                "max": {
+                    "_format": "date-time",
+                    "description": "The latest collector_tstamp available in the batch",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "min": {
+                    "_format": "date-time",
+                    "description": "The earliest collector_stamp available in the batch",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "jobStarted",
+                "jobCompleted",
+                "min",
+                "max"
+            ],
+            "type": "object"
+        },
+        "types": {
+            "description": "Set of Iglu URIs and the format they were shredded into",
+            "items": {
+                "properties": {
+                    "format": {
+                        "description": "File format in which the entities were shredded to",
+                        "enum": [
+                            "TSV",
+                            "JSON"
+                        ]
+                    },
+                    "schemaKey": {
+                        "description": "Iglu URI",
+                        "maxLength": 256,
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "schemaKey",
+                    "format"
+                ]
+            },
+            "type": "array"
+        }
+    },
+    "required": [
+        "base",
+        "compression",
+        "types",
+        "timestamps",
+        "processor"
+    ],
+    "self": {
+        "format": "jsonschema",
+        "name": "shredding_complete",
+        "vendor": "com.snowplowanalytics.snowplow.storage",
+        "version": "1-0-1"
+    },
+    "type": "object"
+}

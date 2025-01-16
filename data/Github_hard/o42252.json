@@ -1,0 +1,381 @@
+{
+    "id": "https://gae123.com/sd2-schema",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "root",
+    "type": "object",
+    "properties": {
+        "config": {
+            "title": "sd2 configuration",
+            "type": "object",
+            "additionalProperties": false,
+            "default": {},
+            "properties": {
+                "HaltOnSuspendResume": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "RsynCheckPeriodInSeconds": {
+                    "type": "number",
+                    "default": 900
+                },
+                "DockerCheckPeriodInSeconds": {
+                    "type": "number",
+                    "default": 60
+                }
+            }
+        },
+        "images": {
+            "title": "Your docker images",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/image"
+            }
+        },
+        "hosts": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            },
+            "minItems": 1
+        },
+        "workspaces": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/workspace"
+            }
+        },
+        "containers": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/container"
+            }
+        }
+    },
+    "required": [
+        "workspaces",
+        "hosts"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "host": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "abstract": {
+                    "type": "boolean"
+                },
+                "extends": {
+                    "type": "string"
+                },
+                "sudo_ssh": {
+                    "type": "string",
+                    "description": "Uses sudo ssh to connect to the host, useful if you want to forward locally ports like 80 or 443"
+                },
+                "User": {
+                    "type": "string",
+                    "description": "Used in .ssh/config defaults to the $USER who runs sd2"
+                },
+                "Port": {
+                    "type": "integer"
+                },
+                "IdentityFile": {
+                    "type": "string"
+                },
+                "StrictHostKeyChecking": {
+                    "type": "string"
+                },
+                "ProxyCommand": {
+                    "type": "string"
+                },
+                "ProxyJump": {
+                    "type": "string"
+                },
+                "AddKeysToAgent": {
+                    "type": "string"
+                },
+                "UseKeychain": {
+                    "type": "string"
+                },
+                "UserKnownHostsFile": {
+                    "type": "string"
+                },
+                "ForwardAgent": {
+                    "type": "string"
+                },
+                "ServerAliveInterval": {
+                    "type": "integer"
+                },
+                "PKCS11Provider": {
+                    "type": "string"
+                },
+                "SmartcardDevice": {
+                    "type": "string"
+                },
+                "HostKeyAlias": {
+                    "type": "string"
+                },
+                "LocalForward": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "_uniqueItems": true
+                },
+                "containers": {
+                    "type": "array",
+                    "description": "List of containers to run on this host",
+                    "items": {
+                        "type": "object",
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "$ref": "#/definitions/container"
+                            }
+                        ]
+                    }
+                },
+                "Operations": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "start": {
+                            "type": "string"
+                        },
+                        "stop": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "container": {
+            "type": "object",
+            "required": [
+                "name",
+                "imagename",
+                "hostname"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                },
+                "aliases": {
+                    "type": "array",
+                    "description": "Names that will be added to /etc/hosts for this container",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "abstract": {
+                    "type": "boolean"
+                },
+                "extends": {
+                    "type": "string"
+                },
+                "imagename": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "descrption": "Should the container be started if it is missing",
+                    "default": true
+                },
+                "disabled": {
+                    "type": "boolean",
+                    "descrption": "Should the container be started if it is missing",
+                    "default": false
+                },
+                "remove_if_version_mismatch": {
+                    "type": "boolean",
+                    "description": "If the container is running with the wrong image remove it and restart it.",
+                    "default": false
+                },
+                "remove_if_running_when_disabled": {
+                    "type": "boolean",
+                    "description": "If the container is running and should not remove it.",
+                    "default": false
+                }
+            }
+        },
+        "image": {
+            "type": "object",
+            "required": [
+                "name",
+                "docker_image_name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "docker_image_name": {
+                    "type": "string",
+                    "description": "The docker image name"
+                },
+                "docker_auth": {
+                    "type": "string",
+                    "description": "A command to run just before running docker, usually used for authentication"
+                },
+                "mount_home_dir": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "ports": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "_uniqueItems": true
+                },
+                "env": {
+                    "description": "Environment variables array to be passed to the container",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "value"
+                        ],
+                        "_uniqueItems": true,
+                        "additionalProperties": false,
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "_uniqueItems": true
+                },
+                "environ": {
+                    "description": "Environment variables array to be passed to the container",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "_uniqueItems": true
+                },
+                "extra_flags": {
+                    "type": [
+                        "string",
+                        "array"
+                    ],
+                    "description": "Flags to add to the docker command line",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "command": {
+                    "type": "string"
+                }
+            }
+        },
+        "workspace": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "abstract": {
+                    "type": "boolean"
+                },
+                "extends": {
+                    "type": "string"
+                },
+                "source_root": {
+                    "description": "The root of the source directory, required for non abstract workspaces",
+                    "type": "string"
+                },
+                "dest_root": {
+                    "description": "The destination directory. Optional, if missing it will be the same the source_root",
+                    "type": "string"
+                },
+                "delete": {
+                    "description": "Exact mirror, delete any files that exist only in dest.",
+                    "type": "boolean"
+                },
+                "paths": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/includeexclude"
+                    }
+                },
+                "targets": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "$ref": "#/definitions/desthost"
+                            }
+                        ]
+                    },
+                    "_uniqueItems": true
+                }
+            }
+        },
+        "desthost": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "disabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "includeexclude": {
+            "type": "object",
+            "properties": {
+                "include": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "_uniqueItems": true
+                },
+                "exclude": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "_uniqueItems": true
+                }
+            }
+        }
+    }
+}

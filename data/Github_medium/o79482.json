@@ -1,0 +1,164 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "app": {
+            "type": "string"
+        },
+        "elapsedTime": {
+            "description": "elapsed time of the operation in milliseconds",
+            "type": "integer"
+        },
+        "tenantEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "kind"
+            ],
+            "properties": {
+                "kind": {
+                    "enum": [
+                        "patchSetApplyRebootStart",
+                        "bumpSecurityGenerationRebootStart",
+                        "simpleRebootStart",
+                        "tenantPreHaltStart",
+                        "tenantPreHaltComplete",
+                        "tenantHaltStart",
+                        "tenantHaltComplete",
+                        "appPatchesApplyStart",
+                        "appPatchesApplyComplete",
+                        "bumpSecurityGenerationComplete",
+                        "tenantPreStartStart",
+                        "tenantPreStartComplete",
+                        "tenantStartStart",
+                        "tenantStartComplete",
+                        "patchSetApplyRebootComplete",
+                        "bumpSecurityGenerationRebootComplete",
+                        "simpleRebootComplete"
+                    ]
+                }
+            }
+        },
+        "appEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "kind",
+                "app"
+            ],
+            "properties": {
+                "kind": {
+                    "enum": [
+                        "appPreHaltStart",
+                        "appPreHaltError",
+                        "appPreHaltTimeout",
+                        "appPreHaltComplete",
+                        "appHaltStart",
+                        "appHaltError",
+                        "appHaltTimeout",
+                        "appHaltComplete",
+                        "appPreStartStart",
+                        "appPreStartError",
+                        "appPreStartTimeout",
+                        "appPreStartComplete",
+                        "appStartStart",
+                        "appStartError",
+                        "appStartTimeout",
+                        "appStartComplete",
+                        "appInstallStart",
+                        "appInstallError",
+                        "appInstallTimeout",
+                        "appInstallComplete",
+                        "appUninstallStart",
+                        "appUninstallError",
+                        "appUninstallTimeout",
+                        "appUninstallComplete",
+                        "appEditComplete"
+                    ]
+                },
+                "app": {
+                    "$ref": "#/definitions/app"
+                }
+            }
+        },
+        "tenantStatusEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "kind",
+                "incarnation",
+                "securityGeneration"
+            ],
+            "properties": {
+                "kind": {
+                    "enum": [
+                        "tenantStatusEvent"
+                    ]
+                },
+                "incarnation": {
+                    "type": "integer"
+                },
+                "securityGeneration": {
+                    "type": "integer"
+                }
+            }
+        },
+        "orderedEvent": {
+            "type": "object",
+            "properties": {
+                "seq": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "event": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/tenantEvent"
+                        },
+                        {
+                            "$ref": "#/definitions/appEvent"
+                        },
+                        {
+                            "$ref": "#/definitions/tenantStatusEvent"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "seq",
+                "time",
+                "event"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "status"
+    ],
+    "properties": {
+        "status": {
+            "enum": [
+                "notLaunched",
+                "inProcess",
+                "complete"
+            ]
+        },
+        "latestEvent": {
+            "type": "integer"
+        },
+        "continuePage": {
+            "type": "string",
+            "description": "the URI that the browser should redirect the user to once this reboot is complete, possibly at a new storefront if a patch set apply swapped out the current one"
+        },
+        "events": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/orderedEvent"
+            }
+        }
+    }
+}

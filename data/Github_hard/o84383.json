@@ -1,0 +1,579 @@
+{
+    "id": "https://tredly.com/docs/tredlyfile-json-schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "schema for an JSON Tredlyfile",
+    "type": "object",
+    "definitions": {
+        "validPort": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+        },
+        "validAnyPort": {
+            "type": "string",
+            "enum": [
+                "any"
+            ]
+        },
+        "positiveInteger": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "binaryStringType": {
+            "type": "string",
+            "enum": [
+                "0",
+                "1"
+            ]
+        },
+        "stringPath": {
+            "type": "string",
+            "pattern": "^/"
+        },
+        "typeSizeMegabyte": {
+            "type": "string",
+            "pattern": "^[0-9]+(m|M)(b|B)?$"
+        },
+        "typeSizeGigabyte": {
+            "type": "string",
+            "pattern": "^[0-9]+(g|G)(b|B)?$"
+        },
+        "validIpv4": {
+            "pattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+        },
+        "validIpv4WithCidr": {
+            "type": "string",
+            "pattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+        },
+        "resourceUnlimited": {
+            "type": "string",
+            "enum": [
+                "unlimited"
+            ]
+        },
+        "inOutPorts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "in": {
+                    "type": "array",
+                    "_uniqueItems": true,
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/validPort"
+                            },
+                            {
+                                "$ref": "#/definitions/validAnyPort"
+                            }
+                        ]
+                    },
+                    "default": {}
+                },
+                "out": {
+                    "type": "array",
+                    "_uniqueItems": true,
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/validPort"
+                            },
+                            {
+                                "$ref": "#/definitions/validAnyPort"
+                            }
+                        ]
+                    },
+                    "default": {}
+                }
+            }
+        },
+        "operationExec": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "exec"
+                    ]
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "operationFolderFileMapping": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "fileFolderMapping"
+                    ]
+                },
+                "source": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "source",
+                "target"
+            ],
+            "additionalProperties": false
+        },
+        "operationInstallPackage": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "installPackage"
+                    ]
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "arrayOfOperations": {
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/operationExec"
+                    },
+                    {
+                        "$ref": "#/definitions/operationFolderFileMapping"
+                    },
+                    {
+                        "$ref": "#/definitions/operationInstallPackage"
+                    }
+                ]
+            }
+        },
+        "arrayOfExecOperationsOnly": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/operationExec"
+            }
+        },
+        "uriProtocolHttps": {
+            "type": "string",
+            "pattern": "^https:\\/\\/"
+        },
+        "uriProtocolHttp": {
+            "type": "string",
+            "pattern": "^http:\\/\\/"
+        },
+        "httpsRedirect": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "url": {
+                    "$ref": "#/definitions/uriProtocolHttps"
+                },
+                "cert": {
+                    "description": "SSL certificate to apply to a http redirect 'from' URL.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "url",
+                "cert"
+            ]
+        },
+        "httpRedirect": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "url": {
+                    "$ref": "#/definitions/uriProtocolHttp"
+                },
+                "cert": {
+                    "type": "null",
+                    "enum": [
+                        null
+                    ]
+                }
+            },
+            "required": [
+                "url",
+                "cert"
+            ]
+        }
+    },
+    "required": [
+        "container"
+    ],
+    "properties": {
+        "container": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Unique per partition. Hostname of this container will this value",
+                    "type": "string",
+                    "pattern": "^[-_a-zA-Z0-9]+$"
+                },
+                "restrictTo": {
+                    "description": "The version of Tredly this file is compatible with.",
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^(\\*|[0-9](?:\\.(\\*|[0-9]{1,}(?:\\.(\\*|[0-9]{1,}))?)?)?)$"
+                        },
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }
+                    ]
+                },
+                "group": {
+                    "description": "Add this container to a particular group.",
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^[-_a-zA-Z0-9]+$"
+                        },
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }
+                    ],
+                    "optional": true
+                },
+                "startOrder": {
+                    "description": "Order in which this container is started within your container group.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 99,
+                    "default": 1
+                },
+                "replicate": {
+                    "description": "When set to yes, this allows a container to be replicated within its container group. This is required if 'group' has been set.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "buildOptions": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "publish": {
+                            "description": "When set to true, on push to a Tredly host this container will be automatically validated and built.",
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
+                    "required": [
+                        "publish"
+                    ]
+                },
+                "technicalOptions": {
+                    "description": "These options will be set when the container is created.",
+                    "type": "object",
+                    "optional": true,
+                    "additionalProperties": false,
+                    "properties": {
+                        "securelevel": {
+                            "type": "integer",
+                            "minimum": -1,
+                            "maximum": 3
+                        },
+                        "devfs_ruleset": {
+                            "$ref": "#/definitions/positiveInteger"
+                        },
+                        "enforce_statfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "children.max": {
+                            "$ref": "#/definitions/positiveInteger"
+                        },
+                        "allow.set_hostname": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.sysvipc": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.raw_sockets": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.chflags": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.mount": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.mount.devfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.mount.nullfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.mount.procfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.mount.tmpfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.mount.zfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.quotas": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "allow.socket_af": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "exec.prestart": {
+                            "$ref": "#/definitions/stringPath"
+                        },
+                        "exec.poststart": {
+                            "$ref": "#/definitions/stringPath"
+                        },
+                        "exec.prestop": {
+                            "$ref": "#/definitions/stringPath"
+                        },
+                        "exec.stop": {
+                            "$ref": "#/definitions/stringPath"
+                        },
+                        "exec.clean": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "exec.timeout": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "exec.fib": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "stop.timeout": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "mount.devfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        },
+                        "mount.fdescfs": {
+                            "$ref": "#/definitions/binaryStringType"
+                        }
+                    }
+                },
+                "persistentStorage": {
+                    "type": "object",
+                    "optional": true,
+                    "description": "Create a persistent block of storage for this container",
+                    "additionalProperties": false,
+                    "properties": {
+                        "identifier": {
+                            "description": "A unique name to identify this block of persistent storage.",
+                            "type": "string",
+                            "pattern": "^[-_a-zA-Z0-9]+$"
+                        },
+                        "mountPoint": {
+                            "description": "The path within the container that the persistent storage will be mounted.",
+                            "$ref": "#/definitions/stringPath"
+                        }
+                    },
+                    "required": [
+                        "identifier",
+                        "mountPoint"
+                    ]
+                },
+                "resourceLimits": {
+                    "description": "Limit resources used by this container.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "maxCpu": {
+                            "description": "The total number of cores or percent this container can utilise.",
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^[0-9]+%$"
+                                },
+                                {
+                                    "type": "integer",
+                                    "minimum": 1
+                                },
+                                {
+                                    "$ref": "#/definitions/resourceUnlimited"
+                                }
+                            ],
+                            "optional": true,
+                            "default": "unlimited"
+                        },
+                        "maxHdd": {
+                            "description": "The total amount of disk space, in Gigabytes (G) or Megabytes (M), this container.",
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/typeSizeMegabyte"
+                                },
+                                {
+                                    "$ref": "#/definitions/typeSizeGigabyte"
+                                },
+                                {
+                                    "$ref": "#/definitions/resourceUnlimited"
+                                }
+                            ],
+                            "optional": true,
+                            "default": "unlimited"
+                        },
+                        "maxRam": {
+                            "description": "The total amount of RAM, in Gigabytes (G) or Megabytes (M), this container can utilise.",
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/typeSizeMegabyte"
+                                },
+                                {
+                                    "$ref": "#/definitions/typeSizeGigabyte"
+                                },
+                                {
+                                    "$ref": "#/definitions/resourceUnlimited"
+                                }
+                            ],
+                            "optional": true,
+                            "default": "unlimited"
+                        }
+                    }
+                },
+                "proxy": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "layer4Proxy": {
+                            "description": "Layer4 proxy allows the container to use the Hosts external IP and forward traffic to your container on specific ports.",
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "layer7Proxy": {
+                            "description": "Group of properties for URL(s) the container services and responds to.",
+                            "optional": true,
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "url": {
+                                        "type": "string"
+                                    },
+                                    "cert": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "enableWebsocket": {
+                                        "optional": true,
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "errorResponse": {
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "maxFileSize": {
+                                        "type": "string",
+                                        "optional": true,
+                                        "pattern": "^[0-9]+(m|g)$",
+                                        "default": "1m"
+                                    },
+                                    "redirects": {
+                                        "type": "array",
+                                        "optional": true,
+                                        "items": {
+                                            "type": "object",
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/definitions/httpRedirect"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/httpsRedirect"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "url",
+                                    "cert"
+                                ]
+                            }
+                        }
+                    },
+                    "required": [
+                        "layer4Proxy"
+                    ]
+                },
+                "firewall": {
+                    "type": "object",
+                    "optional": true,
+                    "properties": {
+                        "ipv4Whitelist": {
+                            "type": "array",
+                            "optional": true,
+                            "_uniqueItems": true,
+                            "default": {},
+                            "items": {
+                                "$ref": "#/definitions/validIpv4WithCidr"
+                            }
+                        },
+                        "allowPorts": {
+                            "type": "object",
+                            "optional": true,
+                            "additionalProperties": false,
+                            "_uniqueItems": true,
+                            "properties": {
+                                "udp": {
+                                    "$ref": "#/definitions/inOutPorts"
+                                },
+                                "tcp": {
+                                    "$ref": "#/definitions/inOutPorts"
+                                }
+                            }
+                        }
+                    }
+                },
+                "customDNS": {
+                    "type": "array",
+                    "_uniqueItems": true,
+                    "optional": true,
+                    "default": {},
+                    "items": {
+                        "$ref": "#/definitions/validIpv4"
+                    }
+                },
+                "operations": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "onStart": {
+                            "$ref": "#/definitions/arrayOfExecOperationsOnly"
+                        },
+                        "onStop": {
+                            "$ref": "#/definitions/arrayOfExecOperationsOnly"
+                        },
+                        "onCreate": {
+                            "$ref": "#/definitions/arrayOfOperations"
+                        },
+                        "onDestroy": {
+                            "$ref": "#/definitions/arrayOfExecOperationsOnly"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

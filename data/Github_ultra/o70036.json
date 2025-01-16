@@ -1,0 +1,1562 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "title": "RightScale Self Service Vending Machine Product Input v1.4",
+    "type": "object",
+    "required": [
+        "name",
+        "resources"
+    ],
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "An optional unique ID of the product.  Ignored for create operations and present in the schema as a placeholder for the peristence mechanism I.E. MongoDB object id"
+        },
+        "name": {
+            "type": "string"
+        },
+        "icon_filename": {
+            "type": "string",
+            "description": "The filename of an icon in the icon directory of the Vending Machine application"
+        },
+        "launch_servers": {
+            "type": "boolean"
+        },
+        "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+            "description": "An optional DB schema version.  This is a semantic version number and it identifies the version of the object schema as stored in a NoSQL database."
+        },
+        "resources": {
+            "description": "An array of resources which can be referenced by any other resource.  Resources can also be nested, such as in deployment/server/security_group.  If a resource is nested it can not be referenced anywhere else in the schema.  Only resources in this array can be referenced by their type and ID.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "anyOf": [
+                    {
+                        "$ref": "#/definitions/deployment"
+                    },
+                    {
+                        "$ref": "#/definitions/input"
+                    },
+                    {
+                        "$ref": "#/definitions/instance"
+                    },
+                    {
+                        "$ref": "#/definitions/security_group"
+                    },
+                    {
+                        "$ref": "#/definitions/security_group_rule"
+                    },
+                    {
+                        "$ref": "#/definitions/server"
+                    },
+                    {
+                        "$ref": "#/definitions/server_array"
+                    },
+                    {
+                        "$ref": "#/definitions/elasticity_params"
+                    },
+                    {
+                        "$ref": "#/definitions/server_template"
+                    },
+                    {
+                        "$ref": "#/definitions/text_product_input"
+                    },
+                    {
+                        "$ref": "#/definitions/select_product_input"
+                    },
+                    {
+                        "$ref": "#/definitions/cloud_product_input"
+                    },
+                    {
+                        "$ref": "#/definitions/instance_type_product_input"
+                    },
+                    {
+                        "$ref": "#/definitions/datacenter_product_input"
+                    },
+                    {
+                        "$ref": "#/definitions/alert_spec"
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "depends": {
+            "type": "object",
+            "description": "An object describing a dependency on a specified value of a specified *_product_input.",
+            "required": [
+                "id",
+                "ref",
+                "value"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "The unique id of the *_product_input which should be depended upon.  The *_product_input must be a child of #/resources and not nested in any other resource"
+                },
+                "ref": {
+                    "enum": [
+                        "text_product_input",
+                        "select_product_input",
+                        "cloud_product_input",
+                        "instance_type_product_input",
+                        "datacenter_product_input"
+                    ],
+                    "description": "The expected type of the input dependency"
+                },
+                "value": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "match": {
+                    "enum": [
+                        "all",
+                        "any"
+                    ],
+                    "description": "When the *_product_input value may be an array, how should the dependency be calculated.  When set to 'all' the *_product_input array must contain all of the values in the dependency set.  When set to 'any' the *_product_input array must contain any one of the values in the dependency set",
+                    "default": "all"
+                }
+            }
+        },
+        "required_cloud_capability": {
+            "type": "object",
+            "description": "An object which can only be applied to *_product_input resources.  When present the cloud chosen in the referenced cloud_product_input must have the specified cloud capabilities",
+            "required": [
+                "cloud_product_input_id",
+                "value",
+                "match"
+            ],
+            "properties": {
+                "cloud_product_input_id": {
+                    "type": "string",
+                    "description": "The unique ID of the cloud_product_input which must have the specified cloud capabilities"
+                },
+                "value": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "match": {
+                    "enum": [
+                        "all",
+                        "any",
+                        "none"
+                    ],
+                    "description": "If set to 'all' the specified cloud must have all the specified cloud capabilities to match.  If set to 'any' the cloud must have any of the specified cloud capabilities to match. If set to 'non' the cloud must have none of the specified cloud capabilities to match.",
+                    "default": "all"
+                }
+            }
+        },
+        "deployment": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "name",
+                "servers"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "A unique ID for this deployment within the product."
+                },
+                "resource_type": {
+                    "enum": [
+                        "deployment"
+                    ]
+                },
+                "name": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "server_tag_scope": {
+                    "enum": [
+                        "deployment",
+                        "account"
+                    ]
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/input"
+                            },
+                            {
+                                "$ref": "#/definitions/input_relationship"
+                            }
+                        ]
+                    }
+                },
+                "servers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/server"
+                            },
+                            {
+                                "$ref": "#/definitions/server_relationship"
+                            }
+                        ]
+                    }
+                },
+                "server_arrays": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/server_array"
+                            },
+                            {
+                                "$ref": "#/definitions/server_array_relationship"
+                            }
+                        ]
+                    }
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "alert_spec": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "name",
+                "condition",
+                "duration",
+                "file",
+                "threshold",
+                "variable"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "alert_spec"
+                    ]
+                },
+                "name": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "condition": {
+                    "enum": [
+                        ">",
+                        ">=",
+                        "<",
+                        "<=",
+                        "==",
+                        "!="
+                    ]
+                },
+                "description": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "duration": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "escalation_name": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "file": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "threshold": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "variable": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "vote_tag": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "vote_type": {
+                    "enum": [
+                        "grow",
+                        "shrink"
+                    ]
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "server_array": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "array_type",
+                "elasticity_params",
+                "instance",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "server_array"
+                    ]
+                },
+                "array_type": {
+                    "enum": [
+                        "alert",
+                        "queue"
+                    ]
+                },
+                "description": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "elasticity_params": {
+                    "description": "See Peculiarities -> Depends in the README.markdown",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/elasticity_params"
+                            },
+                            {
+                                "$ref": "#/definitions/elasticity_params_relationship"
+                            }
+                        ]
+                    }
+                },
+                "instance": {
+                    "description": "See Peculiarities -> Depends in the README.markdown.  Also, when the instance includes a datacenter_href property which is a relationship to a datacenter_product_input with multiple datacenters selected the datacenter_policy should be set to evenly distribute across the selected datacenters.  With just one datacenter selected all instances will be placed in the specified datacenter.  If not set, the datacenter_policy will be set to evenly distribute across all available datacenters for the cloud",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/instance"
+                            },
+                            {
+                                "$ref": "#/definitions/instance_relationship"
+                            }
+                        ]
+                    }
+                },
+                "name": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "optimized": {
+                    "type": "boolean"
+                },
+                "state": {
+                    "enum": [
+                        "enabled",
+                        "disabled"
+                    ],
+                    "default": "disabled"
+                },
+                "alert_specs": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/alert_spec"
+                            },
+                            {
+                                "$ref": "#/definitions/alert_spec_relationship"
+                            }
+                        ]
+                    }
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "elasticity_params": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "bounds",
+                "pacing"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "elasticity_params"
+                    ]
+                },
+                "bounds": {
+                    "description": "See Peculiarities -> Depends in the README.markdown",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "min_count",
+                            "max_count"
+                        ],
+                        "properties": {
+                            "max_count": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "min_count": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "depends": {
+                                "type": "object",
+                                "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/depends"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "pacing": {
+                    "description": "See Peculiarities -> Depends in the README.markdown",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "resize_calm_time",
+                            "resize_down_by",
+                            "resize_up_by"
+                        ],
+                        "properties": {
+                            "resize_calm_time": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "resize_down_by": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "resize_up_by": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "depends": {
+                                "type": "object",
+                                "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/depends"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "alert_specific_params": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "decision_threshold": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "voters_tag_predicate": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "depends": {
+                                "type": "object",
+                                "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/depends"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "queue_specific_params": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "collect_audit_entries": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "item_age": {
+                                "type": "array",
+                                "minItems": 1,
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "algorithm": {
+                                            "enum": [
+                                                "max_10",
+                                                "avg_10"
+                                            ]
+                                        },
+                                        "max_age": {
+                                            "$ref": "#/definitions/string_or_input"
+                                        },
+                                        "regexp": {
+                                            "$ref": "#/definitions/string_or_input"
+                                        },
+                                        "depends": {
+                                            "type": "object",
+                                            "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                            "oneOf": [
+                                                {
+                                                    "$ref": "#/definitions/depends"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "queue_size": {
+                                "type": "array",
+                                "minItems": 1,
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "items_per_instance": {
+                                            "$ref": "#/definitions/string_or_input"
+                                        },
+                                        "depends": {
+                                            "type": "object",
+                                            "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                            "oneOf": [
+                                                {
+                                                    "$ref": "#/definitions/depends"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "depends": {
+                                "type": "object",
+                                "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/depends"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "schedule": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "day",
+                            "max_count",
+                            "min_count",
+                            "time"
+                        ],
+                        "properties": {
+                            "day": {
+                                "enum": [
+                                    "Sunday",
+                                    "Monday",
+                                    "Tuesday",
+                                    "Wednesday",
+                                    "Thursday",
+                                    "Friday",
+                                    "Saturday"
+                                ]
+                            },
+                            "max_count": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "min_count": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "time": {
+                                "type": "string",
+                                "pattern": "^\\d\\d:\\d\\d$"
+                            },
+                            "depends": {
+                                "type": "object",
+                                "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/depends"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "server": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "name_prefix",
+                "count",
+                "instance"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "server"
+                    ]
+                },
+                "name_prefix": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "description": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "optimized": {
+                    "type": "boolean"
+                },
+                "count": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "instance": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/instance"
+                            },
+                            {
+                                "$ref": "#/definitions/instance_relationship"
+                            }
+                        ]
+                    }
+                },
+                "alert_specs": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/alert_spec"
+                            },
+                            {
+                                "$ref": "#/definitions/alert_spec_relationship"
+                            }
+                        ]
+                    }
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "instance": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "cloud_href",
+                "security_groups",
+                "server_template"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "instance"
+                    ]
+                },
+                "cloud_href": {
+                    "$ref": "#/definitions/cloud_product_input_relationship"
+                },
+                "datacenter_href": {
+                    "description": "When set to a datacenter_product_input with more than one datacenter href, as a child of a server_array, the server_array datacenter_policy will be set to be evenly weighted across the specified datacenter_hrefs",
+                    "$ref": "#/definitions/datacenter_product_input_relationship"
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/input"
+                            },
+                            {
+                                "$ref": "#/definitions/input_relationship"
+                            }
+                        ]
+                    }
+                },
+                "instance_type_href": {
+                    "$ref": "#/definitions/instance_type_product_input_relationship"
+                },
+                "security_groups": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/security_group"
+                            },
+                            {
+                                "$ref": "#/definitions/security_group_relationship"
+                            }
+                        ]
+                    }
+                },
+                "server_template": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/server_template"
+                            },
+                            {
+                                "$ref": "#/definitions/server_template_relationship"
+                            }
+                        ]
+                    }
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "input": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "name",
+                "value"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "input"
+                    ]
+                },
+                "name": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "value": {
+                    "$ref": "#/definitions/string_or_input",
+                    "pattern": "^(text|key|cred|array|env):.*"
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "server_template": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "name",
+                "revision"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "server_template"
+                    ]
+                },
+                "name": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "revision": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "publication_id": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "security_group": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "cloud_href",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "security_group"
+                    ]
+                },
+                "cloud_href": {
+                    "$ref": "#/definitions/cloud_product_input_relationship"
+                },
+                "description": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "name": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "security_group_rules": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/security_group_rule"
+                            },
+                            {
+                                "$ref": "#/definitions/security_group_rule_relationship"
+                            }
+                        ]
+                    }
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "security_group_rule": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "protocol",
+                "protocol_details",
+                "source_type"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "security_group_rule"
+                    ]
+                },
+                "cidr_ips": {
+                    "$ref": "#/definitions/string_or_input"
+                },
+                "ingress_group": {
+                    "$ref": "#/definitions/security_group_relationship"
+                },
+                "protocol": {
+                    "enum": [
+                        "tcp",
+                        "udp",
+                        "icmp"
+                    ]
+                },
+                "protocol_details": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "end_port": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "icmp_code": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "icmp_type": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "start_port": {
+                                "$ref": "#/definitions/string_or_input"
+                            },
+                            "depends": {
+                                "type": "object",
+                                "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/depends"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "source_type": {
+                    "enum": [
+                        "cidr_ips",
+                        "group"
+                    ]
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "text_product_input": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "default_value",
+                "input_name",
+                "display_name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "text_product_input"
+                    ]
+                },
+                "default_value": {
+                    "type": "string"
+                },
+                "input_name": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "advanced": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "unique": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When set to true the value should be suffixed with a timestamp by the UI"
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                },
+                "required_cloud_capability": {
+                    "$ref": "#/definitions/required_cloud_capability"
+                }
+            }
+        },
+        "select_product_input": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "options",
+                "default_value",
+                "input_name",
+                "display_name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "select_product_input"
+                    ]
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "default_value": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "input_name": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "advanced": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "multiselect": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                },
+                "required_cloud_capability": {
+                    "$ref": "#/definitions/required_cloud_capability"
+                }
+            }
+        },
+        "cloud_product_input": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "default_value",
+                "input_name",
+                "display_name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "cloud_product_input"
+                    ]
+                },
+                "default_value": {
+                    "type": "string"
+                },
+                "input_name": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "advanced": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "instance_type_product_input": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "cloud_product_input",
+                "input_name",
+                "display_name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "instance_type_product_input"
+                    ]
+                },
+                "cloud_product_input": {
+                    "$ref": "#/definitions/cloud_product_input_relationship"
+                },
+                "default_value": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/cloud_to_resource_href_hash"
+                            }
+                        ]
+                    }
+                },
+                "input_name": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "advanced": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "datacenter_product_input": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "cloud_product_input",
+                "input_name",
+                "display_name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "datacenter_product_input"
+                    ]
+                },
+                "cloud_product_input": {
+                    "$ref": "#/definitions/cloud_product_input_relationship"
+                },
+                "default_value": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/cloud_to_resource_href_hash"
+                            }
+                        ]
+                    }
+                },
+                "input_name": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "advanced": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "multiselect": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "depends": {
+                    "type": "object",
+                    "description": "Makes this resource dependent upon the specified product_input dependency being matched.  Only if the constraint is matched, will this resource be provisioned.  This allows for profiles within a product definition such as; if cloud == aws then provision this resource",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/depends"
+                        }
+                    ]
+                }
+            }
+        },
+        "cloud_to_resource_href_hash": {
+            "type": "object",
+            "required": [
+                "cloud_href",
+                "resource_hrefs"
+            ],
+            "properties": {
+                "cloud_href": {
+                    "type": "string"
+                },
+                "resource_hrefs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string",
+                        "pattern": "^\\/api[a-zA-Z_0-9\\/]+$"
+                    }
+                }
+            }
+        },
+        "string_or_input": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "$ref": "#/definitions/text_product_input_relationship"
+                },
+                {
+                    "$ref": "#/definitions/select_product_input_relationship"
+                },
+                {
+                    "$ref": "#/definitions/cloud_product_input_relationship"
+                },
+                {
+                    "$ref": "#/definitions/instance_type_product_input_relationship"
+                },
+                {
+                    "$ref": "#/definitions/datacenter_product_input_relationship"
+                }
+            ]
+        },
+        "input_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "input"
+                    ]
+                }
+            }
+        },
+        "server_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "server"
+                    ]
+                }
+            }
+        },
+        "server_template_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "server_template"
+                    ]
+                }
+            }
+        },
+        "server_array_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "server_array"
+                    ]
+                }
+            }
+        },
+        "elasticity_params_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "elasticity_params"
+                    ]
+                }
+            }
+        },
+        "instance_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "instance"
+                    ]
+                }
+            }
+        },
+        "alert_spec_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "alert_spec"
+                    ]
+                }
+            }
+        },
+        "cloud_product_input_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "cloud_product_input"
+                    ]
+                }
+            }
+        },
+        "instance_type_product_input_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "instance_type_product_input"
+                    ]
+                }
+            }
+        },
+        "datacenter_product_input_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "datacenter_product_input"
+                    ]
+                }
+            }
+        },
+        "text_product_input_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "text_product_input"
+                    ]
+                }
+            }
+        },
+        "select_product_input_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "select_product_input"
+                    ]
+                }
+            }
+        },
+        "security_group_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "security_group"
+                    ]
+                }
+            }
+        },
+        "security_group_rule_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "security_group_rule"
+                    ]
+                }
+            }
+        }
+    }
+}

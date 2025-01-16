@@ -1,0 +1,271 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "interface": {
+            "type": "object",
+            "title": "Interface Specification",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Network interface type.",
+                    "enum": [
+                        "monitor",
+                        "vlan",
+                        "wifi-ap"
+                    ]
+                },
+                "dhcp": {
+                    "type": "object",
+                    "properties": {
+                        "leasetime": {
+                            "type": "string",
+                            "description": "Duration of client leases, e.g. 2h.",
+                            "pattern": "\\d+[dhms]"
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Size of address range beginning at start value.",
+                            "minimum": 1
+                        },
+                        "start": {
+                            "type": "integer",
+                            "description": "Starting offset for address assignment.",
+                            "minimum": 3
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "dns": {
+                    "type": "array",
+                    "description": "List of DNS servers to advertise to connected clients.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "wireless": {
+                    "type": "object",
+                    "properties": {
+                        "ssid": {
+                            "type": "string",
+                            "description": "ESSID to broadcast.",
+                            "maxLength": 32
+                        },
+                        "key": {
+                            "type": "string",
+                            "description": "Wireless network password.",
+                            "minLength": 8
+                        },
+                        "nasid": {
+                            "type": "string",
+                            "description": "NAS identifier for RADIUS."
+                        },
+                        "acct_server": {
+                            "type": "string",
+                            "description": "RADIUS accounting server."
+                        },
+                        "acct_secret": {
+                            "type": "string",
+                            "description": "RADIUS accounting secret."
+                        },
+                        "acct_interval": {
+                            "type": "integer",
+                            "description": "RADIUS accounting update interval (seconds).",
+                            "minimum": 1
+                        },
+                        "hidden": {
+                            "type": "boolean",
+                            "description": "Disable broadcasting the ESSID in beacons."
+                        },
+                        "isolate": {
+                            "type": "boolean",
+                            "description": "Disable forwarding traffic between connected clients."
+                        },
+                        "maxassoc": {
+                            "type": "integer",
+                            "description": "Maximum number of associated clients.",
+                            "minimum": 0
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "requirements": {
+                    "type": "object",
+                    "properties": {
+                        "hwmode": {
+                            "type": "string",
+                            "description": "Required operating mode (11b for old hardware, 11g for 2.4 GHz, 11a for 5 Ghz).",
+                            "enum": [
+                                "11b",
+                                "11g",
+                                "11a"
+                            ]
+                        },
+                        "ipv4_network": {
+                            "type": "string",
+                            "description": "Required IP network in slash notation.",
+                            "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "l3bridge": {
+                    "type": "string",
+                    "description": "Bridge to another network using ARP proxying (experimental)."
+                },
+                "vlan-id": {
+                    "type": "integer",
+                    "description": "VLAN tag for traffic to and from the interface.",
+                    "minimum": 1,
+                    "maximum": 4094
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false,
+            "$$target": "#/definitions/interface"
+        },
+        "service": {
+            "type": "object",
+            "title": "Service Specification",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Type of chute service.",
+                    "enum": [
+                        "light",
+                        "normal",
+                        "image"
+                    ]
+                },
+                "source": {
+                    "type": "string",
+                    "description": "Source directory for this service."
+                },
+                "image": {
+                    "type": "string",
+                    "description": "Image specification for services that pull a Docker image."
+                },
+                "command": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "dns": {
+                    "type": "array",
+                    "description": "List of DNS servers to be used within the container.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "environment": {
+                    "type": "object",
+                    "description": "Environment variables."
+                },
+                "interfaces": {
+                    "type": "object",
+                    "description": "Network interfaces to be connected.",
+                    "patternProperties": {
+                        "\\w{1,16}": {
+                            "$ref": "#/definitions/interface"
+                        }
+                    }
+                },
+                "requests": {
+                    "type": "object",
+                    "properties": {
+                        "as-root": {
+                            "type": "boolean",
+                            "description": "Run service as privileged user."
+                        },
+                        "port-bindings": {
+                            "type": "array",
+                            "description": "Port bindings from host to service container.",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "external": {
+                                        "type": "integer",
+                                        "description": "External (host) port number.",
+                                        "minimum": 1,
+                                        "maximum": 65536
+                                    },
+                                    "internal": {
+                                        "type": "integer",
+                                        "description": "Internal (container) port number.",
+                                        "minimum": 1,
+                                        "maximum": 65536
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false,
+            "$$target": "#/definitions/service"
+        }
+    },
+    "type": "object",
+    "title": "Chute Specification",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Name of the chute."
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of the chute to be shown to users."
+        },
+        "version": {
+            "description": "Version of the chute.",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                }
+            ]
+        },
+        "services": {
+            "type": "object",
+            "description": "Services to be installed with the chute.",
+            "patternProperties": {
+                "\\w+": {
+                    "$ref": "#/definitions/service"
+                }
+            }
+        },
+        "web": {
+            "type": "object",
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "description": "Name of chute service which provides the web service."
+                },
+                "port": {
+                    "type": "integer",
+                    "description": "Listening port inside the chute.",
+                    "minimum": 1,
+                    "maximum": 65536
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false
+}

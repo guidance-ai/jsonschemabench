@@ -1,0 +1,277 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Reward Created Webhook Schema",
+    "description": "Sent whenever a reward is created (when it becomes available, e.g. not pending).",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "title": "Reward Id",
+            "description": "The unique identifier associated with this reward"
+        },
+        "type": {
+            "type": "string",
+            "title": "Reward Type",
+            "enum": [
+                "PCT_DISCOUNT",
+                "FUELTANK",
+                "CREDIT",
+                "INTEGRATION"
+            ]
+        },
+        "dateCreated": {
+            "type": "integer",
+            "title": "Date Reward Created",
+            "description": "The date this reward was created"
+        },
+        "dateScheduledFor": {
+            "type": [
+                "integer",
+                "null"
+            ],
+            "title": "Date Scheduled For",
+            "description": "The date this reward is scheduled to be given if it starts in a pending state"
+        },
+        "dateGiven": {
+            "type": [
+                "integer",
+                "null"
+            ],
+            "title": "Date Given",
+            "description": "The date this reward was given (became available for use)"
+        },
+        "dateExpires": {
+            "type": [
+                "integer",
+                "null"
+            ],
+            "title": "Date Expires",
+            "description": "The date this reward will expire"
+        },
+        "dateCancelled": {
+            "type": [
+                "integer",
+                "null"
+            ],
+            "title": "Date Cancelled",
+            "description": "The date this reward was cancelled"
+        },
+        "accountId": {
+            "type": "string",
+            "title": "Account Id",
+            "description": "The account Id for the user who received this reward"
+        },
+        "userId": {
+            "type": "string",
+            "title": "User Id",
+            "description": "The user Id for the user who received this reward"
+        },
+        "cancellable": {
+            "type": "boolean",
+            "title": "Is Cancellable",
+            "description": "Whether this reward can be cancelled (e.g. rewards that have already been fulfilled externally cannot be cancelled)"
+        },
+        "programId": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "title": "Program Id",
+            "description": "The program that issued this reward"
+        },
+        "rewardSource": {
+            "type": "string",
+            "title": "Reward Source",
+            "description": "The source of this reward (e.g. insight into why this reward was created)",
+            "enum": [
+                "FRIEND_SIGNUP",
+                "REFERRED",
+                "MANUAL",
+                "ACTIVATION",
+                "ACQUISITION",
+                "RETENTION",
+                "REACTIVATION",
+                "AUTOMATED"
+            ]
+        }
+    },
+    "required": [
+        "id",
+        "type",
+        "dateCreated",
+        "accountId",
+        "userId",
+        "cancellable",
+        "rewardSource"
+    ],
+    "dependencies": {
+        "type": {
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "PCT_DISCOUNT"
+                            ]
+                        },
+                        "discountPercent": {
+                            "type": "integer",
+                            "title": "Discount Percent",
+                            "description": "The percent discount to be given (e.g. 1-100)"
+                        },
+                        "unit": {
+                            "type": "string",
+                            "title": "Reward Unit",
+                            "description": "The unit of this reward",
+                            "const": "%"
+                        },
+                        "name": {
+                            "type": "string",
+                            "title": "Reward Name",
+                            "description": "The name given to this discount reward (e.g. Referrer Reward)"
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "FUELTANK"
+                            ]
+                        },
+                        "fuelTankCode": {
+                            "type": "string",
+                            "title": "Reward Code",
+                            "description": "The code associated with this reward (e.g. used in fulfillment)"
+                        },
+                        "unit": {
+                            "type": "string",
+                            "title": "Reward Unit",
+                            "description": "The unit of this reward"
+                        },
+                        "amount": {
+                            "type": "integer",
+                            "title": "Reward Amount",
+                            "description": "The value associated with this reward (e.g. 10% or $100)"
+                        },
+                        "fuelTankType": {
+                            "type": "string",
+                            "title": "Reward Code Type",
+                            "description": "The type of the redeemable reward associated with the fuel tank code (e.g. is it a discount or credit)",
+                            "enum": [
+                                "PCT_DISCOUNT",
+                                "CREDIT"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "CREDIT"
+                            ]
+                        },
+                        "unit": {
+                            "type": "string",
+                            "title": "Reward Unit",
+                            "description": "The unit of this reward (e.g. USD)"
+                        },
+                        "assignedCredit": {
+                            "type": "integer",
+                            "title": "Assigned Credit",
+                            "description": "The credit assigned to this reward (e.g. amount that can be redeemed)"
+                        },
+                        "redeemedCredit": {
+                            "type": "integer",
+                            "title": "Redeemed Credit",
+                            "description": "The amount of credit that has already been redeemed from this reward"
+                        },
+                        "name": {
+                            "type": "string",
+                            "title": "Reward Name",
+                            "description": "The name given to this credit reward (e.g. Referrer Reward)"
+                        },
+                        "redemptions": {
+                            "type": "array",
+                            "title": "Reward Redemptions",
+                            "description": "A record of how credit was redeemed from this reward",
+                            "items": {
+                                "$ref": "#/definitions/rewardRedemption"
+                            }
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "INTEGRATION"
+                            ]
+                        },
+                        "name": {
+                            "type": "string",
+                            "title": "Reward Name",
+                            "description": "The name of this reward (e.g. Amazon Gift Card)"
+                        },
+                        "description": {
+                            "type": "string",
+                            "title": "Reward Description",
+                            "description": "This describe the reward in more detail"
+                        },
+                        "unit": {
+                            "type": "string",
+                            "title": "Reward Unit",
+                            "description": "The unit of this reward (e.g. USD)"
+                        },
+                        "valueInCents": {
+                            "type": "integer",
+                            "title": "Reward Value",
+                            "description": "The monetary value of this reward in its fractional unit (e.g. cents)"
+                        },
+                        "integrationId": {
+                            "type": "string",
+                            "title": "Integration Id",
+                            "description": "The identifier for the integration that issued this reward"
+                        },
+                        "rewardDetails": {
+                            "type": "object",
+                            "title": "Reward Details",
+                            "description": "A map of details about this reward provided by the underlying giftcard provider (e.g. Tango's utid)"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "rewardRedemption": {
+            "type": "object",
+            "title": "Reward Redemption",
+            "description": "An instance of credit being withdrawn from a reward",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Redemption Id",
+                    "description": "The unique identifier of this redemption"
+                },
+                "dateRedeemed": {
+                    "type": "integer",
+                    "title": "Date Redeemed",
+                    "description": "The date this redemption was made"
+                },
+                "quantityRedeemed": {
+                    "type": "string",
+                    "title": "Quantity Redeemed",
+                    "description": "The amount that was withdrawn from this reward"
+                }
+            },
+            "required": [
+                "id",
+                "dateRedeemed",
+                "quantityRedeemed"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

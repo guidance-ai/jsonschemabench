@@ -1,0 +1,558 @@
+{
+  "title": "JSON schema for Outblocks App configuration files",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$ref": "#/definitions/OutblocksApp",
+  "definitions": {
+    "OutblocksApp": {
+      "title": "OutblocksApp",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "description": "Name of the app. Defaults to directory name.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of the app.",
+          "type": "string",
+          "enum": [
+            "static",
+            "function",
+            "service"
+          ]
+        },
+        "env": {
+          "description": "Environment variables common for all operations.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "dir": {
+          "description": "Working directory of the app where all commands will be run. Defaults to location of this yaml. All other dirs will be relative to this one.",
+          "type": "string"
+        },
+        "url": {
+          "description": "External URL of the app.",
+          "type": "string"
+        },
+        "path_redirect": {
+          "description": "Path redirect rewrites URL to specified path. URL path from 'url' field will be stripped and replaced with value below.",
+          "type": "string"
+        },
+        "needs": {
+          "description": "Application dependencies to inject.",
+          "$ref": "#/definitions/Needs"
+        },
+        "run": {
+          "description": "Run config used for dev builds during run.",
+          "$ref": "#/definitions/Run"
+        },
+        "cdn": {
+          "description": "CDN settings.",
+          "$ref": "#/definitions/CDN"
+        },
+        "build": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "static"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "routing": {
+                "description": "Routing type. Defaults to 'react'.",
+                "type": "string",
+                "enum": [
+                  "react",
+                  "gatsby",
+                  "disabled"
+                ]
+              },
+              "remove_trailing_slash": {
+                "description": "Remove trailing slash with permanent redirect. Currently used only for deployments. Defaults to 'true' when gatsby routing is used, 'false' otherwise.",
+                "type": "boolean"
+              },
+              "basic_auth": {
+                "description": "Static application basic authentication config. Currently used only for deployments.",
+                "$ref": "#/definitions/StaticBasicAuth"
+              },
+              "build": {
+                "description": "Static application build config used for deployment builds.",
+                "$ref": "#/definitions/StaticBuild"
+              },
+              "deploy": {
+                "description": "Static deploy config.",
+                "$ref": "#/definitions/StaticDeploy"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "service"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "private": {
+                "description": "Marks app as private - won't allow unauthenticated access.",
+                "type": "boolean"
+              },
+              "build": {
+                "description": "Service application build config used for deployment builds.",
+                "$ref": "#/definitions/ServiceBuild"
+              },
+              "container": {
+                "description": "Service application container config used for docker based deployments/runs.",
+                "$ref": "#/definitions/ServiceContainer"
+              },
+              "deploy": {
+                "description": "Service deploy config.",
+                "$ref": "#/definitions/ServiceDeploy"
+              },
+              "scheduler": {
+                "description": "Service scheduler config.",
+                "$ref": "#/definitions/Scheduler"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "function"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "private": {
+                "description": "Marks app as private - won't allow unauthenticated access.",
+                "type": "boolean"
+              },
+              "runtime": {
+                "description": "The runtime in which the function is going to run, refer to cloud provider docs for possible options.",
+                "type": "string"
+              },
+              "entrypoint": {
+                "description": "Name of the function that will be executed when the function is triggered. Not all deployment plugins support it. Defaults to application name.",
+                "type": "string"
+              },
+              "build": {
+                "description": "Function application build config used for deployment builds.",
+                "$ref": "#/definitions/FunctionBuild"
+              },
+              "deploy": {
+                "description": "Function deploy config.",
+                "$ref": "#/definitions/FunctionDeploy"
+              },
+              "package": {
+                "description": "Function package config.",
+                "$ref": "#/definitions/FunctionPackage"
+              },
+              "scheduler": {
+                "description": "Function scheduler config.",
+                "$ref": "#/definitions/Scheduler"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Needs": {
+      "title": "Needs",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[_a-zA-Z][a-zA-Z0-9_-]*$": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    "Run": {
+      "title": "Run config",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "description": "Run plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        },
+        "command": {
+          "description": "Command to be run to for dev mode.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "port": {
+          "description": "Port override, by default just assigns next port starting from listen-port.",
+          "type": "integer"
+        },
+        "env": {
+          "description": "Additional environment variables available local run.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "StaticDeploy": {
+      "title": "Static deploy config",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "description": "Deploy plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        },
+        "min_scale": {
+          "description": "Minimum scale of container deployment (used if deployment uses a container).",
+          "type": "integer"
+        },
+        "max_scale": {
+          "description": "Maximum scale of container deployment (used if deployment uses a container).",
+          "type": "integer"
+        },
+        "timeout": {
+          "description": "Execution timeout. Execution is considered failed and can be terminated if the function is not completed at the end of the timeout period.",
+          "type": "integer"
+        },
+        "patterns": {
+          "description": "File/dir patterns to exclude (or force include if starts with '!').",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ServiceDeploy": {
+      "title": "Service deploy config",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "description": "Deploy plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        },
+        "env": {
+          "description": "Additional environment variables.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "cpu_limit": {
+          "description": "CPU limit of container deployment. 1.0 means 1 full core of CPU will be used.",
+          "type": "number"
+        },
+        "memory_limit": {
+          "description": "Memory limit in MiB of container deployment.",
+          "type": "integer"
+        },
+        "min_scale": {
+          "description": "Minimum scale of container deployment.",
+          "type": "integer"
+        },
+        "max_scale": {
+          "description": "Maximum scale of container deployment.",
+          "type": "integer"
+        },
+        "timeout": {
+          "description": "Execution timeout. Execution is considered failed and can be terminated if the function is not completed at the end of the timeout period.",
+          "type": "integer"
+        },
+        "container": {
+          "description": "Service application container config used for docker based deployments.",
+          "$ref": "#/definitions/ServiceContainer"
+        }
+      }
+    },
+    "Scheduler": {
+      "title": "Scheduler config",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cron"
+        ],
+        "properties": {
+          "cron": {
+            "description": "Scheduler cron, e.g. */30 * * * * runs every 30 minutes.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of cron (just for information purpose).",
+            "type": "string"
+          },
+          "method": {
+            "description": "HTTP method to use. Defaults to 'GET'.",
+            "type": "string",
+            "enum": [
+              "GET", "POST", "HEAD", "PUT", "DELETE", "PATCH", "OPTIONS"
+            ]
+          },
+          "path": {
+            "description": "Path to call in current app url.",
+            "type": "string"
+          },
+          "headers": {
+            "description": "Additional headers to use for this call.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "FunctionDeploy": {
+      "title": "Function deploy config",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "plugin": {
+          "description": "Deploy plugin override. Defaults to first supported plugin available.",
+          "type": "string"
+        },
+        "env": {
+          "description": "Additional environment variables.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "memory_limit": {
+          "description": "Memory limit in MiB of function deployment.",
+          "type": "integer"
+        },
+        "min_scale": {
+          "description": "Minimum scale of container deployment (used if deployment uses a container).",
+          "type": "integer"
+        },
+        "max_scale": {
+          "description": "Maximum scale of container deployment (used if deployment uses a container).",
+          "type": "integer"
+        },
+        "timeout": {
+          "description": "Execution timeout. Execution is considered failed and can be terminated if the function is not completed at the end of the timeout period.",
+          "type": "integer"
+        }
+      }
+    },
+    "FunctionPackage": {
+      "title": "Function package config",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "patterns": {
+          "description": "Package patterns to exclude (or force include if starts with '!').",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "CDN": {
+      "title": "CDN",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "StaticBasicAuth": {
+      "title": "Static app basic auth config",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "realm": {
+          "description": "Basic auth realm name, defaults to 'restricted'.",
+          "type": "string"
+        },
+        "users": {
+          "description": "Basic auth users in form of `user: password` where password is either in plain text or in a form of apr1 hash (used by htpasswd).",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "StaticBuild": {
+      "title": "Build static app",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "env": {
+          "description": "Additional environment variables available during build.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "command": {
+          "description": "Command to be run to generate output files.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "dir": {
+          "description": "Output dir to where static files end up.",
+          "type": "string"
+        }
+      }
+    },
+    "ServiceBuild": {
+      "title": "Service app build definition",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "description": "Docker image to use. If specified, will try to pull this image if skip-build is enabled.",
+          "type": "string"
+        },
+        "skip_build": {
+          "description": "Skip this image build phase. If enabled, requires image to be either present on docker host or custom image to be possible to pull.",
+          "type": "boolean"
+        },
+        "skip_pull": {
+          "description": "Skip this image dependencies pull phase. As a result, doesn't check for newer versions of tagged dependencies. Useful if dependencies do not exist outside of local docker.",
+          "type": "boolean"
+        },
+        "build_args": {
+          "description": "Docker build-args.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "context": {
+          "description": "Docker context directory, relative to application dir.",
+          "type": "string"
+        },
+        "dockerfile": {
+          "description": "Dockerfile to use, relative to context path. Defaults to 'Dockerfile'.",
+          "type": "string"
+        }
+      }
+    },
+    "FunctionBuild": {
+      "title": "Build function app",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "env": {
+          "description": "Additional environment variables available during build.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "command": {
+          "description": "Command to be run to generate output files.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "dir": {
+          "description": "Output dir to where built files end up.",
+          "type": "string"
+        }
+      }
+    },
+    "ServiceContainer": {
+      "title": "Service app container definition",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "port": {
+          "description": "Docker container port to use.",
+          "type": "integer"
+        },
+        "command": {
+          "description": "Docker command (CMD) to override.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "entrypoint": {
+          "description": "Docker entrypoint (ENTRYPOINT) to override.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

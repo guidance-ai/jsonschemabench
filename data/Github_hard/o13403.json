@@ -1,0 +1,556 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Scene Definition Schema",
+    "type": "object",
+    "required": [
+        "NearClip",
+        "FarClip",
+        "ModelInstanceThreshold"
+    ],
+    "properties": {
+        "NearClip": {
+            "description": "The Z-distance to the near clip plane",
+            "type": "number"
+        },
+        "FarClip": {
+            "description": "The Z-distance to the far clip plane",
+            "type": "number"
+        },
+        "SceneScaleFactor": {
+            "description": "The amount to scale the entire scene by",
+            "type": "number"
+        },
+        "ModelInstanceThreshold": {
+            "description": "If the number of instances is less than or equal to this number, the model will just be drawn multiple times. However, if the number of instances is greater than this number, we will add to the instance buffer and use DrawIndexedInstanced",
+            "type": "integer",
+            "minimum": 1
+        },
+        "Materials": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/material"
+            }
+        },
+        "Models": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/Model-File"
+                    },
+                    {
+                        "$ref": "#/definitions/Model-Plane"
+                    },
+                    {
+                        "$ref": "#/definitions/Model-Box"
+                    },
+                    {
+                        "$ref": "#/definitions/Model-Sphere"
+                    }
+                ]
+            },
+            "minItems": 1,
+            "additionalItems": false
+        },
+        "DirectionalLight": {
+            "description": "",
+            "type": "object",
+            "required": [
+                "Color",
+                "Direction"
+            ],
+            "properties": {
+                "Color": {
+                    "description": "",
+                    "$ref": "#/definitions/float3"
+                },
+                "Direction": {
+                    "description": "",
+                    "$ref": "#/definitions/float3"
+                },
+                "AngularVelocity": {
+                    "description": "",
+                    "$ref": "#/definitions/float3"
+                }
+            },
+            "additionalProperties": false
+        },
+        "PointLights": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/SpecificPointLight"
+                    },
+                    {
+                        "$ref": "#/definitions/RandomPointLights"
+                    }
+                ]
+            }
+        },
+        "SpotLights": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/SpecificSpotLight"
+                    },
+                    {
+                        "$ref": "#/definitions/RandomSpotLights"
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false,
+    "definitions": {
+        "float2": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "additionalItems": false
+        },
+        "float3": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "additionalItems": false
+        },
+        "material": {
+            "type": "object",
+            "required": [
+                "Name",
+                "HMATFilePath"
+            ],
+            "properties": {
+                "Name": {
+                    "description": "The unique name of the material",
+                    "type": "string"
+                },
+                "HMATFilePath": {
+                    "description": "The file path to the *.hmat file for the material",
+                    "type": "string"
+                },
+                "TextureDefinitions": {
+                    "description": "The textures used in the shader. ORDER MATTERS!! They will be fed to the shader in the order that they are specified here",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "FilePath": {
+                                "description": "The file path to the texture",
+                                "type": "string"
+                            },
+                            "Sampler": {
+                                "description": "The sampler to use with the texture",
+                                "enum": [
+                                    "linear_clamp",
+                                    "linear_border",
+                                    "linear_wrap",
+                                    "point_clamp",
+                                    "point_wrap",
+                                    "anisotropic_wrap"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Model-File": {
+            "type": "object",
+            "required": [
+                "Type",
+                "FilePath",
+                "Instances"
+            ],
+            "properties": {
+                "Type": {
+                    "description": "A model from a HMF file",
+                    "enum": [
+                        "file"
+                    ]
+                },
+                "FilePath": {
+                    "description": "The path to the HMF file",
+                    "type": "string"
+                },
+                "Instances": {
+                    "description": "The world transform matricies for one or more instances of the model",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 16,
+                        "maxItems": 16,
+                        "additionalItems": false
+                    },
+                    "minItems": 1,
+                    "additionalItems": false
+                }
+            }
+        },
+        "Model-Plane": {
+            "type": "object",
+            "required": [
+                "Type",
+                "Width",
+                "Depth",
+                "Instances"
+            ],
+            "properties": {
+                "Type": {
+                    "description": "A (potentially) subdivided quad in the X-Z plane",
+                    "enum": [
+                        "plane"
+                    ]
+                },
+                "Width": {
+                    "description": "The width of the quad",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "Depth": {
+                    "description": "The depth of the quad",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "X-Subdivisions": {
+                    "description": "The number of times to subdivide the quad in the X direction",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "Z-Subdivisions": {
+                    "description": "The number of times to subdivide the quad in the Z direction",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "X-TextureTiling": {
+                    "description": "How much to tile the texture coordinates in the U (X) direction. 1.0 means the texture will be stretched across the entire grid, 2.0 means the texture will be tiled twice, etc.",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "Z-TextureTiling": {
+                    "description": "How much to tile the texture coordinates in the V (Z) direction. 1.0 means the texture will be stretched across the entire grid, 2.0 means the texture will be tiled twice, etc.",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "Material": {
+                    "description": "The material for the plane",
+                    "type": "string"
+                },
+                "Instances": {
+                    "description": "The world transform matricies for one or more instances of the model",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 16,
+                        "maxItems": 16,
+                        "additionalItems": false
+                    },
+                    "minItems": 1,
+                    "additionalItems": false
+                }
+            }
+        },
+        "Model-Box": {
+            "type": "object",
+            "required": [
+                "Type",
+                "Width",
+                "Height",
+                "Depth",
+                "Instances"
+            ],
+            "properties": {
+                "Type": {
+                    "description": "A box",
+                    "enum": [
+                        "box"
+                    ]
+                },
+                "Width": {
+                    "description": "The width of the box",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "Height": {
+                    "description": "The height of the box",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "Depth": {
+                    "description": "The depth of the box",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "Material": {
+                    "description": "The material for the box",
+                    "type": "string"
+                },
+                "Instances": {
+                    "description": "The world transform matricies for one or more instances of the model",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 16,
+                        "maxItems": 16,
+                        "additionalItems": false
+                    },
+                    "minItems": 1,
+                    "additionalItems": false
+                }
+            }
+        },
+        "Model-Sphere": {
+            "type": "object",
+            "required": [
+                "Type",
+                "SliceCount",
+                "StackCount",
+                "Instances"
+            ],
+            "properties": {
+                "Type": {
+                    "description": "A sphere",
+                    "enum": [
+                        "sphere"
+                    ]
+                },
+                "Radius": {
+                    "description": "The radius of the sphere",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "SliceCount": {
+                    "description": "The number of slices to divide the sphere into",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "StackCount": {
+                    "description": "The number of stacks to divide the sphere into",
+                    "type": "integer",
+                    "minimum": 0.0
+                },
+                "Material": {
+                    "description": "The material for the sphere",
+                    "type": "string"
+                },
+                "Instances": {
+                    "description": "The world transform matricies for one or more instances of the model",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 16,
+                        "maxItems": 16,
+                        "additionalItems": false
+                    },
+                    "minItems": 1,
+                    "additionalItems": false
+                }
+            }
+        },
+        "SpecificPointLight": {
+            "type": "object",
+            "required": [
+                "Diffuse",
+                "Specular",
+                "Position",
+                "Range",
+                "AttenuationDistanceUNorm"
+            ],
+            "properties": {
+                "Color": {
+                    "description": "The color of the light",
+                    "$ref": "#/definitions/float3"
+                },
+                "Position": {
+                    "description": "The position of the light in world space",
+                    "$ref": "#/definitions/float3"
+                },
+                "Range": {
+                    "description": "The range of the light",
+                    "type": "number"
+                },
+                "LinearVelocity": {
+                    "description": "The linear velocity of the light [world units/ms]",
+                    "$ref": "#/definitions/float3"
+                },
+                "AABB_min": {
+                    "description": "The minimum range of the light movement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                },
+                "AABB_max": {
+                    "description": "The maximum range of the light movement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                }
+            }
+        },
+        "RandomPointLights": {
+            "type": "object",
+            "required": [
+                "NumberOfLights",
+                "AABB_min",
+                "AABB_max",
+                "RangeRange",
+                "AttenuationDistanceUNorm"
+            ],
+            "properties": {
+                "NumberOfLights": {
+                    "description": "The number of lights to generate",
+                    "type": "number"
+                },
+                "AABB_min": {
+                    "description": "The minimum range of the light movement/initial placement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                },
+                "AABB_max": {
+                    "description": "The maximum range of the light movement/initial placement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                },
+                "RangeRange": {
+                    "description": "Interval in which to randomly generate the range of the light",
+                    "$ref": "#/definitions/float2"
+                },
+                "LinearVelocityMinRange": {
+                    "description": "The lower part of the interval in which to generate the light linear velocity [x, y, z]",
+                    "$ref": "#/definitions/float3"
+                },
+                "LinearVelocityMaxRange": {
+                    "description": "The upper part of the interval in which to generate the light linear velocity [x, y, z]",
+                    "$ref": "#/definitions/float3"
+                }
+            }
+        },
+        "SpecificSpotLight": {
+            "type": "object",
+            "required": [
+                "Diffuse",
+                "Specular",
+                "Position",
+                "Range",
+                "Direction",
+                "AttenuationDistanceUNorm",
+                "InnerConeAngle",
+                "OuterConeAngle"
+            ],
+            "properties": {
+                "Color": {
+                    "description": "The color of the light",
+                    "$ref": "#/definitions/float3"
+                },
+                "Position": {
+                    "description": "The position of the light in world space",
+                    "$ref": "#/definitions/float3"
+                },
+                "Range": {
+                    "description": "The range of the light",
+                    "type": "number"
+                },
+                "Direction": {
+                    "description": "The direction of the light",
+                    "$ref": "#/definitions/float3"
+                },
+                "InnerConeAngle": {
+                    "description": "The angle of the inner cone of light. The inner cone will have full light intensity",
+                    "type": "number"
+                },
+                "OuterConeAngle": {
+                    "description": "The angle of the outer cone of light. The light intensity will smoothstep between the inner cone and the outer cone",
+                    "type": "number"
+                },
+                "LinearVelocity": {
+                    "description": "The linear velocity of the light [world units/ms]",
+                    "$ref": "#/definitions/float3"
+                },
+                "AngularVelocity": {
+                    "description": "The angular velocity of the light [radians/ms]",
+                    "$ref": "#/definitions/float3"
+                },
+                "AABB_min": {
+                    "description": "The minimum range of the light movement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                },
+                "AABB_max": {
+                    "description": "The maximum range of the light movement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                }
+            }
+        },
+        "RandomSpotLights": {
+            "type": "object",
+            "required": [
+                "NumberOfLights",
+                "AABB_min",
+                "AABB_max",
+                "RangeRange",
+                "AttenuationDistanceUNorm",
+                "OuterAngleRange",
+                "InnerAngleDifference"
+            ],
+            "properties": {
+                "NumberOfLights": {
+                    "description": "The number of lights to generate",
+                    "type": "number"
+                },
+                "AABB_min": {
+                    "description": "The minimum range of the light movement/initial placement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                },
+                "AABB_max": {
+                    "description": "The maximum range of the light movement/initial placement. Movement will bounce at these boundaries",
+                    "$ref": "#/definitions/float3"
+                },
+                "RangeRange": {
+                    "description": "Interval in which to randomly generate the range of the light",
+                    "$ref": "#/definitions/float2"
+                },
+                "OuterAngleRange": {
+                    "description": "Interval in which to randomly generate the outer cone angle",
+                    "$ref": "#/definitions/float2"
+                },
+                "InnerAngleDifference": {
+                    "description": "The inner cone angle will be the OuterAngle - InnerAngleDifference",
+                    "type": "number"
+                },
+                "LinearVelocityMinRange": {
+                    "description": "The lower part of the interval in which to generate the light linear velocity [x, y, z]",
+                    "$ref": "#/definitions/float3"
+                },
+                "LinearVelocityMaxRange": {
+                    "description": "The upper part of the interval in which to generate the light linear velocity [x, y, z]",
+                    "$ref": "#/definitions/float3"
+                },
+                "AngularVelocityMinRange": {
+                    "description": "The lower part of the interval in which to generate the light angular velocity [x, y, z]",
+                    "$ref": "#/definitions/float3"
+                },
+                "AngularVelocityMaxRange": {
+                    "description": "The upper part of the interval in which to generate the light angular velocity [x, y, z]",
+                    "$ref": "#/definitions/float3"
+                }
+            }
+        }
+    }
+}

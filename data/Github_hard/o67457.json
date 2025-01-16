@@ -1,0 +1,777 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Canto JSON Export Schema",
+    "type": "object",
+    "definitions": {
+        "nullableString": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "stringInteger": {
+            "title": "String integer",
+            "description": "An integer value in string format.",
+            "type": "string",
+            "pattern": "^\\d+$"
+        },
+        "ncbiTaxonomyId": {
+            "title": "NCBI Taxonomy identifier",
+            "description": "A non-zero integer that represents the NCBI Taxonomy identifier for an organism.",
+            "oneOf": [
+                {
+                    "type": "number",
+                    "minimum": 1
+                },
+                {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d*$"
+                }
+            ]
+        },
+        "date": {
+            "title": "Date",
+            "description": "A date in RFC 3339 format.",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "examples": [
+                "2019-07-29"
+            ]
+        },
+        "dateTime": {
+            "title": "Date and time",
+            "description": "A date and time in RFC 3339 format, separated by a space.",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$",
+            "examples": [
+                "2019-07-29 13:36:52"
+            ]
+        },
+        "nullableDateTime": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/dateTime"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "sessionKey": {
+            "title": "Curation session key",
+            "description": "A unique identifier for Canto curation sessions, in hexadecimal format; used in curation session URLs. Note that 8-character identifiers are a legacy format.",
+            "type": "string",
+            "pattern": "^[a-f0-9]{8,16}$",
+            "examples": [
+                "ae5f4ed044163d0c",
+                "ae5f4ed0"
+            ]
+        },
+        "alleleId": {
+            "title": "Allele identifier",
+            "description": "A unique identifier for an allele, which combines 1) the unique name property for the gene, 2) the curation session identifier for the session containing the allele, and 3) a sequentially incremented number.",
+            "type": "string",
+            "pattern": "^.+:[a-f0-9]{8,16}-\\d+$",
+            "examples": [
+                "P87324:ae5f4ed044163d0c-1"
+            ]
+        },
+        "genotypeId": {
+            "title": "Genotype identifier",
+            "description": "A unique identifier for a genotype. Wild-type genotypes (containing no alleles) have a different identifier format from mutant genotypes (which contain one or more alleles).",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/mutantGenotypeId"
+                },
+                {
+                    "$ref": "#/definitions/wildTypeGenotypeId"
+                }
+            ]
+        },
+        "mutantGenotypeId": {
+            "title": "Mutant genotype identifier",
+            "description": "A unique identifier for a mutant genotype. A mutant genotype is a genotype that contains one or more alleles. The identifier consists of: 1) the curation session identifier, 2) the string '-genotype-', and 3) a sequentially incremented integer.",
+            "type": "string",
+            "pattern": "^[a-f0-9]{8,16}-genotype-\\d+$"
+        },
+        "wildTypeGenotypeId": {
+            "title": "Wild-type genotype identifier",
+            "description": "A unique identifier for a wild-type genotype. A wild-type genotype is a genotype that contains no alleles. The identifier consists of: 1) the species name, 2) the string 'wild-type-genotype', and 3) the strain name of the species.",
+            "type": "string",
+            "pattern": "^.+?wild-type-genotype.*$"
+        },
+        "metagenotypeId": {
+            "title": "Metagenotype identifier",
+            "description": "A unique identifer for a metagenotype, consisting of 1) the curation session identifier, 2) the string '-metagenotype-', and 3) a sequentially incremented integer.",
+            "type": "string",
+            "pattern": "^[a-f0-9]{8,16}-metagenotype-\\d+$"
+        },
+        "pmid": {
+            "title": "PMID",
+            "description": "PubMed unique identifier",
+            "type": "string",
+            "pattern": "^PMID:[1-9]\\d*$",
+            "examples": [
+                "PMID:12345"
+            ]
+        },
+        "orcid": {
+            "title": "ORCID",
+            "description": "Open Researcher and Contributor ID",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}(\\d|X)$",
+            "examples": [
+                "0000-0002-1825-0097",
+                "0000-0000-0000-000X"
+            ]
+        }
+    },
+    "properties": {
+        "curation_sessions": {
+            "title": "Curation sessions",
+            "description": "A collection of all curation sessions exported by Canto, keyed by their session ID.",
+            "type": "object",
+            "additionalProperties": false,
+            "propertyNames": {
+                "$ref": "#/definitions/sessionKey"
+            },
+            "patternProperties": {
+                ".+": {
+                    "title": "Curation session",
+                    "description": "An object containing all the data curated in one curation session.",
+                    "type": "object",
+                    "properties": {
+                        "alleles": {
+                            "title": "Alleles",
+                            "description": "A collection of all alleles in the curation session, keyed by their allele identifier.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "propertyNames": {
+                                "$ref": "#/definitions/alleleId"
+                            },
+                            "patternProperties": {
+                                ".+": {
+                                    "title": "Allele",
+                                    "description": "A single allele; a mutation, or set of mutations, in one copy of a gene at one locus.",
+                                    "type": "object",
+                                    "properties": {
+                                        "allele_type": {
+                                            "title": "Allele type",
+                                            "description": "The type of mutation (or mutations) for the allele.",
+                                            "type": "string",
+                                            "examples": [
+                                                "deletion",
+                                                "amino acid insertion and substitution",
+                                                "wild type"
+                                            ]
+                                        },
+                                        "gene": {
+                                            "title": "Allele gene",
+                                            "description": "An identifier for the gene corresponding to the allele. May contain the scientific name for the organism corresponding to the gene, if Canto is in multi-organism mode.",
+                                            "type": "string",
+                                            "examples": [
+                                                "Magnaporthe oryzae G4N0Z0"
+                                            ]
+                                        },
+                                        "name": {
+                                            "title": "Allele name",
+                                            "description": "The name for the allele. This may be specified by the user, or automatically generated by Canto.",
+                                            "type": "string"
+                                        },
+                                        "primary_identifier": {
+                                            "type": "string"
+                                        },
+                                        "synonyms": {
+                                            "title": "Allele synonyms",
+                                            "description": "A collection of synonyms of the allele name.",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "annotations": {
+                            "title": "Annotations",
+                            "description": "A collection of all annotations from the curation session.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "conditions": {
+                                        "title": "Experimental conditions",
+                                        "description": "A collection of experimental conditions for the annotation.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "creation_date": {
+                                        "title": "Creation date",
+                                        "description": "The date when the annotation was created.",
+                                        "$ref": "#/definitions/date"
+                                    },
+                                    "curator": {
+                                        "title": "Annotation curator",
+                                        "description": "The curator who created the annotation.",
+                                        "type": "object",
+                                        "properties": {
+                                            "community_curated": {
+                                                "title": "Community curated",
+                                                "description": "`true` if the curator who created the annotation was a community curator (not a member of the admin curation team), otherwise `false`.",
+                                                "type": "boolean"
+                                            },
+                                            "email": {
+                                                "title": "Annotation curator email",
+                                                "description": "The email address of the curator who created the annotation.",
+                                                "type": "string"
+                                            },
+                                            "name": {
+                                                "title": "Annotation curator name",
+                                                "description": "The name of the curator who created the annotation.",
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "evidence_code": {
+                                        "title": "Experimental evidence code",
+                                        "description": "An evidence code or experimental technique related to the annotation. In the case of Gene Ontology annotations, this code should be a GO Experimental Evidence Code. Note that these codes may be freely configured by Canto admins.",
+                                        "type": "string",
+                                        "examples": [
+                                            "TAS",
+                                            "Microscopy"
+                                        ]
+                                    },
+                                    "extension": {
+                                        "title": "Annotation extensions",
+                                        "description": "A collection of annotation extensions on the annotation.",
+                                        "type": "array",
+                                        "items": {
+                                            "title": "Annotation extension",
+                                            "description": "An annotation extension is a binary relation with a ontology term as its domain, and a range of one of the following: an ontology term ID; an annotated feature in the curation session (gene, genotype, etc.); or a literal value (a number or a string).",
+                                            "type": "object",
+                                            "properties": {
+                                                "rangeDisplayName": {
+                                                    "title": "Extension range display name",
+                                                    "description": "A display name for the range of the annotation extension relation. For ontology terms, the display name is the name of the term; for annotated features, the display name is the name of the feature; otherwise, the display name is blank.",
+                                                    "type": "string",
+                                                    "examples": [
+                                                        "leaf",
+                                                        "stb6"
+                                                    ]
+                                                },
+                                                "rangeType": {
+                                                    "title": "Extension range type",
+                                                    "description": "The type of the range of the annotation extension relation. Note that this may be absent in the case that an admin curator has entered the relation as text.",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Gene",
+                                                        "Ontology",
+                                                        "%",
+                                                        "Text"
+                                                    ]
+                                                },
+                                                "rangeValue": {
+                                                    "title": "Extension range value",
+                                                    "description": "The value of the range of an annotation extension relation. For ontology terms, the value is the OBO ID of the term; for annotated features, the value is the unique identifier of the feature; for literals, the value is the value of the literal.",
+                                                    "type": "string",
+                                                    "examples": [
+                                                        "GO:0052170",
+                                                        "A0A1D5VHV3",
+                                                        "50"
+                                                    ]
+                                                },
+                                                "relation": {
+                                                    "title": "Extension relation name",
+                                                    "description": "The name of the annotation extension relation, loaded from the annotation extension configuration file.",
+                                                    "type": "string",
+                                                    "examples": [
+                                                        "has_penetrance",
+                                                        "part_of",
+                                                        "assayed_using"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "gene": {
+                                        "title": "Annotation gene",
+                                        "description": "The identifier of the gene annotated by the annotation.",
+                                        "type": "string"
+                                    },
+                                    "genotype": {
+                                        "title": "Annotation genotype",
+                                        "description": "The identifier of the genotype annotated by the annotation.",
+                                        "$ref": "#/definitions/genotypeId"
+                                    },
+                                    "metagenotype": {
+                                        "title": "Annotation metagenotype",
+                                        "description": "The identifier of the metagenotype annotated by the annotation.",
+                                        "$ref": "#/definitions/metagenotypeId"
+                                    },
+                                    "publication": {
+                                        "title": "Annotation publication",
+                                        "description": "The PubMed ID for the publication corresponding to the curation session containing this annotation.",
+                                        "$ref": "#/definitions/pmid"
+                                    },
+                                    "status": {
+                                        "title": "Annotation status",
+                                        "description": "The status of the annotation.",
+                                        "type": "string",
+                                        "enum": [
+                                            "new"
+                                        ]
+                                    },
+                                    "submitter_comment": {
+                                        "title": "Submitter comment",
+                                        "description": "A comment from the curator who created the annotation, usually describing information that cannot be captured elsewhere in the annotation.",
+                                        "$ref": "#/definitions/nullableString"
+                                    },
+                                    "term": {
+                                        "title": "Annotation ontology term",
+                                        "description": "The OBO ID of the ontology term used in the annotation.",
+                                        "type": "string"
+                                    },
+                                    "term_suggestion": {
+                                        "title": "A suggestion for a term to be added to the relevant ontology for the annotation. Used when no suitable term exists for the annotation being made.",
+                                        "anyOf": [
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "definition": {
+                                                        "title": "Suggested term definition",
+                                                        "description": "The term definition for the suggested term.",
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "title": "Suggested term name",
+                                                        "description": "The term name for the suggested term.",
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "null"
+                                            }
+                                        ]
+                                    },
+                                    "type": {
+                                        "title": "Annotation type",
+                                        "description": "The type of the annotation; usually equivalent to the OBO namespace of the ontology term used in the annotation.",
+                                        "type": "string"
+                                    },
+                                    "with_gene_id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "creation_date",
+                                    "publication",
+                                    "type"
+                                ],
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "gene"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "genotype"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "metagenotype"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "genes": {
+                            "title": "Genes",
+                            "description": "A collection of all genes from the curation session.",
+                            "type": "object",
+                            "patternProperties": {
+                                ".+": {
+                                    "title": "Gene",
+                                    "type": "object",
+                                    "properties": {
+                                        "organism": {
+                                            "title": "Gene organism name",
+                                            "description": "The scientific name of the organism corresponding to the gene.",
+                                            "type": "string"
+                                        },
+                                        "uniquename": {
+                                            "title": "Gene unique name",
+                                            "description": "A unique name for the gene; usually a systematic identifier from a biological database.",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "genotypes": {
+                            "title": "Genotypes",
+                            "description": "A collection of all genotypes from the curation session, keyed by their genotype identifier.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "propertyNames": {
+                                "$ref": "#/definitions/genotypeId"
+                            },
+                            "patternProperties": {
+                                ".+": {
+                                    "title": "Genotype",
+                                    "description": "A genotype of an organism of a specific strain. Contains one or more loci, and one or more alleles at each locus.",
+                                    "type": "object",
+                                    "properties": {
+                                        "background": {
+                                            "title": "Genotype background",
+                                            "description": "Background details about a genotype, such as the mating type of the organism, or reporter genes.",
+                                            "type": "string"
+                                        },
+                                        "comment": {
+                                            "title": "Genotype comments",
+                                            "description": "Comments entered by the curator to describe information that is out of scope of current genotype curation.",
+                                            "type": "string"
+                                        },
+                                        "loci": {
+                                            "title": "Genotype loci",
+                                            "description": "A collection of loci corresponding to the alleles in the genotype.",
+                                            "type": "array",
+                                            "items": {
+                                                "title": "Genotype locus",
+                                                "description": "A collection representing a locus containing one or more alleles. Multiple alleles are present in the case of diploid or polyploid organisms.",
+                                                "type": "array",
+                                                "items": {
+                                                    "title": "Genotype allele",
+                                                    "description": "An allele of a gene in the genotype; specifically a reference to the ID of that allele.",
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "expression": {
+                                                            "title": "Gene expression level",
+                                                            "description": "A qualitative term describing the level of gene expression in the allele.",
+                                                            "$ref": "#/definitions/nullableString",
+                                                            "examples": [
+                                                                "Overexpression",
+                                                                "Wild type product level",
+                                                                "Knockdown"
+                                                            ]
+                                                        },
+                                                        "id": {
+                                                            "$ref": "#/definitions/alleleId"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "name": {
+                                            "title": "Genotype name",
+                                            "description": "A name for the genotype specified by the curator.",
+                                            "type": "string"
+                                        },
+                                        "organism_strain": {
+                                            "title": "Genotype organism strain",
+                                            "description": "The strain name of the organism corresponding to the genotype.",
+                                            "type": "string"
+                                        },
+                                        "organism_taxonid": {
+                                            "title": "Genotype taxonomic identifier",
+                                            "description": "The NCBI Taxonomy ID of the organism corresponding to the genotype.",
+                                            "$ref": "#/definitions/ncbiTaxonomyId"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "metadata": {
+                            "title": "Session metadata",
+                            "description": "Metadata about the curation session.",
+                            "type": "object",
+                            "properties": {
+                                "accepted_timestamp": {
+                                    "title": "Accepted date",
+                                    "description": "The date and time on which the curation session was accepted by an admin curator.",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "admin_session": {
+                                    "title": "Admin session",
+                                    "description": "Boolean string that tracks whether the curation session is in admin mode. For internal use only.",
+                                    "$ref": "#/definitions/stringInteger"
+                                },
+                                "annotation_mode": {
+                                    "title": "Annotation mode",
+                                    "description": "Tracks the annotation mode of the curation session in Canto. For internal use only.",
+                                    "type": "string",
+                                    "enum": [
+                                        "standard",
+                                        "advanced"
+                                    ]
+                                },
+                                "annotation_status": {
+                                    "title": "Annotation status",
+                                    "description": "A categorical term that tracks the current state (and relative progress) of a curation session.",
+                                    "type": "string",
+                                    "examples": [
+                                        "APPROVED",
+                                        "CURATION_IN_PROGRESS",
+                                        "APPROVAL_IN_PROGRESS"
+                                    ]
+                                },
+                                "annotation_status_datestamp": {
+                                    "title": "Annotation status date",
+                                    "description": "The date and time when the annotation status was last changed.",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "approval_in_progress_timestamp": {
+                                    "title": "Approval in progress date",
+                                    "description": "The date and time when the annotation status was set to 'APPROVAL_IN_PROGRESS'.",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "canto_session": {
+                                    "title": "The session identifier for this curation session.",
+                                    "$ref": "#/definitions/sessionKey"
+                                },
+                                "curation_accepted_date": {
+                                    "$ref": "#/definitions/nullableDateTime"
+                                },
+                                "curation_in_progress_timestamp": {
+                                    "title": "Curation in progress date",
+                                    "description": "The date and time when the annotation status was set to 'CURATION_IN_PROGRESS'.",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "curation_pub_id": {
+                                    "title": "Curation session PubMed ID",
+                                    "description": "The PubMed identifier for the publication corresponding to the curation session.",
+                                    "$ref": "#/definitions/pmid"
+                                },
+                                "curator_name": {
+                                    "title": "Curator name",
+                                    "description": "The name of the current curator of the curation session.",
+                                    "$ref": "#/definitions/nullableString"
+                                },
+                                "curator_role": {
+                                    "title": "Curator role",
+                                    "description": "The role of the current curator of the curation session; specifically whether they are an admin curator or a community curator.",
+                                    "type": "string"
+                                },
+                                "initial_curator_name": {
+                                    "title": "Initial curator name",
+                                    "description": "The name of of the curator that created the curation session.",
+                                    "$ref": "#/definitions/nullableString"
+                                },
+                                "message_for_curators": {
+                                    "title": "Message for admin curators",
+                                    "description": "A message from the current curator to the team of admin curators, usually detailing additional information that could not be captured in the curation session.",
+                                    "type": "string"
+                                },
+                                "needs_approval_timestamp": {
+                                    "title": "Needs approval date",
+                                    "description": "The date and time when the annotation status was set to 'NEEDS_APPROVAL'.",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "reactivated_timestamp": {
+                                    "title": "Reactivated date",
+                                    "description": "The date and time when the curation session was reactivated (after being paused).",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "session_created_timestamp": {
+                                    "title": "Session creation date",
+                                    "description": "The date and time when the curation session was first created.",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "session_first_submitted_timestamp": {
+                                    "title": "Session submission date",
+                                    "description": "The date and time when the curation session was first submitted for approval.",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "session_genes_count": {
+                                    "title": "Session gene count",
+                                    "description": "The number of genes in the curation session.",
+                                    "$ref": "#/definitions/stringInteger"
+                                },
+                                "session_reactivated_timestamp": {
+                                    "title": "Reactivated date",
+                                    "description": "The date and time when the curation session was reactivated (after being paused).",
+                                    "$ref": "#/definitions/dateTime"
+                                },
+                                "session_term_suggestions_count": {
+                                    "title": "Term suggestion count",
+                                    "description": "The number of term suggestions in the curation session.",
+                                    "$ref": "#/definitions/stringInteger"
+                                },
+                                "session_unknown_conditions_count": {
+                                    "title": "Unknown conditions count",
+                                    "description": "The number of experimental conditions in the session that are not found in the experimental conditions ontology.",
+                                    "$ref": "#/definitions/stringInteger"
+                                },
+                                "term_suggestion_count": {
+                                    "title": "Term suggestion count",
+                                    "description": "The number of term suggestions in the curation session.",
+                                    "$ref": "#/definitions/stringInteger"
+                                },
+                                "unknown_conditions_count": {
+                                    "title": "Unknown conditions count",
+                                    "description": "The number of experimental conditions in the session that are not found in the experimental conditions ontology.",
+                                    "$ref": "#/definitions/stringInteger"
+                                }
+                            }
+                        },
+                        "metagenotypes": {
+                            "title": "Curation session metagenotypes",
+                            "description": "A collection of metagenotypes curated in the curation session, keyed by their metagenotype identifier.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "propertyNames": {
+                                "$ref": "#/definitions/metagenotypeId"
+                            },
+                            "patternProperties": {
+                                ".+": {
+                                    "title": "Metagenotype",
+                                    "description": "A metagenotype is a composition of two genotypes, and is used as the basis for annotating multi-organism interactions.",
+                                    "type": "object",
+                                    "properties": {
+                                        "host_genotype": {
+                                            "title": "Host genotype",
+                                            "description": "The host part of the metagenotype.",
+                                            "$ref": "#/definitions/genotypeId"
+                                        },
+                                        "pathogen_genotype": {
+                                            "title": "Pathogen genotype",
+                                            "description": "The pathogen part of the metagenotype.",
+                                            "$ref": "#/definitions/genotypeId"
+                                        },
+                                        "type": {
+                                            "title": "Metagenotype type",
+                                            "description": "The category of a metagenotype.",
+                                            "type": "string",
+                                            "examples": [
+                                                "pathogen-host"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "organisms": {
+                            "title": "Curation session organisms",
+                            "description": "A collection of organisms used in the curation session, keyed by their NCBI Taxonomy identifiers.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "propertyNames": {
+                                "$ref": "#/definitions/ncbiTaxonomyId"
+                            },
+                            "patternProperties": {
+                                ".+": {
+                                    "type": "object",
+                                    "properties": {
+                                        "full_name": {
+                                            "title": "Scientific name",
+                                            "description": "The scientific (binomial) name of the species of the organism.",
+                                            "type": "string",
+                                            "examples": [
+                                                "Schizosaccharomyces pombe"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "publications": {
+                            "title": "Curation session publications",
+                            "description": "A collection of publications curated by the curation session, keyed by their PubMed identifier.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "propertyNames": {
+                                "$ref": "#/definitions/pmid"
+                            },
+                            "patternProperties": {
+                                ".+": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "title": "Publication title",
+                                            "description": "The title of the publication.",
+                                            "type": "string",
+                                            "examples": [
+                                                "Formate assay in body fluids: application in methanol poisoning."
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "publications": {
+            "title": "Publications",
+            "description": "A collection of all publications tracked by Canto, keyed by their PubMed identifier.",
+            "type": "object",
+            "additionalProperties": false,
+            "propertyNames": {
+                "$ref": "#/definitions/pmid"
+            },
+            "patternProperties": {
+                ".+": {
+                    "type": "object",
+                    "properties": {
+                        "abstract": {
+                            "$ref": "#/definitions/nullableString"
+                        },
+                        "added_date": {
+                            "$ref": "#/definitions/nullableDateTime"
+                        },
+                        "affiliation": {
+                            "$ref": "#/definitions/nullableString"
+                        },
+                        "authors": {
+                            "$ref": "#/definitions/nullableString"
+                        },
+                        "citation": {
+                            "type": "string"
+                        },
+                        "corresponding_author": {
+                            "$ref": "#/definitions/nullableString"
+                        },
+                        "curation_statuses": {
+                            "type": "array"
+                        },
+                        "properties": {
+                            "type": "array"
+                        },
+                        "publication_date": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "$ref": "#/definitions/nullableString"
+                        },
+                        "triage_status": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "schema_version": {
+            "title": "Schema version",
+            "description": "The version number of the current schema.",
+            "type": "integer",
+            "minimum": 1
+        }
+    },
+    "required": [
+        "curation_sessions",
+        "schema_version"
+    ]
+}

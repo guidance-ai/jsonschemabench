@@ -1,0 +1,191 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "responseType": {
+            "description": "Response type, as defined by the Open311/GeoReport2 standard.",
+            "type": "string",
+            "enum": [
+                "realtime",
+                "batch",
+                "blackbox"
+            ]
+        },
+        "service": {
+            "description": "All requests are for a Service.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "The id must be unique",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "name": {
+                    "description": "Title of the Service.",
+                    "type": "string"
+                },
+                "responseType": {
+                    "description": "Response type, as defined by the Open311/GeoReport2 standard.  This overrides anything set at the Provider level.",
+                    "$ref": "#/definitions/responseType"
+                },
+                "group": {
+                    "description": "The group this Service request type belongs to.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "group"
+            ]
+        },
+        "emailCfg": {
+            "description": "Email configuration: to, from, subject, and template.",
+            "type": "object",
+            "properties": {
+                "to": {
+                    "description": "Email will be sent to this address(es).",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "from": {
+                    "description": "Email marked as being sent by this address and sender.",
+                    "type": "array",
+                    "items": {
+                        "description": "The first string is the sender address, the second string is the sender name.",
+                        "type": "string"
+                    }
+                },
+                "subject": {
+                    "description": "The subject line of the email.",
+                    "type": "string"
+                },
+                "template": {
+                    "description": "The Go template to use to format the email.  This is the path and filename of the template file.",
+                    "type": "string"
+                }
+            }
+        },
+        "provider": {
+            "description": "A specific Service Provider interface.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "A number uniquely identifying the Service Provider.  This is only used within the Gateway system, and must be unique and unchanging. New values should be placed numerically ABOVE existing values.  Changing the values will confuse any issue ID's that may be stored in a user device.",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "name": {
+                    "description": "Identifies the Service Provider instance.  This should be unique, as it will be used in error and log messages.",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "The URL of the Service Provider interface.",
+                    "type": "string"
+                },
+                "apiVersion": {
+                    "description": "The API version of the Service Provider interface.  Not currently used.",
+                    "type": "string"
+                },
+                "key": {
+                    "description": "The API key to access the Service Provider interface.",
+                    "type": "string"
+                },
+                "responseType": {
+                    "description": "Response type, as defined by the Open311/GeoReport2 standard.  This sets the default value for the Provider, which can be overridden at the Service level.",
+                    "$ref": "#/definitions/responseType"
+                },
+                "email": {
+                    "description": "The email configuration for this Provider.  Only applies to the Email adapter.",
+                    "$ref": "#/definitions/emailCfg"
+                },
+                "services": {
+                    "description": "The Services of the Provider.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service"
+                    }
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "responseType",
+                "services"
+            ]
+        },
+        "serviceArea": {
+            "description": "A Service Area, having one or more Service Providers.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of the Area.",
+                    "type": "string"
+                },
+                "providers": {
+                    "description": "The list of all Providers for this Area.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/provider"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "providers"
+            ]
+        }
+    },
+    "properties": {
+        "adapter": {
+            "description": "Basic configuration info for the Adapter",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Identifies the Adapter to the Engine. This must match the Engine configuration file.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "The type of Adapter - e.g. 'CitySourced', 'Email', etc.",
+                    "type": "string"
+                },
+                "address": {
+                    "description": "The IP address and port number over which the Adapter will communicate with the Engine.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "type",
+                "address"
+            ]
+        },
+        "monitor": {
+            "description": "Configuration data for the System Monitor.",
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "IP and port of the system monitor.",
+                    "type:": "string"
+                }
+            },
+            "required": [
+                "address"
+            ]
+        },
+        "serviceGroups": {
+            "description": "The list of all top level categories for all Services.  These will be referenced in the serviceAreas.",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "serviceAreas": {
+            "description": "The list of all geographic areas the Adapter services, including the list of all services for each area.",
+            "additionalProperties": {
+                "$ref": "#/definitions/serviceArea"
+            }
+        }
+    }
+}

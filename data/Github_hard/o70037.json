@@ -1,0 +1,570 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "title": "RightScale Self Service Vending Machine Product Output v1.0.0",
+    "type": "object",
+    "required": [
+        "name",
+        "resources"
+    ],
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+            "description": "An optional DB schema version.  This is a semantic version number and it identifies the version of the object schema as stored in a NoSQL database."
+        },
+        "resources": {
+            "description": "An array of resources which can be referenced by any other resource.  Resources can also be nested, such as in deployment/server/security_group.  If a resource is nested it can not be referenced anywhere else in the schema.  Only resources in this array can be referenced by their type and ID.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "anyOf": [
+                    {
+                        "$ref": "#/definitions/deployment"
+                    },
+                    {
+                        "$ref": "#/definitions/security_group"
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "deployment": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "name",
+                "servers"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "A unique ID for this deployment within the product."
+                },
+                "resource_type": {
+                    "enum": [
+                        "deployment"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "server_tag_scope": {
+                    "enum": [
+                        "deployment",
+                        "account"
+                    ]
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/input"
+                    }
+                },
+                "servers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/server"
+                    }
+                },
+                "server_arrays": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/server_array"
+                    }
+                }
+            }
+        },
+        "alert_spec": {
+            "type": "object",
+            "required": [
+                "resource_type",
+                "name",
+                "condition",
+                "duration",
+                "file",
+                "threshold",
+                "variable"
+            ],
+            "properties": {
+                "resource_type": {
+                    "enum": [
+                        "alert_spec"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "condition": {
+                    "enum": [
+                        ">",
+                        ">=",
+                        "<",
+                        "<=",
+                        "==",
+                        "!="
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "escalation_name": {
+                    "type": "string"
+                },
+                "file": {
+                    "type": "string"
+                },
+                "threshold": {
+                    "type": "string"
+                },
+                "variable": {
+                    "type": "string"
+                },
+                "vote_tag": {
+                    "type": "string"
+                },
+                "vote_type": {
+                    "enum": [
+                        "grow",
+                        "shrink"
+                    ]
+                }
+            }
+        },
+        "server_array": {
+            "type": "object",
+            "required": [
+                "resource_type",
+                "array_type",
+                "elasticity_params",
+                "instance",
+                "name"
+            ],
+            "properties": {
+                "resource_type": {
+                    "enum": [
+                        "server_array"
+                    ]
+                },
+                "array_type": {
+                    "enum": [
+                        "alert",
+                        "queue"
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                },
+                "elasticity_params": {
+                    "$ref": "#/definitions/elasticity_params"
+                },
+                "instance": {
+                    "$ref": "#/definitions/instance"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "optimized": {
+                    "type": "boolean"
+                },
+                "state": {
+                    "enum": [
+                        "enabled",
+                        "disabled"
+                    ],
+                    "default": "disabled"
+                },
+                "alert_specs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/alert_spec"
+                    }
+                }
+            }
+        },
+        "elasticity_params": {
+            "type": "object",
+            "required": [
+                "resource_type",
+                "bounds",
+                "pacing"
+            ],
+            "properties": {
+                "resource_type": {
+                    "enum": [
+                        "elasticity_params"
+                    ]
+                },
+                "bounds": {
+                    "type": "object",
+                    "required": [
+                        "min_count",
+                        "max_count"
+                    ],
+                    "properties": {
+                        "max_count": {
+                            "type": "string"
+                        },
+                        "min_count": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "pacing": {
+                    "type": "object",
+                    "required": [
+                        "resize_calm_time",
+                        "resize_down_by",
+                        "resize_up_by"
+                    ],
+                    "properties": {
+                        "resize_calm_time": {
+                            "type": "string"
+                        },
+                        "resize_down_by": {
+                            "type": "string"
+                        },
+                        "resize_up_by": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "alert_specific_params": {
+                    "type": "object",
+                    "properties": {
+                        "decision_threshold": {
+                            "type": "string"
+                        },
+                        "voters_tag_predicate": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "queue_specific_params": {
+                    "type": "object",
+                    "properties": {
+                        "collect_audit_entries": {
+                            "type": "string"
+                        },
+                        "item_age": {
+                            "type": "object",
+                            "properties": {
+                                "algorithm": {
+                                    "enum": [
+                                        "max_10",
+                                        "avg_10"
+                                    ]
+                                },
+                                "max_age": {
+                                    "type": "string"
+                                },
+                                "regexp": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "queue_size": {
+                            "type": "object",
+                            "properties": {
+                                "items_per_instance": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "schedule": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "day",
+                            "max_count",
+                            "min_count",
+                            "time"
+                        ],
+                        "properties": {
+                            "day": {
+                                "enum": [
+                                    "Sunday",
+                                    "Monday",
+                                    "Tuesday",
+                                    "Wednesday",
+                                    "Thursday",
+                                    "Friday",
+                                    "Saturday"
+                                ]
+                            },
+                            "max_count": {
+                                "type": "string"
+                            },
+                            "min_count": {
+                                "type": "string"
+                            },
+                            "time": {
+                                "type": "string",
+                                "pattern": "^\\d\\d:\\d\\d$"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "server": {
+            "type": "object",
+            "required": [
+                "resource_type",
+                "name_prefix",
+                "count",
+                "instance"
+            ],
+            "properties": {
+                "resource_type": {
+                    "enum": [
+                        "server"
+                    ]
+                },
+                "name_prefix": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "optimized": {
+                    "type": "boolean"
+                },
+                "count": {
+                    "type": "string"
+                },
+                "instance": {
+                    "$ref": "#/definitions/instance"
+                },
+                "alert_specs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/alert_spec"
+                    }
+                }
+            }
+        },
+        "instance": {
+            "type": "object",
+            "required": [
+                "resource_type",
+                "cloud_href",
+                "server_template"
+            ],
+            "properties": {
+                "resource_type": {
+                    "enum": [
+                        "instance"
+                    ]
+                },
+                "cloud_href": {
+                    "type": "string"
+                },
+                "datacenter_hrefs": {
+                    "type": "array"
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/input"
+                    }
+                },
+                "instance_type_href": {
+                    "type": "string"
+                },
+                "multi_cloud_image_href": {
+                    "type": "string"
+                },
+                "security_group_hrefs": {
+                    "description": "Can contain either security group hrefs, or a reference to a security group definition which must be created and the resultant href used.",
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "$ref": "#/definitions/security_group_relationship"
+                            }
+                        ]
+                    }
+                },
+                "server_template": {
+                    "$ref": "#/definitions/server_template"
+                },
+                "ssh_key_href": {
+                    "type": "string"
+                },
+                "subnet_hrefs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "input": {
+            "type": "object",
+            "required": [
+                "resource_type",
+                "name",
+                "value"
+            ],
+            "properties": {
+                "resource_type": {
+                    "enum": [
+                        "input"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string",
+                    "pattern": "^(text|key|cred|array|env):.*"
+                }
+            }
+        },
+        "server_template": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "name",
+                "revision"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "server_template"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "publication_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "security_group": {
+            "type": "object",
+            "required": [
+                "id",
+                "resource_type",
+                "cloud_href",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource_type": {
+                    "enum": [
+                        "security_group"
+                    ]
+                },
+                "cloud_href": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "security_group_rules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/security_group_rule"
+                    }
+                }
+            }
+        },
+        "security_group_rule": {
+            "type": "object",
+            "required": [
+                "resource_type",
+                "protocol",
+                "protocol_details",
+                "source_type"
+            ],
+            "properties": {
+                "resource_type": {
+                    "enum": [
+                        "security_group_rule"
+                    ]
+                },
+                "cidr_ips": {
+                    "type": "string"
+                },
+                "ingress_group": {
+                    "$ref": "#/definitions/security_group_relationship"
+                },
+                "protocol": {
+                    "enum": [
+                        "tcp",
+                        "udp",
+                        "icmp"
+                    ]
+                },
+                "protocol_details": {
+                    "type": "object",
+                    "properties": {
+                        "end_port": {
+                            "type": "string"
+                        },
+                        "icmp_code": {
+                            "type": "string"
+                        },
+                        "icmp_type": {
+                            "type": "string"
+                        },
+                        "start_port": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "source_type": {
+                    "enum": [
+                        "cidr_ips",
+                        "group"
+                    ]
+                }
+            }
+        },
+        "security_group_relationship": {
+            "type": "object",
+            "required": [
+                "id",
+                "ref"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "ref": {
+                    "enum": [
+                        "security_group"
+                    ]
+                }
+            }
+        }
+    }
+}

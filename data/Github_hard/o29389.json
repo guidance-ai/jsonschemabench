@@ -1,0 +1,370 @@
+{
+    "$id": "https://antha.com/layout-schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "JSON Schema for deck layout description",
+    "type": "object",
+    "required": [
+        "before",
+        "after",
+        "new_ids",
+        "version"
+    ],
+    "properties": {
+        "version": {
+            "description": "the version of this schema for validation",
+            "const": "1.0"
+        },
+        "before": {
+            "$ref": "#/definitions/deckSummary"
+        },
+        "after": {
+            "$ref": "#/definitions/deckSummary"
+        },
+        "new_ids": {
+            "type": "object",
+            "description": "maps from the object IDs in 'before' to 'after'",
+            "additionalProperties": {
+                "type": "string",
+                "description": "An ID in 'after'"
+            }
+        }
+    },
+    "definitions": {
+        "deckSummary": {
+            "type": "object",
+            "description": "Describes the layout of a liquidhandling deck at a given point in time",
+            "required": [
+                "positions"
+            ],
+            "properties": {
+                "positions": {
+                    "type": "object",
+                    "description": "Keys are the names of positions on the deck of the liquidhandling deck",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/deckPosition"
+                    }
+                }
+            }
+        },
+        "deckPosition": {
+            "type": "object",
+            "description": "a position on the liquidhandling deck",
+            "required": [
+                "position",
+                "size"
+            ],
+            "properties": {
+                "position": {
+                    "$ref": "#/definitions/coordinates3"
+                },
+                "size": {
+                    "$ref": "#/definitions/coordinates2"
+                },
+                "item": {
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/plate"
+                        },
+                        {
+                            "$ref": "#/definitions/tipbox"
+                        },
+                        {
+                            "$ref": "#/definitions/tipwaste"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "coordinates2": {
+            "type": "object",
+            "description": "Two dimensional coordinates",
+            "required": [
+                "x_mm",
+                "y_mm"
+            ],
+            "properties": {
+                "x_mm": {
+                    "type": "number",
+                    "description": "x coordinate in mm"
+                },
+                "y_mm": {
+                    "type": "number",
+                    "description": "y coordinate in mm"
+                }
+            },
+            "additionalProperties": false
+        },
+        "coordinates3": {
+            "type": "object",
+            "description": "Three dimensional coordinates",
+            "required": [
+                "x_mm",
+                "y_mm"
+            ],
+            "properties": {
+                "x_mm": {
+                    "type": "number",
+                    "description": "x coordinate in mm"
+                },
+                "y_mm": {
+                    "type": "number",
+                    "description": "y coordinate in mm"
+                },
+                "z_mm": {
+                    "type": "number",
+                    "description": "z coordinate in mm"
+                }
+            },
+            "additionalProperties": false
+        },
+        "item": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "type",
+                "manufacturer",
+                "description",
+                "rows",
+                "columns",
+                "dimensions",
+                "well_dimensions",
+                "well_start",
+                "well_type"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "The unique ID of the object"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of this particular object"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "The type name of this object, e.g. 'pcrplate'"
+                },
+                "manufacturer": {
+                    "type": "string",
+                    "description": "The name of the manufacturer of this object"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A handy description of this object"
+                },
+                "rows": {
+                    "type": "number",
+                    "description": "The number of rows of wells or tips in this object",
+                    "multipleOf": 1.0,
+                    "minimum": 0.0
+                },
+                "columns": {
+                    "type": "number",
+                    "description": "The number of columns of wells or tips in this object",
+                    "multipleOf": 1.0,
+                    "minimum": 0.0
+                },
+                "dimensions": {
+                    "description": "The size of this object",
+                    "$ref": "#/definitions/coordinates3"
+                },
+                "well_dimensions": {
+                    "description": "The size of the wells or tips in this object",
+                    "$ref": "#/definitions/coordinates3"
+                },
+                "well_start": {
+                    "description": "The position of the center of the upper left-most well or tip in this object",
+                    "$ref": "#/definitions/coordinates3"
+                },
+                "well_type": {
+                    "description": "The type, or rather the shape, of the wells in this plate",
+                    "type": "string",
+                    "enum": [
+                        "cylinder",
+                        "cuboid"
+                    ]
+                }
+            }
+        },
+        "plate": {
+            "description": "Represent a plate on the deck",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/item"
+                },
+                {
+                    "properties": {
+                        "kind": {
+                            "description": "used to verify the type",
+                            "const": "plate"
+                        },
+                        "residual_volume": {
+                            "description": "volume which cannot be removed from the wells of a plate",
+                            "$ref": "#/definitions/measurement"
+                        },
+                        "contents": {
+                            "patternProperties": {
+                                "^[0-9]+$": {
+                                    "description": "a column of wells",
+                                    "type": "object",
+                                    "patternProperties": {
+                                        "^[0-9]+$": {
+                                            "description": "the contents of the well at the given position in the column",
+                                            "$ref": "#/definitions/liquid"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "kind",
+                        "residual_volume"
+                    ]
+                }
+            ]
+        },
+        "tipbox": {
+            "description": "Represent a tipbox on the deck",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/item"
+                },
+                {
+                    "properties": {
+                        "kind": {
+                            "description": "used to verify the type",
+                            "const": "tipbox"
+                        },
+                        "missing_tips": {
+                            "description": "Lists the positions at which tips are not present",
+                            "type": "array",
+                            "items": {
+                                "description": "Well coordinates of the missing tip",
+                                "type": "object",
+                                "required": [
+                                    "row",
+                                    "col"
+                                ],
+                                "properties": {
+                                    "row": {
+                                        "type": "number",
+                                        "multipleOf": 1.0,
+                                        "minimum": 0.0
+                                    },
+                                    "col": {
+                                        "type": "number",
+                                        "multipleOf": 1.0,
+                                        "minimum": 0.0
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": [
+                        "kind"
+                    ]
+                }
+            ]
+        },
+        "tipwaste": {
+            "description": "Represent a tipwaste on the deck",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/item"
+                },
+                {
+                    "properties": {
+                        "kind": {
+                            "description": "used to verify the type",
+                            "const": "tipwaste"
+                        },
+                        "discarded_tips": {
+                            "type": "number",
+                            "description": "The number of discarded tips in the waste",
+                            "multipleOf": 1.0,
+                            "minimum": 0.0
+                        }
+                    },
+                    "required": [
+                        "kind"
+                    ]
+                }
+            ]
+        },
+        "liquid": {
+            "description": "Describe a liquid in a plate well",
+            "type": "object",
+            "required": [
+                "name",
+                "total_volume"
+            ],
+            "properties": {
+                "name": {
+                    "description": "The display name of the liquid",
+                    "type": "string"
+                },
+                "total_volume": {
+                    "description": "The total volume present of the liquid",
+                    "$ref": "#/definitions/measurement"
+                },
+                "components": {
+                    "description": "The sub-components which make up this liquid",
+                    "type": "array",
+                    "items": {
+                        "description": "A sub component",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "concentration",
+                            "unit"
+                        ],
+                        "properties": {
+                            "name": {
+                                "description": "the display name of the sub-component",
+                                "type": "string"
+                            },
+                            "concentration": {
+                                "description": "the concentration of the sub-component",
+                                "type": "number",
+                                "minimum": 0.0
+                            },
+                            "unit": {
+                                "description": "the units in which the concentration is expressed",
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "measurement": {
+            "description": "A measurement, typically of a Volume",
+            "type": "object",
+            "required": [
+                "value",
+                "unit"
+            ],
+            "properties": {
+                "value": {
+                    "description": "The value of the measurement",
+                    "type": "number"
+                },
+                "unit": {
+                    "description": "The units in which the measurement is expressed",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

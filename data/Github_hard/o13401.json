@@ -1,0 +1,556 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Lantern Scene Definition Schema",
+    "type": "object",
+    "required": [
+        "camera"
+    ],
+    "properties": {
+        "background_color": {
+            "description": "",
+            "$ref": "#/definitions/float3"
+        },
+        "camera": {
+            "description": "",
+            "type": "object",
+            "required": [
+                "client_width",
+                "client_height"
+            ],
+            "properties": {
+                "phi": {
+                    "description": "",
+                    "type": "number"
+                },
+                "theta": {
+                    "description": "",
+                    "type": "number"
+                },
+                "radius": {
+                    "description": "",
+                    "type": "number"
+                },
+                "client_width": {
+                    "description": "",
+                    "type": "number"
+                },
+                "client_height": {
+                    "description": "",
+                    "type": "number"
+                },
+                "fov": {
+                    "description": "",
+                    "type": "number"
+                },
+                "target": {
+                    "description": "",
+                    "$ref": "#/definitions/float3"
+                }
+            }
+        },
+        "bsdfs": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/ideal_specular_dielectric_bsdf"
+                    },
+                    {
+                        "$ref": "#/definitions/lambert_bsdf"
+                    },
+                    {
+                        "$ref": "#/definitions/mirror_bsdf"
+                    }
+                ]
+            }
+        },
+        "media": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/non_scattering_medium"
+                    },
+                    {
+                        "$ref": "#/definitions/isotropic_scattering_medium"
+                    }
+                ]
+            }
+        },
+        "materials": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "bsdf"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "bsdf": {
+                        "description": "",
+                        "type": "string"
+                    },
+                    "medium": {
+                        "description": "",
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "primitives": {
+            "description": "",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/lantern_model_file"
+                    },
+                    {
+                        "$ref": "#/definitions/grid"
+                    },
+                    {
+                        "$ref": "#/definitions/geosphere"
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false,
+    "definitions": {
+        "float2": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "additionalItems": false
+        },
+        "float3": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "additionalItems": false
+        },
+        "float4x4": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 16,
+            "maxItems": 16,
+            "additionalItems": false
+        },
+        "constant_texture": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "constant"
+                    ]
+                },
+                "value": {
+                    "description": "",
+                    "$ref": "#/definitions/float3"
+                }
+            }
+        },
+        "image_texture": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "image"
+                    ]
+                },
+                "file_path": {
+                    "description": "",
+                    "type": "string"
+                }
+            }
+        },
+        "uv_texture": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "uv"
+                    ]
+                }
+            }
+        },
+        "ideal_specular_dielectric_bsdf": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "albedo",
+                "ior"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "ideal_specular_dielectric"
+                    ]
+                },
+                "albedo": {
+                    "description": "",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/constant_texture"
+                        },
+                        {
+                            "$ref": "#/definitions/image_texture"
+                        },
+                        {
+                            "$ref": "#/definitions/uv_texture"
+                        }
+                    ]
+                },
+                "ior": {
+                    "description": "",
+                    "type": "number"
+                }
+            }
+        },
+        "lambert_bsdf": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "albedo"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "lambert"
+                    ]
+                },
+                "albedo": {
+                    "description": "",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/constant_texture"
+                        },
+                        {
+                            "$ref": "#/definitions/image_texture"
+                        },
+                        {
+                            "$ref": "#/definitions/uv_texture"
+                        }
+                    ]
+                }
+            }
+        },
+        "mirror_bsdf": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "albedo"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "mirror"
+                    ]
+                },
+                "albedo": {
+                    "description": "",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/constant_texture"
+                        },
+                        {
+                            "$ref": "#/definitions/image_texture"
+                        },
+                        {
+                            "$ref": "#/definitions/uv_texture"
+                        }
+                    ]
+                }
+            }
+        },
+        "non_scattering_medium": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "absorption_color",
+                "absorption_at_distance"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "non_scattering"
+                    ]
+                },
+                "absorption_color": {
+                    "description": "",
+                    "$ref": "#/definitions/float3"
+                },
+                "absorption_at_distance": {
+                    "description": "",
+                    "type": "number"
+                }
+            }
+        },
+        "isotropic_scattering_medium": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "absorption_color",
+                "absorption_at_distance",
+                "scattering_distance"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "isotropic_scattering"
+                    ]
+                },
+                "absorption_color": {
+                    "description": "",
+                    "$ref": "#/definitions/float3"
+                },
+                "absorption_at_distance": {
+                    "description": "",
+                    "type": "number"
+                },
+                "scattering_distance": {
+                    "description": "",
+                    "type": "number"
+                }
+            }
+        },
+        "lantern_model_file": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "file_path",
+                "material"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "lmf"
+                    ]
+                },
+                "file_path": {
+                    "description": "",
+                    "type": "string"
+                },
+                "material": {
+                    "description": "",
+                    "type": "string"
+                },
+                "transform": {
+                    "description": "",
+                    "$ref": "#/definitions/float4x4"
+                },
+                "emission": {
+                    "description": "",
+                    "type": "object",
+                    "required": [
+                        "color",
+                        "radiant_power"
+                    ],
+                    "properties": {
+                        "color": {
+                            "description": "",
+                            "$ref": "#/definitions/float3"
+                        },
+                        "radiant_power": {
+                            "description": "",
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "grid": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "width",
+                "depth",
+                "material"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "grid"
+                    ]
+                },
+                "width": {
+                    "description": "",
+                    "type": "number"
+                },
+                "depth": {
+                    "description": "",
+                    "type": "number"
+                },
+                "n": {
+                    "description": "Number of divisons in X",
+                    "type": "number"
+                },
+                "m": {
+                    "description": "Number of divison in Z",
+                    "type": "number"
+                },
+                "material": {
+                    "description": "",
+                    "type": "string"
+                },
+                "transform": {
+                    "description": "",
+                    "$ref": "#/definitions/float4x4"
+                },
+                "emission": {
+                    "description": "",
+                    "type": "object",
+                    "required": [
+                        "color",
+                        "radiant_power"
+                    ],
+                    "properties": {
+                        "color": {
+                            "description": "",
+                            "$ref": "#/definitions/float3"
+                        },
+                        "radiant_power": {
+                            "description": "",
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "geosphere": {
+            "type": "object",
+            "required": [
+                "name",
+                "type",
+                "radius",
+                "n",
+                "material"
+            ],
+            "properties": {
+                "name": {
+                    "description": "",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "geosphere"
+                    ]
+                },
+                "radius": {
+                    "description": "",
+                    "type": "number"
+                },
+                "n": {
+                    "description": "Number of  subdivisions",
+                    "type": "number"
+                },
+                "material": {
+                    "description": "",
+                    "type": "string"
+                },
+                "transform": {
+                    "description": "",
+                    "$ref": "#/definitions/float4x4"
+                },
+                "emission": {
+                    "description": "",
+                    "type": "object",
+                    "required": [
+                        "color",
+                        "radiant_power"
+                    ],
+                    "properties": {
+                        "color": {
+                            "description": "",
+                            "$ref": "#/definitions/float3"
+                        },
+                        "radiant_power": {
+                            "description": "",
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

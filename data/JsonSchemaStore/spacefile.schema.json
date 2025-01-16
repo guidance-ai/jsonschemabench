@@ -1,0 +1,295 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://deta.space/assets/spacefile.schema.json",
+  "$ref": "#/definitions/spacefile",
+  "definitions": {
+    "spacefile": {
+      "title": "Spacefile",
+      "description": "Space app configuration",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "v": {
+          "description": "Version number of the Spacefile",
+          "type": "integer",
+          "enum": [
+            0
+          ],
+          "default": 0
+        },
+        "icon": {
+          "description": "Path to an icon image file (PNG or WebP file of 512x512 pixels)",
+          "type": "string"
+        },
+        "app_name": {
+          "description": "Display name of the app",
+          "type": "string",
+          "maxLength": 12
+        },
+        "micros": {
+          "description": "List of Micros in the app",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/definitions/micro"
+          }
+        }
+      },
+      "required": [
+        "v",
+        "micros"
+      ]
+    },
+    "micro": {
+      "title": "Micro",
+      "description": "Micro configuration",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Name of the Micro",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "src": {
+          "description": "Relative path to the root directory of the Micro",
+          "type": "string"
+        },
+        "engine": {
+          "description": "Runtime engine for the Micro",
+          "type": "string",
+          "enum": [
+            "static",
+            "react",
+            "svelte",
+            "vue",
+            "next",
+            "nuxt",
+            "svelte-kit",
+            "python3.9",
+            "python3.8",
+            "nodejs16",
+            "custom"
+          ]
+        },
+        "primary": {
+          "description": "If the Micro should be the entry point for the app",
+          "type": "boolean",
+          "default": true
+        },
+        "path": {
+          "description": "Path relative to the hostname this Micro should receive requests on",
+          "type": "string"
+        },
+        "serve": {
+          "description": "Directory path relative to the Micro's path that should be served for the static Micro",
+          "type": "string"
+        },
+        "commands": {
+          "description": "Commands to run before packaging the Micro",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "include": {
+          "description": "Files and directories in the Micro's source directory that should be part of the final app package",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "run": {
+          "description": "Command to start the Micro",
+          "type": "string"
+        },
+        "dev": {
+          "description": "Command to start the Micro in development mode",
+          "type": "string"
+        },
+        "presets": {
+          "$ref": "#/definitions/presets"
+        },
+        "public_routes": {
+          "description": "Routes that will be available publicly",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "public": {
+          "description": "If the Micro should be available to the public",
+          "type": "boolean",
+          "default": false
+        },
+        "actions": {
+          "description": "Tasks that run on triggers like a schedule",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/action"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "src",
+        "engine"
+      ],
+      "allOf": [
+        {
+          "$comment": "If engine is static, then serve is required",
+          "if": {
+            "properties": {
+              "engine": {
+                "const": "static"
+              }
+            },
+            "required": [
+              "engine"
+            ]
+          },
+          "then": {
+            "required": [
+              "serve"
+            ]
+          }
+        },
+        {
+          "$comment": "public and public_routes are mutually exclusive",
+          "not": {
+            "required": [
+              "public",
+              "public_routes"
+            ]
+          }
+        },
+        {
+          "$comment": "If engine is static or static-like, then include is not allowed, otherwise serve is not allowed",
+          "if": {
+            "properties": {
+              "engine": {
+                "enum": [
+                  "static",
+                  "react",
+                  "vue",
+                  "svelte"
+                ]
+              }
+            },
+            "required": [
+              "engine"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "include"
+              ]
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "serve"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "presets": {
+      "title": "Presets",
+      "description": "Presets to use for the Micro",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "env": {
+          "description": "Environment variables that the user can set for a Micro",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/env"
+          }
+        },
+        "api_keys": {
+          "description": "Enable the use of API keys to access private routes of a Micro",
+          "type": "boolean"
+        }
+      }
+    },
+    "env": {
+      "title": "Env",
+      "description": "Environment variable",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Name of the environment variable",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human readable description",
+          "type": "string"
+        },
+        "default": {
+          "description": "Default value of the environment variable",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "action": {
+      "title": "Action",
+      "description": "Action configuration",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the action (needs to be unique across the app)",
+          "type": "string"
+        },
+        "name": {
+          "description": "Human readable name for the action (needs to be unique across the app)",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human readable description for the action",
+          "type": "string",
+          "maxLength": 142
+        },
+        "trigger": {
+          "description": "Trigger for the action",
+          "type": "string",
+          "enum": [
+            "schedule"
+          ],
+          "default": "schedule"
+        },
+        "default_interval": {
+          "description": "Interval at which the schedule will run",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path of the Micro that will handle the action request",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "trigger",
+        "default_interval"
+      ]
+    }
+  }
+}

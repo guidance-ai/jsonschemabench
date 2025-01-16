@@ -1,0 +1,1608 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "title": "JSON Schema for extensions modules",
+    "type": "object",
+    "definitions": {
+        "assembly": {
+            "type": "object",
+            "required": [
+                "priority"
+            ],
+            "properties": {
+                "priority": {
+                    "type": "number"
+                },
+                "options": {
+                    "type": "object"
+                }
+            }
+        },
+        "dbConnection": {
+            "type": "object",
+            "properties": {
+                "connections": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "connectionString"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "default": "default"
+                            },
+                            "connectionString": {
+                                "type": "string"
+                            },
+                            "database": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "serviceLifetime": {
+                    "enum": [
+                        "Singleton",
+                        "Scoped",
+                        "Transient"
+                    ],
+                    "default": "Scoped"
+                }
+            }
+        },
+        "efIncludeNavigationPropertiesOperation": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Include main navigation propeties"
+                },
+                "except": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Fully qualified name of the type, including its namespace but not its assembly"
+                },
+                "explicit": {
+                    "description": "Custome rules by type",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "entity": {
+                                "type": "string",
+                                "description": "Fully qualified name of the type, including its namespace but not its assembly"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "description": "Array of indented navigation paths to include\ni.e. for Order entity\n[\n [\"OrderDetail\",\"Product\",\"Supplier\"],\n [\"Customer\"]\n]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "endpoint": {
+            "type": "object",
+            "required": [
+                "address"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "enableSsl": {
+                    "type": "boolean"
+                },
+                "skipCertificateValidation": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "endpointAuth": {
+            "type": "object",
+            "properties": {
+                "authPolicies": {
+                    "items": {
+                        "type": "string",
+                        "_uniqueItems": true
+                    },
+                    "description": "List of policy name to validate"
+                },
+                "authHosts": {
+                    "items": {
+                        "type": "string",
+                        "_uniqueItems": true
+                    },
+                    "description": "List of authorized hosts, i.e. host:8001"
+                }
+            }
+        },
+        "entryExpirationInMinutes": {
+            "type": "object",
+            "properties": {
+                "fast": {
+                    "type": "integer",
+                    "default": 10
+                },
+                "medium": {
+                    "type": "integer",
+                    "default": 60
+                },
+                "slow": {
+                    "type": "integer",
+                    "default": 240
+                },
+                "never": {
+                    "type": "integer",
+                    "default": 1440
+                }
+            }
+        },
+        "healthResult": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "health check mnemonic name",
+                    "default": "Autogenerated"
+                },
+                "status": {
+                    "enum": [
+                        "Unhealthy",
+                        "Degraded"
+                    ],
+                    "description": "Health status on check failure",
+                    "default": "Unhealthy"
+                }
+            }
+        },
+        "identityResource": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The unique name of the resource"
+                },
+                "displayName": {
+                    "type": "string",
+                    "description": "Display name of the resource"
+                },
+                "userClaims": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "_uniqueItems": true
+                    },
+                    "description": "List of accociated user claims that should be included when this resource is requested"
+                },
+                "properties": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Sets the custom properties for the resource"
+                }
+            }
+        },
+        "identitySecret": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "\"Convert.ToBase64String(System.Security.Cryptography.SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(\"secret\")))\""
+                },
+                "expiration": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "SharedSecret",
+                        "X509Thumbprint",
+                        "X509Name",
+                        "X509CertificateBase64"
+                    ],
+                    "default": "SharedSecret"
+                }
+            }
+        },
+        "serialization": {
+            "type": "object",
+            "description": "Serialization settings",
+            "properties": {
+                "nullValueHandling": {
+                    "enum": [
+                        "Ignore",
+                        "Include"
+                    ],
+                    "default": "Ignore"
+                },
+                "formatting": {
+                    "enum": [
+                        "None",
+                        "Indented"
+                    ],
+                    "default": "None"
+                },
+                "referenceLoopHandling": {
+                    "enum": [
+                        "Error",
+                        "Ignore",
+                        "Serialize"
+                    ],
+                    "default": "Error"
+                },
+                "dateParseHandling": {
+                    "enum": [
+                        "None",
+                        "DateTime",
+                        "DateTimeOffset"
+                    ],
+                    "default": "DateTime"
+                },
+                "dateTimeZoneHandling": {
+                    "enum": [
+                        "Local",
+                        "Utc",
+                        "Unspecified",
+                        "RoundtripKind"
+                    ],
+                    "default": "RoundtripKind"
+                },
+                "typeNameHandling": {
+                    "enum": [
+                        "None",
+                        "Objects",
+                        "Arrays",
+                        "All",
+                        "Auto"
+                    ],
+                    "default": "None"
+                },
+                "typeNameAssemblyFormatHandling": {
+                    "enum": [
+                        "Simple",
+                        "Full"
+                    ],
+                    "default": "Simple"
+                },
+                "converters": {
+                    "type": "array",
+                    "description": "List of assembly/JsonConvert type to apply",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "assembly": {
+                                "type": "string",
+                                "description": "Assembly full name, i.e. web"
+                            },
+                            "type": {
+                                "type": "string",
+                                "description": "JsonConverter class full name, i.e. web.Code.LocaleJsonConverter\nNote: class needs a ctor with params object[] args, parameterless ctor will also evaluate as fallback"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "staticFilesFolder": {
+            "type": "object",
+            "properties": {
+                "headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Relative or UNC path"
+                },
+                "isRelativePath": {
+                    "type": "boolean"
+                },
+                "requestPath": {
+                    "type": "string",
+                    "description": "i.e. /downloads"
+                },
+                "mimeTypes": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^\\.[^.]+$": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "string",
+                        "pattern": "^\\.[^.]+$"
+                    }
+                }
+            }
+        }
+    },
+    "required": [
+        "extConfig"
+    ],
+    "properties": {
+        "extConfig": {
+            "type": "object",
+            "properties": {
+                "folder": {
+                    "type": "string"
+                },
+                "enableShutDownOnChange": {
+                    "type": "boolean"
+                },
+                "assemblies": {
+                    "type": "object",
+                    "properties": {
+                        "Ws.Core.Extensions.Api": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "serialization": {
+                                            "$ref": "#/definitions/serialization"
+                                        },
+                                        "session": {
+                                            "type": "object",
+                                            "properties": {
+                                                "idleTimeoutInMinutes": {
+                                                    "default": 20,
+                                                    "description": "The IdleTimeout indicates how long the session can be idle before its contents are abandoned. Each session access resets the timeout. Note this only applies to the content of the session, not the cookie.",
+                                                    "type": "integer"
+                                                },
+                                                "cookie": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": "The name of the cookie."
+                                                        },
+                                                        "path": {
+                                                            "type": "string",
+                                                            "description": "The cookie path."
+                                                        },
+                                                        "domain": {
+                                                            "type": "string",
+                                                            "description": "The domain to associate the cookie with."
+                                                        },
+                                                        "httpOnly": {
+                                                            "type": "boolean",
+                                                            "description": "Indicates whether a cookie is accessible by client-side script.",
+                                                            "default": true
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "documentation": {
+                                            "type": "object",
+                                            "required": [
+                                                "endpoints"
+                                            ],
+                                            "properties": {
+                                                "routePrefix": {
+                                                    "type": "string",
+                                                    "default": "swagger"
+                                                },
+                                                "ui": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "injectJs": {
+                                                            "type": "string",
+                                                            "description": "Relative path of additional js file, added in wwwroot folder; i.e. \"/swagger-ui/custom.js\""
+                                                        },
+                                                        "injectCss": {
+                                                            "type": "string",
+                                                            "description": "Relative path of additional css file, added in wwwroot folder; i.e. \"/swagger-ui/custom.css\""
+                                                        }
+                                                    }
+                                                },
+                                                "endpoints": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "default": "v{index}"
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "default": "API v{index}"
+                                                            },
+                                                            "version": {
+                                                                "type": "string",
+                                                                "default": "{id}"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "securityDefinitions": {
+                                                    "type": "object",
+                                                    "description": "Add one or more security definitions, describing how your api is protected",
+                                                    "properties": {
+                                                        "bearer": {
+                                                            "type": "boolean",
+                                                            "description": "Add Authorization header for bearer token",
+                                                            "default": false
+                                                        },
+                                                        "cookies": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "_uniqueItems": true
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "xmlComments": {
+                                                    "type": "object",
+                                                    "description": "To include Xml Comments, open the Properties dialog for your project, click the \"Build\" tab and ensure that \"XML documentation file\" is checked.\n This will produce a file containing all XML comments at build-time.\nAt this point, any classes or methods that are NOT annotated with XML comments will trigger a build warning.\n To suppress this, enter the warning code 1591 into the \"Suppress warnings\" field in the properties dialog.",
+                                                    "required": [
+                                                        "fileName"
+                                                    ],
+                                                    "properties": {
+                                                        "fileName": {
+                                                            "type": "string",
+                                                            "description": "i.e. api.xml\nCheck PropertyGroup>DocumentationFile value in your .csproj file."
+                                                        },
+                                                        "includeControllerComments": {
+                                                            "type": "boolean",
+                                                            "default": false
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Cors": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "policies": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "origins": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "description": "To allow one or more specific origins"
+                                                    },
+                                                    "methods": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "enum": [
+                                                                "GET",
+                                                                "HEAD",
+                                                                "POST",
+                                                                "PUT",
+                                                                "PATCH",
+                                                                "DELETE",
+                                                                "OPTIONS",
+                                                                "TRACE"
+                                                            ]
+                                                        },
+                                                        "_uniqueItems": true
+                                                    },
+                                                    "headers": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "description": "To whitelist specific headers"
+                                                    },
+                                                    "exposedHeaders": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "description": "The CORS spec calls simple response headers. Specify other headers available to the application"
+                                                    },
+                                                    "allowCredentials": {
+                                                        "type": "boolean",
+                                                        "description": " Credentials include cookies as well as HTTP authentication schemes"
+                                                    },
+                                                    "preflightMaxAgeInSeconds": {
+                                                        "type": "integer",
+                                                        "description": "Value in seconds. The Access-Control-Max-Age header specifies how long the response to the preflight request can be cached"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data": {
+                            "$ref": "#/definitions/assembly"
+                        },
+                        "Ws.Core.Extensions.Data.Cache": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "enum": [
+                                                "Memory",
+                                                "Distributed"
+                                            ]
+                                        },
+                                        "entryExpirationInMinutes": {
+                                            "$ref": "#/definitions/entryExpirationInMinutes"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.Cache.Memcached": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "client": {
+                                            "type": "object",
+                                            "properties": {
+                                                "servers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "address": {
+                                                                "type": "string"
+                                                            },
+                                                            "port": {
+                                                                "type": "integer"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "authentication": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string",
+                                                            "description": "i.e. Enyim.Caching.Memcached.PlainTextAuthenticator"
+                                                        },
+                                                        "parameters": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "zone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "userName": {
+                                                                    "type": "string"
+                                                                },
+                                                                "password": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "entryExpirationInMinutes": {
+                                            "$ref": "#/definitions/entryExpirationInMinutes"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.Cache.Redis": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "client": {
+                                            "type": "object",
+                                            "properties": {
+                                                "configuration": {
+                                                    "type": "string"
+                                                },
+                                                "instanceName": {
+                                                    "type": "string",
+                                                    "default": "master"
+                                                }
+                                            }
+                                        },
+                                        "entryExpirationInMinutes": {
+                                            "$ref": "#/definitions/entryExpirationInMinutes"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.Cache.SqlServer": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "client": {
+                                            "type": "object",
+                                            "properties": {
+                                                "connectionString": {
+                                                    "type": "string"
+                                                },
+                                                "schemaName": {
+                                                    "type": "string",
+                                                    "default": "dbo"
+                                                },
+                                                "tableName": {
+                                                    "type": "string",
+                                                    "default": "Entry"
+                                                }
+                                            }
+                                        },
+                                        "entryExpirationInMinutes": {
+                                            "$ref": "#/definitions/entryExpirationInMinutes"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.EF": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "ignore": {
+                                            "type": "array",
+                                            "description": "Excludes the given entity type from the model. This method is typically used to remove types from the model that were added by convention., i.e. `MyNamespace.MyClass, MyAssembly`",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "jsonConvert": {
+                                            "type": "array",
+                                            "description": "Serialize/deserialize type, mapped on a text column, i.e. `MyNamespace.MyClass, MyAssembly`\nInterface can be listed too",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "mappings": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "namespace": {
+                                                        "type": "string",
+                                                        "description": "Entity namespace (case sensitive) or leave empty"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "description": "Entity name, case sensitive",
+                                                        "default": "typeof(T).Name"
+                                                    },
+                                                    "table": {
+                                                        "type": "string",
+                                                        "description": "Specify a table name",
+                                                        "default": "typeof(T).Name"
+                                                    },
+                                                    "schema": {
+                                                        "type": "string",
+                                                        "description": "Specify a database schema",
+                                                        "default": "dbo"
+                                                    },
+                                                    "IdColumnName": {
+                                                        "type": "string",
+                                                        "description": "Map Id property to column name",
+                                                        "default": "Id"
+                                                    },
+                                                    "IdHasDefaultValue": {
+                                                        "type": "boolean",
+                                                        "default": true
+                                                    },
+                                                    "properties": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "description": "Name of the property, case sensitive"
+                                                                },
+                                                                "column": {
+                                                                    "type": "string",
+                                                                    "description": "Name of the database column representing the property"
+                                                                },
+                                                                "ignore": {
+                                                                    "type": "boolean",
+                                                                    "default": false,
+                                                                    "description": "Excludes the given property from the entity type"
+                                                                },
+                                                                "jsonConvert": {
+                                                                    "type": "boolean",
+                                                                    "default": null,
+                                                                    "description": "Map property with text columun, serializing/deserializing value"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "name"
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name"
+                                                ]
+                                            }
+                                        },
+                                        "includeNavigationProperties": {
+                                            "type": "object",
+                                            "properties": {
+                                                "list": {
+                                                    "$ref": "#/definitions/efIncludeNavigationPropertiesOperation"
+                                                },
+                                                "find": {
+                                                    "$ref": "#/definitions/efIncludeNavigationPropertiesOperation"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.EF.MySql": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "$ref": "#/definitions/dbConnection"
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.EF.SqlServer": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/definitions/dbConnection"
+                                        }
+                                    ],
+                                    "properties": {
+                                        "merge": {
+                                            "type": "object",
+                                            "description": "Repository merge implementation",
+                                            "properties": {
+                                                "useTempDb": {
+                                                    "type": "boolean",
+                                                    "default": true
+                                                },
+                                                "updateByProperties": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "_uniqueItems": true,
+                                                    "default": "[Id]"
+                                                },
+                                                "bulkCopyTimeout": {
+                                                    "type": "number",
+                                                    "default": 180,
+                                                    "description": "Operation timeout in seconds"
+                                                }
+                                            }
+                                        },
+                                        "storedProcedure": {
+                                            "type": "object",
+                                            "description": "Use stored procedure instead of EF methods",
+                                            "properties": {
+                                                "schema": {
+                                                    "type": "string",
+                                                    "description": " Stored procedure schema",
+                                                    "default": "dbo"
+                                                },
+                                                "mappings": {
+                                                    "description": "Map entity type to a set of stored procedure",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "namespace": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "description": "Entity typeof(T).Name"
+                                                            },
+                                                            "schema": {
+                                                                "type": "string",
+                                                                "description": "Override default"
+                                                            },
+                                                            "storedProcedure": {
+                                                                "type": "string",
+                                                                "description": "Stored procedure name. Will be trasformed in {schema}.entity_{name}_{method}",
+                                                                "default": "Entity name"
+                                                            },
+                                                            "methods": {
+                                                                "description": "Call sp for this methods only; If empty: all methods",
+                                                                "default": "all",
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "enum": [
+                                                                        "list",
+                                                                        "find",
+                                                                        "add",
+                                                                        "addmany",
+                                                                        "update",
+                                                                        "updatemany",
+                                                                        "merge",
+                                                                        "delete",
+                                                                        "deletemany"
+                                                                    ]
+                                                                },
+                                                                "_uniqueItems": true
+                                                            },
+                                                            "commandTimeOut": {
+                                                                "type": "object",
+                                                                "description": "Maximum execution time in seconds",
+                                                                "properties": {
+                                                                    "read": {
+                                                                        "type": "number",
+                                                                        "default": 120,
+                                                                        "description": "For List,Find methods"
+                                                                    },
+                                                                    "write": {
+                                                                        "type": "number",
+                                                                        "default": 60,
+                                                                        "description": "For Add,AddMany,Update,UpdateMany,Delete,DeleteMany methods"
+                                                                    },
+                                                                    "sync": {
+                                                                        "type": "number",
+                                                                        "default": 180,
+                                                                        "description": "For Merge method"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.Mongo": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "$ref": "#/definitions/dbConnection"
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Data.FileSystem": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "folder": {
+                                            "type": "string",
+                                            "description": "Folder of stored files, relative to ContentRootPath",
+                                            "default": "Files/Entity"
+                                        },
+                                        "serialization": {
+                                            "$ref": "#/definitions/serialization"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.HealthCheck": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "routes": {
+                                            "description": "List of health check routes",
+                                            "type": "array",
+                                            "default": "2 routes: /healtz for basic app status, with no additional check; /healtz/checks for overall app status, performing all checks",
+                                            "items": {
+                                                "type": "object",
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/endpointAuth"
+                                                    }
+                                                ],
+                                                "properties": {
+                                                    "path": {
+                                                        "type": "string",
+                                                        "description": "i.e. /healtz"
+                                                    },
+                                                    "contentType": {
+                                                        "enum": [
+                                                            "json",
+                                                            "text"
+                                                        ],
+                                                        "default": "json"
+                                                    },
+                                                    "skipChecks": {
+                                                        "type": "boolean",
+                                                        "description": "If true skip any defined checks, returning a basic health check",
+                                                        "default": false
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "checks": {
+                                            "type": "object",
+                                            "properties": {
+                                                "storage": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/definitions/healthResult"
+                                                            }
+                                                        ],
+                                                        "properties": {
+                                                            "driver": {
+                                                                "type": "string",
+                                                                "description": "i.e. C:\\, skip check if empty"
+                                                            },
+                                                            "minimumFreeMb": {
+                                                                "type": "number",
+                                                                "description": "i.e. 1024 = 1Gb"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "memory": {
+                                                    "type": "object",
+                                                    "allOf": [
+                                                        {
+                                                            "$ref": "#/definitions/healthResult"
+                                                        }
+                                                    ],
+                                                    "properties": {
+                                                        "maximumAllocatedMb": {
+                                                            "type": "number",
+                                                            "description": "i.e. 500"
+                                                        }
+                                                    }
+                                                },
+                                                "process": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/definitions/healthResult"
+                                                            }
+                                                        ],
+                                                        "properties": {
+                                                            "processName": {
+                                                                "type": "string",
+                                                                "description": "Check if exists, skip check if empty"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "winservice": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/definitions/healthResult"
+                                                            }
+                                                        ],
+                                                        "properties": {
+                                                            "serviceName": {
+                                                                "type": "string",
+                                                                "description": "Check if running, skip check if empty"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "tcp": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/definitions/healthResult"
+                                                            }
+                                                        ],
+                                                        "properties": {
+                                                            "host": {
+                                                                "type": "string",
+                                                                "description": "Skip check if empty"
+                                                            },
+                                                            "port": {
+                                                                "type": "number"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "http": {
+                                                    "description": "Http request",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/definitions/healthResult"
+                                                            }
+                                                        ],
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": "string",
+                                                                "description": "Skip check if empty"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "ui": {
+                                            "type": "object",
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/endpointAuth"
+                                                }
+                                            ],
+                                            "properties": {
+                                                "enabled": {
+                                                    "type": "boolean",
+                                                    "default": false
+                                                },
+                                                "dbPath": {
+                                                    "type": "string",
+                                                    "default": "healthchecksdb",
+                                                    "description": "Db path relative to content root, i.e. files\\db\\healthchecksdb"
+                                                },
+                                                "route": {
+                                                    "type": "string",
+                                                    "default": "/healthchecks-ui"
+                                                },
+                                                "routeApi": {
+                                                    "type": "string",
+                                                    "default": "/healthchecks-api"
+                                                },
+                                                "routeWebhook": {
+                                                    "type": "string",
+                                                    "default": "/healthchecks-webhooks"
+                                                },
+                                                "injectCss": {
+                                                    "type": "string",
+                                                    "description": "i.e. wwwroot/healthcheck-ui/style.css"
+                                                },
+                                                "endpoints": {
+                                                    "description": "List of health check endopoint to show",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "uri": {
+                                                                "type": "string",
+                                                                "description": "i.e. http://host:8001/healthz, skip check if empty"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "webhooks": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "uri": {
+                                                                "type": "string",
+                                                                "description": "Skip check if empty"
+                                                            },
+                                                            "payload": {
+                                                                "type": "string",
+                                                                "description": "Encoded payload for failed check. Available token: [[LIVENESS]] [[FAILURE]] [[DESCRIPTIONS]]"
+                                                            },
+                                                            "restorePayload": {
+                                                                "type": "string",
+                                                                "description": "Encoded payload for restored status. Available token: [[LIVENESS]]"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "evaluationTimeinSeconds": {
+                                                    "type": "number",
+                                                    "default": 60
+                                                },
+                                                "minimumSecondsBetweenFailureNotifications": {
+                                                    "type": "number",
+                                                    "default": 300
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Identity": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "inMemory": {
+                                            "type": "object",
+                                            "description": "Use in-memory identities, resources, clients",
+                                            "properties": {
+                                                "enable": {
+                                                    "type": "boolean",
+                                                    "default": true
+                                                },
+                                                "identityResources": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/definitions/identityResource"
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "apiResources": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/definitions/identityResource"
+                                                            }
+                                                        ],
+                                                        "properties": {
+                                                            "apiSecrets": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "$ref": "#/definitions/identitySecret"
+                                                                },
+                                                                "description": "The API secret is used for the introspection endpoint. The API can authenticate with introspection using the API name and secret"
+                                                            },
+                                                            "scopes": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "allOf": [
+                                                                        {
+                                                                            "$ref": "#/definitions/identityResource"
+                                                                        }
+                                                                    ],
+                                                                    "properties": {
+                                                                        "showInDiscoveryDocument": {
+                                                                            "type": "boolean",
+                                                                            "default": true,
+                                                                            "description": "Specifies whether this scope is shown in the discovery document"
+                                                                        }
+                                                                    },
+                                                                    "description": "An API must have at least one scope. Each scope can have different settings"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "clients": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "enabled": {
+                                                                "type": "boolean",
+                                                                "default": true
+                                                            },
+                                                            "clientId": {
+                                                                "type": "string"
+                                                            },
+                                                            "clientSecrets": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "$ref": "#/definitions/identitySecret"
+                                                                },
+                                                                "description": "only relevant for flows that require a secret"
+                                                            },
+                                                            "allowedGrantTypes": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "enum": [
+                                                                        "authorization_code",
+                                                                        "client_credentials",
+                                                                        "hybrid",
+                                                                        "implicit",
+                                                                        "password",
+                                                                        "urn:ietf:params:oauth:grant-type:device_code"
+                                                                    ]
+                                                                },
+                                                                "_uniqueItems": true
+                                                            },
+                                                            "allowedScopes": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "_uniqueItems": true,
+                                                                "description": " Specifies the api scopes that the client is allowed to request. If empty, the client can't access any scope"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "persistedGrants": {
+                                                    "type": "boolean",
+                                                    "description": "Adds in-memory store",
+                                                    "default": false
+                                                },
+                                                "caching": {
+                                                    "type": "boolean",
+                                                    "description": "Adds in-memory caching",
+                                                    "default": false
+                                                }
+                                            }
+                                        },
+                                        "developerSigningCredential": {
+                                            "type": "boolean",
+                                            "default": false,
+                                            "description": "Sets the temporary signing credential"
+                                        },
+                                        "jwtBearerClientAuthentication": {
+                                            "type": "boolean",
+                                            "default": false,
+                                            "description": "Adds support for client authentication using JWT bearer assertions"
+                                        },
+                                        "testUsers": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "subjectId": {
+                                                        "type": "string"
+                                                    },
+                                                    "username": {
+                                                        "type": "string"
+                                                    },
+                                                    "password": {
+                                                        "type": "string"
+                                                    },
+                                                    "isActive": {
+                                                        "type": "boolean",
+                                                        "default": true
+                                                    },
+                                                    "claims": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "description": "i.e. Name, Email, Address"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "valueType": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "string",
+                                                                        "boolean",
+                                                                        "integer",
+                                                                        "double",
+                                                                        "date",
+                                                                        "datetime",
+                                                                        "json"
+                                                                    ],
+                                                                    "default": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Message": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "senders": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/endpoint"
+                                            }
+                                        },
+                                        "receivers": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/endpoint"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.Routing": {
+                            "$ref": "#/definitions/assembly"
+                        },
+                        "Ws.Core.Extensions.Spa": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "rootPath": {
+                                            "type": "string",
+                                            "description": "Path relative to the application root, of the directory in which the physical files are located. If the specified directory does not exist, then the SpaStaticFiles middleware will not serve any static files.",
+                                            "default": "Client/dist/browser"
+                                        },
+                                        "defaultPage": {
+                                            "type": "string",
+                                            "description": "Default page that hosts your SPA user interface",
+                                            "default": "/index.html"
+                                        },
+                                        "sourcePath": {
+                                            "type": "string",
+                                            "description": "Path, relative to the application working directory, of the directory that contains the SPA source files during development. The directory may not exist in published applications",
+                                            "default": "Client"
+                                        },
+                                        "startupTimeoutInSeconds": {
+                                            "type": "integer",
+                                            "description": "Maximum duration that a request will wait for the SPA to become ready to serve to the client",
+                                            "default": 90
+                                        },
+                                        "spaDevelopmentServer": {
+                                            "type": "string",
+                                            "description": "Use only in development! Forward incoming requests to a local development server,i.e. http://localhost:4200."
+                                        },
+                                        "cliServerScript": {
+                                            "type": "string",
+                                            "description": "Use only in development! The name of the script in your package.json file that launches the Angular CLI process, i.e. start. This handles requests by passing them through to an instance of the Angular CLI server; alternative to spaDevelopmentServer"
+                                        },
+                                        "staticFilesPaths": {
+                                            "type": "array",
+                                            "items": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/staticFilesFolder"
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "prerendering": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enable": {
+                                                    "type": "boolean",
+                                                    "default": true
+                                                },
+                                                "cacheResponse": {
+                                                    "type": "object",
+                                                    "description": "Cache prerendering output, injecting app ICache implementation",
+                                                    "properties": {
+                                                        "enable": {
+                                                            "type": "boolean",
+                                                            "default": true
+                                                        },
+                                                        "skipQueryStringPath": {
+                                                            "type": "boolean",
+                                                            "description": "If true, don't cache parameterized path",
+                                                            "default": true
+                                                        },
+                                                        "skipFilePath": {
+                                                            "type": "boolean",
+                                                            "description": "If true, cache only extensionless path",
+                                                            "default": true
+                                                        },
+                                                        "excludePaths": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "description": "Array of path prefixes for which cache is disabled"
+                                                        },
+                                                        "includePaths": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "description": "Array of path prefixes for which cache is always enabled"
+                                                        }
+                                                    }
+                                                },
+                                                "bootModulePath": {
+                                                    "type": "string",
+                                                    "description": "Path, relative to your application root, of the JavaScript file containing prerendering logic",
+                                                    "default": "Client/dist/server/main.js"
+                                                },
+                                                "bootModuleBuilderScript": {
+                                                    "type": "string",
+                                                    "description": "Use only in development! npm script that the prerenderer will invoke before looking for the boot module file, i.e. build:server "
+                                                },
+                                                "excludeUrls": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "description": "\"Array of URL prefixes for which prerendering should not run, i.e. \"/sockjs-node\"\""
+                                                },
+                                                "contextData": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "enum": [
+                                                            "features",
+                                                            "items",
+                                                            "session",
+                                                            "user",
+                                                            "webSockets"
+                                                        ]
+                                                    },
+                                                    "description": "Pass additional context data to the prerendering entrypoint code",
+                                                    "_uniqueItems": true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "Ws.Core.Extensions.StaticFiles": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/assembly"
+                                }
+                            ],
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "paths": {
+                                            "type": "array",
+                                            "items": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/staticFilesFolder"
+                                                    }
+                                                ],
+                                                "properties": {
+                                                    "defaultFiles": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "enableDirectoryBrowser": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": [
+                            "string",
+                            "object"
+                        ],
+                        "$ref": "#/definitions/assembly"
+                    }
+                }
+            }
+        }
+    }
+}

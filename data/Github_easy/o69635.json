@@ -1,0 +1,423 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://rc2.io/something",
+    "title": "Rc2 Compute Messages",
+    "description": "Messages to communicate with Rc2 compute engine",
+    "type": "object",
+    "minProperties": 2,
+    "properties": {
+        "msg": {
+            "type": "string",
+            "description": "the command to perform",
+            "enum": [
+                "open",
+                "close",
+                "saveEnv",
+                "execScript",
+                "execAndReturn",
+                "execFile",
+                "help",
+                "listVariables",
+                "getVariable",
+                "toggleVariableWatch",
+                "clearEnvironment",
+                "createEnvironment"
+            ]
+        },
+        "argument": {
+            "type": "string",
+            "description": "main argument for the command"
+        }
+    },
+    "required": [
+        "msg",
+        "argument"
+    ],
+    "oneOf": [
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "open"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "maxLength": 0
+                },
+                "wspaceId": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "sessionRecId": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "dbhost": {
+                    "type": "string"
+                },
+                "dbuser": {
+                    "type": "string"
+                },
+                "dbname": {
+                    "type": "string"
+                },
+                "dbpassword": {
+                    "type": "string"
+                },
+                "apiVersion": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "additionalProperties": false,
+            "title": "Open the connection",
+            "required": [
+                "argument",
+                "wspaceId",
+                "sessionRecId",
+                "dbhost",
+                "dbuser",
+                "dbname",
+                "apiVersion"
+            ]
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "close"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "maxLength": 0
+                }
+            },
+            "title": "Close the connection",
+            "description": "close command"
+        },
+        {
+            "properties": {
+                "argument": {
+                    "type": "string",
+                    "maxLength": 0
+                },
+                "msg": {
+                    "enum": [
+                        "saveEnv"
+                    ]
+                }
+            },
+            "title": "Save Environment"
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "execScript"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "queryId": {
+                    "type": "number",
+                    "multipleOf": 1,
+                    "minimum": 1
+                },
+                "watchVariables": {
+                    "type": "boolean"
+                },
+                "startTime": {
+                    "type": "string",
+                    "pattern": "^[0-9]*$",
+                    "title": "start time of query in seconds since 1970"
+                }
+            },
+            "title": "Execute Script",
+            "required": [
+                "queryId"
+            ]
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "execAndReturn"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "queryId": {
+                    "type": "number",
+                    "multipleOf": 1,
+                    "minimum": 1
+                },
+                "startTime": {
+                    "type": "string",
+                    "pattern": "^[0-9]*$",
+                    "title": "start time of query in seconds since 1970"
+                },
+                "contextId": {
+                    "type": "integer"
+                }
+            },
+            "title": "Execute and Return Object",
+            "description": "execute and returns only an execComplete response with the result as a json object",
+            "required": [
+                "queryId",
+                "contextId"
+            ]
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "execFile"
+                    ]
+                },
+                "argument": {
+                    "minLength": 1,
+                    "pattern": "^[0-9]+$",
+                    "title": "file id as string"
+                },
+                "queryId": {
+                    "type": "number",
+                    "multipleOf": 1,
+                    "minimum": 1,
+                    "title": "arbitrary id to link query to matching results"
+                },
+                "startTime": {
+                    "type": "string",
+                    "pattern": "^[0-9]*$",
+                    "title": "start time of query in seconds since 1970"
+                },
+                "clientData": {
+                    "type": "object",
+                    "properties": {
+                        "fileId": {
+                            "type": "number",
+                            "multipleOf": 1,
+                            "minimum": 1,
+                            "title": "id of the file to execute"
+                        },
+                        "fileVersopm": {
+                            "type": "number",
+                            "multipleOf": 1,
+                            "minimum": 1,
+                            "title": "version of the file to execute"
+                        }
+                    },
+                    "patternProperties": {
+                        ".": {
+                            "type": "number",
+                            "multipleOf": 1
+                        }
+                    },
+                    "title": "Custom Data"
+                }
+            },
+            "title": "Execute File",
+            "required": [
+                "queryId"
+            ]
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "help"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "title": "Get Help",
+            "description": "Get Help Paths for Topic"
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "listVariables"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "maxLength": 0
+                },
+                "delta": {
+                    "type": "boolean"
+                },
+                "contextId": {
+                    "type": "integer"
+                }
+            },
+            "title": "List Variables",
+            "required": [
+                "delta"
+            ]
+        },
+        {
+            "properties": {
+                "argument": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "msg": {
+                    "enum": [
+                        "getVariable"
+                    ]
+                },
+                "clientData": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".": {
+                            "type": "number",
+                            "multipleOf": 1
+                        }
+                    }
+                },
+                "contextId": {
+                    "type": "integer"
+                }
+            },
+            "title": "Get Variable"
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "toggleVariableWatch"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "maxLength": 0
+                },
+                "contextId": {
+                    "type": "integer"
+                },
+                "watch": {
+                    "type": "boolean"
+                }
+            },
+            "additionalProperties": false,
+            "title": "Toggle Variable Watch",
+            "description": "Toggle if Variable Changes are Being Watched",
+            "required": [
+                "watch"
+            ]
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "clearEnvironment"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "maxLength": 0
+                },
+                "contextId": {
+                    "type": "integer"
+                }
+            },
+            "title": "Clear Environment",
+            "description": "Clears the argument specified as contextId, or the global environment"
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "createEnvironment"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "title": "Create Environment"
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "initPreview"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "fileId": {
+                    "type": "integer"
+                }
+            },
+            "title": "Init Preview",
+            "required": [
+                "fileId"
+            ]
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "updatePreview"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "previewId": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "chunkId": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "includePrevious": {
+                    "type": "boolean"
+                },
+                "updateIdentifier": {
+                    "type": "string"
+                }
+            },
+            "title": "Update Preview",
+            "required": [
+                "previewId",
+                "chunkId"
+            ]
+        },
+        {
+            "properties": {
+                "msg": {
+                    "enum": [
+                        "removePreview"
+                    ]
+                },
+                "argument": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "previewId": {
+                    "type": "integer"
+                }
+            },
+            "title": "Remove Preview",
+            "required": [
+                "previewId"
+            ]
+        }
+    ]
+}
