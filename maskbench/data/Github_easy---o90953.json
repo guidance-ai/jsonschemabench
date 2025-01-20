@@ -1,0 +1,209 @@
+{
+  "description": "sample Github_easy/o90953.json",
+  "meta": {
+    "full_size": 1138,
+    "stripped_size": 724,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "allOf",
+      "enum",
+      "items",
+      "not",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "A JSON RPC 2.0 response",
+    "oneOf": [
+      {
+        "$ref": "#/definitions/success"
+      },
+      {
+        "$ref": "#/definitions/error"
+      },
+      {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/success"
+            },
+            {
+              "$ref": "#/definitions/error"
+            }
+          ]
+        }
+      }
+    ],
+    "definitions": {
+      "common": {
+        "required": [
+          "id",
+          "jsonrpc"
+        ],
+        "not": {
+          "description": "cannot have result and error at the same time",
+          "required": [
+            "result",
+            "error"
+          ]
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "integer",
+              "null"
+            ],
+            "note": [
+              "spec says a number which should not contain a fractional part",
+              "We choose integer here, but this is unenforceable with some languages"
+            ]
+          },
+          "jsonrpc": {
+            "enum": [
+              "2.0"
+            ]
+          }
+        }
+      },
+      "success": {
+        "description": "A success. The result member is then required and can be anything.",
+        "allOf": [
+          {
+            "$ref": "#/definitions/common"
+          },
+          {
+            "required": [
+              "result"
+            ]
+          }
+        ]
+      },
+      "error": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/common"
+          },
+          {
+            "required": [
+              "error"
+            ],
+            "properties": {
+              "error": {
+                "type": "object",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "integer",
+                    "note": [
+                      "unenforceable in some languages"
+                    ]
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "description": "optional, can be anything"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "Hello, World!"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "Hello, world!"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"Hello, world!\",\"error\":{\"code\":1,\"message\":\"example error\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'jsonrpc': '2.0', 'id': 1, 'result': 'Hello, world!', 'error': {'code': 1, 'message': 'example error'}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'A JSON RPC 2.0 response',\n     'oneOf': [{'$ref': '#/definitions/success'},\n               {'$ref': '#/definitions/error'},\n               {'type': 'array',\n                'items': {'oneOf': [{'$ref': '#/definitions/success'},\n                                    {'$ref': '#/definitions/error'}]}}],\n     'definitions': {'common': {'required': ['id', 'jsonrpc'],\n                                'not': {'description': 'cannot have result '\n                                                       'and error at the '\n                                                       'same time',\n                                        'required': ['result', 'error']},\n                                'type': 'object',\n                                'properties': {'i.. (3356 more)",
+      "data": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "Hello, world!",
+        "error": {
+          "code": 1,
+          "message": "example error"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"jsonrpc\":\"2.0\",\"id\":true,\"result\":\"Hello, world!\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'jsonrpc': '2.0', 'id': True, 'result': 'Hello, world!'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'A JSON RPC 2.0 response',\n     'oneOf': [{'$ref': '#/definitions/success'},\n               {'$ref': '#/definitions/error'},\n               {'type': 'array',\n                'items': {'oneOf': [{'$ref': '#/definitions/success'},\n                                    {'$ref': '#/definitions/error'}]}}],\n     'definitions': {'common': {'required': ['id', 'jsonrpc'],\n                                'not': {'description': 'cannot have result '\n                                                       'and error at the '\n                                                       'same time',\n                                        'required': ['result', 'error']},\n                                'type': 'object',\n                                'properties': {'id': {'type': ['string',\n                       .. (3247 more)",
+      "data": {
+        "jsonrpc": "2.0",
+        "id": true,
+        "result": "Hello, world!"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"Hello, world!\",\"error\":{\"code\":1,\"message\":\"Test error\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'jsonrpc': '2.0', 'id': 1, 'result': 'Hello, world!', 'error': {'code': 1, 'message': 'Test error'}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'A JSON RPC 2.0 response',\n     'oneOf': [{'$ref': '#/definitions/success'},\n               {'$ref': '#/definitions/error'},\n               {'type': 'array',\n                'items': {'oneOf': [{'$ref': '#/definitions/success'},\n                                    {'$ref': '#/definitions/error'}]}}],\n     'definitions': {'common': {'required': ['id', 'jsonrpc'],\n                                'not': {'description': 'cannot have result '\n                                                       'and error at the '\n                                                       'same time',\n                                        'required': ['result', 'error']},\n                                'type': 'object',\n                                'properties': {'id':.. (3350 more)",
+      "data": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "Hello, world!",
+        "error": {
+          "code": 1,
+          "message": "Test error"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"Hello, world!\",\"error\":{}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'jsonrpc': '2.0', 'id': 1, 'result': 'Hello, world!', 'error': {}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'A JSON RPC 2.0 response',\n     'oneOf': [{'$ref': '#/definitions/success'},\n               {'$ref': '#/definitions/error'},\n               {'type': 'array',\n                'items': {'oneOf': [{'$ref': '#/definitions/success'},\n                                    {'$ref': '#/definitions/error'}]}}],\n     'definitions': {'common': {'required': ['id', 'jsonrpc'],\n                                'not': {'description': 'cannot have result '\n                                                       'and error at the '\n                                                       'same time',\n                                        'required': ['result', 'error']},\n                                'type': 'object',\n                                'properties': {'id': {'type': ['string',\n             .. (3267 more)",
+      "data": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "Hello, world!",
+        "error": {}
+      }
+    }
+  ]
+}

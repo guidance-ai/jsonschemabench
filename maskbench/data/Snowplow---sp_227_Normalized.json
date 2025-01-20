@@ -1,0 +1,118 @@
+{
+  "description": "sample Snowplow/sp_227_Normalized.json",
+  "meta": {
+    "full_size": 463,
+    "stripped_size": 288,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for application context",
+    "properties": {
+      "logLevel": {
+        "maxLength": 64,
+        "type": "string"
+      },
+      "name": {
+        "maxLength": 64,
+        "type": "string"
+      },
+      "tags": {
+        "patternProperties": {
+          ".*": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "version": {
+        "maxLength": 64,
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "version"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "application_context",
+      "vendor": "com.snowplowanalytics.monitoring.batch",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "My Application",
+        "version": "1.0.0",
+        "logLevel": "INFO",
+        "tags": {
+          "environment": "production",
+          "region": "us-east-1"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "My Application",
+        "version": "1.0.0",
+        "logLevel": "INFO",
+        "tags": {
+          "environment": "dev",
+          "region": "us-east-1"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['tags']['patternProperties']['.*']:\n    {'type': 'string'}\n\nOn instance['tags']['extraTag']:\n    123",
+      "data": {
+        "name": "My Application",
+        "version": "1.0.0",
+        "logLevel": "INFO",
+        "tags": {
+          "environment": "dev",
+          "region": "us-east-1",
+          "extraTag": 123
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('extraField' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for application context',\n     'properties': {'logLevel': {'maxLength': 64, 'type': 'string'},\n                    'name': {'maxLength': 64, 'type': 'string'},\n                    'tags': {'patternProperties': {'.*': {'type': 'string'}},\n                             'type': 'object'},\n                    'version': {'maxLength': 64, 'type': 'string'}},\n     'required': ['name', 'version'],\n     'self': {'format': 'jsonschema',\n              'name': 'application_context',\n              'vendor': 'com.snowplowanalytics.monitoring.batch',\n              'version': '1-0-0'},\n     'type': 'object'}\n\nOn instance:\n    {'name': 'My Application',\n     'version': '1.0.0',\n     'logLevel': 'INFO',\n     'tags': {'environment': 'dev', 'region': 123},\n     'extraField': 'Extra Value'}",
+      "data": {
+        "name": "My Application",
+        "version": "1.0.0",
+        "logLevel": "INFO",
+        "tags": {
+          "environment": "dev",
+          "region": 123
+        },
+        "extraField": "Extra Value"
+      }
+    }
+  ]
+}

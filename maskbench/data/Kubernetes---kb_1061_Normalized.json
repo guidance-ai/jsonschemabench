@@ -1,0 +1,87 @@
+{
+  "description": "sample Kubernetes/kb_1061_Normalized.json",
+  "meta": {
+    "full_size": 688,
+    "stripped_size": 393,
+    "features": [
+      "$ref",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_util_intstr_IntOrString": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "description": "TCPSocketAction describes an action based on opening a socket",
+    "properties": {
+      "host": {
+        "description": "Optional: Host name to connect to, defaults to the pod IP.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "port": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_util_intstr_IntOrString",
+        "description": "Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME."
+      }
+    },
+    "required": [
+      "port"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "host": "example.com",
+        "port": 8080
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['host']:\n    {'description': 'Optional: Host name to connect to, defaults to the '\n                    'pod IP.',\n     'type': ['string', 'null']}\n\nOn instance['host']:\n    123",
+      "data": {
+        "host": 123,
+        "port": 8080
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"string\",\"value\":8080} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'string', 'value': 8080} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['port']:\n    {'oneOf': [{'type': 'string'}, {'type': 'integer'}]}\n\nOn instance['port']:\n    {'type': 'string', 'value': 8080}",
+      "data": {
+        "host": "example.com",
+        "port": {
+          "type": "string",
+          "value": 8080
+        }
+      }
+    }
+  ]
+}

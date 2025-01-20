@@ -1,0 +1,337 @@
+{
+  "description": "sample Github_hard/o84047.json",
+  "meta": {
+    "full_size": 2625,
+    "stripped_size": 860,
+    "features": [],
+    "raw_features": [
+      "properties",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "externalDatabase": {
+        "description": "If MariaDB is disabled. Use this section to specify the external database details",
+        "form": true,
+        "properties": {
+          "database": {
+            "form": true,
+            "hidden": "mariadb.enabled",
+            "title": "Database Name",
+            "type": "string"
+          },
+          "host": {
+            "form": true,
+            "hidden": "mariadb.enabled",
+            "title": "Database Host",
+            "type": "string"
+          },
+          "password": {
+            "form": true,
+            "hidden": "mariadb.enabled",
+            "title": "Database Password",
+            "type": "string"
+          },
+          "port": {
+            "form": true,
+            "hidden": "mariadb.enabled",
+            "title": "Database Port",
+            "type": "integer"
+          },
+          "user": {
+            "form": true,
+            "hidden": "mariadb.enabled",
+            "title": "Database Username",
+            "type": "string"
+          }
+        },
+        "title": "External Database Details",
+        "type": "object"
+      },
+      "ghostBlogTitle": {
+        "form": true,
+        "title": "Blog Name",
+        "type": "string"
+      },
+      "ghostEmail": {
+        "form": true,
+        "title": "Admin email",
+        "type": "string"
+      },
+      "ghostHost": {
+        "description": "Hostname used to generate application URLs",
+        "form": true,
+        "title": "Host",
+        "type": "string"
+      },
+      "ghostPassword": {
+        "description": "Defaults to a random 10-character alphanumeric string if not set",
+        "form": true,
+        "title": "Password",
+        "type": "string"
+      },
+      "ghostUsername": {
+        "form": true,
+        "title": "User",
+        "type": "string"
+      },
+      "mariadb": {
+        "form": true,
+        "properties": {
+          "enabled": {
+            "description": "Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database switch this off and configure the external database parameters",
+            "form": true,
+            "title": "Use a new MariaDB database hosted in the cluster",
+            "type": "boolean"
+          },
+          "master": {
+            "properties": {
+              "persistence": {
+                "properties": {
+                  "size": {
+                    "form": true,
+                    "hidden": {
+                      "condition": false,
+                      "value": "mariadb.enabled"
+                    },
+                    "render": "slider",
+                    "sliderMax": 100,
+                    "sliderMin": 1,
+                    "sliderUnit": "Gi",
+                    "title": "Volume Size",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": "MariaDB Details",
+        "type": "object"
+      },
+      "persistence": {
+        "properties": {
+          "size": {
+            "form": true,
+            "render": "slider",
+            "sliderMax": 100,
+            "sliderMin": 1,
+            "sliderUnit": "Gi",
+            "title": "Persistent Volume Size",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "resources": {
+        "description": "Configure resource requests",
+        "form": true,
+        "properties": {
+          "requests": {
+            "properties": {
+              "cpu": {
+                "form": true,
+                "render": "slider",
+                "sliderMax": 2000,
+                "sliderMin": 10,
+                "sliderUnit": "m",
+                "title": "CPU Request",
+                "type": "string"
+              },
+              "memory": {
+                "form": true,
+                "render": "slider",
+                "sliderMax": 2048,
+                "sliderMin": 10,
+                "sliderUnit": "Mi",
+                "title": "Memory Request",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": "Required Resources",
+        "type": "object"
+      },
+      "securityContext": {
+        "properties": {
+          "enabled": {
+            "description": "When disabled, an initContainer will be used to set required folder permissions",
+            "form": true,
+            "title": "Enable Pod Security Context",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "externalDatabase": {
+          "database": "my_external_db",
+          "host": "my_external_host",
+          "password": "my_external_password",
+          "port": 3306,
+          "user": "my_external_user"
+        },
+        "ghostBlogTitle": "My Ghost Blog",
+        "ghostEmail": "admin@example.com",
+        "ghostHost": "example.com",
+        "ghostPassword": "my_ghost_password",
+        "ghostUsername": "my_ghost_user",
+        "mariadb": {
+          "enabled": false,
+          "master": {
+            "persistence": {
+              "size": "10Gi"
+            }
+          }
+        },
+        "persistence": {
+          "size": "20Gi"
+        },
+        "resources": {
+          "requests": {
+            "cpu": "100m",
+            "memory": "512Mi"
+          }
+        },
+        "securityContext": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"3306\" is not of type \"integer\"",
+      "python_error": "'3306' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['externalDatabase']['properties']['port']:\n    {'form': True,\n     'hidden': 'mariadb.enabled',\n     'title': 'Database Port',\n     'type': 'integer'}\n\nOn instance['externalDatabase']['port']:\n    '3306'",
+      "data": {
+        "externalDatabase": {
+          "database": "my_external_db",
+          "host": "my_external_host",
+          "password": "my_external_password",
+          "port": "3306",
+          "Invalid: port should be an integer, not a string": "",
+          "user": "my_external_user"
+        },
+        "ghostBlogTitle": "My Ghost Blog",
+        "ghostEmail": "admin@example.com",
+        "ghostHost": "example.com",
+        "ghostPassword": "my_ghost_password",
+        "ghostUsername": "my_ghost_user",
+        "mariadb": {
+          "enabled": false,
+          "master": {
+            "persistence": {
+              "size": "10Gi"
+            }
+          }
+        },
+        "persistence": {
+          "size": "20Gi"
+        },
+        "resources": {
+          "requests": {
+            "cpu": "100m",
+            "memory": "512Mi"
+          }
+        },
+        "securityContext": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "externalDatabase": {
+          "database": "mydatabase",
+          "host": "myhost",
+          "password": "mypassword",
+          "port": 3306,
+          "user": "myuser"
+        },
+        "ghostBlogTitle": "My Ghost Blog",
+        "ghostEmail": "admin@example.com",
+        "ghostHost": "example.com",
+        "ghostPassword": "mypassword",
+        "ghostUsername": "admin",
+        "mariadb": {
+          "enabled": false,
+          "master": {
+            "persistence": {
+              "size": "10Gi"
+            }
+          }
+        },
+        "persistence": {
+          "size": "20Gi"
+        },
+        "resources": {
+          "requests": {
+            "cpu": "100m",
+            "memory": "512Mi"
+          }
+        },
+        "securityContext": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['ghostBlogTitle']:\n    {'form': True, 'title': 'Blog Name', 'type': 'string'}\n\nOn instance['ghostBlogTitle']:\n    None",
+      "data": {
+        "externalDatabase": {
+          "database": "mydatabase",
+          "host": "myhost",
+          "password": "mypassword",
+          "port": 3306,
+          "user": "myuser"
+        },
+        "ghostBlogTitle": null,
+        "ghostEmail": "admin@example.com",
+        "ghostHost": "example.com",
+        "ghostPassword": "mypassword",
+        "ghostUsername": "admin",
+        "mariadb": {
+          "enabled": false,
+          "master": {
+            "persistence": {
+              "size": "0Gi"
+            }
+          }
+        },
+        "persistence": {
+          "size": "101Gi"
+        },
+        "resources": {
+          "requests": {
+            "cpu": "2001m",
+            "memory": "2049Mi"
+          }
+        },
+        "securityContext": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}

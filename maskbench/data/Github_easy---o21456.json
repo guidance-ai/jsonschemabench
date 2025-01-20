@@ -1,0 +1,133 @@
+{
+  "description": "sample Github_easy/o21456.json",
+  "meta": {
+    "full_size": 531,
+    "stripped_size": 531,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "description": {
+        "maxLength": 160,
+        "minLength": 1,
+        "type": "string"
+      },
+      "from": {
+        "maxLength": 254,
+        "minLength": 5,
+        "pattern": "^[^@^\\s]+@[^@^\\.^\\s]+(\\.[^@^\\.^\\s]*)*.gov.uk",
+        "type": "string"
+      },
+      "jobId": {
+        "type": "integer"
+      },
+      "message": {
+        "maxLength": 1900,
+        "minLength": 1,
+        "type": "string"
+      },
+      "subject": {
+        "maxLength": 130,
+        "type": "string"
+      },
+      "to": {
+        "maxLength": 254,
+        "minLength": 5,
+        "pattern": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "to",
+      "from",
+      "subject",
+      "message"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "description": "This is a test description",
+        "from": "test@example.gov.uk",
+        "jobId": 123,
+        "message": "This is a test message",
+        "subject": "Test Email",
+        "to": "test@example.com"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "description": "This is a test email",
+        "from": "test@example.gov.uk",
+        "jobId": 12345,
+        "message": "This is a test email message",
+        "subject": "Test Email",
+        "to": "recipient@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"test@example.gov\" does not match \"^[^@^\\s]+@[^@^\\.^\\s]+(\\.[^@^\\.^\\s]*)*.gov.uk\"",
+      "python_error": "'test@example.gov' does not match '^[^@^\\\\s]+@[^@^\\\\.^\\\\s]+(\\\\.[^@^\\\\.^\\\\s]*)*.gov.uk'\n\nFailed validating 'pattern' in schema['properties']['from']:\n    {'maxLength': 254,\n     'minLength': 5,\n     'pattern': '^[^@^\\\\s]+@[^@^\\\\.^\\\\s]+(\\\\.[^@^\\\\.^\\\\s]*)*.gov.uk',\n     'type': 'string'}\n\nOn instance['from']:\n    'test@example.gov'",
+      "data": {
+        "description": "This is a test email",
+        "from": "test@example.gov",
+        "jobId": 12345,
+        "message": "This is a test email message",
+        "subject": "Test Email",
+        "to": "recipient@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['description']:\n    {'maxLength': 160, 'minLength': 1, 'type': 'string'}\n\nOn instance['description']:\n    ''",
+      "data": {
+        "description": "",
+        "from": "test@example.gov.uk",
+        "jobId": 12345,
+        "message": "This is a test email message",
+        "subject": "Test Email",
+        "to": "recipient@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'properties': {'description': {'maxLength': 160,\n                                    'minLength': 1,\n                                    'type': 'string'},\n                    'from': {'maxLength': 254,\n                             'minLength': 5,\n                             'pattern': '^[^@^\\\\s]+@[^@^\\\\.^\\\\s]+(\\\\.[^@^\\\\.^\\\\s]*)*.gov.uk',\n                             'type': 'string'},\n                    'jobId': {'type': 'integer'},\n                    'message': {'maxLength': 1900,\n                                'minLength': 1,\n                                'type': 'string'},\n                    'subject': {'maxLength': 130, 'type': 'string'},\n                    'to': {'maxLength': 254,\n                           'minLength': 5,\n                           'pattern': '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\\\.[a-zA-Z0-9-.]+$',\n                     .. (365 more)",
+      "data": {
+        "description": "This is a test email",
+        "from": "test@example.gov.uk",
+        "jobId": 12345,
+        "message": "This is a test email message",
+        "subject": "Test Email",
+        "to": "recipient@example.com",
+        "extraProperty": "Invalid"
+      }
+    }
+  ]
+}

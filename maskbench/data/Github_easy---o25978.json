@@ -1,0 +1,305 @@
+{
+  "description": "sample Github_easy/o25978.json",
+  "meta": {
+    "full_size": 676,
+    "stripped_size": 676,
+    "features": [
+      "$ref",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "MyType6": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    "properties": {
+      "var1": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "var2": {
+        "type": [
+          "string",
+          "number",
+          "null"
+        ]
+      },
+      "var3": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "var4": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "var5": {
+        "anyOf": [
+          {
+            "properties": {
+              "foo": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "foo"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "var6": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/MyType6"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "var7": {
+        "$ref": "#/definitions/MyType6"
+      }
+    },
+    "required": [
+      "var1",
+      "var2",
+      "var3",
+      "var4",
+      "var5",
+      "var6",
+      "var7"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "var1": "string",
+        "var2": 123,
+        "var3": [
+          1,
+          2,
+          3
+        ],
+        "var4": [
+          4,
+          5,
+          6
+        ],
+        "var5": {
+          "foo": 7
+        },
+        "var6": {},
+        "var7": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "True is not of type 'string', 'number', 'null'\n\nFailed validating 'type' in schema['properties']['var2']:\n    {'type': ['string', 'number', 'null']}\n\nOn instance['var2']:\n    True",
+      "data": {
+        "var1": 123,
+        "var2": true,
+        "var3": [
+          1,
+          2,
+          3
+        ],
+        "var4": [
+          4,
+          5,
+          6
+        ],
+        "var5": {
+          "foo": 7
+        },
+        "var6": {},
+        "var7": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[1,\"string\",3] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'string' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['var6']:\n    {'anyOf': [{'$ref': '#/definitions/MyType6'}, {'type': 'null'}]}\n\nOn instance['var6']:\n    'string'",
+      "data": {
+        "var1": "string",
+        "var2": 123,
+        "var3": [
+          1,
+          "string",
+          3
+        ],
+        "var4": [
+          4,
+          "string",
+          6
+        ],
+        "var5": {
+          "foo": "string"
+        },
+        "var6": "string",
+        "var7": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[1,2,\"3\"] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'3' is not of type 'number'\n\nFailed validating 'type' in schema[0]['items']:\n    {'type': 'number'}\n\nOn instance[2]:\n    '3'",
+      "data": {
+        "var1": "string",
+        "var2": 123,
+        "var3": [
+          1,
+          2,
+          "3"
+        ],
+        "var4": [
+          4,
+          5,
+          6
+        ],
+        "var5": {
+          "foo": 7
+        },
+        "var6": {},
+        "var7": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"null\", \"string\"",
+      "python_error": "True is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['var1']:\n    {'type': ['string', 'null']}\n\nOn instance['var1']:\n    True",
+      "data": {
+        "var1": true,
+        "var2": 123,
+        "var3": [
+          1,
+          2,
+          3
+        ],
+        "var4": [
+          4,
+          5,
+          6
+        ],
+        "var5": {
+          "foo": 7
+        },
+        "var6": {},
+        "var7": {}
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "var1": "string",
+        "var2": 123,
+        "var3": "string",
+        "var4": [
+          1,
+          2,
+          3
+        ],
+        "var5": {
+          "foo": 456
+        },
+        "var6": null,
+        "var7": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['var6']:\n    {'anyOf': [{'$ref': '#/definitions/MyType6'}, {'type': 'null'}]}\n\nOn instance['var6']:\n    True",
+      "data": {
+        "var1": "string",
+        "var2": 123,
+        "var3": "string",
+        "var4": [
+          1,
+          2,
+          3
+        ],
+        "var5": {
+          "foo": 456
+        },
+        "var6": true,
+        "var7": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "true is not of types \"null\", \"string\"",
+      "python_error": "True is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['var1']:\n    {'type': ['string', 'null']}\n\nOn instance['var1']:\n    True",
+      "data": {
+        "var1": true,
+        "var2": 123,
+        "var3": "string",
+        "var4": [
+          1,
+          2,
+          3
+        ],
+        "var5": {
+          "foo": 456
+        },
+        "var6": null,
+        "var7": {}
+      }
+    }
+  ]
+}

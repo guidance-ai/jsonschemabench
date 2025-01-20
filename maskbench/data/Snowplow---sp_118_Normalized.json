@@ -1,0 +1,254 @@
+{
+  "description": "sample Snowplow/sp_118_Normalized.json",
+  "meta": {
+    "full_size": 1502,
+    "stripped_size": 524,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "properties",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": true,
+    "description": "Schema for a Mailgun message dropped event",
+    "properties": {
+      "attachmentCount": {
+        "description": "Number of attachments in attachment-x (where x is a number) fields.",
+        "maximum": 65535,
+        "type": "integer"
+      },
+      "code": {
+        "description": "SMTP bounce error code in form (X.X.X).",
+        "maxLength": 8,
+        "type": "string"
+      },
+      "description": {
+        "description": "Detailed explanation for why the message was dropped.",
+        "type": "string"
+      },
+      "domain": {
+        "_format": "hostname",
+        "description": "Domain that sent the original message.",
+        "maxLength": 256,
+        "type": "string"
+      },
+      "event": {
+        "description": "Event name ('dropped').",
+        "maxLength": 16,
+        "type": "string"
+      },
+      "messageHeaders": {
+        "description": "String list of all MIME headers of the original message dumped to a JSON string (order of headers preserved).",
+        "type": "string"
+      },
+      "reason": {
+        "description": "Reason for failure. Can be one either 'hardfail' or 'old'.",
+        "maxLength": 8,
+        "type": "string"
+      },
+      "recipient": {
+        "_format": "email",
+        "description": "Recipient who could not be reached.",
+        "maxLength": 256,
+        "type": "string"
+      },
+      "signature": {
+        "description": "String with hexadecimal digits generate by HMAC algorithm (see securing webhooks).",
+        "maxLength": 128,
+        "type": "string"
+      },
+      "token": {
+        "description": "Randomly generated string with length 50 (see securing webhooks).",
+        "maxLength": 50,
+        "minLength": 50,
+        "type": "string"
+      },
+      "xMailgunSid": {
+        "description": "Mailgun identifying header.",
+        "type": "string"
+      }
+    },
+    "self": {
+      "format": "jsonschema",
+      "name": "message_dropped",
+      "vendor": "com.mailgun",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "attachmentCount": 1,
+        "code": "5.1.1",
+        "description": "The recipient's email address was not found.",
+        "domain": "example.com",
+        "event": "dropped",
+        "messageHeaders": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "reason": "hardfail",
+        "recipient": "jane.doe@example.com",
+        "signature": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5",
+        "xMailgunSid": "mailgun-1234567890"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t\" is shorter than 50 characters",
+      "python_error": "'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t' is too short\n\nFailed validating 'minLength' in schema['properties']['token']:\n    {'description': 'Randomly generated string with length 50 (see '\n                    'securing webhooks).',\n     'maxLength': 50,\n     'minLength': 50,\n     'type': 'string'}\n\nOn instance['token']:\n    'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t'",
+      "data": {
+        "attachmentCount": 1,
+        "code": "5.1.1",
+        "description": "The recipient's email address was not found.",
+        "domain": "example.com",
+        "event": "dropped",
+        "messageHeaders": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "reason": "hardfail",
+        "recipient": "jane.doe@example.com",
+        "signature": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t",
+        "xMailgunSid": "mailgun-1234567890"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maximum keyword",
+      "valid": false,
+      "rust_error": "65536 is greater than the maximum of 65535",
+      "python_error": "65536 is greater than the maximum of 65535\n\nFailed validating 'maximum' in schema['properties']['attachmentCount']:\n    {'description': 'Number of attachments in attachment-x (where x is a '\n                    'number) fields.',\n     'maximum': 65535,\n     'type': 'integer'}\n\nOn instance['attachmentCount']:\n    65536",
+      "data": {
+        "attachmentCount": 65536,
+        "code": "5.1.1",
+        "description": "The recipient's email address was not found.",
+        "domain": "example.com",
+        "event": "dropped",
+        "messageHeaders": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "reason": "hardfail",
+        "recipient": "jane.doe@example.com",
+        "signature": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5",
+        "xMailgunSid": "mailgun-1234567890"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "65536 is greater than the maximum of 65535",
+      "python_error": "'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z' is too long\n\nFailed validating 'maxLength' in schema['properties']['token']:\n    {'description': 'Randomly generated string with length 50 (see '\n                    'securing webhooks).',\n     'maxLength': 50,\n     'minLength': 50,\n     'type': 'string'}\n\nOn instance['token']:\n    'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z'",
+      "data": {
+        "attachmentCount": 65536,
+        "code": "5.1.1",
+        "description": "The recipient's email address was not found.",
+        "domain": "example.com",
+        "event": "dropped",
+        "messageHeaders": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "reason": "hardfail",
+        "recipient": "jane.doe@example.com",
+        "signature": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z",
+        "xMailgunSid": "mailgun-1234567890"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z\" is longer than 50 characters",
+      "python_error": "'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z' is too long\n\nFailed validating 'maxLength' in schema['properties']['token']:\n    {'description': 'Randomly generated string with length 50 (see '\n                    'securing webhooks).',\n     'maxLength': 50,\n     'minLength': 50,\n     'type': 'string'}\n\nOn instance['token']:\n    'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z'",
+      "data": {
+        "attachmentCount": 1,
+        "code": "5.1.1",
+        "description": "The recipient's email address was not found.",
+        "domain": "example.com",
+        "event": "dropped",
+        "messageHeaders": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "reason": "hardfail",
+        "recipient": "jane.doe@example.com",
+        "signature": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z",
+        "xMailgunSid": "mailgun-1234567890",
+        "anotherProperty": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "xMailgunSids": "mailgun-1234567890",
+        "xMailgunSids2": "mailgun-1234567890",
+        "token2": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature2": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "recipient2": "jane.doe@example.com",
+        "reason2": "hardfail",
+        "reason3": "hardfail",
+        "description2": "The recipient's email address was not found.",
+        "description3": "The recipient's email address was not found.",
+        "event2": "dropped",
+        "event3": "dropped",
+        "event4": "dropped",
+        "domain2": "example.com",
+        "domain3": "example.com",
+        "code2": "5.1.1",
+        "code3": "5.1.1",
+        "attachmentCount2": 1,
+        "attachmentCount3": 1,
+        "messageHeaders2": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders3": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders4": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders5": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders6": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders7": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders8": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders9": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders10": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders11": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders12": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders13": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "messageHeaders14": "{\"From\": \"John Doe <john.doe@example.com>\", \"To\": \"Jane Doe <jane.doe@example.com>\", \"Subject\": \"Test Email\"}",
+        "token3": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token4": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token5": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token6": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token7": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature3": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature4": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature5": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature6": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature7": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature8": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature9": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature10": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature11": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature12": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature13": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature14": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token8": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token9": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token10": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token11": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token12": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token13": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token14": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature15": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature16": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature17": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature18": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature19": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "signature20": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token15": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token16": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token17": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token18": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token19": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "token20": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"
+      }
+    }
+  ]
+}

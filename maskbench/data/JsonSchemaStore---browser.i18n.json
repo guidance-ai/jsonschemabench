@@ -1,0 +1,201 @@
+{
+  "description": "sample JsonSchemaStore/browser.i18n.json",
+  "meta": {
+    "full_size": 1209,
+    "stripped_size": 778,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/browser.i18n.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "translationEntry": {
+        "description": "Translation key",
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Translation string"
+          },
+          "description": {
+            "type": "string",
+            "description": "(optional): Description of this string for the translator team"
+          },
+          "placeholders": {
+            "$ref": "#/definitions/placeholders"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "placeholders": {
+        "type": "object",
+        "description": "(optional): List of placeholders that can be used in the message.",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^(?!@@)[@a-zA-Z0-9_-]+$": {
+            "$ref": "#/definitions/placeholder"
+          }
+        }
+      },
+      "placeholder": {
+        "description": "Placeholder key",
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Value to insert. It can contain a variable $1"
+          },
+          "example": {
+            "type": "string",
+            "description": "(optional) example of this placeholder"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "patternProperties": {
+      "^(?!@@)[@a-zA-Z0-9_-]+$": {
+        "$ref": "#/definitions/translationEntry"
+      }
+    },
+    "title": "browser.i18n messages.json translation file",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "helloWorld": {
+          "message": "Hello, world!",
+          "description": "A greeting message",
+          "placeholders": {
+            "name": {
+              "content": "$1",
+              "example": "John Doe"
+            }
+          }
+        },
+        "goodbye": {
+          "message": "Goodbye, $1!",
+          "placeholders": {
+            "name": {
+              "content": "$1"
+            }
+          }
+        },
+        "welcome": {
+          "message": "Welcome to our website!"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "hello": {
+          "message": "Hello, {name}!",
+          "description": "Greeting message",
+          "placeholders": {
+            "name": {
+              "content": "$1",
+              "example": "John Doe"
+            }
+          }
+        },
+        "goodbye": {
+          "message": "Goodbye, {name}!",
+          "placeholders": {
+            "name": {
+              "content": "$1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('@@reserved' was unexpected)",
+      "python_error": "'@@reserved' does not match any of the regexes: '^(?!@@)[@a-zA-Z0-9_-]+$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$id': 'https://json.schemastore.org/browser.i18n.json',\n     '$schema': 'http://json-schema.org/draft-07/schema#',\n     'additionalProperties': False,\n     'definitions': {'translationEntry': {'description': 'Translation key',\n                                          'type': 'object',\n                                          'properties': {'message': {'type': 'string',\n                                                                     'description': 'Translation '\n                                                                                    'string'},\n                                                         'description': {'type': 'string',\n                                                                         'description': '(optional): '\n                                                                                        'Description '\n                          .. (3756 more)",
+      "data": {
+        "hello": {
+          "message": "Hello, {name}!",
+          "description": "Greeting message",
+          "placeholders": {
+            "name": {
+              "content": "$1",
+              "example": "John Doe"
+            }
+          }
+        },
+        "goodbye": {
+          "message": "Goodbye, {name}!",
+          "placeholders": {
+            "name": {
+              "content": "$1"
+            }
+          }
+        },
+        "@@reserved": {
+          "message": "This is a reserved key",
+          "placeholders": {
+            "name": {
+              "content": "$1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "'not an object' is not of type 'object'\n\nFailed validating 'type' in schema['patternProperties']['^(?!@@)[@a-zA-Z0-9_-]+$']:\n    {'description': 'Translation key',\n     'type': 'object',\n     'properties': {'message': {'type': 'string',\n                                'description': 'Translation string'},\n                    'description': {'type': 'string',\n                                    'description': '(optional): '\n                                                   'Description of this '\n                                                   'string for the '\n                                                   'translator team'},\n                    'placeholders': {'$ref': '#/definitions/placeholders'}},\n     'required': ['message'],\n     'additionalProperties': False}\n\nOn instance['foo']:\n    'not an object'",
+      "data": {
+        "hello": {
+          "message": "Hello, {name}!",
+          "description": "Greeting message",
+          "placeholders": {
+            "name": {
+              "content": "$1",
+              "example": "John Doe",
+              "extraProperty": "should not be here"
+            }
+          }
+        },
+        "goodbye": {
+          "message": "Goodbye, {name}!",
+          "placeholders": {
+            "name": {
+              "content": "$1"
+            }
+          }
+        },
+        "foo": "not an object"
+      }
+    }
+  ]
+}

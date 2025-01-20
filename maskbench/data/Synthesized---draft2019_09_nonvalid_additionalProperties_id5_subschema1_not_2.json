@@ -1,0 +1,85 @@
+{
+  "description": "sample Synthesized/draft2019_09_nonvalid_additionalProperties_id5_subschema1_not_2.json",
+  "meta": {
+    "full_size": 152,
+    "stripped_size": 152,
+    "features": [
+      "additionalProperties",
+      "allOf",
+      "enum",
+      "not",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties"
+    ]
+  },
+  "schema": {
+    "allOf": [
+      {
+        "enum": [
+          {
+            "foo": 1,
+            "vroom": 2
+          }
+        ]
+      },
+      {
+        "not": {
+          "not": {
+            "additionalProperties": false,
+            "patternProperties": {
+              "^v": {}
+            },
+            "properties": {
+              "bar": {},
+              "foo": {}
+            }
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "foo": 1,
+        "vroom": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"foo\":1} is not one of [{\"foo\":1,\"vroom\":2}]",
+      "python_error": "{'foo': 1} is not one of [{'foo': 1, 'vroom': 2}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'foo': 1, 'vroom': 2}]}\n\nOn instance:\n    {'foo': 1}",
+      "data": {
+        "foo": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"foo\":1,\"vroom\":2,\"vx\":3} is not one of [{\"foo\":1,\"vroom\":2}]",
+      "python_error": "{'foo': 1, 'vroom': 2, 'vx': 3} is not one of [{'foo': 1, 'vroom': 2}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'foo': 1, 'vroom': 2}]}\n\nOn instance:\n    {'foo': 1, 'vroom': 2, 'vx': 3}",
+      "data": {
+        "foo": 1,
+        "vroom": 2,
+        "vx": 3
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"foo\":1,\"vroom\":2,\"bar\":true} is not one of [{\"foo\":1,\"vroom\":2}]",
+      "python_error": "{'foo': 1, 'vroom': 2, 'bar': True} is not one of [{'foo': 1, 'vroom': 2}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'foo': 1, 'vroom': 2}]}\n\nOn instance:\n    {'foo': 1, 'vroom': 2, 'bar': True}",
+      "data": {
+        "foo": 1,
+        "vroom": 2,
+        "bar": true
+      }
+    }
+  ]
+}

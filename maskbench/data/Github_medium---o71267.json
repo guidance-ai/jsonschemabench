@@ -1,0 +1,168 @@
+{
+  "description": "sample Github_medium/o71267.json",
+  "meta": {
+    "full_size": 2330,
+    "stripped_size": 932,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-json-schema.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "jsend json schema",
+    "description": "This is a json-schema for the jsend format for json responses for applications. see https://labs.omniti.com/labs/jsend/wiki",
+    "type": "object",
+    "oneOf": [
+      {
+        "$ref": "#/definitions/success"
+      },
+      {
+        "$ref": "#/definitions/fail"
+      },
+      {
+        "$ref": "#/definitions/error"
+      }
+    ],
+    "definitions": {
+      "success": {
+        "description": "All went well, and (usually) some data was returned.",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^success$",
+            "description": "the status for a succesful handling"
+          },
+          "data": {
+            "description": "Acts as the wrapper for any data returned by the API call. If the call returns no data (as in the last example), data should be set to null.",
+            "$ref": "#/definitions/data"
+          }
+        }
+      },
+      "fail": {
+        "description": "There was a problem with the data submitted, or some pre-condition of the API call wasn't satisfied",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^fail$",
+            "description": "the status for a failure handling"
+          },
+          "data": {
+            "description": "provides the wrapper for the details of why the request failed. If the reasons for failure correspond to POST values, the response object's keys SHOULD correspond to those POST values.",
+            "$ref": "#/definitions/data"
+          }
+        }
+      },
+      "error": {
+        "description": "An error occurred in processing the request, i.e. an exception was thrown",
+        "required": [
+          "status",
+          "message"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^error$",
+            "description": "the status for a error handling"
+          },
+          "message": {
+            "$ref": "#/definitions/message"
+          },
+          "code": {
+            "$ref": "#/definitions/code"
+          },
+          "data": {
+            "description": "A generic container for any other information about the error, i.e. the conditions that caused the error, stack traces, etc.",
+            "$ref": "#/definitions/data"
+          }
+        }
+      },
+      "data": {
+        "description": "a generic container for data returned for success, fail or error",
+        "type": [
+          "string",
+          "null",
+          "array",
+          "object",
+          "integer",
+          "boolean"
+        ]
+      },
+      "code": {
+        "description": "A numeric code corresponding to the error in an error result, if applicable",
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "message": {
+        "description": "A meaningful, end-user-readable (or at the least log-worthy) message, explaining what went wrong in an error result.",
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "success",
+        "data": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john@example.com"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"status\":\"succes\",\"data\":{\"id\":1,\"name\":\"John Doe\",\"email\":\"john@example.com\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'status': 'succes', 'data': {'id': 1, 'name': 'John Doe', 'email': 'john@example.com'}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'id': 'https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-json-schema.json',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'jsend json schema',\n     'description': 'This is a json-schema for the jsend format for json '\n                    'responses for applications. see '\n                    'https://labs.omniti.com/labs/jsend/wiki',\n     'type': 'object',\n     'oneOf': [{'$ref': '#/definitions/success'},\n               {'$ref': '#/definitions/fail'},\n               {'$ref': '#/definitions/error'}],\n     'definitions': {'success': {'description': 'All went well, and '\n                                                '(usually) some data was '\n                                                'returned.',\n                                 'required': ['status', 'data'],\n           .. (10667 more)",
+      "data": {
+        "status": "succes",
+        "data": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john@example.com"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"status\":\"success\",\"data\":12345.6789} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'status': 'success', 'data': 12345.6789} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'id': 'https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-json-schema.json',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'jsend json schema',\n     'description': 'This is a json-schema for the jsend format for json '\n                    'responses for applications. see '\n                    'https://labs.omniti.com/labs/jsend/wiki',\n     'type': 'object',\n     'oneOf': [{'$ref': '#/definitions/success'},\n               {'$ref': '#/definitions/fail'},\n               {'$ref': '#/definitions/error'}],\n     'definitions': {'success': {'description': 'All went well, and '\n                                                '(usually) some data was '\n                                                'returned.',\n                                 'required': ['status', 'data'],\n                                 'properties': {'status': .. (10568 more)",
+      "data": {
+        "status": "success",
+        "data": 12345.6789
+      }
+    }
+  ]
+}

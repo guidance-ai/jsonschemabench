@@ -1,0 +1,124 @@
+{
+  "description": "sample Glaiveai2K/track_calories_ecbd9766.json",
+  "meta": {
+    "full_size": 434,
+    "stripped_size": 252,
+    "features": [
+      "format",
+      "format:date",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "date": {
+        "description": "The date for tracking",
+        "format": "date",
+        "type": "string"
+      },
+      "meals": {
+        "description": "The meals consumed on the specified date",
+        "items": {
+          "properties": {
+            "calories": {
+              "description": "The calories consumed in the meal",
+              "type": "number"
+            },
+            "name": {
+              "description": "The name of the meal",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "calories"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "date",
+      "meals"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "date": "2022-07-25",
+        "meals": [
+          {
+            "calories": 300.5,
+            "name": "Breakfast"
+          },
+          {
+            "calories": 500.25,
+            "name": "Lunch"
+          },
+          {
+            "calories": 700.75,
+            "name": "Dinner"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-07-55\" is not a \"date\"",
+      "python_error": "'2022-07-55' is not a 'date'\n\nFailed validating 'format' in schema['properties']['date']:\n    {'description': 'The date for tracking',\n     'format': 'date',\n     'type': 'string'}\n\nOn instance['date']:\n    '2022-07-55'",
+      "data": {
+        "date": "2022-07-55",
+        "meals": [
+          {
+            "calories": 300.5,
+            "name": "Breakfast"
+          },
+          {
+            "calories": 500.25,
+            "name": "Lunch"
+          },
+          {
+            "calories": 700.75,
+            "name": "Dinner"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"name\" is a required property",
+      "python_error": "'name' is a required property\n\nFailed validating 'required' in schema['properties']['meals']['items']:\n    {'properties': {'calories': {'description': 'The calories consumed in '\n                                                'the meal',\n                                 'type': 'number'},\n                    'name': {'description': 'The name of the meal',\n                             'type': 'string'}},\n     'required': ['name', 'calories'],\n     'type': 'object'}\n\nOn instance['meals'][2]:\n    {'calories': 700.75}",
+      "data": {
+        "date": "2022-07-25",
+        "meals": [
+          {
+            "calories": -1,
+            "name": "Breakfast"
+          },
+          {
+            "calories": 500.25,
+            "name": ""
+          },
+          {
+            "calories": 700.75
+          }
+        ]
+      }
+    }
+  ]
+}

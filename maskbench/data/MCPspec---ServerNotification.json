@@ -1,0 +1,288 @@
+{
+  "description": "sample MCPspec/ServerNotification.json",
+  "meta": {
+    "full_size": 6161,
+    "stripped_size": 2744,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "const",
+      "enum",
+      "format",
+      "format:uri"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ServerNotification",
+    "definitions": {
+      "ServerNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/CancelledNotification"
+          },
+          {
+            "$ref": "#/definitions/ProgressNotification"
+          },
+          {
+            "$ref": "#/definitions/ResourceListChangedNotification"
+          },
+          {
+            "$ref": "#/definitions/ResourceUpdatedNotification"
+          },
+          {
+            "$ref": "#/definitions/PromptListChangedNotification"
+          },
+          {
+            "$ref": "#/definitions/ToolListChangedNotification"
+          },
+          {
+            "$ref": "#/definitions/LoggingMessageNotification"
+          }
+        ]
+      },
+      "CancelledNotification": {
+        "description": "This notification can be sent by either side to indicate that it is cancelling a previously-issued request.\n\nThe request SHOULD still be in-flight, but due to communication latency, it is always possible that this notification MAY arrive after the request has already finished.\n\nThis notification indicates that the result will be unused, so any associated processing SHOULD cease.\n\nA client MUST NOT attempt to cancel its `initialize` request.",
+        "properties": {
+          "method": {
+            "const": "notifications/cancelled",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "reason": {
+                "description": "An optional string describing the reason for the cancellation. This MAY be logged or presented to the user.",
+                "type": "string"
+              },
+              "requestId": {
+                "$ref": "#/definitions/RequestId",
+                "description": "The ID of the request to cancel.\n\nThis MUST correspond to the ID of a request previously issued in the same direction."
+              }
+            },
+            "required": [
+              "requestId"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "RequestId": {
+        "description": "A uniquely identifying ID for a request in JSON-RPC.",
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "ProgressNotification": {
+        "description": "An out-of-band notification used to inform the receiver of a progress update for a long-running request.",
+        "properties": {
+          "method": {
+            "const": "notifications/progress",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "progress": {
+                "description": "The progress thus far. This should increase every time progress is made, even if the total is unknown.",
+                "type": "number"
+              },
+              "progressToken": {
+                "$ref": "#/definitions/ProgressToken",
+                "description": "The progress token which was given in the initial request, used to associate this notification with the request that is proceeding."
+              },
+              "total": {
+                "description": "Total number of items to process (or total progress required), if known.",
+                "type": "number"
+              }
+            },
+            "required": [
+              "progress",
+              "progressToken"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "ProgressToken": {
+        "description": "A progress token, used to associate progress notifications with the original request.",
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "ResourceListChangedNotification": {
+        "description": "An optional notification from the server to the client, informing it that the list of resources it can read from has changed. This may be issued by servers without any previous subscription from the client.",
+        "properties": {
+          "method": {
+            "const": "notifications/resources/list_changed",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {},
+            "properties": {
+              "_meta": {
+                "additionalProperties": {},
+                "description": "This parameter name is reserved by MCP to allow clients and servers to attach additional metadata to their notifications.",
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "type": "object"
+      },
+      "ResourceUpdatedNotification": {
+        "description": "A notification from the server to the client, informing it that a resource has changed and may need to be read again. This should only be sent if the client previously sent a resources/subscribe request.",
+        "properties": {
+          "method": {
+            "const": "notifications/resources/updated",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "uri": {
+                "description": "The URI of the resource that has been updated. This might be a sub-resource of the one that the client actually subscribed to.",
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "uri"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "PromptListChangedNotification": {
+        "description": "An optional notification from the server to the client, informing it that the list of prompts it offers has changed. This may be issued by servers without any previous subscription from the client.",
+        "properties": {
+          "method": {
+            "const": "notifications/prompts/list_changed",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {},
+            "properties": {
+              "_meta": {
+                "additionalProperties": {},
+                "description": "This parameter name is reserved by MCP to allow clients and servers to attach additional metadata to their notifications.",
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "type": "object"
+      },
+      "ToolListChangedNotification": {
+        "description": "An optional notification from the server to the client, informing it that the list of tools it offers has changed. This may be issued by servers without any previous subscription from the client.",
+        "properties": {
+          "method": {
+            "const": "notifications/tools/list_changed",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {},
+            "properties": {
+              "_meta": {
+                "additionalProperties": {},
+                "description": "This parameter name is reserved by MCP to allow clients and servers to attach additional metadata to their notifications.",
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "type": "object"
+      },
+      "LoggingMessageNotification": {
+        "description": "Notification of a log message passed from server to client. If no logging/setLevel request has been sent from the client, the server MAY decide which messages to send automatically.",
+        "properties": {
+          "method": {
+            "const": "notifications/message",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "data": {
+                "description": "The data to be logged, such as a string message or an object. Any JSON serializable type is allowed here."
+              },
+              "level": {
+                "$ref": "#/definitions/LoggingLevel",
+                "description": "The severity of this log message."
+              },
+              "logger": {
+                "description": "An optional name of the logger issuing this message.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "data",
+              "level"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "LoggingLevel": {
+        "description": "The severity of a log message.\n\nThese map to syslog message severities, as specified in RFC-5424:\nhttps://datatracker.ietf.org/doc/html/rfc5424#section-6.2.1",
+        "enum": [
+          "alert",
+          "critical",
+          "debug",
+          "emergency",
+          "error",
+          "info",
+          "notice",
+          "warning"
+        ],
+        "type": "string"
+      }
+    }
+  },
+  "tests": []
+}

@@ -1,0 +1,112 @@
+{
+  "description": "sample Github_medium/o66049.json",
+  "meta": {
+    "full_size": 1053,
+    "stripped_size": 428,
+    "features": [
+      "@minmaxLength"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Address",
+    "description": "PayPal address json schema",
+    "type": "object",
+    "properties": {
+      "line1": {
+        "description": "Line 1 of the address (e.g., Number, street, etc). 100 characters max",
+        "type": "string",
+        "maxLength": 100
+      },
+      "line2": {
+        "description": "Line 2 of the address (e.g., Suite, apt #, etc). 100 characters max.",
+        "type": "string",
+        "maxLength": 100
+      },
+      "city": {
+        "description": "City name. 50 characters max.",
+        "type": "string",
+        "maxLength": 50
+      },
+      "country_code": {
+        "description": "2-letter country code. 2 characters max.",
+        "type": "string",
+        "maxLength": 2
+      },
+      "postal_code": {
+        "description": "Zip code or equivalent is usually required for countries that have them. 20 characters max. Required in certain countries.",
+        "type": "string",
+        "maxLength": 20
+      },
+      "state": {
+        "description": "2-letter code for US states, and the equivalent for other countries. 100 characters max.",
+        "type": "string",
+        "maxLength": 100
+      },
+      "phone": {
+        "description": "Phone number in E.123 format.",
+        "type": "string",
+        "maxLength": 50
+      }
+    },
+    "required": [
+      "line1",
+      "city",
+      "country_code"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "line1": "123 Main St",
+        "line2": "Apt 101",
+        "city": "New York",
+        "country_code": "US",
+        "postal_code": "10001",
+        "state": "NY",
+        "phone": "+1-212-123-4567"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"New York City is a very big city in the United States of America\" is longer than 50 characters",
+      "python_error": "'New York City is a very big city in the United States of America' is too long\n\nFailed validating 'maxLength' in schema['properties']['city']:\n    {'description': 'City name. 50 characters max.',\n     'type': 'string',\n     'maxLength': 50}\n\nOn instance['city']:\n    'New York City is a very big city in the United States of America'",
+      "data": {
+        "line1": "123 Main St",
+        "line2": "Apt 101",
+        "city": "New York City is a very big city in the United States of America",
+        "country_code": "US",
+        "postal_code": "10001",
+        "state": "NY",
+        "phone": "+1-212-123-4567"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"USA\" is longer than 2 characters",
+      "python_error": "'USA' is too long\n\nFailed validating 'maxLength' in schema['properties']['country_code']:\n    {'description': '2-letter country code. 2 characters max.',\n     'type': 'string',\n     'maxLength': 2}\n\nOn instance['country_code']:\n    'USA'",
+      "data": {
+        "line1": "123 Main St",
+        "line2": "Apt 101",
+        "city": "New York City is a very big city",
+        "country_code": "USA",
+        "postal_code": "10001",
+        "state": "NY",
+        "phone": "+1-212-123-4567"
+      }
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "description": "sample MCPspec/ResourceUpdatedNotification.json",
+  "meta": {
+    "full_size": 746,
+    "stripped_size": 383,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "const",
+      "format",
+      "format:uri"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResourceUpdatedNotification",
+    "definitions": {
+      "ResourceUpdatedNotification": {
+        "description": "A notification from the server to the client, informing it that a resource has changed and may need to be read again. This should only be sent if the client previously sent a resources/subscribe request.",
+        "properties": {
+          "method": {
+            "const": "notifications/resources/updated",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "uri": {
+                "description": "The URI of the resource that has been updated. This might be a sub-resource of the one that the client actually subscribed to.",
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "uri"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "notifications/resources/updated",
+        "params": {
+          "uri": "https://example.com/resource/123"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\" invalid-uri\" is not a \"uri\"",
+      "python_error": "' invalid-uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['params']['properties']['uri']:\n    {'description': 'The URI of the resource that has been updated. This '\n                    'might be a sub-resource of the one that the client '\n                    'actually subscribed to.',\n     'format': 'uri',\n     'type': 'string'}\n\nOn instance['params']['uri']:\n    ' invalid-uri'",
+      "data": {
+        "method": "notifications/resources/updated",
+        "params": {
+          "uri": " invalid-uri"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\" ftp://example.com/resource/123\" is not a \"uri\"",
+      "python_error": "' ftp://example.com/resource/123' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['params']['properties']['uri']:\n    {'description': 'The URI of the resource that has been updated. This '\n                    'might be a sub-resource of the one that the client '\n                    'actually subscribed to.',\n     'format': 'uri',\n     'type': 'string'}\n\nOn instance['params']['uri']:\n    ' ftp://example.com/resource/123'",
+      "data": {
+        "method": "notifications/resources/updated",
+        "params": {
+          "uri": " ftp://example.com/resource/123"
+        }
+      }
+    }
+  ]
+}

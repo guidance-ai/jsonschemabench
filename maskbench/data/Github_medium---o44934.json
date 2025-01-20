@@ -1,0 +1,551 @@
+{
+  "description": "sample Github_medium/o44934.json",
+  "meta": {
+    "full_size": 725,
+    "stripped_size": 707,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "version": "1.0.0",
+    "type": "object",
+    "properties": {
+      "book": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "contents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "headers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ordinal": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "chapter",
+                          "appendix",
+                          "part",
+                          "episode"
+                        ]
+                      },
+                      "identifier": {
+                        "type": [
+                          "integer",
+                          "string"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "type",
+                      "identifier"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "id",
+            "contents"
+          ]
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the book",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Chapter 1: Getting started",
+                  "Setting up the environment"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 2
+                }
+              },
+              {
+                "name": "Appendix A",
+                "headers": [
+                  "Appendix A: Glossary",
+                  "Important terms"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Another Book",
+            "id": "another-book-id",
+            "contents": [
+              {
+                "name": "Part 1",
+                "headers": [
+                  "Part 1: Introduction",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "part",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Episode 1",
+                "headers": [
+                  "Episode 1: Getting started",
+                  "Setting up the environment"
+                ],
+                "ordinal": {
+                  "type": "episode",
+                  "identifier": 1
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"integer\", \"string\"",
+      "python_error": "True is not of type 'integer', 'string'\n\nFailed validating 'type' in schema['properties']['book']['items']['properties']['contents']['items']['properties']['ordinal']['properties']['identifier']:\n    {'type': ['integer', 'string']}\n\nOn instance['book'][0]['contents'][0]['ordinal']['identifier']:\n    True",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the book",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['book']['items']['properties']['contents']['items']['properties']['ordinal']:\n    {'type': 'object',\n     'properties': {'type': {'type': 'string',\n                             'enum': ['chapter',\n                                      'appendix',\n                                      'part',\n                                      'episode']},\n                    'identifier': {'type': ['integer', 'string']}},\n     'additionalProperties': False,\n     'required': ['type', 'identifier']}\n\nOn instance['book'][0]['contents'][0]['ordinal']:\n    {'type': 'chapter', 'identifier': 1, 'extraProperty': 'extraValue'}",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the book",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1,
+                  "extraProperty": "extraValue"
+                }
+              },
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Chapter 1: Getting started",
+                  "Setting up the environment"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 2
+                }
+              },
+              {
+                "name": "Appendix A",
+                "headers": [
+                  "Appendix A: Glossary",
+                  "Important terms"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Another Book",
+            "id": "another-book-id",
+            "contents": [
+              {
+                "name": "Part 1",
+                "headers": [
+                  "Part 1: Introduction",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "part",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Episode 1",
+                "headers": [
+                  "Episode 1: Getting started",
+                  "Setting up the environment"
+                ],
+                "ordinal": {
+                  "type": "episode",
+                  "identifier": 1
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "1.5 is not of types \"integer\", \"string\"",
+      "python_error": "1.5 is not of type 'integer', 'string'\n\nFailed validating 'type' in schema['properties']['book']['items']['properties']['contents']['items']['properties']['ordinal']['properties']['identifier']:\n    {'type': ['integer', 'string']}\n\nOn instance['book'][0]['contents'][0]['ordinal']['identifier']:\n    1.5",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the book",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1.5
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-06/schema#',\n     'version': '1.0.0',\n     'type': 'object',\n     'properties': {'book': {'type': 'array',\n                             'items': {'type': 'object',\n                                       'properties': {'name': {'type': 'string'},\n                                                      'id': {'type': 'string'},\n                                                      'contents': {'type': 'array',\n                                                                   'items': {'type': 'object',\n                                                                             'properties': {'name': {'type': 'string'},\n                                                                                            'headers': {'type': 'array',\n                                                                                                        'ite.. (4262 more)",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the book",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1,
+                  "extraProperty": "extraValue"
+                }
+              },
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Chapter 1: Getting started",
+                  "Setting up the environment"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 2
+                }
+              },
+              {
+                "name": "Appendix A",
+                "headers": [
+                  "Appendix A: Glossary",
+                  "Important terms"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Another Book",
+            "id": "another-book-id",
+            "contents": [
+              {
+                "name": "Part 1",
+                "headers": [
+                  "Part 1: Introduction",
+                  "What to expect"
+                ],
+                "ordinal": {
+                  "type": "part",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Episode 1",
+                "headers": [
+                  "Episode 1: Getting started",
+                  "Setting up the environment"
+                ],
+                "ordinal": {
+                  "type": "episode",
+                  "identifier": 1
+                }
+              }
+            ]
+          },
+          {
+            "name": "Invalid Book",
+            "id": "invalid-book-id",
+            "contents": [
+              {
+                "name": "Invalid Chapter",
+                "headers": [
+                  "Invalid Chapter: Getting started",
+                  "Setting up the environment"
+                ],
+                "ordinal": {
+                  "type": "invalidType",
+                  "identifier": 1
+                }
+              }
+            ]
+          }
+        ],
+        "extraProperty": "extraValue"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Introduction",
+                  "Background"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Appendix A",
+                "headers": [
+                  "Glossary",
+                  "References"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Another Book",
+            "id": "another-book-id",
+            "contents": [
+              {
+                "name": "Part 1",
+                "headers": [
+                  "Introduction",
+                  "Background"
+                ],
+                "ordinal": {
+                  "type": "part",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Episode 2",
+                "headers": [
+                  "Plot",
+                  "Characters"
+                ],
+                "ordinal": {
+                  "type": "episode",
+                  "identifier": 2
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of types \"integer\", \"string\"",
+      "python_error": "None is not of type 'integer', 'string'\n\nFailed validating 'type' in schema['properties']['book']['items']['properties']['contents']['items']['properties']['ordinal']['properties']['identifier']:\n    {'type': ['integer', 'string']}\n\nOn instance['book'][0]['contents'][0]['ordinal']['identifier']:\n    None",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Introduction",
+                  "Background"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": null
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-06/schema#',\n     'version': '1.0.0',\n     'type': 'object',\n     'properties': {'book': {'type': 'array',\n                             'items': {'type': 'object',\n                                       'properties': {'name': {'type': 'string'},\n                                                      'id': {'type': 'string'},\n                                                      'contents': {'type': 'array',\n                                                                   'items': {'type': 'object',\n                                                                             'properties': {'name': {'type': 'string'},\n                                                                                            'headers': {'type': 'array',\n                                                                                                        'ite.. (3096 more)",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "contents": [
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Introduction",
+                  "Background"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1,
+                  "extraProperty": "extraValue"
+                }
+              },
+              {
+                "name": "Appendix A",
+                "headers": [
+                  "Glossary",
+                  "References"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Another Book",
+            "id": "another-book-id",
+            "contents": [
+              {
+                "name": "Part 1",
+                "headers": [
+                  "Introduction",
+                  "Background"
+                ],
+                "ordinal": {
+                  "type": "part",
+                  "identifier": 1
+                }
+              }
+            ]
+          }
+        ],
+        "extraProperty": "extraValue"
+      }
+    }
+  ]
+}

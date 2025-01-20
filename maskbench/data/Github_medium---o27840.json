@@ -1,0 +1,221 @@
+{
+  "description": "sample Github_medium/o27840.json",
+  "meta": {
+    "full_size": 932,
+    "stripped_size": 932,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "const",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "ComputeOfferings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "DiskOfferings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "FilterOfferingDisabled": {
+        "additionalProperties": false,
+        "properties": {
+          "filterOfferings": {
+            "const": false
+          },
+          "zones": {
+            "additionalProperties": {
+              "$ref": "#/definitions/OfferingsForZone"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "filterOfferings"
+        ],
+        "type": "object"
+      },
+      "FilterOfferingEnabled": {
+        "additionalProperties": false,
+        "properties": {
+          "filterOfferings": {
+            "const": true
+          },
+          "zones": {
+            "additionalProperties": {
+              "$ref": "#/definitions/OfferingsForZone"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "filterOfferings",
+          "zones"
+        ],
+        "type": "object"
+      },
+      "OfferingsForZone": {
+        "additionalProperties": false,
+        "properties": {
+          "computeOfferings": {
+            "$ref": "#/definitions/ComputeOfferings"
+          },
+          "diskOfferings": {
+            "$ref": "#/definitions/DiskOfferings"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "oneOf": [
+      {
+        "$ref": "#/definitions/FilterOfferingEnabled"
+      },
+      {
+        "$ref": "#/definitions/FilterOfferingDisabled"
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "filterOfferings": true,
+        "zones": {
+          "zone1": {
+            "computeOfferings": [
+              "computeOffering1",
+              "computeOffering2"
+            ],
+            "diskOfferings": [
+              "diskOffering1",
+              "diskOffering2"
+            ]
+          },
+          "zone2": {
+            "computeOfferings": [
+              "computeOffering3",
+              "computeOffering4"
+            ],
+            "diskOfferings": [
+              "diskOffering3",
+              "diskOffering4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "filterOfferings": true,
+        "zones": {
+          "zone1": {
+            "computeOfferings": [
+              "compute-offering-1",
+              "compute-offering-2"
+            ],
+            "diskOfferings": [
+              "disk-offering-1",
+              "disk-offering-2"
+            ]
+          },
+          "zone2": {
+            "computeOfferings": [
+              "compute-offering-3",
+              "compute-offering-4"
+            ],
+            "diskOfferings": [
+              "disk-offering-3",
+              "disk-offering-4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"filterOfferings\":true,\"zones\":{\"zone1\":{\"computeOfferings\":[\"compute-offering-1\",\"compute-offering-2\"],\"diskOfferings\":[\"disk-offering-1\",\"disk-offering-2\"],\"unknownProperty\":\"some value\"},\"zone2\":{\"computeOfferings\":[\"compute-offering-3\",\"compute-offering-4\"],\"diskOfferings\":[\"disk-offering-3\",\"disk-offering-4\"]}}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'filterOfferings': True, 'zones': {'zone1': {'computeOfferings': ['compute-offering-1', 'compute-offering-2'], 'diskOfferings': ['disk-offering-1', 'disk-offering-2'], 'unknownProperty': 'some value'}, 'zone2': {'computeOfferings': ['compute-offering-3', 'compute-offering-4'], 'diskOfferings': ['disk-offering-3', 'disk-offering-4']}}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'definitions': {'ComputeOfferings': {'items': {'type': 'string'},\n                                          'type': 'array'},\n                     'DiskOfferings': {'items': {'type': 'string'},\n                                       'type': 'array'},\n                     'FilterOfferingDisabled': {'additionalProperties': False,\n                                                'properties': {'filterOfferings': {'const': False},\n                                                               'zones': {'additionalProperties': {'$ref': '#/definitions/OfferingsForZone'},\n                            .. (1966 more)",
+      "data": {
+        "filterOfferings": true,
+        "zones": {
+          "zone1": {
+            "computeOfferings": [
+              "compute-offering-1",
+              "compute-offering-2"
+            ],
+            "diskOfferings": [
+              "disk-offering-1",
+              "disk-offering-2"
+            ],
+            "unknownProperty": "some value"
+          },
+          "zone2": {
+            "computeOfferings": [
+              "compute-offering-3",
+              "compute-offering-4"
+            ],
+            "diskOfferings": [
+              "disk-offering-3",
+              "disk-offering-4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"filterOfferings\":true,\"zones\":{\"zone1\":{\"computeOfferings\":[\"compute-offering-1\",123],\"diskOfferings\":[\"disk-offering-1\",\"disk-offering-2\"]},\"zone2\":{\"computeOfferings\":[\"compute-offering-3\",\"compute-offering-4\"],\"diskOfferings\":[\"disk-offering-3\",\"disk-offering-4\"]}}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'filterOfferings': True, 'zones': {'zone1': {'computeOfferings': ['compute-offering-1', 123], 'diskOfferings': ['disk-offering-1', 'disk-offering-2']}, 'zone2': {'computeOfferings': ['compute-offering-3', 'compute-offering-4'], 'diskOfferings': ['disk-offering-3', 'disk-offering-4']}}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'definitions': {'ComputeOfferings': {'items': {'type': 'string'},\n                                          'type': 'array'},\n                     'DiskOfferings': {'items': {'type': 'string'},\n                                       'type': 'array'},\n                     'FilterOfferingDisabled': {'additionalProperties': False,\n                                                'properties': {'filterOfferings': {'const': False},\n                                                               'zones': {'additionalProperties': {'$ref': '#/definitions/OfferingsForZone'},\n                                                                         'type.. (1795 more)",
+      "data": {
+        "filterOfferings": true,
+        "zones": {
+          "zone1": {
+            "computeOfferings": [
+              "compute-offering-1",
+              123
+            ],
+            "diskOfferings": [
+              "disk-offering-1",
+              "disk-offering-2"
+            ]
+          },
+          "zone2": {
+            "computeOfferings": [
+              "compute-offering-3",
+              "compute-offering-4"
+            ],
+            "diskOfferings": [
+              "disk-offering-3",
+              "disk-offering-4"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

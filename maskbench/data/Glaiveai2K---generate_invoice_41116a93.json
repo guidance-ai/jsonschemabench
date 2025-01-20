@@ -1,0 +1,122 @@
+{
+  "description": "sample Glaiveai2K/generate_invoice_41116a93.json",
+  "meta": {
+    "full_size": 577,
+    "stripped_size": 357,
+    "features": [
+      "format",
+      "format:email",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "customer_details": {
+        "properties": {
+          "address": {
+            "description": "The address of the customer",
+            "type": "string"
+          },
+          "email": {
+            "description": "The email address of the customer",
+            "format": "email",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the customer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "address"
+        ],
+        "type": "object"
+      },
+      "items": {
+        "description": "The items purchased",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "total_amount": {
+        "description": "The total amount of the purchase",
+        "type": "number"
+      }
+    },
+    "required": [
+      "items",
+      "total_amount",
+      "customer_details"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "customer_details": {
+          "address": "123 Main Street, Anytown USA",
+          "email": "john.doe@example.com",
+          "name": "John Doe"
+        },
+        "items": [
+          "Item 1",
+          "Item 2",
+          "Item 3"
+        ],
+        "total_amount": 100.99
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid_email\" is not a \"email\"",
+      "python_error": "'invalid_email' is not a 'email'\n\nFailed validating 'format' in schema['properties']['customer_details']['properties']['email']:\n    {'description': 'The email address of the customer',\n     'format': 'email',\n     'type': 'string'}\n\nOn instance['customer_details']['email']:\n    'invalid_email'",
+      "data": {
+        "customer_details": {
+          "address": "123 Main Street, Anytown USA",
+          "email": "invalid_email",
+          "name": "John Doe"
+        },
+        "items": [
+          "Item 1",
+          "Item 2",
+          "Item 3"
+        ],
+        "total_amount": 100.99
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"john.doe.example.com\" is not a \"email\"",
+      "python_error": "'john.doe.example.com' is not a 'email'\n\nFailed validating 'format' in schema['properties']['customer_details']['properties']['email']:\n    {'description': 'The email address of the customer',\n     'format': 'email',\n     'type': 'string'}\n\nOn instance['customer_details']['email']:\n    'john.doe.example.com'",
+      "data": {
+        "customer_details": {
+          "address": "123 Main Street, Anytown USA",
+          "email": "john.doe.example.com",
+          "name": "John Doe"
+        },
+        "items": [
+          "Item 1",
+          "Item 2",
+          "Item 3"
+        ],
+        "total_amount": 100.99
+      }
+    }
+  ]
+}

@@ -1,0 +1,297 @@
+{
+  "description": "sample Github_medium/o90711.json",
+  "meta": {
+    "full_size": 2010,
+    "stripped_size": 791,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "database": {
+        "description": "Kong database configuration properties",
+        "properties": {
+          "database": {
+            "default": "postgres",
+            "description": "The database backend type",
+            "type": "string"
+          },
+          "host": {
+            "default": "postgresql.marathon.l4lb.thisdcos.directory",
+            "description": "The DNS name of the internal MLB",
+            "type": "string"
+          },
+          "password": {
+            "default": "kong",
+            "description": "The postgresdb password",
+            "type": "string"
+          },
+          "port": {
+            "default": 5432,
+            "description": "The service port for the postgresdb",
+            "type": "integer"
+          },
+          "user": {
+            "default": "kong",
+            "description": "The postgresdb username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "host",
+          "user",
+          "port",
+          "database"
+        ],
+        "type": "object"
+      },
+      "kong": {
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "cpus": {
+            "default": 1,
+            "description": "CPU shares to allocate to each instance.",
+            "minimum": 1,
+            "type": "number"
+          },
+          "instances": {
+            "default": 1,
+            "description": "Number of instances to run.",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mem": {
+            "default": 512,
+            "description": "Memory (MB) to allocate to each task.",
+            "minimum": 512,
+            "type": "number"
+          },
+          "name": {
+            "default": "kong",
+            "description": "Name for this application",
+            "type": "string"
+          },
+          "role": {
+            "default": "*",
+            "description": "Deploy crm only on nodes with this role.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem",
+          "instances",
+          "name"
+        ],
+        "type": "object"
+      },
+      "marathon-lb": {
+        "description": "Marathon-LB service configuration properties",
+        "properties": {
+          "group0": {
+            "default": "external",
+            "description": "The MLB name for HAPROXY_0_GROUP",
+            "type": "string"
+          },
+          "group1": {
+            "default": "external",
+            "description": "The MLB name for HAPROXY_1_GROUP",
+            "type": "string"
+          },
+          "port0": {
+            "default": 10001,
+            "description": "The service port for port0",
+            "type": "integer"
+          },
+          "port1": {
+            "default": 10002,
+            "description": "The service port for port1",
+            "type": "integer"
+          },
+          "port2": {
+            "default": 10003,
+            "description": "The service port for port2",
+            "type": "integer"
+          },
+          "port3": {
+            "default": 10004,
+            "description": "The service port for port3",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "port0",
+          "port1",
+          "port2",
+          "port3",
+          "group0",
+          "group1"
+        ],
+        "type": "object"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "database": {
+          "database": "postgres",
+          "host": "postgresql.marathon.l4lb.thisdcos.directory",
+          "password": "kong",
+          "port": 5432,
+          "user": "kong"
+        },
+        "kong": {
+          "cpus": 1,
+          "instances": 1,
+          "mem": 512,
+          "name": "kong",
+          "role": "*"
+        },
+        "marathon-lb": {
+          "group0": "external",
+          "group1": "external",
+          "port0": 10001,
+          "port1": 10002,
+          "port2": 10003,
+          "port3": 10004
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['kong']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to each instance.',\n     'minimum': 1,\n     'type': 'number'}\n\nOn instance['kong']['cpus']:\n    0",
+      "data": {
+        "database": {
+          "database": "postgres",
+          "host": "postgresql.marathon.l4lb.thisdcos.directory",
+          "password": "kong",
+          "port": 5432,
+          "user": "kong"
+        },
+        "kong": {
+          "cpus": 0,
+          "instances": 1,
+          "mem": 512,
+          "name": "kong",
+          "role": "*"
+        },
+        "marathon-lb": {
+          "group0": "external",
+          "group1": "external",
+          "port0": 10001,
+          "port1": 10002,
+          "port2": 10003,
+          "port3": 10004
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"10004\" is not of type \"integer\"",
+      "python_error": "'10004' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['marathon-lb']['properties']['port3']:\n    {'default': 10004,\n     'description': 'The service port for port3',\n     'type': 'integer'}\n\nOn instance['marathon-lb']['port3']:\n    '10004'",
+      "data": {
+        "database": {
+          "database": "postgres",
+          "host": "postgresql.marathon.l4lb.thisdcos.directory",
+          "password": "kong",
+          "port": 5432,
+          "user": "kong"
+        },
+        "kong": {
+          "cpus": 1,
+          "instances": 1,
+          "mem": 512,
+          "name": "kong",
+          "role": "*"
+        },
+        "marathon-lb": {
+          "group0": "external",
+          "group1": "external",
+          "port0": 10001,
+          "port1": 10002,
+          "port2": 10003,
+          "port3": "10004"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.5 is less than the minimum of 1",
+      "python_error": "'mem' is a required property\n\nFailed validating 'required' in schema['properties']['kong']:\n    {'description': 'DC/OS service configuration properties',\n     'properties': {'cpus': {'default': 1,\n                             'description': 'CPU shares to allocate to '\n                                            'each instance.',\n                             'minimum': 1,\n                             'type': 'number'},\n                    'instances': {'default': 1,\n                                  'description': 'Number of instances to '\n                                                 'run.',\n                                  'minimum': 1,\n                                  'type': 'integer'},\n                    'mem': {'default': 512,\n                            'description': 'Memory (MB) to allocate to '\n                                           'each task.',\n                            'minimum': 512,\n                            'type': 'number'},\n                    'name': {'default': 'kong',\n      .. (575 more)",
+      "data": {
+        "database": {
+          "database": "postgres",
+          "host": "postgresql.marathon.l4lb.thisdcos.directory",
+          "password": "kong",
+          "port": 5432,
+          "user": "kong"
+        },
+        "kong": {
+          "cpus": 0.5,
+          "below the minimum cpus": "instances",
+          "removed the key": "mem",
+          "name": "kong",
+          "role": "*"
+        },
+        "marathon-lb": {
+          "group0": "external",
+          "group1": "external",
+          "port0": 10001,
+          "port1": 10002,
+          "port2": 10003,
+          "port3": 10004
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 1",
+      "python_error": "-1 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['kong']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to each instance.',\n     'minimum': 1,\n     'type': 'number'}\n\nOn instance['kong']['cpus']:\n    -1",
+      "data": {
+        "database": {
+          "database": "postgres",
+          "host": "postgresql.marathon.l4lb.thisdcos.directory",
+          "password": "kong",
+          "port": 5432,
+          "user": "kong"
+        },
+        "kong": {
+          "cpus": -1,
+          "instances": 1,
+          "mem": 512,
+          "name": "kong",
+          "role": "*"
+        },
+        "marathon-lb": {
+          "group0": "external",
+          "group1": "external",
+          "port0": 10001,
+          "port1": 10002,
+          "port2": 10003,
+          "port3": 10004
+        }
+      }
+    }
+  ]
+}

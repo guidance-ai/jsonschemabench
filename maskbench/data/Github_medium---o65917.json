@@ -1,0 +1,528 @@
+{
+  "description": "sample Github_medium/o65917.json",
+  "meta": {
+    "full_size": 1835,
+    "stripped_size": 1835,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@minmaxLength",
+      "@siblingKeys",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "extracted",
+      "files"
+    ],
+    "properties": {
+      "extracted": {
+        "type": "boolean"
+      },
+      "files": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "package_name",
+            "package_version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "package_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "package_version": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "oneOf": [
+            {
+              "$ref": "#/definitions/file_changed"
+            },
+            {
+              "$ref": "#/definitions/file_error"
+            }
+          ]
+        }
+      }
+    },
+    "definitions": {
+      "file_changed": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "changed"
+            ]
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/definitions/file_changed_modified"
+          },
+          {
+            "$ref": "#/definitions/link_changed_modified"
+          },
+          {
+            "$ref": "#/definitions/file_changed_deleted"
+          }
+        ]
+      },
+      "file_changed_modified": {
+        "required": [
+          "changes",
+          "mode",
+          "user",
+          "group",
+          "type"
+        ],
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "size",
+                "mode",
+                "md5",
+                "device_number",
+                "link_path",
+                "user",
+                "group",
+                "time",
+                "capabilities",
+                "replaced",
+                "other_rpm_changes"
+              ]
+            },
+            "minItems": 1
+          },
+          "mode": {
+            "type": "string",
+            "pattern": "^[0-7]{3,4}$"
+          },
+          "user": {
+            "type": "string",
+            "minLength": 1
+          },
+          "group": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "file",
+              "dir"
+            ]
+          }
+        }
+      },
+      "link_changed_modified": {
+        "required": [
+          "target",
+          "changes",
+          "mode",
+          "user",
+          "group",
+          "type"
+        ],
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "size",
+                "mode",
+                "md5",
+                "device_number",
+                "link_path",
+                "user",
+                "group",
+                "time",
+                "capabilities",
+                "replaced",
+                "other_rpm_changes"
+              ]
+            },
+            "minItems": 1
+          },
+          "mode": {
+            "type": "string",
+            "pattern": "^[0-7]{3,4}$"
+          },
+          "user": {
+            "type": "string",
+            "minLength": 1
+          },
+          "group": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "link"
+            ]
+          },
+          "target": {
+            "type": "string"
+          }
+        }
+      },
+      "file_changed_deleted": {
+        "required": [
+          "changes"
+        ],
+        "properties": {
+          "changes": {
+            "enum": [
+              [
+                "deleted"
+              ]
+            ]
+          }
+        }
+      },
+      "file_error": {
+        "required": [
+          "status",
+          "error_message"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "error"
+            ]
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "extracted": true,
+        "files": [
+          {
+            "name": "file1.txt",
+            "package_name": "package1",
+            "package_version": "1.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "644",
+            "user": "user1",
+            "group": "group1",
+            "type": "file"
+          },
+          {
+            "name": "file2.txt",
+            "package_name": "package2",
+            "package_version": "2.0",
+            "status": "changed",
+            "target": "/path/to/file2.txt",
+            "changes": [
+              "link_path"
+            ],
+            "mode": "755",
+            "user": "user2",
+            "group": "group2",
+            "type": "link"
+          },
+          {
+            "name": "file3.txt",
+            "package_name": "package3",
+            "package_version": "3.0",
+            "status": "changed",
+            "changes": [
+              "deleted"
+            ]
+          },
+          {
+            "name": "file4.txt",
+            "package_name": "package4",
+            "package_version": "4.0",
+            "status": "error",
+            "error_message": "Failed to extract file"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "extracted": true,
+        "files": [
+          {
+            "name": "example.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "644",
+            "user": "root",
+            "group": "root",
+            "type": "file"
+          },
+          {
+            "name": "example_link",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "755",
+            "user": "root",
+            "group": "root",
+            "type": "link",
+            "target": "/path/to/target"
+          },
+          {
+            "name": "deleted_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "deleted"
+            ]
+          },
+          {
+            "name": "error_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "error",
+            "error_message": "File not found"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"example.txt\",\"package_name\":\"example-package\",\"package_version\":\"1.0.0\",\"status\":\"changed\",\"changes\":[],\"mode\":\"644\",\"user\":\"root\",\"group\":\"root\",\"type\":\"file\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'changed' is not one of ['error']\n\nFailed validating 'enum' in schema[1]['properties']['status']:\n    {'enum': ['error']}\n\nOn instance['status']:\n    'changed'",
+      "data": {
+        "extracted": true,
+        "files": [
+          {
+            "name": "example.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [],
+            "mode": "644",
+            "user": "root",
+            "group": "root",
+            "type": "file"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"example.txt\",\"package_name\":\"example-package\",\"package_version\":\"1.0.0\",\"status\":\"changed\",\"changes\":[\"size\",\"mode\"],\"mode\":\"12345\",\"changed the mode to a value that does not match the pattern\":\"user\",\"group\":\"root\",\"type\":\"file\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'changed' is not one of ['error']\n\nFailed validating 'enum' in schema[1]['properties']['status']:\n    {'enum': ['error']}\n\nOn instance['status']:\n    'changed'",
+      "data": {
+        "extracted": true,
+        "files": [
+          {
+            "name": "example.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "12345",
+            "changed the mode to a value that does not match the pattern": "user",
+            "group": "root",
+            "type": "file"
+          },
+          {
+            "name": "example_link",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "755",
+            "user": "root",
+            "group": "root",
+            "type": "link",
+            "target": "/path/to/target"
+          },
+          {
+            "name": "deleted_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "deleted"
+            ]
+          },
+          {
+            "name": "error_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "error",
+            "error_message": "File not found"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['files']['items']['properties']['package_name']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['files'][0]['package_name']:\n    ''",
+      "data": {
+        "extracted": true,
+        "files": [
+          {
+            "name": "example.txt",
+            "package_name": "",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "644",
+            "user": "root",
+            "group": "root",
+            "type": "file"
+          },
+          {
+            "name": "example_link",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "755",
+            "user": "root",
+            "group": "root",
+            "type": "link",
+            "target": "/path/to/target"
+          },
+          {
+            "name": "deleted_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "deleted"
+            ]
+          },
+          {
+            "name": "error_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "error",
+            "error_message": "File not found"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['files']['items']['properties']['package_name']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['files'][0]['package_name']:\n    ''",
+      "data": {
+        "extracted": true,
+        "files": [
+          {
+            "name": "example.txt",
+            "package_name": "",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "644",
+            "user": "root",
+            "group": "root",
+            "type": "file"
+          },
+          {
+            "name": "example_link",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "size",
+              "mode"
+            ],
+            "mode": "755",
+            "user": "root",
+            "group": "root",
+            "type": "link",
+            "target": ""
+          },
+          {
+            "name": "deleted_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "changed",
+            "changes": [
+              "deleted"
+            ]
+          },
+          {
+            "name": "error_file.txt",
+            "package_name": "example-package",
+            "package_version": "1.0.0",
+            "status": "error",
+            "error_message": "File not found"
+          }
+        ]
+      }
+    }
+  ]
+}

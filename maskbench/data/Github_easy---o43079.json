@@ -1,0 +1,105 @@
+{
+  "description": "sample Github_easy/o43079.json",
+  "meta": {
+    "full_size": 462,
+    "stripped_size": 344,
+    "features": [
+      "$ref",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "JSONAPI rc3",
+    "description": "A JSONAPI document",
+    "type": "object",
+    "properties": {
+      "data": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/resource"
+          },
+          {
+            "description": "The top-level resource or array of resources",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/resource"
+            }
+          }
+        ]
+      }
+    },
+    "required": [
+      "data"
+    ],
+    "definitions": {
+      "resource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "data": {
+          "id": "1",
+          "type": "users"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"1\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'type' is a required property\n\nFailed validating 'required' in schema[0]:\n    {'type': 'object',\n     'properties': {'id': {'type': 'string'}, 'type': {'type': 'string'}},\n     'required': ['type']}\n\nOn instance:\n    {'id': '1'}",
+      "data": {
+        "data": {
+          "id": "1"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "data": {
+          "id": "1",
+          "type": "user"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "1 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "1 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['data']:\n    {'anyOf': [{'$ref': '#/definitions/resource'},\n               {'description': 'The top-level resource or array of '\n                               'resources',\n                'type': 'array',\n                'items': {'$ref': '#/definitions/resource'}}]}\n\nOn instance['data']:\n    1",
+      "data": {
+        "data": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "description": "sample Github_easy/o83690.json",
+  "meta": {
+    "full_size": 325,
+    "stripped_size": 249,
+    "features": [
+      "@minmaxProperties",
+      "additionalProperties",
+      "additionalProperties:object",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxProperties",
+      "minProperties",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Contacts",
+    "description": "Contacts: name, freeform contact methods",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      }
+    },
+    "minProperties": 1,
+    "maxProperties": 5,
+    "required": [
+      "name"
+    ],
+    "additionalProperties": {
+      "type": "string",
+      "pattern": "^([0-9]{3}) [0-9]{3}-[0-9]{4}$"
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "John Doe",
+        "phone": "123 456-7890",
+        "fax": "987 654-3210"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123456-7890\" does not match \"^([0-9]{3}) [0-9]{3}-[0-9]{4}$\"",
+      "python_error": "'123456-7890' does not match '^([0-9]{3}) [0-9]{3}-[0-9]{4}$'\n\nFailed validating 'pattern' in schema['additionalProperties']:\n    {'type': 'string', 'pattern': '^([0-9]{3}) [0-9]{3}-[0-9]{4}$'}\n\nOn instance['phone']:\n    '123456-7890'",
+      "data": {
+        "name": "John Doe",
+        "phone": "123456-7890",
+        "fax": "987 654-3210"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"number\":\"987 654-3210\"} is not of type \"string\"",
+      "python_error": "{'number': '987 654-3210'} is not of type 'string'\n\nFailed validating 'type' in schema['additionalProperties']:\n    {'type': 'string', 'pattern': '^([0-9]{3}) [0-9]{3}-[0-9]{4}$'}\n\nOn instance['fax']:\n    {'number': '987 654-3210'}",
+      "data": {
+        "name": "John Doe",
+        "phone": "123 456-7890",
+        "fax": {
+          "number": "987 654-3210"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minProperties keyword or maxProperties keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"John Doe\",\"phone\":\"123 456-7890\",\"fax\":\"987 654-3210\",\"email\":\"johndoe@example.com\",\"website\":\"https://johndoe.com\",\"address\":\"123 Main St\"} has more than 5 properties",
+      "python_error": "{'name': 'John Doe', 'phone': '123 456-7890', 'fax': '987 654-3210', 'email': 'johndoe@example.com', 'website': 'https://johndoe.com', 'address': '123 Main St'} has too many properties\n\nFailed validating 'maxProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Contacts',\n     'description': 'Contacts: name, freeform contact methods',\n     'type': 'object',\n     'properties': {'name': {'type': 'string'}},\n     'minProperties': 1,\n     'maxProperties': 5,\n     'required': ['name'],\n     'additionalProperties': {'type': 'string',\n                              'pattern': '^([0-9]{3}) [0-9]{3}-[0-9]{4}$'}}\n\nOn instance:\n    {'name': 'John Doe',\n     'phone': '123 456-7890',\n     'fax': '987 654-3210',\n     'email': 'johndoe@example.com',\n     'website': 'https://johndoe.com',\n     'address': '123 Main St'}",
+      "data": {
+        "name": "John Doe",
+        "phone": "123 456-7890",
+        "fax": "987 654-3210",
+        "email": "johndoe@example.com",
+        "website": "https://johndoe.com",
+        "address": "123 Main St"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"name\":\"John Doe\",\"phone\":\"123 456-7890\",\"fax\":\"987 654-3210\",\"email\":\"john.doe@example.com\",\"address\":\"123 Main St\",\"website\":\"https://johndoe.com\"} has more than 5 properties",
+      "python_error": "{'name': 'John Doe', 'phone': '123 456-7890', 'fax': '987 654-3210', 'email': 'john.doe@example.com', 'address': '123 Main St', 'website': 'https://johndoe.com'} has too many properties\n\nFailed validating 'maxProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Contacts',\n     'description': 'Contacts: name, freeform contact methods',\n     'type': 'object',\n     'properties': {'name': {'type': 'string'}},\n     'minProperties': 1,\n     'maxProperties': 5,\n     'required': ['name'],\n     'additionalProperties': {'type': 'string',\n                              'pattern': '^([0-9]{3}) [0-9]{3}-[0-9]{4}$'}}\n\nOn instance:\n    {'name': 'John Doe',\n     'phone': '123 456-7890',\n     'fax': '987 654-3210',\n     'email': 'john.doe@example.com',\n     'address': '123 Main St',\n     'website': 'https://johndoe.com'}",
+      "data": {
+        "name": "John Doe",
+        "phone": "123 456-7890",
+        "fax": "987 654-3210",
+        "email": "john.doe@example.com",
+        "address": "123 Main St",
+        "website": "https://johndoe.com"
+      }
+    }
+  ]
+}

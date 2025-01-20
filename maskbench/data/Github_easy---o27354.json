@@ -1,0 +1,89 @@
+{
+  "description": "sample Github_easy/o27354.json",
+  "meta": {
+    "full_size": 318,
+    "stripped_size": 278,
+    "features": [
+      "$ref",
+      "pattern"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "type",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "absolute_path": {
+        "pattern": "^/[^\u0000]+$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "plugins": {
+        "properties": {
+          "minimize_size": {
+            "properties": {
+              "shrink": {
+                "type": "boolean"
+              },
+              "zerofree": {
+                "$ref": "#/definitions/absolute_path"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "title": "Minimize size plugin manifest",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "plugins": {
+          "minimize_size": {
+            "shrink": true,
+            "zerofree": "/path/to/zerofree"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"/path/to/zerofree\\u0000suffix\" does not match \"^/[^\u0000]+$\"",
+      "python_error": "'/path/to/zerofree\\x00suffix' does not match '^/[^\\x00]+$'\n\nFailed validating 'pattern' in schema['properties']['plugins']['properties']['minimize_size']['properties']['zerofree']:\n    {'pattern': '^/[^\\x00]+$', 'type': 'string'}\n\nOn instance['plugins']['minimize_size']['zerofree']:\n    '/path/to/zerofree\\x00suffix'",
+      "data": {
+        "plugins": {
+          "minimize_size": {
+            "shrink": true,
+            "zerofree": "/path/to/zerofree\u0000suffix"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"/path/to/zerofree\\u0000\" does not match \"^/[^\u0000]+$\"",
+      "python_error": "'/path/to/zerofree\\x00' does not match '^/[^\\x00]+$'\n\nFailed validating 'pattern' in schema['properties']['plugins']['properties']['minimize_size']['properties']['zerofree']:\n    {'pattern': '^/[^\\x00]+$', 'type': 'string'}\n\nOn instance['plugins']['minimize_size']['zerofree']:\n    '/path/to/zerofree\\x00'",
+      "data": {
+        "plugins": {
+          "minimize_size": {
+            "shrink": true,
+            "zerofree": "/path/to/zerofree\u0000"
+          }
+        }
+      }
+    }
+  ]
+}

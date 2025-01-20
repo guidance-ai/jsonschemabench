@@ -1,0 +1,439 @@
+{
+  "description": "sample Github_medium/o34351.json",
+  "meta": {
+    "full_size": 1958,
+    "stripped_size": 1060,
+    "features": [
+      "$ref",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "Loot Table",
+    "description": "Schema for loot tables in Minecraf Add-Ons",
+    "definitions": {
+      "conditions": {
+        "type": "array",
+        "title": "Conditions",
+        "description": "Types of conditions that cause loot tables to activate",
+        "items": {
+          "type": "object",
+          "properties": {
+            "condition": {
+              "type": "string",
+              "title": "Condition",
+              "description": "Condition that triggers loot"
+            },
+            "default_chance": {
+              "type": "number",
+              "title": "Default Chance",
+              "description": "Chance of loot in default difficulty"
+            },
+            "peaceful": {
+              "type": "number",
+              "title": "Peaceful Chance",
+              "description": "Chance of loot in peaceful difficulty"
+            },
+            "hard": {
+              "type": "number",
+              "title": "Hard Chance",
+              "description": "Chance of loot in hard difficulty"
+            }
+          },
+          "required": [
+            "condition",
+            "default_chance",
+            "peaceful",
+            "hard"
+          ]
+        }
+      },
+      "rolls": {
+        "type": [
+          "array",
+          "integer"
+        ],
+        "title": "Rolls",
+        "description": "Unkown/either one number or array of 'min' and 'max'"
+      },
+      "pools": {
+        "type": "array",
+        "title": "Pools",
+        "items": {
+          "type": "object",
+          "properties": {
+            "rolls": {
+              "$ref": "#/definitions/rolls"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "title": "Type",
+                    "description": "Type of loot"
+                  },
+                  "name": {
+                    "type": "string",
+                    "title": "Name",
+                    "description": "Name of loot in 'minecraft:x' format"
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "title": "Weight",
+                    "description": "Weight of loot"
+                  },
+                  "pools": {
+                    "$ref": "#/definitions/pools"
+                  },
+                  "functions": {
+                    "type": "array",
+                    "title": "Functions",
+                    "description": "Holds functions for loot",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "function": {
+                          "type": "string",
+                          "title": "Function",
+                          "description": "Name of function used"
+                        },
+                        "count": {
+                          "type": "object",
+                          "title": "Count",
+                          "properties": {
+                            "min": {
+                              "type": "integer",
+                              "title": "Minimum"
+                            },
+                            "max": {
+                              "type": "integer",
+                              "title": "Maximum"
+                            }
+                          },
+                          "required": [
+                            "min",
+                            "max"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "function",
+                        "count"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "name"
+                ]
+              }
+            }
+          },
+          "conditions": {
+            "$ref": "#/definitions/conditions"
+          },
+          "required": [
+            "rolls"
+          ]
+        }
+      }
+    },
+    "properties": {
+      "pools": {
+        "$ref": "#/definitions/pools"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "pools": [
+          {
+            "rolls": 1,
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:diamond",
+                "weight": 10,
+                "functions": [
+                  {
+                    "function": "set_count",
+                    "count": {
+                      "min": 1,
+                      "max": 3
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "name": "minecraft:gold_ingot",
+                "weight": 5
+              }
+            ]
+          },
+          {
+            "rolls": [
+              1,
+              3
+            ],
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:iron_ingot",
+                "weight": 20
+              }
+            ],
+            "conditions": [
+              {
+                "condition": "killed_by_player",
+                "default_chance": 1,
+                "peaceful": 0,
+                "hard": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"one\" is not of types \"array\", \"integer\"",
+      "python_error": "'one' is not of type 'array', 'integer'\n\nFailed validating 'type' in schema['properties']['pools']['items']['properties']['rolls']:\n    {'type': ['array', 'integer'],\n     'title': 'Rolls',\n     'description': \"Unkown/either one number or array of 'min' and 'max'\"}\n\nOn instance['pools'][0]['rolls']:\n    'one'",
+      "data": {
+        "pools": [
+          {
+            "rolls": "one",
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:diamond",
+                "weight": 10,
+                "functions": [
+                  {
+                    "function": "set_count",
+                    "count": {
+                      "min": 1,
+                      "max": 3
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "name": "minecraft:gold_ingot",
+                "weight": 5
+              }
+            ]
+          },
+          {
+            "rolls": [
+              1,
+              3
+            ],
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:iron_ingot",
+                "weight": 20
+              }
+            ],
+            "conditions": [
+              {
+                "condition": "killed_by_player",
+                "default_chance": 1,
+                "peaceful": 0,
+                "hard": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"string\" is not of types \"array\", \"integer\"",
+      "python_error": "'string' is not of type 'array', 'integer'\n\nFailed validating 'type' in schema['properties']['pools']['items']['properties']['rolls']:\n    {'type': ['array', 'integer'],\n     'title': 'Rolls',\n     'description': \"Unkown/either one number or array of 'min' and 'max'\"}\n\nOn instance['pools'][0]['rolls']:\n    'string'",
+      "data": {
+        "pools": [
+          {
+            "rolls": "string",
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:diamond",
+                "weight": 10,
+                "functions": [
+                  {
+                    "function": "set_count",
+                    "count": {
+                      "min": 1,
+                      "max": 3
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "name": "minecraft:gold_ingot",
+                "weight": 5
+              }
+            ]
+          },
+          {
+            "rolls": [
+              1,
+              3
+            ],
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:iron_ingot",
+                "weight": 20
+              }
+            ],
+            "conditions": [
+              {
+                "condition": "killed_by_player",
+                "default_chance": 1,
+                "peaceful": 0,
+                "hard": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "pools": [
+          {
+            "rolls": 1,
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:diamond",
+                "weight": 1,
+                "functions": [
+                  {
+                    "function": "set_count",
+                    "count": {
+                      "min": 1,
+                      "max": 3
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "name": "minecraft:gold_ingot",
+                "weight": 2
+              }
+            ],
+            "conditions": [
+              {
+                "condition": "killed_by_player",
+                "default_chance": 0.5,
+                "peaceful": 0.2,
+                "hard": 0.8
+              }
+            ]
+          },
+          {
+            "rolls": [
+              1,
+              2
+            ],
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:iron_ingot",
+                "weight": 1
+              },
+              {
+                "type": "item",
+                "name": "minecraft:coal",
+                "weight": 2
+              }
+            ],
+            "conditions": [
+              {
+                "condition": "killed_by_player",
+                "default_chance": 0.3,
+                "peaceful": 0.1,
+                "hard": 0.6
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"one\" is not of types \"array\", \"integer\"",
+      "python_error": "'one' is not of type 'array', 'integer'\n\nFailed validating 'type' in schema['properties']['pools']['items']['properties']['rolls']:\n    {'type': ['array', 'integer'],\n     'title': 'Rolls',\n     'description': \"Unkown/either one number or array of 'min' and 'max'\"}\n\nOn instance['pools'][0]['rolls']:\n    'one'",
+      "data": {
+        "pools": [
+          {
+            "rolls": "one",
+            "entries": [
+              {
+                "type": "item",
+                "name": "minecraft:diamond",
+                "weight": 1,
+                "functions": [
+                  {
+                    "function": "set_count",
+                    "count": {
+                      "min": 1,
+                      "max": 3
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "name": "minecraft:gold_ingot",
+                "weight": 2
+              }
+            ],
+            "conditions": [
+              {
+                "condition": "killed_by_player",
+                "default_chance": 0.5,
+                "peaceful": 0.2,
+                "hard": 0.8
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

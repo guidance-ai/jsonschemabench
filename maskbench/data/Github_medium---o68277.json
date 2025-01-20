@@ -1,0 +1,293 @@
+{
+  "description": "sample Github_medium/o68277.json",
+  "meta": {
+    "full_size": 1659,
+    "stripped_size": 556,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxProperties",
+      "additionalItems",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maximum",
+      "minItems",
+      "minProperties",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "description": "A Price Floors object which is parsed and used to enforce dynamic floors depending on the properties of the json",
+    "type": "object",
+    "title": "Price Floors Enforcement",
+    "required": [
+      "schema",
+      "values"
+    ],
+    "properties": {
+      "schema": {
+        "type": "object",
+        "description": "Defines the schema of the rules",
+        "required": [
+          "fields"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "description": "The list of fields to be used for matching criteria of a bid response with a price floor",
+            "minItems": 1,
+            "_uniqueItems": true,
+            "additionalItems": false,
+            "items": {
+              "type": "string"
+            }
+          },
+          "delimiter": {
+            "type": "string",
+            "description": "The character used to differentiate the fields inside a single rule",
+            "examples": [
+              "|",
+              "^",
+              "~"
+            ]
+          }
+        }
+      },
+      "values": {
+        "type": "object",
+        "description": "A object with key : value pairs which constitutes a rule and floor",
+        "additionalProperties": {
+          "type": "number"
+        },
+        "minProperties": 1,
+        "examples": [
+          {
+            "123456/someSlot|300x250|www.prebid.org": 1.5,
+            "123456/someSlot|300x600|www.prebid.org": 2.5,
+            "123456/someSlot|300x600|*": 1.2,
+            "123456/someSlot|*|*": 0.8
+          }
+        ]
+      },
+      "currency": {
+        "type": "string",
+        "description": "The three digit Currency Code which the floors are provided in",
+        "examples": [
+          "USD",
+          "EUR",
+          "JPY"
+        ],
+        "pattern": "^[a-zA-Z]{3}$"
+      },
+      "modelVersion": {
+        "type": "string",
+        "description": "The floor modeling name to be used for tracking",
+        "examples": [
+          "Prebid-Floor-Model-1.2"
+        ]
+      },
+      "skipRate": {
+        "type": "integer",
+        "description": "The skip rate as to which flooring will be 'turned off' for a given auction",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "default": {
+        "type": "number",
+        "description": "The default floor to use if no entry in the value matches a bid response",
+        "examples": [
+          0.75
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "schema": {
+          "fields": [
+            "publisherId",
+            "adUnitId",
+            "adSize",
+            "domain"
+          ],
+          "delimiter": "|"
+        },
+        "values": {
+          "123456/someSlot|300x250|www.prebid.org": 1.5,
+          "123456/someSlot|300x600|www.prebid.org": 2.5,
+          "123456/someSlot|300x600|*": 1.2,
+          "123456/someSlot|*|*": 0.8
+        },
+        "currency": "USD",
+        "modelVersion": "Prebid-Floor-Model-1.2",
+        "skipRate": 10,
+        "default": 0.75
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "schema": {
+          "fields": [
+            "publisherId",
+            "adUnitId",
+            "adUnitSize",
+            "domain"
+          ],
+          "delimiter": "|"
+        },
+        "values": {
+          "123456/someSlot|300x250|www.prebid.org": 1.5,
+          "123456/someSlot|300x600|www.prebid.org": 2.5,
+          "123456/someSlot|300x600|*": 1.2,
+          "123456/someSlot|*|*": 0.8
+        },
+        "currency": "USD",
+        "modelVersion": "Prebid-Floor-Model-1.2",
+        "skipRate": 5,
+        "default": 0.75
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"USD123\" does not match \"^[a-zA-Z]{3}$\"",
+      "python_error": "'USD123' does not match '^[a-zA-Z]{3}$'\n\nFailed validating 'pattern' in schema['properties']['currency']:\n    {'type': 'string',\n     'description': 'The three digit Currency Code which the floors are '\n                    'provided in',\n     'examples': ['USD', 'EUR', 'JPY'],\n     'pattern': '^[a-zA-Z]{3}$'}\n\nOn instance['currency']:\n    'USD123'",
+      "data": {
+        "schema": {
+          "fields": [
+            "publisherId",
+            "adUnitId",
+            "adUnitSize",
+            "domain"
+          ],
+          "delimiter": "|"
+        },
+        "values": {
+          "123456/someSlot|300x250|www.prebid.org": 1.5,
+          "123456/someSlot|300x600|www.prebid.org": 2.5,
+          "123456/someSlot|300x600|*": 1.2,
+          "123456/someSlot|*|*": 0.8
+        },
+        "currency": "USD123",
+        "modelVersion": "Prebid-Floor-Model-1.2",
+        "skipRate": 5,
+        "default": 0.75
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "101 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['skipRate']:\n    {'type': 'integer',\n     'description': \"The skip rate as to which flooring will be 'turned \"\n                    \"off' for a given auction\",\n     'minimum': 0,\n     'maximum': 100}\n\nOn instance['skipRate']:\n    101",
+      "data": {
+        "schema": {
+          "fields": [],
+          "delimiter": "|"
+        },
+        "values": {
+          "123456/someSlot|300x250|www.prebid.org": 1.5,
+          "123456/someSlot|300x600|www.prebid.org": 2.5,
+          "123456/someSlot|300x600|*": 1.2,
+          "123456/someSlot|*|*": 0.8
+        },
+        "currency": "USD",
+        "modelVersion": "Prebid-Floor-Model-1.2",
+        "skipRate": 101,
+        "default": 0.75
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalItems keyword",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['schema']['properties']['fields']['items']:\n    {'type': 'string'}\n\nOn instance['schema']['fields'][5]:\n    None",
+      "data": {
+        "schema": {
+          "fields": [
+            "publisherId",
+            "adUnitId",
+            "adUnitSize",
+            "domain",
+            12345,
+            null
+          ],
+          "delimiter": "|"
+        },
+        "values": {
+          "123456/someSlot|300x250|www.prebid.org": 1.5,
+          "123456/someSlot|300x600|www.prebid.org": 2.5,
+          "123456/someSlot|300x600|*": 1.2,
+          "123456/someSlot|*|*": 0.8
+        },
+        "currency": "USD",
+        "modelVersion": "Prebid-Floor-Model-1.2",
+        "skipRate": 5,
+        "default": 0.75
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minProperties keyword",
+      "valid": false,
+      "rust_error": "{} has less than 1 property",
+      "python_error": "{} should be non-empty\n\nFailed validating 'minProperties' in schema['properties']['values']:\n    {'type': 'object',\n     'description': 'A object with key : value pairs which constitutes a '\n                    'rule and floor',\n     'additionalProperties': {'type': 'number'},\n     'minProperties': 1,\n     'examples': [{'123456/someSlot|300x250|www.prebid.org': 1.5,\n                   '123456/someSlot|300x600|www.prebid.org': 2.5,\n                   '123456/someSlot|300x600|*': 1.2,\n                   '123456/someSlot|*|*': 0.8}]}\n\nOn instance['values']:\n    {}",
+      "data": {
+        "schema": {
+          "fields": [
+            "publisherId",
+            "adUnitId",
+            "adUnitSize",
+            "domain"
+          ],
+          "delimiter": "|"
+        },
+        "values": {},
+        "currency": "USD",
+        "modelVersion": "Prebid-Floor-Model-1.2",
+        "skipRate": 5,
+        "default": 0.75
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['schema']['properties']['fields']:\n    {'type': 'array',\n     'description': 'The list of fields to be used for matching criteria '\n                    'of a bid response with a price floor',\n     'minItems': 1,\n     '_uniqueItems': True,\n     'additionalItems': False,\n     'items': {'type': 'string'}}\n\nOn instance['schema']['fields']:\n    []",
+      "data": {
+        "schema": {
+          "fields": [],
+          "delimiter": "|"
+        },
+        "values": {
+          "123456/someSlot|300x250|www.prebid.org": 1.5,
+          "123456/someSlot|300x600|www.prebid.org": 2.5,
+          "123456/someSlot|300x600|*": 1.2,
+          "123456/someSlot|*|*": 0.8
+        },
+        "currency": "USD",
+        "modelVersion": "Prebid-Floor-Model-1.2",
+        "skipRate": 5,
+        "default": 0.75
+      }
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "description": "sample Kubernetes/kb_834_Normalized.json",
+  "meta": {
+    "full_size": 1854,
+    "stripped_size": 861,
+    "features": [
+      "$ref",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_autoscaling_v2beta2_MetricValueStatus": {
+        "description": "MetricValueStatus holds the current value for a metric",
+        "properties": {
+          "averageUtilization": {
+            "_format": "int32",
+            "description": "currentAverageUtilization is the current value of the average of the resource metric across all relevant pods, represented as a percentage of the requested value of the resource for the pods.",
+            "type": "integer"
+          },
+          "averageValue": {
+            "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity",
+            "description": "averageValue is the current value of the average of the metric across all relevant pods (as a quantity)"
+          },
+          "value": {
+            "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity",
+            "description": "value is the current value of the metric (as a quantity)."
+          }
+        },
+        "type": "object"
+      },
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "description": "ResourceMetricStatus indicates the current value of a resource metric known to Kubernetes, as specified in requests and limits, describing each pod in the current scale target (e.g. CPU or memory).  Such metrics are built in to Kubernetes, and have special scaling options on top of those available to normal per-pod metrics using the \"pods\" source.",
+    "properties": {
+      "current": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_autoscaling_v2beta2_MetricValueStatus",
+        "description": "current contains the current value for the given metric"
+      },
+      "name": {
+        "description": "Name is the name of the resource in question.",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "name",
+      "current"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "current": {
+          "averageUtilization": 50,
+          "averageValue": "100m",
+          "value": "200m"
+        },
+        "name": "cpu"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "current": {
+          "averageUtilization": 50,
+          "averageValue": "100m",
+          "value": "100m"
+        },
+        "name": "cpu"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of type \"integer\"",
+      "python_error": "True is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['current']['properties']['averageUtilization']:\n    {'_format': 'int32',\n     'description': 'currentAverageUtilization is the current value of the '\n                    'average of the resource metric across all relevant '\n                    'pods, represented as a percentage of the requested '\n                    'value of the resource for the pods.',\n     'type': 'integer'}\n\nOn instance['current']['averageUtilization']:\n    True",
+      "data": {
+        "name": "cpu",
+        "current": {
+          "averageUtilization": true,
+          "averageValue": "100m",
+          "value": "100m"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "[100,\"m\"] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "[100, 'm'] is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['current']['properties']['averageValue']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['current']['averageValue']:\n    [100, 'm']",
+      "data": {
+        "name": "cpu",
+        "current": {
+          "averageUtilization": 50,
+          "averageValue": [
+            100,
+            "m"
+          ],
+          "value": "100m"
+        }
+      }
+    }
+  ]
+}

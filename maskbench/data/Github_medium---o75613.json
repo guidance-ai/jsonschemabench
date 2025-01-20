@@ -1,0 +1,651 @@
+{
+  "description": "sample Github_medium/o75613.json",
+  "meta": {
+    "full_size": 613,
+    "stripped_size": 569,
+    "features": [
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Schema for Artillery test scripts",
+    "type": "object",
+    "properties": {
+      "config": {
+        "type": "object",
+        "properties": {
+          "environments": {
+            "type": "object"
+          },
+          "target": {
+            "type": "string"
+          },
+          "phases": {
+            "type": "array"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "array"
+              }
+            ]
+          },
+          "defaults": {
+            "type": "object"
+          },
+          "ensure": {
+            "type": "object"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "poisson",
+              "uniform"
+            ]
+          },
+          "tls": {
+            "type": "object"
+          }
+        }
+      },
+      "before": {
+        "type": "object",
+        "properties": {
+          "flow": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "flow"
+        ]
+      },
+      "scenarios": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "scenarios"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "config": {
+          "environments": {
+            "dev": {
+              "target": "https://example.com"
+            },
+            "prod": {
+              "target": "https://prod.example.com"
+            }
+          },
+          "target": "https://example.com",
+          "phases": [
+            {
+              "duration": 60,
+              "arrivalRate": 10
+            }
+          ],
+          "payload": {
+            "key": "value"
+          },
+          "defaults": {
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          },
+          "ensure": {
+            "responseCode": 200
+          },
+          "mode": "poisson",
+          "tls": {
+            "rejectUnauthorized": false
+          }
+        },
+        "before": {
+          "flow": [
+            {
+              "post": "/login",
+              "json": {
+                "username": "user",
+                "password": "password"
+              }
+            }
+          ]
+        },
+        "scenarios": [
+          {
+            "name": "Scenario 1",
+            "flow": [
+              {
+                "get": "/users"
+              }
+            ]
+          },
+          {
+            "name": "Scenario 2",
+            "flow": [
+              {
+                "post": "/users",
+                "json": {
+                  "name": "John Doe",
+                  "email": "john@example.com"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"Invalid String\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'Invalid String' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['config']['properties']['payload']:\n    {'anyOf': [{'type': 'object'}, {'type': 'array'}]}\n\nOn instance['config']['payload']:\n    'Invalid String'",
+      "data": {
+        "config": {
+          "environments": {
+            "dev": {
+              "target": "https://example.com"
+            },
+            "prod": {
+              "target": "https://prod.example.com"
+            }
+          },
+          "target": "https://example.com",
+          "phases": [
+            {
+              "duration": 60,
+              "arrivalRate": 10
+            }
+          ],
+          "payload": "Invalid String",
+          "defaults": {
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          },
+          "ensure": {
+            "responseCode": 200
+          },
+          "mode": "poisson",
+          "tls": {
+            "rejectUnauthorized": false
+          }
+        },
+        "before": {
+          "flow": [
+            {
+              "post": "/login",
+              "json": {
+                "username": "user",
+                "password": "password"
+              }
+            }
+          ]
+        },
+        "scenarios": [
+          {
+            "name": "Scenario 1",
+            "flow": [
+              {
+                "get": "/users"
+              }
+            ]
+          },
+          {
+            "name": "Scenario 2",
+            "flow": [
+              {
+                "post": "/users",
+                "json": {
+                  "name": "John Doe",
+                  "email": "john@example.com"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"constant\" is not one of [\"poisson\",\"uniform\"]",
+      "python_error": "'constant' is not one of ['poisson', 'uniform']\n\nFailed validating 'enum' in schema['properties']['config']['properties']['mode']:\n    {'type': 'string', 'enum': ['poisson', 'uniform']}\n\nOn instance['config']['mode']:\n    'constant'",
+      "data": {
+        "config": {
+          "environments": {
+            "dev": {
+              "target": "https://example.com"
+            },
+            "prod": {
+              "target": "https://prod.example.com"
+            }
+          },
+          "target": "https://example.com",
+          "phases": [
+            {
+              "duration": 60,
+              "arrivalRate": 10
+            }
+          ],
+          "payload": {
+            "key": "value"
+          },
+          "defaults": {
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          },
+          "ensure": {
+            "responseCode": 200
+          },
+          "mode": "constant",
+          "Invalid mode, should be 'poisson' or 'uniform'": "tls",
+          "Invalid key, should be 'tls' not ':tls'": {
+            "rejectUnauthorized": false
+          }
+        },
+        "before": {
+          "flow": [
+            {
+              "post": "/login",
+              "json": {
+                "username": "user",
+                "password": "password"
+              }
+            }
+          ]
+        },
+        "scenarios": [
+          {
+            "name": "Scenario 1",
+            "flow": [
+              {
+                "get": "/users"
+              }
+            ]
+          },
+          {
+            "name": "Scenario 2",
+            "flow": [
+              {
+                "post": "/users",
+                "json": {
+                  "name": "John Doe",
+                  "email": "john@example.com"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"Invalid Payload\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'Invalid Payload' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['config']['properties']['payload']:\n    {'anyOf': [{'type': 'object'}, {'type': 'array'}]}\n\nOn instance['config']['payload']:\n    'Invalid Payload'",
+      "data": {
+        "config": {
+          "environments": {
+            "dev": {
+              "target": "https://example.com"
+            },
+            "prod": {
+              "target": "https://prod.example.com"
+            }
+          },
+          "target": "https://example.com",
+          "phases": [
+            {
+              "duration": 60,
+              "arrivalRate": 10
+            }
+          ],
+          "payload": "Invalid Payload",
+          "defaults": {
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          },
+          "ensure": {
+            "responseCode": 200
+          },
+          "mode": "poisson",
+          "tls": {
+            "rejectUnauthorized": false
+          }
+        },
+        "before": {
+          "flow": [
+            {
+              "post": "/login",
+              "json": {
+                "username": "user",
+                "password": "password"
+              }
+            }
+          ]
+        },
+        "scenarios": [
+          {
+            "name": "Scenario 1",
+            "flow": [
+              {
+                "get": "/users"
+              }
+            ]
+          },
+          {
+            "name": "Scenario 2",
+            "flow": [
+              {
+                "post": "/users",
+                "json": {
+                  "name": "John Doe",
+                  "email": "john@example.com"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "config": {
+          "environments": {
+            "dev": {
+              "target": "https://example.com"
+            },
+            "prod": {
+              "target": "https://prod.example.com"
+            }
+          },
+          "target": "https://example.com",
+          "phases": [
+            {
+              "duration": 60,
+              "arrivalRate": 10
+            }
+          ],
+          "payload": {
+            "key": "value"
+          },
+          "defaults": {
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          },
+          "ensure": {
+            "codes": [
+              200,
+              201
+            ]
+          },
+          "mode": "poisson",
+          "tls": {
+            "rejectUnauthorized": false
+          }
+        },
+        "before": {
+          "flow": [
+            {
+              "post": {
+                "url": "/login",
+                "json": {
+                  "username": "user",
+                  "password": "password"
+                }
+              }
+            }
+          ]
+        },
+        "scenarios": [
+          {
+            "name": "Scenario 1",
+            "flow": [
+              {
+                "get": {
+                  "url": "/users"
+                }
+              },
+              {
+                "post": {
+                  "url": "/users",
+                  "json": {
+                    "name": "John Doe",
+                    "email": "john@example.com"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Scenario 2",
+            "flow": [
+              {
+                "get": {
+                  "url": "/products"
+                }
+              },
+              {
+                "post": {
+                  "url": "/products",
+                  "json": {
+                    "name": "Product 1",
+                    "price": 10.99
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Example Artillery test script"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['config']['properties']['payload']:\n    {'anyOf': [{'type': 'object'}, {'type': 'array'}]}\n\nOn instance['config']['payload']:\n    123",
+      "data": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Example Artillery test script",
+        "config": {
+          "environments": {
+            "dev": {
+              "target": "https://example.com"
+            },
+            "prod": {
+              "target": "https://prod.example.com"
+            }
+          },
+          "target": "https://example.com",
+          "phases": [
+            {
+              "duration": 60,
+              "arrivalRate": 10
+            }
+          ],
+          "payload": 123,
+          "defaults": {
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          },
+          "ensure": {
+            "codes": [
+              200,
+              201
+            ]
+          },
+          "mode": "poisson",
+          "tls": {
+            "rejectUnauthorized": false
+          }
+        },
+        "before": {
+          "flow": [
+            {
+              "post": {
+                "url": "/login",
+                "json": {
+                  "username": "user",
+                  "password": "password"
+                }
+              }
+            }
+          ]
+        },
+        "scenarios": [
+          {
+            "name": "Scenario 1",
+            "flow": [
+              {
+                "get": {
+                  "url": "/users"
+                }
+              },
+              {
+                "post": {
+                  "url": "/users",
+                  "json": {
+                    "name": "John Doe",
+                    "email": "john@example.com"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Scenario 2",
+            "flow": [
+              {
+                "get": {
+                  "url": "/products"
+                }
+              },
+              {
+                "post": {
+                  "url": "/products",
+                  "json": {
+                    "name": "Product 1",
+                    "price": 10.99
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"linear\" is not one of [\"poisson\",\"uniform\"]",
+      "python_error": "'linear' is not one of ['poisson', 'uniform']\n\nFailed validating 'enum' in schema['properties']['config']['properties']['mode']:\n    {'type': 'string', 'enum': ['poisson', 'uniform']}\n\nOn instance['config']['mode']:\n    'linear'",
+      "data": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Example Artillery test script",
+        "config": {
+          "environments": {
+            "dev": {
+              "target": "https://example.com"
+            },
+            "prod": {
+              "target": "https://prod.example.com"
+            }
+          },
+          "target": "https://example.com",
+          "phases": [
+            {
+              "duration": 60,
+              "arrivalRate": 10
+            }
+          ],
+          "payload": {
+            "key": "value"
+          },
+          "defaults": {
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          },
+          "ensure": {
+            "codes": [
+              200,
+              201
+            ]
+          },
+          "mode": "linear",
+          "Invalid mode, schema only supports 'poisson' and 'uniform'": "tls",
+          "Typo in property name, should be 'tls'": {
+            "rejectUnauthorized": false
+          }
+        },
+        "before": {
+          "flow": [
+            {
+              "post": {
+                "url": "/login",
+                "json": {
+                  "username": "user",
+                  "password": "password"
+                }
+              }
+            }
+          ]
+        },
+        "scenarios": [],
+        "Empty array is not explicitly forbidden in the schema, but could be considered invalid by the application": "scenarios",
+        "Duplicate property name, but the second one is ignored": [
+          {
+            "name": "Scenario 1",
+            "flow": [
+              {
+                "get": {
+                  "url": "/users"
+                }
+              },
+              {
+                "post": {
+                  "url": "/users",
+                  "json": {
+                    "name": "John Doe",
+                    "email": "john@example.com"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

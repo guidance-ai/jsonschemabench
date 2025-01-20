@@ -1,0 +1,164 @@
+{
+  "description": "sample Snowplow/sp_251_Normalized.json",
+  "meta": {
+    "full_size": 581,
+    "stripped_size": 427,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "dependencies",
+      "enum"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "dependencies": {
+      "cost": [
+        "costModel"
+      ]
+    },
+    "description": "Schema for an ad click event",
+    "properties": {
+      "advertiserId": {
+        "type": "string"
+      },
+      "bannerId": {
+        "type": "string"
+      },
+      "campaignId": {
+        "type": "string"
+      },
+      "clickId": {
+        "type": "string"
+      },
+      "cost": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "costModel": {
+        "enum": [
+          "cpa",
+          "cpc",
+          "cpm"
+        ]
+      },
+      "impressionId": {
+        "type": "string"
+      },
+      "targetUrl": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "zoneId": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "targetUrl"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "ad_click",
+      "vendor": "com.snowplowanalytics.snowplow",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "advertiserId": "advertiser123",
+        "bannerId": "banner456",
+        "campaignId": "campaign789",
+        "clickId": "click012",
+        "cost": 1.5,
+        "costModel": "cpc",
+        "impressionId": "impression345",
+        "targetUrl": "https://www.example.com",
+        "zoneId": "zone678"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "advertiserId": "advertiser123",
+        "bannerId": "banner456",
+        "campaignId": "campaign789",
+        "clickId": "click012",
+        "cost": 10.99,
+        "costModel": "cpc",
+        "impressionId": "impression345",
+        "targetUrl": "https://example.com",
+        "zoneId": "zone678"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1.99 is less than the minimum of 0",
+      "python_error": "-1.99 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['cost']:\n    {'minimum': 0, 'type': 'number'}\n\nOn instance['cost']:\n    -1.99",
+      "data": {
+        "advertiserId": "advertiser123",
+        "bannerId": "banner456",
+        "campaignId": "campaign789",
+        "clickId": "click012",
+        "cost": -1.99,
+        "costModel": "cpc",
+        "impressionId": "impression345",
+        "targetUrl": "https://example.com",
+        "zoneId": "zone678"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['targetUrl']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['targetUrl']:\n    ''",
+      "data": {
+        "advertiserId": "advertiser123",
+        "bannerId": "banner456",
+        "campaignId": "campaign789",
+        "clickId": "click012",
+        "cost": 10.99,
+        "costModel": "cpc",
+        "impressionId": "impression345",
+        "targetUrl": "",
+        "zoneId": "zone678"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "Additional properties are not allowed ('costModel1', 'unknownProperty' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'dependencies': {'cost': ['costModel']},\n     'description': 'Schema for an ad click event',\n     'properties': {'advertiserId': {'type': 'string'},\n                    'bannerId': {'type': 'string'},\n                    'campaignId': {'type': 'string'},\n                    'clickId': {'type': 'string'},\n                    'cost': {'minimum': 0, 'type': 'number'},\n                    'costModel': {'enum': ['cpa', 'cpc', 'cpm']},\n                    'impressionId': {'type': 'string'},\n                    'targetUrl': {'minLength': 1, 'type': 'string'},\n                    'zoneId': {'type': 'string'}},\n     'required': ['targetUrl'],\n     'self': {'format': 'jsonschema',\n              'name': 'ad_click',\n              'vendor': 'com.snowplowanalytics.snowplow',\n              'version': '1-0-0'},\n     'type': 'object'}\n\nOn instance.. (337 more)",
+      "data": {
+        "advertiserId": "advertiser123",
+        "bannerId": "banner456",
+        "campaignId": "campaign789",
+        "clickId": "click012",
+        "cost": -1.0,
+        "costModel": "invalidCostModel",
+        "impressionId": "impression345",
+        "targetUrl": "",
+        "zoneId": "zone678",
+        "unknownProperty": "someValue",
+        "costModel1": "cpa"
+      }
+    }
+  ]
+}

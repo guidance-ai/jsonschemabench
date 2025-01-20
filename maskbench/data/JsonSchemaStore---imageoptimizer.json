@@ -1,0 +1,200 @@
+{
+  "description": "sample JsonSchemaStore/imageoptimizer.json",
+  "meta": {
+    "full_size": 920,
+    "stripped_size": 414,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for imageoptimizer.json files",
+    "id": "https://json.schemastore.org/imageoptimizer.json",
+    "properties": {
+      "optimizations": {
+        "description": "An array of optimization rules",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": [
+            "includes"
+          ],
+          "properties": {
+            "includes": {
+              "description": "An array of globbing patterns of files/folders to include in the optimization",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "excludes": {
+              "description": "An array of globbing patterns of files/folders to exclude in the optimization",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "default": [
+                "node_modules",
+                "bower_components",
+                "jspm_packages"
+              ]
+            },
+            "lossy": {
+              "description": "When set to true, images are compressed a lot more but with a slight quality loss that may not be visible to the human eye.",
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "optimizations": [
+          {
+            "includes": [
+              "images/*.jpg",
+              "images/*.png"
+            ],
+            "excludes": [
+              "images/exclude/*.jpg",
+              "images/exclude/*.png"
+            ],
+            "lossy": true
+          },
+          {
+            "includes": [
+              "thumbnails/*.jpg",
+              "thumbnails/*.png"
+            ],
+            "lossy": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['optimizations']['items']['properties']['includes']['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['optimizations'][0]['includes'][0]:\n    ''",
+      "data": {
+        "optimizations": [
+          {
+            "includes": [
+              "",
+              "images/*.png"
+            ],
+            "excludes": [
+              "images/exclude/*.jpg",
+              "images/exclude/*.png"
+            ],
+            "lossy": true
+          },
+          {
+            "includes": [
+              "thumbnails/*.jpg",
+              "thumbnails/*.png"
+            ],
+            "lossy": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['optimizations']:\n    {'description': 'An array of optimization rules',\n     'type': 'array',\n     'minItems': 1,\n     'items': {'type': 'object',\n               'required': ['includes'],\n               'properties': {'includes': {'description': 'An array of '\n                                                          'globbing '\n                                                          'patterns of '\n                                                          'files/folders '\n                                                          'to include in '\n                                                          'the '\n                                                          'optimization',\n                                           'type': 'array',\n                                           'items': {'type': 'string',\n                                                     'minLength': 1}},\n                              'excludes': {'descript.. (1619 more)",
+      "data": {
+        "optimizations": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"array\"",
+      "python_error": "123 is not of type 'array'\n\nFailed validating 'type' in schema['properties']['optimizations']['items']['properties']['excludes']:\n    {'description': 'An array of globbing patterns of files/folders to '\n                    'exclude in the optimization',\n     'type': 'array',\n     'items': {'type': 'string', 'minLength': 1},\n     'default': ['node_modules', 'bower_components', 'jspm_packages']}\n\nOn instance['optimizations'][2]['excludes']:\n    123",
+      "data": {
+        "optimizations": [
+          {
+            "includes": [
+              "images/*.jpg",
+              "images/*.png"
+            ],
+            "excludes": [
+              "images/exclude/*.jpg",
+              "images/exclude/*.png"
+            ],
+            "lossy": true
+          },
+          {
+            "includes": [
+              "thumbnails/*.jpg",
+              "thumbnails/*.png"
+            ]
+          },
+          {
+            "includes": [
+              "thumbnails/*.jpg",
+              "thumbnails/*.png"
+            ],
+            "lossy": true,
+            "excludes": 123
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['optimizations']['items']['properties']['excludes']['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['optimizations'][0]['excludes'][1]:\n    ''",
+      "data": {
+        "optimizations": [
+          {
+            "includes": [
+              "images/*.jpg",
+              "images/*.png"
+            ],
+            "excludes": [
+              "images/exclude/*.jpg",
+              ""
+            ],
+            "lossy": true
+          },
+          {
+            "includes": [
+              "thumbnails/*.jpg",
+              "thumbnails/*.png"
+            ],
+            "lossy": false
+          }
+        ]
+      }
+    }
+  ]
+}

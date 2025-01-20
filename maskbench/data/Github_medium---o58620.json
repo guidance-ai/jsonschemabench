@@ -1,0 +1,208 @@
+{
+  "description": "sample Github_medium/o58620.json",
+  "meta": {
+    "full_size": 866,
+    "stripped_size": 845,
+    "features": [
+      "$ref",
+      "format",
+      "format:chickenbutt",
+      "format:date",
+      "format:date-time",
+      "format:int64",
+      "format:time",
+      "format:utc-millisec",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://example.com/restapi/HasFormats.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "HasFormats",
+    "type": "object",
+    "definitions": {
+      "MyDateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "MyUtcMillisec": {
+        "type": "number",
+        "format": "utc-millisec"
+      },
+      "MyObj": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "properties": {
+      "TheDateAndTime": {
+        "$ref": "#/definitions/MyDateTime"
+      },
+      "TheDateAndTimeArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/MyDateTime"
+        }
+      },
+      "TheDateAndTimeArray2": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/MyObj"
+        }
+      },
+      "TheTimestamp": {
+        "$ref": "#/definitions/MyUtcMillisec"
+      },
+      "TheDate": {
+        "type": "string",
+        "format": "date"
+      },
+      "TheTime": {
+        "type": "string",
+        "format": "time"
+      },
+      "AnotherDateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "int64": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "UnhandledFormat": {
+        "type": "string",
+        "format": "chickenbutt"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "TheDateAndTime": "2022-01-01T12:00:00Z",
+        "TheDateAndTimeArray": [
+          "2022-01-01T12:00:00Z",
+          "2022-01-02T13:00:00Z"
+        ],
+        "TheDateAndTimeArray2": [
+          {
+            "name": "John Doe"
+          },
+          {
+            "name": "Jane Doe"
+          }
+        ],
+        "TheTimestamp": 1643723400000,
+        "TheDate": "2022-01-01",
+        "TheTime": "12:00:00Z",
+        "AnotherDateTime": "2022-01-01T12:00:00Z",
+        "int64": 1234567890,
+        "UnhandledFormat": "This is an unhandled format"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "TheDateAndTime": "2022-01-01T12:00:00Z",
+        "TheDateAndTimeArray": [
+          "2022-01-01T12:00:00Z",
+          "2022-01-02T13:00:00Z"
+        ],
+        "TheDateAndTimeArray2": [
+          {
+            "name": "John"
+          },
+          {
+            "name": "Doe"
+          }
+        ],
+        "TheTimestamp": 1643723400000,
+        "TheDate": "2022-01-01",
+        "TheTime": "12:00:00Z",
+        "AnotherDateTime": "2022-01-01T12:00:00Z",
+        "int64": 1234567890,
+        "UnhandledFormat": "This will not be validated as the format 'chickenbutt' is not a standard format"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-01-01T12:00:00\" is not a \"date\"",
+      "python_error": "'12:00:00' is not a 'time'\n\nFailed validating 'format' in schema['properties']['TheTime']:\n    {'type': 'string', 'format': 'time'}\n\nOn instance['TheTime']:\n    '12:00:00'",
+      "data": {
+        "TheDateAndTime": "2022-01-01T12:00:00+01:00",
+        "TheDateAndTimeArray": [
+          "2022-01-01T12:00:00+01:00",
+          "2022-01-02T13:00:00Z"
+        ],
+        "TheDateAndTimeArray2": [
+          {
+            "name": "John"
+          },
+          {
+            "name": "Doe"
+          }
+        ],
+        "TheTimestamp": 1643723400,
+        "TheDate": "2022-01-01T12:00:00",
+        "TheTime": "12:00:00",
+        "AnotherDateTime": "2022-01-01T12:00:00+01:00",
+        "int64": 12345678901234567890,
+        "UnhandledFormat": "This will not be validated as the format 'chickenbutt' is not a standard format"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1234567890 is not of type \"string\"",
+      "python_error": "'12:00:00' is not a 'time'\n\nFailed validating 'format' in schema['properties']['TheTime']:\n    {'type': 'string', 'format': 'time'}\n\nOn instance['TheTime']:\n    '12:00:00'",
+      "data": {
+        "TheDateAndTime": "2022-01-01T12:00:00.001Z",
+        "TheDateAndTime should be in date-time format and should not have more than millisecond precision": "TheDateAndTimeArray2",
+        "TheDateAndTimeArray": [
+          "2022-01-01T12:00:00Z",
+          "2022-01-02T13:00:00Z",
+          1234567890,
+          "This should be a string in date-time format"
+        ],
+        "TheDateAndTimeArray2": [
+          {
+            "name": "John"
+          },
+          {
+            "name": "Doe"
+          },
+          {
+            "This should be an object with a single property 'name'": ","
+          }
+        ],
+        "TheTimestamp": 1643723400,
+        "TheTimestamp should be in utc-millisec format": "TheDate",
+        "TheTime": "12:00:00",
+        "This should be in time format and should have a timezone offset": "AnotherDateTime",
+        "int64": 12345678901234567890,
+        "int64 should be a 64-bit integer": "UnhandledFormat",
+        "UnusedKey": "UnusedValue",
+        "UnusedKey is not defined in the schema": "TheDateAndTimeArray2"
+      }
+    }
+  ]
+}

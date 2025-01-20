@@ -1,0 +1,282 @@
+{
+  "description": "sample Github_medium/o33701.json",
+  "meta": {
+    "full_size": 1432,
+    "stripped_size": 610,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "targetType": "document_surface1d",
+    "schemaType": "NamedEntity",
+    "title": "Named Entity",
+    "type": "object",
+    "required": [
+      "schemaType",
+      "_corpusID",
+      "_documentID",
+      "offsets"
+    ],
+    "properties": {
+      "schemaType": {
+        "type": "string",
+        "description": "Schema type",
+        "searchable": true,
+        "searchModes": [
+          "noop"
+        ],
+        "locked": true
+      },
+      "_documentID": {
+        "type": "string",
+        "description": "Internal document GUID",
+        "searchable": true,
+        "searchModes": [
+          "noop"
+        ],
+        "locked": true
+      },
+      "_corpusID": {
+        "type": "string",
+        "description": "Internal Corpus GUID",
+        "searchable": true,
+        "searchModes": [
+          "noop"
+        ],
+        "locked": true
+      },
+      "offsets": {
+        "searchable": true,
+        "locked": true,
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "begin": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "TypeNE": {
+        "type": "string",
+        "description": "Named entity's type.",
+        "enum": [
+          "personne",
+          "lieu",
+          "organisation",
+          "autre"
+        ],
+        "searchable": true,
+        "searchModes": [
+          "basic"
+        ],
+        "locked": true
+      },
+      "TypeEn_Wikipedia": {
+        "type": "array",
+        "_uniqueItems": true,
+        "description": "Type of entity on Wikipedia.",
+        "searchable": true,
+        "searchModes": [
+          "basic"
+        ],
+        "locked": false,
+        "minItems": 0,
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": {
+        "type": "string",
+        "description": "Description of the named entity.",
+        "searchable": true,
+        "searchModes": [
+          "basic"
+        ],
+        "locked": false
+      },
+      "wikipedia": {
+        "type": "string",
+        "description": "Reference URL for the entityt on Wikipedia",
+        "searchable": true,
+        "searchModes": [
+          "basic"
+        ],
+        "locked": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "schemaType": "NamedEntity",
+        "_documentID": "doc-12345",
+        "_corpusID": "corpus-67890",
+        "offsets": [
+          {
+            "begin": 10,
+            "end": 20
+          }
+        ],
+        "TypeNE": "personne",
+        "TypeEn_Wikipedia": [
+          "French politician"
+        ],
+        "description": "French politician and former President of France",
+        "wikipedia": "https://fr.wikipedia.org/wiki/Emmanuel_Macron"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['offsets']:\n    {'searchable': True,\n     'locked': True,\n     'type': 'array',\n     'minItems': 1,\n     'items': {'type': 'object',\n               'properties': {'begin': {'type': 'integer', 'minimum': 0},\n                              'end': {'type': 'integer', 'minimum': 0}}}}\n\nOn instance['offsets']:\n    []",
+      "data": {
+        "schemaType": "NamedEntity",
+        "_documentID": "doc-12345",
+        "_corpusID": "corpus-67890",
+        "offsets": [],
+        "TypeNE": "personne",
+        "TypeEn_Wikipedia": [
+          "French politician"
+        ],
+        "description": "French politician and former President of France",
+        "wikipedia": "https://fr.wikipedia.org/wiki/Emmanuel_Macron"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['offsets']['items']['properties']['begin']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['offsets'][0]['begin']:\n    -1",
+      "data": {
+        "schemaType": "NamedEntity",
+        "_documentID": "doc-12345",
+        "_corpusID": "corpus-67890",
+        "offsets": [
+          {
+            "begin": -1,
+            "end": 20
+          }
+        ],
+        "TypeNE": "personne",
+        "TypeEn_Wikipedia": [
+          "French politician"
+        ],
+        "description": "French politician and former President of France",
+        "wikipedia": "https://fr.wikipedia.org/wiki/Emmanuel_Macron"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "schemaType": "NamedEntity",
+        "_documentID": "document-67890",
+        "_corpusID": "corpus-12345",
+        "offsets": [
+          {
+            "begin": 10,
+            "end": 20
+          }
+        ],
+        "TypeNE": "personne",
+        "TypeEn_Wikipedia": [
+          "Politician"
+        ],
+        "description": "A French politician.",
+        "wikipedia": "https://fr.wikipedia.org/wiki/Politician"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['offsets']['items']['properties']['begin']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['offsets'][0]['begin']:\n    -1",
+      "data": {
+        "schemaType": "NamedEntity",
+        "_documentID": "document-67890",
+        "_corpusID": "corpus-12345",
+        "offsets": [
+          {
+            "begin": -1,
+            "end": 20
+          }
+        ],
+        "TypeNE": "personne",
+        "TypeEn_Wikipedia": [
+          "Politician"
+        ],
+        "description": "A French politician.",
+        "wikipedia": "https://fr.wikipedia.org/wiki/Politician"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['offsets']:\n    {'searchable': True,\n     'locked': True,\n     'type': 'array',\n     'minItems': 1,\n     'items': {'type': 'object',\n               'properties': {'begin': {'type': 'integer', 'minimum': 0},\n                              'end': {'type': 'integer', 'minimum': 0}}}}\n\nOn instance['offsets']:\n    []",
+      "data": {
+        "schemaType": "NamedEntity",
+        "_corpusID": "corpus-12345",
+        "_documentID": "document-67890",
+        "offsets": [],
+        "TypeNE": "personne",
+        "TypeEn_Wikipedia": [
+          "Politician"
+        ],
+        "description": "A French politician.",
+        "wikipedia": "https://fr.wikipedia.org/wiki/Politician"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['offsets']['items']['properties']['begin']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['offsets'][0]['begin']:\n    -1",
+      "data": {
+        "schemaType": "NamedEntity",
+        "_documentID": "document-67890",
+        "_corpusID": "corpus-12345",
+        "offsets": [
+          {
+            "begin": -1,
+            "end": 20
+          }
+        ],
+        "TypeNE": "personne",
+        "TypeEn_Wikipedia": [
+          "Politician"
+        ],
+        "description": "A French politician.",
+        "wikipedia": "https://fr.wikipedia.org/wiki/Politician"
+      }
+    }
+  ]
+}

@@ -1,0 +1,322 @@
+{
+  "description": "sample Github_medium/o58614.json",
+  "meta": {
+    "full_size": 672,
+    "stripped_size": 672,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "format",
+      "format:date",
+      "format:int32",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "id": "http://example.com/schemas/Contact.json",
+    "definitions": {
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street_address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "street_address",
+          "city",
+          "state"
+        ]
+      }
+    },
+    "properties": {
+      "ContactAddresses": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "DateOfBirth": {
+        "type": "string",
+        "format": "date"
+      },
+      "HomePhone": {
+        "type": "string"
+      },
+      "HomePhoneCountry": {
+        "type": "string"
+      },
+      "Name": {
+        "type": "string"
+      },
+      "NumDependents": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "PrimaryAddress": {
+        "type": "object",
+        "$ref": "#/definitions/Address"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "New York",
+            "state": "NY"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Los Angeles",
+            "state": "CA"
+          }
+        ],
+        "DateOfBirth": "1990-01-01",
+        "HomePhone": "123-456-7890",
+        "HomePhoneCountry": "USA",
+        "Name": "John Doe",
+        "NumDependents": 2,
+        "PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Chicago",
+          "state": "IL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"1990-01-32\" is not a \"date\"",
+      "python_error": "'1990-01-32' is not a 'date'\n\nFailed validating 'format' in schema['properties']['DateOfBirth']:\n    {'type': 'string', 'format': 'date'}\n\nOn instance['DateOfBirth']:\n    '1990-01-32'",
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "New York",
+            "state": "NY"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Los Angeles",
+            "state": "CA"
+          }
+        ],
+        "DateOfBirth": "1990-01-32",
+        "PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Chicago",
+          "state": "IL"
+        },
+        "Invalid date, should be in the format 'YYYY-MM-DD'": "HomePhone",
+        "123-456-7890": "HomePhoneCountry",
+        "USA": "Name",
+        "John Doe": "NumDependents",
+        "abc": "Invalid integer, should be a 32-bit integer"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"state\" is a required property",
+      "python_error": "'state' is a required property\n\nFailed validating 'required' in schema['properties']['ContactAddresses']['items']:\n    {'type': 'object',\n     'properties': {'street_address': {'type': 'string'},\n                    'city': {'type': 'string'},\n                    'state': {'type': 'string'}},\n     'required': ['street_address', 'city', 'state']}\n\nOn instance['ContactAddresses'][1]:\n    {'street_address': '456 Elm St', 'city': 'Los Angeles'}",
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "New York",
+            "state": "NY"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Los Angeles"
+          }
+        ],
+        "DateOfBirth": "1990-01-01",
+        "HomePhone": "123-456-7890",
+        "HomePhoneCountry": "USA",
+        "Name": "John Doe",
+        "NumDependents": 2,
+        "PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Chicago",
+          "state": "IL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"1990-01-32\" is not a \"date\"",
+      "python_error": "'1990-01-32' is not a 'date'\n\nFailed validating 'format' in schema['properties']['DateOfBirth']:\n    {'type': 'string', 'format': 'date'}\n\nOn instance['DateOfBirth']:\n    '1990-01-32'",
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "New York",
+            "state": "NY"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Los Angeles",
+            "state": "CA"
+          }
+        ],
+        "DateOfBirth": "1990-01-32",
+        "Invalid date, should be in format 'YYYY-MM-DD' and 32 is not a valid day for January": "HomePhone",
+        "Missing value for HomePhone": "HomePhoneCountry",
+        "Missing value for HomePhoneCountry": "Name",
+        "Missing value for Name": "NumDependents",
+        "Missing value for NumDependents": "PrimaryAddress",
+        "Missing value for PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Chicago",
+          "state": "IL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"street_address\" is a required property",
+      "python_error": "'street_address' is a required property\n\nFailed validating 'required' in schema['properties']['ContactAddresses']['items']:\n    {'type': 'object',\n     'properties': {'street_address': {'type': 'string'},\n                    'city': {'type': 'string'},\n                    'state': {'type': 'string'}},\n     'required': ['street_address', 'city', 'state']}\n\nOn instance['ContactAddresses'][2]:\n    {}",
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "New York",
+            "state": "NY"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Los Angeles",
+            "state": "CA"
+          },
+          {}
+        ],
+        "DateOfBirth": "1990-01-01",
+        "HomePhone": "123-456-7890",
+        "HomePhoneCountry": "USA",
+        "Name": "John Doe",
+        "NumDependents": 2,
+        "PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Chicago",
+          "state": "IL"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "Anytown",
+            "state": "CA"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Othertown",
+            "state": "NY"
+          }
+        ],
+        "DateOfBirth": "1990-01-01",
+        "HomePhone": "123-456-7890",
+        "HomePhoneCountry": "USA",
+        "Name": "John Doe",
+        "NumDependents": 2,
+        "PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Hometown",
+          "state": "TX"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"123456\" is not a \"date\"",
+      "python_error": "'123456' is not a 'date'\n\nFailed validating 'format' in schema['properties']['DateOfBirth']:\n    {'type': 'string', 'format': 'date'}\n\nOn instance['DateOfBirth']:\n    '123456'",
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "Anytown",
+            "state": "CA"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Othertown",
+            "state": "NY"
+          }
+        ],
+        "DateOfBirth": "123456",
+        "HomePhone": "+123-456-7890",
+        "HomePhoneCountry": "USA",
+        "Name": "John Doe",
+        "NumDependents": 2147483648,
+        "PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Hometown",
+          "state": "TX"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "'state' is a required property\n\nFailed validating 'required' in schema['properties']['PrimaryAddress']:\n    {'type': 'object',\n     'properties': {'street_address': {'type': 'string'},\n                    'city': {'type': 'string'},\n                    'state': {'type': 'string'}},\n     'required': ['street_address', 'city', 'state']}\n\nOn instance['PrimaryAddress']:\n    {'street_address': '789 Oak St', 'city': 'Hometown'}",
+      "data": {
+        "ContactAddresses": [
+          {
+            "street_address": "123 Main St",
+            "city": "Anytown",
+            "state": "CA"
+          },
+          {
+            "street_address": "456 Elm St",
+            "city": "Othertown",
+            "state": null
+          }
+        ],
+        "DateOfBirth": "1990-01-01",
+        "HomePhone": "123-456-7890",
+        "HomePhoneCountry": "USA",
+        "Name": "John Doe",
+        "NumDependents": 2,
+        "PrimaryAddress": {
+          "street_address": "789 Oak St",
+          "city": "Hometown"
+        }
+      }
+    }
+  ]
+}

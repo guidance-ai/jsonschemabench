@@ -1,0 +1,460 @@
+{
+  "description": "sample JsonSchemaStore/bettercodehub.json",
+  "meta": {
+    "full_size": 1544,
+    "stripped_size": 1044,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$comment": "https://www.bettercodehub.com/docs/configuration-manual",
+    "$id": "https://json.schemastore.org/bettercodehub.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "supportedProgrammingLanguage": {
+        "type": "string",
+        "enum": [
+          "csharp",
+          "cpp",
+          "go",
+          "groovy",
+          "java",
+          "javascript",
+          "objectivec",
+          "perl",
+          "php",
+          "python",
+          "ruby",
+          "scala",
+          "script",
+          "solidity",
+          "swift",
+          "typescript",
+          "kotlin"
+        ]
+      },
+      "excludeFileFilter": {
+        "title": "Exclude",
+        "type": "array",
+        "items": {
+          "title": "Pattern",
+          "description": "A regular expression for the path(s) to exclude.",
+          "type": "string"
+        }
+      },
+      "fileFilter": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "include": {
+            "title": "Include",
+            "type": "array",
+            "items": {
+              "title": "Pattern",
+              "description": "A regular expression for the path(s) to include.",
+              "type": "string"
+            }
+          },
+          "exclude": {
+            "$ref": "#/definitions/excludeFileFilter"
+          }
+        }
+      }
+    },
+    "description": "Configuration file for Better Code Hub to override the default configuration.",
+    "properties": {
+      "component_depth": {
+        "title": "Component Depth",
+        "type": "integer",
+        "default": 1
+      },
+      "languages": {
+        "title": "Languages",
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/supportedProgrammingLanguage"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "$ref": "#/definitions/supportedProgrammingLanguage"
+                },
+                "production": {
+                  "title": "Production",
+                  "$ref": "#/definitions/fileFilter"
+                },
+                "test": {
+                  "title": "Test",
+                  "$ref": "#/definitions/fileFilter"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "exclude": {
+        "$ref": "#/definitions/excludeFileFilter"
+      }
+    },
+    "title": "Better Code Hub",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "component_depth": 2,
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/javascript"
+              ],
+              "exclude": [
+                "src/main/javascript/node_modules"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/javascript"
+              ],
+              "exclude": [
+                "src/test/javascript/node_modules"
+              ]
+            }
+          },
+          "python"
+        ],
+        "exclude": [
+          "node_modules",
+          "target",
+          "build"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"invalid\",\"production\":{\"include\":[\"src/main/javascript\"],\"exclude\":[\"src/main/javascript/node_modules\"]},\"test\":{\"include\":[\"src/test/javascript\"],\"exclude\":[\"src/test/javascript/node_modules\"]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalid' is not one of ['csharp', 'cpp', 'go', 'groovy', 'java', 'javascript', 'objectivec', 'perl', 'php', 'python', 'ruby', 'scala', 'script', 'solidity', 'swift', 'typescript', 'kotlin']\n\nFailed validating 'enum' in schema[1]['properties']['name']:\n    {'type': 'string',\n     'enum': ['csharp',\n              'cpp',\n              'go',\n              'groovy',\n              'java',\n              'javascript',\n              'objectivec',\n              'perl',\n              'php',\n              'python',\n              'ruby',\n              'scala',\n              'script',\n              'solidity',\n              'swift',\n              'typescript',\n              'kotlin']}\n\nOn instance['name']:\n    'invalid'",
+      "data": {
+        "component_depth": 2,
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/javascript"
+              ],
+              "exclude": [
+                "src/main/javascript/node_modules"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/javascript"
+              ],
+              "exclude": [
+                "src/test/javascript/node_modules"
+              ]
+            }
+          },
+          "python",
+          {
+            "name": "invalid",
+            "production": {
+              "include": [
+                "src/main/javascript"
+              ],
+              "exclude": [
+                "src/main/javascript/node_modules"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/javascript"
+              ],
+              "exclude": [
+                "src/test/javascript/node_modules"
+              ]
+            }
+          }
+        ],
+        "exclude": [
+          "node_modules",
+          "target",
+          "build"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"two\" is not of type \"integer\"",
+      "python_error": "'two' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['component_depth']:\n    {'title': 'Component Depth', 'type': 'integer', 'default': 1}\n\nOn instance['component_depth']:\n    'two'",
+      "data": {
+        "component_depth": "two",
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/javascript"
+              ],
+              "exclude": [
+                "src/main/javascript/node_modules"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/javascript"
+              ],
+              "exclude": [
+                "src/test/javascript/node_modules"
+              ]
+            }
+          },
+          "python"
+        ],
+        "exclude": [
+          "node_modules",
+          "target",
+          "build"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"javascript\",\"production\":{\"include\":[\"src/main/javascript\"],\"exclude\":[\"src/main/javascript/node_modules\"]},\"test\":{\"include\":[\"src/test/javascript\"],\"exclude\":[\"src/test/javascript/node_modules\"]},\"extra\":\"extra\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'type': 'object',\n     'additionalProperties': False,\n     'properties': {'name': {'title': 'Name',\n                             '$ref': '#/definitions/supportedProgrammingLanguage'},\n                    'production': {'title': 'Production',\n                                   '$ref': '#/definitions/fileFilter'},\n                    'test': {'title': 'Test',\n                             '$ref': '#/definitions/fileFilter'}}}\n\nOn instance:\n    {'name': 'javascript',\n     'production': {'include': ['src/main/javascript'],\n                    'exclude': ['src/main/javascript/node_modules']},\n     'test': {'include': ['src/test/javascript'],\n              'exclude': ['src/test/javascript/node_modules']},\n     'extra': 'extra'}",
+      "data": {
+        "component_depth": 2,
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/javascript"
+              ],
+              "exclude": [
+                "src/main/javascript/node_modules"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/javascript"
+              ],
+              "exclude": [
+                "src/test/javascript/node_modules"
+              ]
+            }
+          },
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/javascript"
+              ],
+              "exclude": [
+                "src/main/javascript/node_modules"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/javascript"
+              ],
+              "exclude": [
+                "src/test/javascript/node_modules"
+              ]
+            },
+            "extra": "extra"
+          }
+        ],
+        "exclude": [
+          "node_modules",
+          "target",
+          "build"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid_language\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalid_language' is not one of ['csharp', 'cpp', 'go', 'groovy', 'java', 'javascript', 'objectivec', 'perl', 'php', 'python', 'ruby', 'scala', 'script', 'solidity', 'swift', 'typescript', 'kotlin']\n\nFailed validating 'enum' in schema[0]:\n    {'type': 'string',\n     'enum': ['csharp',\n              'cpp',\n              'go',\n              'groovy',\n              'java',\n              'javascript',\n              'objectivec',\n              'perl',\n              'php',\n              'python',\n              'ruby',\n              'scala',\n              'script',\n              'solidity',\n              'swift',\n              'typescript',\n              'kotlin']}\n\nOn instance:\n    'invalid_language'",
+      "data": {
+        "component_depth": 2,
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/javascript"
+              ],
+              "exclude": [
+                "src/main/javascript/node_modules"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/javascript"
+              ],
+              "exclude": [
+                "src/test/javascript/node_modules"
+              ]
+            }
+          },
+          "ruby",
+          "invalid_language"
+        ],
+        "exclude": [
+          "node_modules",
+          "target",
+          "build"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "component_depth": 2,
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/js"
+              ],
+              "exclude": [
+                "src/main/js/vendor"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/js"
+              ],
+              "exclude": [
+                "src/test/js/vendor"
+              ]
+            }
+          },
+          "python"
+        ],
+        "exclude": [
+          "node_modules",
+          "target"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"javascript\",\"production\":{\"include\":[\"src/main/js\"],\"exclude\":[\"src/main/js/vendor\"]},\"test\":{\"include\":[\"src/test/js\"],\"exclude\":[\"src/test/js/vendor\"]},\"invalidKey\":\"invalidValue\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "Additional properties are not allowed ('invalidKey' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'type': 'object',\n     'additionalProperties': False,\n     'properties': {'name': {'title': 'Name',\n                             '$ref': '#/definitions/supportedProgrammingLanguage'},\n                    'production': {'title': 'Production',\n                                   '$ref': '#/definitions/fileFilter'},\n                    'test': {'title': 'Test',\n                             '$ref': '#/definitions/fileFilter'}}}\n\nOn instance:\n    {'name': 'javascript',\n     'production': {'include': ['src/main/js'],\n                    'exclude': ['src/main/js/vendor']},\n     'test': {'include': ['src/test/js'],\n              'exclude': ['src/test/js/vendor']},\n     'invalidKey': 'invalidValue'}",
+      "data": {
+        "component_depth": 2,
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/js"
+              ],
+              "exclude": [
+                "src/main/js/vendor"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/js"
+              ],
+              "exclude": [
+                "src/test/js/vendor"
+              ]
+            },
+            "invalidKey": "invalidValue"
+          },
+          "python"
+        ],
+        "exclude": [
+          "node_modules",
+          "target"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"name\":\"javascript\",\"production\":{\"include\":[\"src/main/js\"],\"exclude\":[\"src/main/js/vendor\",123,\"invalid\"]},\"test\":{\"include\":[\"src/test/js\"],\"exclude\":[\"src/test/js/vendor\"]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "None is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['languages']['items']:\n    {'anyOf': [{'$ref': '#/definitions/supportedProgrammingLanguage'},\n               {'type': 'object',\n                'additionalProperties': False,\n                'properties': {'name': {'title': 'Name',\n                                        '$ref': '#/definitions/supportedProgrammingLanguage'},\n                               'production': {'title': 'Production',\n                                              '$ref': '#/definitions/fileFilter'},\n                               'test': {'title': 'Test',\n                                        '$ref': '#/definitions/fileFilter'}}}]}\n\nOn instance['languages'][3]:\n    None",
+      "data": {
+        "component_depth": 2,
+        "languages": [
+          "java",
+          {
+            "name": "javascript",
+            "production": {
+              "include": [
+                "src/main/js"
+              ],
+              "exclude": [
+                "src/main/js/vendor",
+                123,
+                "invalid"
+              ]
+            },
+            "test": {
+              "include": [
+                "src/test/js"
+              ],
+              "exclude": [
+                "src/test/js/vendor"
+              ]
+            }
+          },
+          "python",
+          null
+        ],
+        "exclude": [
+          "node_modules",
+          "target",
+          true
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "description": "sample Github_easy/o27363.json",
+  "meta": {
+    "full_size": 504,
+    "stripped_size": 474,
+    "features": [
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "VirtualBox manifest",
+    "type": "object",
+    "properties": {
+      "bootstrapper": {
+        "type": "object",
+        "properties": {
+          "guest_additions": {
+            "type": "string"
+          }
+        }
+      },
+      "system": {
+        "type": "object",
+        "properties": {
+          "bootloader": {
+            "type": "string",
+            "enum": [
+              "grub",
+              "extlinux"
+            ]
+          }
+        }
+      },
+      "volume": {
+        "type": "object",
+        "properties": {
+          "backing": {
+            "type": "string",
+            "enum": [
+              "raw",
+              "vdi",
+              "vmdk"
+            ]
+          },
+          "partitions": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "none",
+                  "msdos",
+                  "gpt"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "backing"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "bootstrapper": {
+          "guest_additions": "6.1.34"
+        },
+        "system": {
+          "bootloader": "grub"
+        },
+        "volume": {
+          "backing": "vdi",
+          "partitions": {
+            "type": "msdos"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"syslinux\" is not one of [\"grub\",\"extlinux\"]",
+      "python_error": "'syslinux' is not one of ['grub', 'extlinux']\n\nFailed validating 'enum' in schema['properties']['system']['properties']['bootloader']:\n    {'type': 'string', 'enum': ['grub', 'extlinux']}\n\nOn instance['system']['bootloader']:\n    'syslinux'",
+      "data": {
+        "bootstrapper": {
+          "guest_additions": "6.1.34"
+        },
+        "system": {
+          "bootloader": "syslinux"
+        },
+        "volume": {
+          "backing": "vdi",
+          "partitions": {
+            "type": "apm"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['bootstrapper']['properties']['guest_additions']:\n    {'type': 'string'}\n\nOn instance['bootstrapper']['guest_additions']:\n    None",
+      "data": {
+        "bootstrapper": {
+          "guest_additions": null
+        },
+        "system": {
+          "bootloader": "grub"
+        },
+        "volume": {
+          "backing": "vdi",
+          "partitions": {
+            "type": "msdos"
+          }
+        }
+      }
+    }
+  ]
+}

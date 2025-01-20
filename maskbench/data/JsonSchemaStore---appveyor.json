@@ -1,0 +1,1986 @@
+{
+  "description": "sample JsonSchemaStore/appveyor.json",
+  "meta": {
+    "full_size": 12422,
+    "stripped_size": 7230,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "allOf",
+      "anyOf",
+      "enum",
+      "format",
+      "format:ipv4",
+      "format:ipv6",
+      "format:regex",
+      "items",
+      "not",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "allOf": [
+      {
+        "$ref": "#/definitions/job"
+      }
+    ],
+    "definitions": {
+      "possiblySecretString": {
+        "anyOf": [
+          {
+            "type": "string",
+            "description": "This value will be used directly (regular string)"
+          },
+          {
+            "type": "number",
+            "description": "This value will be treated as a string even though it is a number"
+          },
+          {
+            "title": "secret string",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "secure": {
+                "type": "string",
+                "description": "This should have been encrypted by the same user account to which the project belongs"
+              }
+            }
+          }
+        ]
+      },
+      "commitFilter": {
+        "title": "commit filter",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string",
+            "format": "regex",
+            "description": "Regex for matching commit message"
+          },
+          "author": {
+            "description": "Commit author's username, name, email or regexp matching one of these.",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "regex"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "files": {
+            "type": "array",
+            "description": "Only specific files (glob patterns)",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "command": {
+        "title": "command",
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Run a batch command"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ps": {
+                "type": "string",
+                "description": "Run a PowerShell command"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "pwsh": {
+                "type": "string",
+                "description": "Run a PowerShell Core command"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Run a batch command",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Run a Bash command",
+            "additionalProperties": false,
+            "properties": {
+              "sh": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "envVarHash": {
+        "title": "environment variable hash",
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/definitions/possiblySecretString"
+        }
+      },
+      "platform": {
+        "enum": [
+          "x86",
+          "x64",
+          "ARM",
+          "ARM64",
+          "Win32",
+          "Any CPU"
+        ]
+      },
+      "configuration": {
+        "type": "string"
+      },
+      "imageName": {
+        "enum": [
+          "macOS",
+          "macOS-Mojave",
+          "macos-bigsur",
+          "macos-monterey",
+          "Previous macOS",
+          "Previous macOS-Mojave",
+          "Ubuntu",
+          "Ubuntu1604",
+          "Ubuntu1804",
+          "Ubuntu2004",
+          "Previous Ubuntu",
+          "Previous Ubuntu1604",
+          "Previous Ubuntu1804",
+          "Previous Ubuntu2004",
+          "Visual Studio 2013",
+          "Visual Studio 2015",
+          "Visual Studio 2017",
+          "Visual Studio 2019",
+          "Visual Studio 2022",
+          "Visual Studio 2017 Preview",
+          "Visual Studio 2019 Preview",
+          "Previous Visual Studio 2013",
+          "Previous Visual Studio 2015",
+          "Previous Visual Studio 2017",
+          "Previous Visual Studio 2019",
+          "Previous Visual Studio 2022",
+          "zhaw18",
+          "WMF 5"
+        ]
+      },
+      "image": {
+        "description": "Build worker image (VM template) -DEV_VERSION",
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/imageName"
+            }
+          },
+          {
+            "$ref": "#/definitions/imageName"
+          }
+        ]
+      },
+      "jobScalars": {
+        "title": "job scalars",
+        "type": "object",
+        "properties": {
+          "image": {
+            "$ref": "#/definitions/image"
+          },
+          "platform": {
+            "description": "Build platform, i.e. x86, x64, Any CPU. This setting is optional",
+            "oneOf": [
+              {
+                "$ref": "#/definitions/platform"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/platform"
+                }
+              }
+            ]
+          },
+          "configuration": {
+            "description": "Build Configuration, i.e. Debug, Release, etc.",
+            "oneOf": [
+              {
+                "$ref": "#/definitions/configuration"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/configuration"
+                }
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "not": {
+              "required": [
+                "skip_tags"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "skip_commits"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "skip_branch_with_pr"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "skip_non_tags"
+              ]
+            }
+          }
+        ]
+      },
+      "job": {
+        "title": "job",
+        "type": "object",
+        "properties": {
+          "version": {
+            "description": "Version format",
+            "type": "string"
+          },
+          "branches": {
+            "title": "branch options",
+            "type": "object",
+            "description": "Branches to build",
+            "additionalProperties": false,
+            "properties": {
+              "only": {
+                "description": "Whitelist",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "except": {
+                "type": "array",
+                "description": "Blacklist",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "skip_tags": {
+            "type": "boolean",
+            "description": "Do not build on tags (GitHub and BitBucket)"
+          },
+          "skip_non_tags": {
+            "type": "boolean",
+            "description": "Start builds on tags only (GitHub and BitBucket)"
+          },
+          "skip_commits": {
+            "description": "Skipping commits with particular message or from specific user",
+            "$ref": "#/definitions/commitFilter"
+          },
+          "only_commits": {
+            "description": "Including commits with particular message or from specific user",
+            "$ref": "#/definitions/commitFilter"
+          },
+          "skip_branch_with_pr": {
+            "type": "boolean",
+            "description": "Do not build feature branch with open Pull Requests"
+          },
+          "max_jobs": {
+            "description": "Maximum number of concurrent jobs for the project",
+            "type": "integer"
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "title": "notification",
+              "type": "object"
+            }
+          },
+          "image": {
+            "$ref": "#/definitions/image"
+          },
+          "init": {
+            "description": "Scripts that are called at very beginning, before repo cloning",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "clone_folder": {
+            "type": "string",
+            "description": "Clone directory"
+          },
+          "shallow_clone": {
+            "type": "boolean",
+            "description": "Fetch repository as zip archive",
+            "default": false
+          },
+          "clone_depth": {
+            "description": "Set git clone depth",
+            "type": "integer"
+          },
+          "hosts": {
+            "title": "host options",
+            "type": "object",
+            "description": "Setting up etc\\hosts file",
+            "additionalProperties": {
+              "type": "string",
+              "anyOf": [
+                {
+                  "format": "ipv4"
+                },
+                {
+                  "format": "ipv6"
+                }
+              ]
+            }
+          },
+          "environment": {
+            "description": "Environment variables",
+            "anyOf": [
+              {
+                "title": "environment options",
+                "type": "object",
+                "properties": {
+                  "global": {
+                    "description": "variables defined here are no different than those defined at top level of 'environment' node",
+                    "$ref": "#/definitions/envVarHash"
+                  },
+                  "matrix": {
+                    "type": "array",
+                    "description": "an array of environment variables, each member of which is one dimension in the build matrix calculation",
+                    "items": {
+                      "$ref": "#/definitions/envVarHash"
+                    }
+                  }
+                }
+              },
+              {
+                "$ref": "#/definitions/envVarHash"
+              }
+            ]
+          },
+          "matrix": {
+            "title": "matrix options",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "fast_finish": {
+                "type": "boolean",
+                "description": "Set this flag to immediately finish build once one of the jobs fails"
+              },
+              "allow_failures": {
+                "type": "array",
+                "description": "This is how to allow failing jobs in the matrix",
+                "items": {
+                  "$ref": "#/definitions/jobScalars"
+                }
+              },
+              "exclude": {
+                "type": "array",
+                "description": "Exclude configuration from the matrix. Works similarly to 'allow_failures' but build not even being started for excluded combination.",
+                "items": {
+                  "$ref": "#/definitions/job"
+                }
+              }
+            }
+          },
+          "cache": {
+            "type": "array",
+            "description": "Build cache to preserve files/folders between builds",
+            "items": {
+              "type": "string"
+            }
+          },
+          "services": {
+            "type": "array",
+            "description": "Enable service required for build/tests",
+            "items": {
+              "enum": [
+                "docker",
+                "iis",
+                "mongodb",
+                "msmq",
+                "mssql",
+                "mssql2008r2sp2",
+                "mssql2008r2sp2rs",
+                "mssql2012sp1",
+                "mssql2012sp1rs",
+                "mssql2014",
+                "mssql2014rs",
+                "mssql2016",
+                "mssql2017",
+                "mysql",
+                "postgresql",
+                "postgresql93",
+                "postgresql94",
+                "postgresql95",
+                "postgresql96",
+                "postgresql10",
+                "postgresql11",
+                "postgresql12",
+                "postgresql13"
+              ]
+            }
+          },
+          "install": {
+            "description": "Scripts that run after cloning repository",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "assembly_info": {
+            "title": "assembly options",
+            "type": "object",
+            "description": "Enable patching of AssemblyInfo.* files",
+            "additionalProperties": false,
+            "properties": {
+              "patch": {
+                "type": "boolean"
+              },
+              "file": {
+                "type": "string"
+              },
+              "assembly_version": {
+                "type": "string"
+              },
+              "assembly_file_version": {
+                "type": "string"
+              },
+              "assembly_informational_version": {
+                "type": "string"
+              }
+            }
+          },
+          "nuget": {
+            "title": "NuGet options",
+            "type": "object",
+            "description": "Automatically register private account and/or project AppVeyor NuGet feeds",
+            "properties": {
+              "account_feed": {
+                "type": "boolean"
+              },
+              "project_feed": {
+                "type": "boolean"
+              },
+              "disable_publish_on_pr": {
+                "type": "boolean",
+                "description": "Disable publishing of .nupkg artifacts to account/project feeds for pull request builds"
+              }
+            }
+          },
+          "platform": {
+            "description": "Build platform, i.e. x86, x64, Any CPU. This setting is optional",
+            "oneOf": [
+              {
+                "$ref": "#/definitions/platform"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/platform"
+                }
+              }
+            ]
+          },
+          "configuration": {
+            "description": "Build Configuration, i.e. Debug, Release, etc.",
+            "oneOf": [
+              {
+                "$ref": "#/definitions/configuration"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/configuration"
+                }
+              }
+            ]
+          },
+          "build": {
+            "oneOf": [
+              {
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              },
+              {
+                "title": "build options",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "parallel": {
+                    "type": "boolean",
+                    "description": "Enable MSBuild parallel builds"
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Path to Visual Studio solution or project"
+                  },
+                  "publish_wap": {
+                    "type": "boolean",
+                    "description": "Package Web Application Projects (WAP) for Web Deploy"
+                  },
+                  "publish_wap_xcopy": {
+                    "type": "boolean",
+                    "description": "Package Web Application Projects (WAP) for XCopy deployment"
+                  },
+                  "publish_wap_beanstalk": {
+                    "type": "boolean",
+                    "description": "Package Web Applications for AWS Elastic Beanstalk deployment"
+                  },
+                  "publish_wap_octopus": {
+                    "type": "boolean",
+                    "description": "Package Web Applications for Octopus deployment"
+                  },
+                  "publish_azure_webjob": {
+                    "type": "boolean",
+                    "description": "Package Azure WebJobs for Zip Push deployment"
+                  },
+                  "publish_azure": {
+                    "type": "boolean",
+                    "description": "Package Azure Cloud Service projects and push to artifacts"
+                  },
+                  "publish_aspnet_core": {
+                    "type": "boolean",
+                    "description": "Package ASP.NET Core projects"
+                  },
+                  "publish_core_console": {
+                    "type": "boolean",
+                    "description": "Package .NET Core console projects"
+                  },
+                  "publish_nuget": {
+                    "type": "boolean",
+                    "description": "Package projects with .nuspec files and push to artifacts"
+                  },
+                  "publish_nuget_symbols": {
+                    "type": "boolean",
+                    "description": "Generate and publish NuGet symbol packages"
+                  },
+                  "include_nuget_references": {
+                    "type": "boolean",
+                    "description": "Add -IncludeReferencedProjects option while packaging NuGet artifacts"
+                  },
+                  "verbosity": {
+                    "enum": [
+                      "quiet",
+                      "minimal",
+                      "normal",
+                      "detailed"
+                    ],
+                    "description": "MSBuild verbosity level"
+                  }
+                }
+              }
+            ]
+          },
+          "before_build": {
+            "description": "Scripts to run before build",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "before_package": {
+            "description": "Scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "after_build": {
+            "description": "Scripts to run after build",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "build_script": {
+            "description": "To run your custom scripts instead of automatic MSBuild",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "before_test": {
+            "description": "Scripts to run before tests",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "test": {
+            "oneOf": [
+              {
+                "type": "boolean",
+                "enum": [
+                  false
+                ],
+                "description": "To disable automatic tests"
+              },
+              {
+                "title": "test options",
+                "description": "To run tests again only selected assemblies and/or categories",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "assemblies": {
+                    "title": "assembly options",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "only": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "except": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "categories": {
+                    "oneOf": [
+                      {
+                        "title": "category options",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "only": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "except": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "description": "To run tests from different categories as separate jobs in parallel",
+                        "type": "array",
+                        "items": {
+                          "oneOf": [
+                            {
+                              "type": "string",
+                              "description": "A category common for all jobs"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "test_script": {
+            "description": "To run your custom scripts instead of automatic tests",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "after_test": {
+            "type": "array",
+            "description": "Scripts to run after tests",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "title": "artifact options",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          "before_deploy": {
+            "type": "array",
+            "description": "Scripts to run before deployment",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "deploy": {
+            "oneOf": [
+              {
+                "enum": [
+                  "off"
+                ]
+              },
+              {
+                "type": "array",
+                "items": {
+                  "title": "deployment options",
+                  "type": "object"
+                }
+              }
+            ]
+          },
+          "deploy_script": {
+            "description": "To run your custom scripts instead of provider deployments",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "after_deploy": {
+            "type": "array",
+            "description": "Scripts to run after deployment",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "on_success": {
+            "type": "array",
+            "description": "On successful build",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "on_failure": {
+            "type": "array",
+            "description": "On build failure",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          },
+          "on_finish": {
+            "type": "array",
+            "description": "After build failure or success",
+            "items": {
+              "$ref": "#/definitions/command"
+            }
+          }
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/appveyor.json",
+    "title": "JSON schema for AppVeyor CI configuration files"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0.{build}",
+        "branches": {
+          "only": [
+            "main",
+            "dev"
+          ]
+        },
+        "skip_tags": true,
+        "max_jobs": 5,
+        "notifications": [
+          {
+            "on_build_success": true,
+            "on_build_failure": true,
+            "on_build_status_changed": true
+          }
+        ],
+        "image": "Visual Studio 2019",
+        "init": [
+          {
+            "cmd": "echo off"
+          }
+        ],
+        "clone_folder": "C:\\appveyor\\clone",
+        "shallow_clone": true,
+        "clone_depth": 1,
+        "hosts": {
+          "example.com": "127.0.0.1"
+        },
+        "environment": {
+          "global": {
+            "MY_VAR": "my_value"
+          },
+          "matrix": [
+            {
+              "MY_VAR": "my_value_1"
+            },
+            {
+              "MY_VAR": "my_value_2"
+            }
+          ]
+        },
+        "matrix": {
+          "fast_finish": true,
+          "allow_failures": [
+            {
+              "image": "Visual Studio 2017"
+            }
+          ],
+          "exclude": [
+            {
+              "image": "Visual Studio 2015"
+            }
+          ]
+        },
+        "cache": [
+          "node_modules",
+          "packages"
+        ],
+        "services": [
+          "docker",
+          "iis"
+        ],
+        "install": [
+          {
+            "cmd": "npm install"
+          }
+        ],
+        "assembly_info": {
+          "patch": true,
+          "file": "AssemblyInfo.cs",
+          "assembly_version": "1.0.0.0",
+          "assembly_file_version": "1.0.0.0",
+          "assembly_informational_version": "1.0.0.0"
+        },
+        "nuget": {
+          "account_feed": true,
+          "project_feed": true,
+          "disable_publish_on_pr": true
+        },
+        "platform": "x64",
+        "configuration": "Release",
+        "build": {
+          "parallel": true,
+          "project": "MyProject.csproj",
+          "publish_wap": true,
+          "publish_wap_xcopy": true,
+          "publish_wap_beanstalk": true,
+          "publish_wap_octopus": true,
+          "publish_azure_webjob": true,
+          "publish_azure": true,
+          "publish_aspnet_core": true,
+          "publish_core_console": true,
+          "publish_nuget": true,
+          "publish_nuget_symbols": true,
+          "include_nuget_references": true,
+          "verbosity": "detailed"
+        },
+        "before_build": [
+          {
+            "cmd": "echo before build"
+          }
+        ],
+        "before_package": [
+          {
+            "cmd": "echo before package"
+          }
+        ],
+        "after_build": [
+          {
+            "cmd": "echo after build"
+          }
+        ],
+        "build_script": [
+          {
+            "cmd": "echo build script"
+          }
+        ],
+        "before_test": [
+          {
+            "cmd": "echo before test"
+          }
+        ],
+        "test": {
+          "assemblies": {
+            "only": [
+              "MyAssembly.dll"
+            ],
+            "except": [
+              "MyAssembly2.dll"
+            ]
+          },
+          "categories": {
+            "only": [
+              "MyCategory"
+            ],
+            "except": [
+              "MyCategory2"
+            ]
+          }
+        },
+        "test_script": [
+          {
+            "cmd": "echo test script"
+          }
+        ],
+        "after_test": [
+          {
+            "cmd": "echo after test"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "MyArtifact.dll",
+            "name": "MyArtifact"
+          }
+        ],
+        "before_deploy": [
+          {
+            "cmd": "echo before deploy"
+          }
+        ],
+        "deploy": [
+          {
+            "provider": "AzureWebApp",
+            "settings": {
+              "web_app_name": "my-web-app"
+            }
+          }
+        ],
+        "deploy_script": [
+          {
+            "cmd": "echo deploy script"
+          }
+        ],
+        "after_deploy": [
+          {
+            "cmd": "echo after deploy"
+          }
+        ],
+        "on_success": [
+          {
+            "cmd": "echo on success"
+          }
+        ],
+        "on_failure": [
+          {
+            "cmd": "echo on failure"
+          }
+        ],
+        "on_finish": [
+          {
+            "cmd": "echo on finish"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0.{build}",
+        "branches": {
+          "only": [
+            "main",
+            "dev"
+          ]
+        },
+        "skip_tags": true,
+        "max_jobs": 5,
+        "image": "Visual Studio 2019",
+        "init": [
+          {
+            "cmd": "echo 'Initializing build environment'"
+          }
+        ],
+        "clone_folder": "C:\\Build\\Project",
+        "shallow_clone": true,
+        "clone_depth": 1,
+        "hosts": {
+          "example.com": "127.0.0.1"
+        },
+        "environment": {
+          "global": {
+            "MY_VAR": "my_value"
+          },
+          "matrix": [
+            {
+              "MY_VAR": "my_value_1"
+            },
+            {
+              "MY_VAR": "my_value_2"
+            }
+          ]
+        },
+        "matrix": {
+          "fast_finish": true,
+          "allow_failures": [
+            {
+              "image": "Visual Studio 2017",
+              "platform": "x86"
+            }
+          ]
+        },
+        "cache": [
+          "node_modules",
+          "packages"
+        ],
+        "services": [
+          "docker",
+          "iis"
+        ],
+        "install": [
+          {
+            "cmd": "npm install"
+          }
+        ],
+        "assembly_info": {
+          "patch": true,
+          "file": "AssemblyInfo.cs",
+          "assembly_version": "1.0.0.0",
+          "assembly_file_version": "1.0.0.0",
+          "assembly_informational_version": "1.0.0.0"
+        },
+        "nuget": {
+          "account_feed": true,
+          "project_feed": true,
+          "disable_publish_on_pr": true
+        },
+        "platform": "x64",
+        "configuration": "Release",
+        "build": {
+          "parallel": true,
+          "project": "MyProject.csproj",
+          "publish_wap": true,
+          "publish_wap_xcopy": true,
+          "publish_wap_beanstalk": true,
+          "publish_wap_octopus": true,
+          "publish_azure_webjob": true,
+          "publish_azure": true,
+          "publish_aspnet_core": true,
+          "publish_core_console": true,
+          "publish_nuget": true,
+          "publish_nuget_symbols": true,
+          "include_nuget_references": true,
+          "verbosity": "detailed"
+        },
+        "before_build": [
+          {
+            "cmd": "echo 'Before build'"
+          }
+        ],
+        "before_package": [
+          {
+            "cmd": "echo 'Before package'"
+          }
+        ],
+        "after_build": [
+          {
+            "cmd": "echo 'After build'"
+          }
+        ],
+        "build_script": [
+          {
+            "cmd": "echo 'Build script'"
+          }
+        ],
+        "before_test": [
+          {
+            "cmd": "echo 'Before test'"
+          }
+        ],
+        "test": {
+          "assemblies": {
+            "only": [
+              "MyProject.Tests.dll"
+            ]
+          },
+          "categories": {
+            "only": [
+              "MyCategory"
+            ]
+          }
+        },
+        "test_script": [
+          {
+            "cmd": "echo 'Test script'"
+          }
+        ],
+        "after_test": [
+          {
+            "cmd": "echo 'After test'"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "MyProject.dll",
+            "name": "MyProject"
+          }
+        ],
+        "before_deploy": [
+          {
+            "cmd": "echo 'Before deploy'"
+          }
+        ],
+        "deploy": [
+          {
+            "provider": "AzureWebApp",
+            "app_id": "MyAppId",
+            "slot": "MySlot"
+          }
+        ],
+        "deploy_script": [
+          {
+            "cmd": "echo 'Deploy script'"
+          }
+        ],
+        "after_deploy": [
+          {
+            "cmd": "echo 'After deploy'"
+          }
+        ],
+        "on_success": [
+          {
+            "cmd": "echo 'On success'"
+          }
+        ],
+        "on_failure": [
+          {
+            "cmd": "echo 'On failure'"
+          }
+        ],
+        "on_finish": [
+          {
+            "cmd": "echo 'On finish'"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"parallel\":true,\"project\":\"MyProject.csproj\",\"publish_wap\":true,\"publish_wap_xcopy\":true,\"publish_wap_beanstalk\":true,\"publish_wap_octopus\":true,\"publish_azure_webjob\":true,\"publish_azure\":true,\"publish_aspnet_core\":true,\"publish_core_console\":true,\"publish_nuget\":true,\"publish_nuget_symbols\":true,\"include_nuget_references\":true,\"verbosity\":\"detailed\",\"cmd\":\"echo 'Build script'\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('cmd' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'title': 'build options',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'parallel': {'type': 'boolean',\n                                 'description': 'Enable MSBuild parallel '\n                                                'builds'},\n                    'project': {'type': 'string',\n                                'description': 'Path to Visual Studio '\n                                               'solution or project'},\n                    'publish_wap': {'type': 'boolean',\n                                    'description': 'Package Web '\n                                                   'Application Projects '\n                                                   '(WAP) for Web Deploy'},\n                    'publish_wap_xcopy': {'type': 'boolean',\n                                          'description': 'Package Web '\n                                 .. (4503 more)",
+      "data": {
+        "version": "1.0.{build}",
+        "branches": {
+          "only": [
+            "main",
+            "dev"
+          ]
+        },
+        "skip_tags": true,
+        "max_jobs": 5,
+        "image": "Visual Studio 2019",
+        "init": [
+          {
+            "cmd": "echo 'Initializing build environment'"
+          }
+        ],
+        "clone_folder": "C:\\Build\\Project",
+        "shallow_clone": true,
+        "clone_depth": 1,
+        "hosts": {
+          "example.com": "127.0.0.1"
+        },
+        "environment": {
+          "global": {
+            "MY_VAR": "my_value"
+          },
+          "matrix": [
+            {
+              "MY_VAR": "my_value_1"
+            },
+            {
+              "MY_VAR": "my_value_2"
+            }
+          ]
+        },
+        "matrix": {
+          "fast_finish": true,
+          "allow_failures": [
+            {
+              "image": "Visual Studio 2017",
+              "platform": "x86"
+            }
+          ]
+        },
+        "cache": [
+          "node_modules",
+          "packages"
+        ],
+        "services": [
+          "docker",
+          "iis"
+        ],
+        "install": [
+          {
+            "cmd": "npm install"
+          }
+        ],
+        "assembly_info": {
+          "patch": true,
+          "file": "AssemblyInfo.cs",
+          "assembly_version": "1.0.0.0",
+          "assembly_file_version": "1.0.0.0",
+          "assembly_informational_version": "1.0.0.0"
+        },
+        "nuget": {
+          "account_feed": true,
+          "project_feed": true,
+          "disable_publish_on_pr": true
+        },
+        "platform": "x64",
+        "configuration": "Release",
+        "build": {
+          "parallel": true,
+          "project": "MyProject.csproj",
+          "publish_wap": true,
+          "publish_wap_xcopy": true,
+          "publish_wap_beanstalk": true,
+          "publish_wap_octopus": true,
+          "publish_azure_webjob": true,
+          "publish_azure": true,
+          "publish_aspnet_core": true,
+          "publish_core_console": true,
+          "publish_nuget": true,
+          "publish_nuget_symbols": true,
+          "include_nuget_references": true,
+          "verbosity": "detailed",
+          "cmd": "echo 'Build script'"
+        },
+        "before_build": [
+          {
+            "cmd": "echo 'Before build'"
+          }
+        ],
+        "before_package": [
+          {
+            "cmd": "echo 'Before package'"
+          }
+        ],
+        "after_build": [
+          {
+            "cmd": "echo 'After build'"
+          }
+        ],
+        "build_script": [
+          {
+            "cmd": "echo 'Build script'"
+          }
+        ],
+        "before_test": [
+          {
+            "cmd": "echo 'Before test'"
+          }
+        ],
+        "test": {
+          "assemblies": {
+            "only": [
+              "MyProject.Tests.dll"
+            ]
+          },
+          "categories": {
+            "only": [
+              "MyCategory"
+            ]
+          }
+        },
+        "test_script": [
+          {
+            "cmd": "echo 'Test script'"
+          }
+        ],
+        "after_test": [
+          {
+            "cmd": "echo 'After test'"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "MyProject.dll",
+            "name": "MyProject"
+          }
+        ],
+        "before_deploy": [
+          {
+            "cmd": "echo 'Before deploy'"
+          }
+        ],
+        "deploy": [
+          {
+            "provider": "AzureWebApp",
+            "app_id": "MyAppId",
+            "slot": "MySlot"
+          }
+        ],
+        "deploy_script": [
+          {
+            "cmd": "echo 'Deploy script'"
+          }
+        ],
+        "after_deploy": [
+          {
+            "cmd": "echo 'After deploy'"
+          }
+        ],
+        "on_success": [
+          {
+            "cmd": "echo 'On success'"
+          }
+        ],
+        "on_failure": [
+          {
+            "cmd": "echo 'On failure'"
+          }
+        ],
+        "on_finish": [
+          {
+            "cmd": "echo 'On finish'"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema['allOf'][0]['properties']['branches']:\n    {'title': 'branch options',\n     'type': 'object',\n     'description': 'Branches to build',\n     'additionalProperties': False,\n     'properties': {'only': {'description': 'Whitelist',\n                             'type': 'array',\n                             'items': {'type': 'string'}},\n                    'except': {'type': 'array',\n                               'description': 'Blacklist',\n                               'items': {'type': 'string'}}}}\n\nOn instance['branches']:\n    {'only': ['main', 'dev'], 'extra_property': 'extra_value'}",
+      "data": {
+        "version": "1.0.{build}",
+        "branches": {
+          "only": [
+            "main",
+            "dev"
+          ],
+          "extra_property": "extra_value"
+        },
+        "skip_tags": true,
+        "max_jobs": 5,
+        "image": "Visual Studio 2019",
+        "init": [
+          {
+            "cmd": "echo 'Initializing build environment'"
+          }
+        ],
+        "clone_folder": "C:\\Build\\Project",
+        "shallow_clone": true,
+        "clone_depth": 1,
+        "hosts": {
+          "example.com": "127.0.0.1"
+        },
+        "environment": {
+          "global": {
+            "MY_VAR": "my_value"
+          },
+          "matrix": [
+            {
+              "MY_VAR": "my_value_1"
+            },
+            {
+              "MY_VAR": "my_value_2"
+            }
+          ]
+        },
+        "matrix": {
+          "fast_finish": true,
+          "allow_failures": [
+            {
+              "image": "Visual Studio 2017",
+              "platform": "x86"
+            }
+          ]
+        },
+        "cache": [
+          "node_modules",
+          "packages"
+        ],
+        "services": [
+          "docker",
+          "iis"
+        ],
+        "install": [
+          {
+            "cmd": "npm install"
+          }
+        ],
+        "assembly_info": {
+          "patch": true,
+          "file": "AssemblyInfo.cs",
+          "assembly_version": "1.0.0.0",
+          "assembly_file_version": "1.0.0.0",
+          "assembly_informational_version": "1.0.0.0"
+        },
+        "nuget": {
+          "account_feed": true,
+          "project_feed": true,
+          "disable_publish_on_pr": true
+        },
+        "platform": "x64",
+        "configuration": "Release",
+        "build": {
+          "parallel": true,
+          "project": "MyProject.csproj",
+          "publish_wap": true,
+          "publish_wap_xcopy": true,
+          "publish_wap_beanstalk": true,
+          "publish_wap_octopus": true,
+          "publish_azure_webjob": true,
+          "publish_azure": true,
+          "publish_aspnet_core": true,
+          "publish_core_console": true,
+          "publish_nuget": true,
+          "publish_nuget_symbols": true,
+          "include_nuget_references": true,
+          "verbosity": "detailed"
+        },
+        "before_build": [
+          {
+            "cmd": "echo 'Before build'"
+          }
+        ],
+        "before_package": [
+          {
+            "cmd": "echo 'Before package'"
+          }
+        ],
+        "after_build": [
+          {
+            "cmd": "echo 'After build'"
+          }
+        ],
+        "build_script": [
+          {
+            "cmd": "echo 'Build script'"
+          }
+        ],
+        "before_test": [
+          {
+            "cmd": "echo 'Before test'"
+          }
+        ],
+        "test": {
+          "assemblies": {
+            "only": [
+              "MyProject.Tests.dll"
+            ]
+          },
+          "categories": {
+            "only": [
+              "MyCategory"
+            ]
+          }
+        },
+        "test_script": [
+          {
+            "cmd": "echo 'Test script'"
+          }
+        ],
+        "after_test": [
+          {
+            "cmd": "echo 'After test'"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "MyProject.dll",
+            "name": "MyProject"
+          }
+        ],
+        "before_deploy": [
+          {
+            "cmd": "echo 'Before deploy'"
+          }
+        ],
+        "deploy": [
+          {
+            "provider": "AzureWebApp",
+            "app_id": "MyAppId",
+            "slot": "MySlot"
+          }
+        ],
+        "deploy_script": [
+          {
+            "cmd": "echo 'Deploy script'"
+          }
+        ],
+        "after_deploy": [
+          {
+            "cmd": "echo 'After deploy'"
+          }
+        ],
+        "on_success": [
+          {
+            "cmd": "echo 'On success'"
+          }
+        ],
+        "on_failure": [
+          {
+            "cmd": "echo 'On failure'"
+          }
+        ],
+        "on_finish": [
+          {
+            "cmd": "echo 'On finish'"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "true is not of type \"object\"",
+      "python_error": "True is not of type 'object'\n\nFailed validating 'type' in schema['allOf'][0]['properties']['skip_commits']:\n    {'title': 'commit filter',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'message': {'type': 'string',\n                                'format': 'regex',\n                                'description': 'Regex for matching commit '\n                                               'message'},\n                    'author': {'description': \"Commit author's username, \"\n                                              'name, email or regexp '\n                                              'matching one of these.',\n                               'anyOf': [{'type': 'string',\n                                          'format': 'regex'},\n                                         {'type': 'string'}]},\n                    'files': {'type': 'array',\n                              'description': 'Only specific files (glob '\n                                             'patterns)',\n        .. (91 more)",
+      "data": {
+        "version": "1.0.{build}",
+        "branches": {
+          "only": [
+            "main",
+            "dev"
+          ]
+        },
+        "skip_tags": true,
+        "skip_commits": true,
+        "max_jobs": 5,
+        "image": "Visual Studio 2019",
+        "init": [
+          {
+            "cmd": "echo 'Initializing build environment'"
+          }
+        ],
+        "clone_folder": "C:\\Build\\Project",
+        "shallow_clone": true,
+        "clone_depth": 1,
+        "hosts": {
+          "example.com": "127.0.0.1"
+        },
+        "environment": {
+          "global": {
+            "MY_VAR": "my_value"
+          },
+          "matrix": [
+            {
+              "MY_VAR": "my_value_1"
+            },
+            {
+              "MY_VAR": "my_value_2"
+            }
+          ]
+        },
+        "matrix": {
+          "fast_finish": true,
+          "allow_failures": [
+            {
+              "image": "Visual Studio 2017",
+              "platform": "x86"
+            }
+          ]
+        },
+        "cache": [
+          "node_modules",
+          "packages"
+        ],
+        "services": [
+          "docker",
+          "iis"
+        ],
+        "install": [
+          {
+            "cmd": "npm install"
+          }
+        ],
+        "assembly_info": {
+          "patch": true,
+          "file": "AssemblyInfo.cs",
+          "assembly_version": "1.0.0.0",
+          "assembly_file_version": "1.0.0.0",
+          "assembly_informational_version": "1.0.0.0"
+        },
+        "nuget": {
+          "account_feed": true,
+          "project_feed": true,
+          "disable_publish_on_pr": true
+        },
+        "platform": "x64",
+        "configuration": "Release",
+        "build": {
+          "parallel": true,
+          "project": "MyProject.csproj",
+          "publish_wap": true,
+          "publish_wap_xcopy": true,
+          "publish_wap_beanstalk": true,
+          "publish_wap_octopus": true,
+          "publish_azure_webjob": true,
+          "publish_azure": true,
+          "publish_aspnet_core": true,
+          "publish_core_console": true,
+          "publish_nuget": true,
+          "publish_nuget_symbols": true,
+          "include_nuget_references": true,
+          "verbosity": "detailed"
+        },
+        "before_build": [
+          {
+            "cmd": "echo 'Before build'"
+          }
+        ],
+        "before_package": [
+          {
+            "cmd": "echo 'Before package'"
+          }
+        ],
+        "after_build": [
+          {
+            "cmd": "echo 'After build'"
+          }
+        ],
+        "build_script": [
+          {
+            "cmd": "echo 'Build script'"
+          }
+        ],
+        "before_test": [
+          {
+            "cmd": "echo 'Before test'"
+          }
+        ],
+        "test": {
+          "assemblies": {
+            "only": [
+              "MyProject.Tests.dll"
+            ]
+          },
+          "categories": {
+            "only": [
+              "MyCategory"
+            ]
+          }
+        },
+        "test_script": [
+          {
+            "cmd": "echo 'Test script'"
+          }
+        ],
+        "after_test": [
+          {
+            "cmd": "echo 'After test'"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "MyProject.dll",
+            "name": "MyProject"
+          }
+        ],
+        "before_deploy": [
+          {
+            "cmd": "echo 'Before deploy'"
+          }
+        ],
+        "deploy": [
+          {
+            "provider": "AzureWebApp",
+            "app_id": "MyAppId",
+            "slot": "MySlot"
+          }
+        ],
+        "deploy_script": [
+          {
+            "cmd": "echo 'Deploy script'"
+          }
+        ],
+        "after_deploy": [
+          {
+            "cmd": "echo 'After deploy'"
+          }
+        ],
+        "on_success": [
+          {
+            "cmd": "echo 'On success'"
+          }
+        ],
+        "on_failure": [
+          {
+            "cmd": "echo 'On failure'"
+          }
+        ],
+        "on_finish": [
+          {
+            "cmd": "echo 'On finish'"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"256.256.256.256\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'256.256.256.256' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['allOf'][0]['properties']['hosts']['additionalProperties']:\n    {'type': 'string', 'anyOf': [{'format': 'ipv4'}, {'format': 'ipv6'}]}\n\nOn instance['hosts']['example.com']:\n    '256.256.256.256'",
+      "data": {
+        "version": "1.0.{build}",
+        "branches": {
+          "only": [
+            "main",
+            "dev"
+          ]
+        },
+        "skip_tags": true,
+        "max_jobs": 5,
+        "image": "Visual Studio 2019",
+        "init": [
+          {
+            "cmd": "echo 'Initializing build environment'"
+          }
+        ],
+        "clone_folder": "C:\\Build\\Project",
+        "shallow_clone": true,
+        "clone_depth": 1,
+        "hosts": {
+          "example.com": "256.256.256.256"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"Invalid Visual Studio\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'Invalid Visual Studio' is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['allOf'][0]['properties']['image']:\n    {'description': 'Build worker image (VM template) -DEV_VERSION',\n     'oneOf': [{'type': 'array',\n                'items': {'$ref': '#/definitions/imageName'}},\n               {'$ref': '#/definitions/imageName'}]}\n\nOn instance['image']:\n    'Invalid Visual Studio'",
+      "data": {
+        "version": "1.0.{build}",
+        "branches": {
+          "only": [
+            "main",
+            "dev"
+          ]
+        },
+        "skip_tags": true,
+        "max_jobs": 5,
+        "image": "Invalid Visual Studio",
+        "init": [
+          {
+            "cmd": "echo 'Initializing build environment'"
+          }
+        ],
+        "clone_folder": "C:\\Build\\Project",
+        "shallow_clone": true,
+        "clone_depth": 1,
+        "hosts": {
+          "example.com": "256.1.1.1"
+        },
+        "environment": {
+          "global": {
+            "MY_VAR": null
+          },
+          "matrix": [
+            {
+              "MY_VAR": "my_value_1"
+            },
+            {
+              "MY_VAR": "my_value_2"
+            }
+          ]
+        },
+        "matrix": {
+          "fast_finish": true,
+          "allow_failures": [
+            {
+              "image": "Visual Studio 2017",
+              "platform": "x86"
+            }
+          ]
+        },
+        "cache": [
+          "node_modules",
+          "packages"
+        ],
+        "services": [
+          "docker",
+          "iis"
+        ],
+        "install": [
+          {
+            "cmd": "npm install"
+          }
+        ],
+        "assembly_info": {
+          "patch": true,
+          "file": "AssemblyInfo.cs",
+          "assembly_version": "1.0.0.0",
+          "assembly_file_version": "1.0.0.0",
+          "assembly_informational_version": "1.0.0.0"
+        },
+        "nuget": {
+          "account_feed": true,
+          "project_feed": true,
+          "disable_publish_on_pr": true
+        },
+        "platform": "x64",
+        "configuration": "Release",
+        "build": {
+          "parallel": true,
+          "project": "MyProject.csproj",
+          "publish_wap": true,
+          "publish_wap_xcopy": true,
+          "publish_wap_beanstalk": true,
+          "publish_wap_octopus": true,
+          "publish_azure_webjob": true,
+          "publish_azure": true,
+          "publish_aspnet_core": true,
+          "publish_core_console": true,
+          "publish_nuget": true,
+          "publish_nuget_symbols": true,
+          "include_nuget_references": true,
+          "verbosity": "high"
+        },
+        "before_build": [
+          {
+            "cmd": "echo 'Before build'"
+          }
+        ],
+        "before_package": [
+          {
+            "cmd": "echo 'Before package'"
+          }
+        ],
+        "after_build": [
+          {
+            "cmd": "echo 'After build'"
+          }
+        ],
+        "build_script": [
+          {
+            "cmd": "echo 'Build script'"
+          }
+        ],
+        "before_test": [
+          {
+            "cmd": "echo 'Before test'"
+          }
+        ],
+        "test": {
+          "assemblies": {
+            "only": [
+              "MyProject.Tests.dll"
+            ]
+          },
+          "categories": {
+            "only": [
+              "MyCategory"
+            ]
+          }
+        },
+        "test_script": [
+          {
+            "cmd": "echo 'Test script'"
+          }
+        ],
+        "after_test": [
+          {
+            "cmd": "echo 'After test'"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "MyProject.dll"
+          }
+        ],
+        "before_deploy": [
+          {
+            "cmd": "echo 'Before deploy'"
+          }
+        ],
+        "deploy": [
+          {
+            "provider": "AzureWebApp",
+            "app_id": "MyAppId",
+            "slot": "MySlot"
+          }
+        ],
+        "deploy_script": [
+          {
+            "cmd": "echo 'Deploy script'"
+          }
+        ],
+        "after_deploy": [
+          {
+            "cmd": "echo 'After deploy'"
+          }
+        ],
+        "on_success": [
+          {
+            "cmd": "echo 'On success'"
+          }
+        ],
+        "on_failure": [
+          {
+            "cmd": "echo 'On failure'"
+          }
+        ],
+        "on_finish": [
+          {
+            "cmd": "echo 'On finish'"
+          }
+        ]
+      }
+    }
+  ]
+}

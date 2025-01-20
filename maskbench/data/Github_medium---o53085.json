@@ -1,0 +1,254 @@
+{
+  "description": "sample Github_medium/o53085.json",
+  "meta": {
+    "full_size": 729,
+    "stripped_size": 465,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "exclusiveMinimum",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "basic schema from z-schema benchmark (https://github.com/zaggino/z-schema)",
+    "items": {
+      "additionalProperties": false,
+      "properties": {
+        "dimensions": {
+          "properties": {
+            "height": {
+              "type": "number"
+            },
+            "length": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "length",
+            "width",
+            "height"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "description": "The unique identifier for a product",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "_uniqueItems": true
+        },
+        "warehouseLocation": {
+          "description": "Coordinates of the warehouse with the product"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "price"
+      ],
+      "title": "Product",
+      "type": "object"
+    },
+    "title": "Product set",
+    "type": "array"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": [
+        {
+          "id": 1,
+          "name": "Product A",
+          "price": 10.99,
+          "tags": [
+            "tag1",
+            "tag2"
+          ],
+          "warehouseLocation": "A1-1-1"
+        },
+        {
+          "dimensions": {
+            "height": 10,
+            "length": 20,
+            "width": 30
+          },
+          "id": 2,
+          "name": "Product B",
+          "price": 5.99,
+          "tags": [
+            "tag3",
+            "tag4"
+          ],
+          "warehouseLocation": "B2-2-2"
+        },
+        {
+          "id": 3,
+          "name": "Product C",
+          "price": 7.99,
+          "tags": [
+            "tag5",
+            "tag6"
+          ],
+          "warehouseLocation": "C3-3-3"
+        }
+      ]
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"id\":1,\"name\":\"Product A\",\"price\":10.99,\"tags\":[],\"warehouseLocation\":\"A1-1-1\"} is not of type \"array\"",
+      "python_error": "{'id': 1, 'name': 'Product A', 'price': 10.99, 'tags': [], 'warehouseLocation': 'A1-1-1'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'basic schema from z-schema benchmark '\n                    '(https://github.com/zaggino/z-schema)',\n     'items': {'additionalProperties': False,\n               'properties': {'dimensions': {'properties': {'height': {'type': 'number'},\n                                                            'length': {'type': 'number'},\n                                                            'width': {'type': 'number'}},\n                                             'required': ['length',\n                                                          'width',\n                                                          'height'],\n                                             'type': 'object'},\n                              'id': {'description': 'The unique identifier '\n                                                    'for a product',\n                       .. (1220 more)",
+      "data": {
+        "id": 1,
+        "name": "Product A",
+        "price": 10.99,
+        "tags": [],
+        "warehouseLocation": "A1-1-1"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on exclusiveMinimum keyword",
+      "valid": false,
+      "rust_error": "{\"id\":1,\"name\":\"Product A\",\"price\":0,\"tags\":[\"tag1\",\"tag2\"],\"warehouseLocation\":\"A1-1-1\"} is not of type \"array\"",
+      "python_error": "{'id': 1, 'name': 'Product A', 'price': 0, 'tags': ['tag1', 'tag2'], 'warehouseLocation': 'A1-1-1'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'basic schema from z-schema benchmark '\n                    '(https://github.com/zaggino/z-schema)',\n     'items': {'additionalProperties': False,\n               'properties': {'dimensions': {'properties': {'height': {'type': 'number'},\n                                                            'length': {'type': 'number'},\n                                                            'width': {'type': 'number'}},\n                                             'required': ['length',\n                                                          'width',\n                                                          'height'],\n                                             'type': 'object'},\n                              'id': {'description': 'The unique identifier '\n                                                    'for a product',\n             .. (1240 more)",
+      "data": {
+        "id": 1,
+        "name": "Product A",
+        "price": 0,
+        "tags": [
+          "tag1",
+          "tag2"
+        ],
+        "warehouseLocation": "A1-1-1"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":1,\"name\":\"Product A\",\"price\":-1.99,\"tags\":[\"tag1\",\"tag2\"],\"warehouseLocation\":\"A1-1-1\"} is not of type \"array\"",
+      "python_error": "{'id': 1, 'name': 'Product A', 'price': -1.99, 'tags': ['tag1', 'tag2'], 'warehouseLocation': 'A1-1-1'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'basic schema from z-schema benchmark '\n                    '(https://github.com/zaggino/z-schema)',\n     'items': {'additionalProperties': False,\n               'properties': {'dimensions': {'properties': {'height': {'type': 'number'},\n                                                            'length': {'type': 'number'},\n                                                            'width': {'type': 'number'}},\n                                             'required': ['length',\n                                                          'width',\n                                                          'height'],\n                                             'type': 'object'},\n                              'id': {'description': 'The unique identifier '\n                                                    'for a product',\n         .. (1248 more)",
+      "data": {
+        "id": 1,
+        "name": "Product A",
+        "price": -1.99,
+        "tags": [
+          "tag1",
+          "tag2"
+        ],
+        "warehouseLocation": "A1-1-1"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"description\":\"basic schema from z-schema benchmark (https://github.com/zaggino/z-schema)\",\"items\":{\"additionalProperties\":false,\"properties\":{\"dimensions\":{\"properties\":{\"height\":{\"type\":\"number\"},\"length\":{\"type\":\"number\"},\"width\":{\"type\":\"number\"}},\"required\":[\"length\",\"width\",\"height\"],\"type\":\"object\"},\"id\":{\"description\":\"The unique identifier for a product\",\"type\":\"number\"},\"name\":{\"type\":\"string\"},\"price\":{\"exclusiveMinimum\":0,\"type\":\"number\"},\"tags\":{\"items\":{\"type\":\"string\"},\"minItems\":1,\"type\":\"array\",\"_uniqueItems\":true},\"warehouseLocation\":{\"description\":\"Coordinates of the warehouse with the product\"}},\"required\":[\"id\",\"name\",\"price\"],\"title\":\"Product\",\"type\":\"object\"},\"title\":\"Product set\",\"type\":\"array\"} is not of type \"array\"",
+      "python_error": "{'description': 'basic schema from z-schema benchmark (https://github.com/zaggino/z-schema)', 'items': {'additionalProperties': False, 'properties': {'dimensions': {'properties': {'height': {'type': 'number'}, 'length': {'type': 'number'}, 'width': {'type': 'number'}}, 'required': ['length', 'width', 'height'], 'type': 'object'}, 'id': {'description': 'The unique identifier for a product', 'type': 'number'}, 'name': {'type': 'string'}, 'price': {'exclusiveMinimum': 0, 'type': 'number'}, 'tags': {'items': {'type': 'string'}, 'minItems': 1, 'type': 'array', '_uniqueItems': True}, 'warehouseLocation': {'description': 'Coordinates of the warehouse with the product'}}, 'required': ['id', 'name', 'price'], 'title': 'Product', 'type': 'object'}, 'title': 'Product set', 'type': 'array'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'basic schema from z-schema benchmark '\n                    '(https://github.com/zaggino/z-schema)',\n     'items': {'additionalProperties': False,\n       .. (3773 more)",
+      "data": {
+        "description": "basic schema from z-schema benchmark (https://github.com/zaggino/z-schema)",
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "dimensions": {
+              "properties": {
+                "height": {
+                  "type": "number"
+                },
+                "length": {
+                  "type": "number"
+                },
+                "width": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "length",
+                "width",
+                "height"
+              ],
+              "type": "object"
+            },
+            "id": {
+              "description": "The unique identifier for a product",
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "price": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "tags": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "_uniqueItems": true
+            },
+            "warehouseLocation": {
+              "description": "Coordinates of the warehouse with the product"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "price"
+          ],
+          "title": "Product",
+          "type": "object"
+        },
+        "title": "Product set",
+        "type": "array"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":1,\"name\":\"Product A\",\"price\":-0.01,\"price is now less than the exclusive minimum\":\"additionalProperty\",\"additionalProperties are not allowed in items\":\"extra value\",\"tags\":[\"tag1\",\"tag1\",\"tags are no longer unique\"],\"warehouseLocation\":\"A1-1-1\"} is not of type \"array\"",
+      "python_error": "{'id': 1, 'name': 'Product A', 'price': -0.01, 'price is now less than the exclusive minimum': 'additionalProperty', 'additionalProperties are not allowed in items': 'extra value', 'tags': ['tag1', 'tag1', 'tags are no longer unique'], 'warehouseLocation': 'A1-1-1'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'basic schema from z-schema benchmark '\n                    '(https://github.com/zaggino/z-schema)',\n     'items': {'additionalProperties': False,\n               'properties': {'dimensions': {'properties': {'height': {'type': 'number'},\n                                                            'length': {'type': 'number'},\n                                                            'width': {'type': 'number'}},\n                                             'required': ['length',\n                                                          'width',\n                                                          'height'],\n                                             'type': 'ob.. (1584 more)",
+      "data": {
+        "id": 1,
+        "name": "Product A",
+        "price": -0.01,
+        "price is now less than the exclusive minimum": "additionalProperty",
+        "additionalProperties are not allowed in items": "extra value",
+        "tags": [
+          "tag1",
+          "tag1",
+          "tags are no longer unique"
+        ],
+        "warehouseLocation": "A1-1-1"
+      }
+    }
+  ]
+}

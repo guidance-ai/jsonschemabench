@@ -1,0 +1,184 @@
+{
+  "description": "sample Github_medium/o65450.json",
+  "meta": {
+    "full_size": 1229,
+    "stripped_size": 525,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "A document of some sort (PDF, TIFF, HTML) associated with a filing",
+    "type": "object",
+    "properties": {
+      "uid": {
+        "description": "Unique id/reference for the filing if it has one",
+        "type": "string"
+      },
+      "file_format": {
+        "description": "Format of the document, if known",
+        "enum": [
+          "xml",
+          "pdf",
+          "html",
+          "doc",
+          null
+        ]
+      },
+      "original_source_url": {
+        "description": "Persistent URL for the document, if there is one",
+        "type": "string"
+      },
+      "source_url": {
+        "description": "Source url of the web page for the filing or if there is not persistent URL the page from which it can be found (e.g. search page)",
+        "type": "string",
+        "minLength": 11
+      },
+      "source_location": {
+        "type": "string",
+        "description": "If the accounts filing has been put on sources.opencorporates.com the path to the filing"
+      },
+      "language": {
+        "description": "Should be represented as two-letter ISO-639 code",
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 2
+      },
+      "classification": {
+        "description": "type of document (at the moment only XBRL is the only option here)",
+        "type": "string",
+        "enum": [
+          "xbrl",
+          null
+        ]
+      },
+      "pages": {
+        "description": "Number of pages, if known",
+        "type": "integer"
+      }
+    },
+    "additionalProperties": false,
+    "anyOf": [
+      {
+        "required": [
+          "source_location"
+        ]
+      },
+      {
+        "required": [
+          "source_url"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "uid": "12345",
+        "file_format": "pdf",
+        "original_source_url": "https://example.com/original-source",
+        "source_url": "https://example.com/source",
+        "source_location": "path/to/filing",
+        "language": "en",
+        "classification": "xbrl",
+        "pages": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"e\" is shorter than 2 characters",
+      "python_error": "'e' is too short\n\nFailed validating 'minLength' in schema['properties']['language']:\n    {'description': 'Should be represented as two-letter ISO-639 code',\n     'type': 'string',\n     'minLength': 2,\n     'maxLength': 2}\n\nOn instance['language']:\n    'e'",
+      "data": {
+        "uid": "12345",
+        "file_format": "pdf",
+        "original_source_url": "https://example.com/original-source",
+        "source_url": "https://example.com/source",
+        "source_location": "path/to/filing",
+        "language": "e",
+        "classification": "xbrl",
+        "pages": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"uid\":\"12345\",\"file_format\":\"pdf\",\"original_source_url\":\"https://example.com/original-source\",\"language\":\"en\",\"classification\":\"xbrl\",\"pages\":10} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'uid': '12345', 'file_format': 'pdf', 'original_source_url': 'https://example.com/original-source', 'language': 'en', 'classification': 'xbrl', 'pages': 10} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'A document of some sort (PDF, TIFF, HTML) associated '\n                    'with a filing',\n     'type': 'object',\n     'properties': {'uid': {'description': 'Unique id/reference for the '\n                                           'filing if it has one',\n                            'type': 'string'},\n                    'file_format': {'description': 'Format of the '\n                                                   'document, if known',\n                                    'enum': ['xml',\n                                             'pdf',\n                                             'html',\n                                             'doc',\n                                             None]}.. (2640 more)",
+      "data": {
+        "uid": "12345",
+        "file_format": "pdf",
+        "original_source_url": "https://example.com/original-source",
+        "language": "en",
+        "classification": "xbrl",
+        "pages": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'A document of some sort (PDF, TIFF, HTML) associated '\n                    'with a filing',\n     'type': 'object',\n     'properties': {'uid': {'description': 'Unique id/reference for the '\n                                           'filing if it has one',\n                            'type': 'string'},\n                    'file_format': {'description': 'Format of the '\n                                                   'document, if known',\n                                    'enum': ['xml',\n                                             'pdf',\n                                             'html',\n                                             'doc',\n                                             None]},\n                    'original_source_url': {'description': 'Persistent URL '\n                                    .. (2654 more)",
+      "data": {
+        "uid": "12345",
+        "file_format": "pdf",
+        "original_source_url": "https://example.com/original-source",
+        "source_url": "https://example.com/source",
+        "source_location": "path/to/filing",
+        "language": "en",
+        "classification": "xbrl",
+        "pages": 10,
+        "extra_property": "extra_value"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "uid": "1234567890",
+        "file_format": "pdf",
+        "original_source_url": "https://example.com/original-source",
+        "source_url": "https://example.com/source-url",
+        "source_location": "/path/to/filing",
+        "language": "en",
+        "classification": "xbrl",
+        "pages": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"enx\" is longer than 2 characters",
+      "python_error": "'enx' is too long\n\nFailed validating 'maxLength' in schema['properties']['language']:\n    {'description': 'Should be represented as two-letter ISO-639 code',\n     'type': 'string',\n     'minLength': 2,\n     'maxLength': 2}\n\nOn instance['language']:\n    'enx'",
+      "data": {
+        "uid": "1234567890",
+        "file_format": "pdf",
+        "original_source_url": "https://example.com/original-source",
+        "source_url": "https://example.com/source-url",
+        "source_location": "/path/to/filing",
+        "language": "enx",
+        "classification": "xbrl",
+        "pages": 10
+      }
+    }
+  ]
+}

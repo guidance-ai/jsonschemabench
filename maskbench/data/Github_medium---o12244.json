@@ -1,0 +1,276 @@
+{
+  "description": "sample Github_medium/o12244.json",
+  "meta": {
+    "full_size": 647,
+    "stripped_size": 597,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "minimum",
+      "properties",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "subject": {
+        "type": "string",
+        "maxLength": 255
+      },
+      "description": {
+        "type": "string"
+      },
+      "category": {
+        "type": "string",
+        "maxLength": 255
+      },
+      "school_id": {
+        "type": "string",
+        "minLength": 36,
+        "maxLength": 36
+      },
+      "status": {
+        "description": "A value of enum TicketStatus.java",
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "newComment": {
+        "type": "string"
+      },
+      "attachments": {
+        "type": "array",
+        "additionalProperties": false,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "01234567-89ab-cdef-0123-456789abcdef",
+        "status": 1,
+        "newComment": "This is a new comment.",
+        "attachments": [
+          {
+            "id": "1",
+            "name": "example.txt",
+            "size": 1024
+          },
+          {
+            "id": "2",
+            "name": "example2.txt",
+            "size": 2048
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"01234567-89ab-cdef-0123-456789abcde\" is shorter than 36 characters",
+      "python_error": "'01234567-89ab-cdef-0123-456789abcde' is too short\n\nFailed validating 'minLength' in schema['properties']['school_id']:\n    {'type': 'string', 'minLength': 36, 'maxLength': 36}\n\nOn instance['school_id']:\n    '01234567-89ab-cdef-0123-456789abcde'",
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "01234567-89ab-cdef-0123-456789abcde",
+        "status": 1,
+        "newComment": "This is a new comment.",
+        "attachments": [
+          {
+            "id": "",
+            "name": "example.txt",
+            "size": 1024
+          },
+          {
+            "id": "2",
+            "name": "example2.txt",
+            "size": 2048
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['attachments']['items']['properties']['size']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['attachments'][0]['size']:\n    0",
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "01234567-89ab-cdef-0123-456789abcdef",
+        "status": 1,
+        "newComment": "This is a new comment.",
+        "attachments": [
+          {
+            "id": "1",
+            "name": "example.txt",
+            "size": 0
+          },
+          {
+            "id": "2",
+            "name": "example2.txt",
+            "size": 2048
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "5 is not one of [1,2,3,4]",
+      "python_error": "5 is not one of [1, 2, 3, 4]\n\nFailed validating 'enum' in schema['properties']['status']:\n    {'description': 'A value of enum TicketStatus.java',\n     'enum': [1, 2, 3, 4]}\n\nOn instance['status']:\n    5",
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "01234567-89ab-cdef-0123-456789abcdef",
+        "status": 5,
+        "newComment": "This is a new comment.",
+        "attachments": [
+          {
+            "id": "1",
+            "name": "example.txt",
+            "size": 1024
+          },
+          {
+            "id": "2",
+            "name": "example2.txt",
+            "size": 2048
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"01234567-89ab-cdef-0123-456789abcde\" is shorter than 36 characters",
+      "python_error": "Additional properties are not allowed ('Invalid school_id length' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'subject': {'type': 'string', 'maxLength': 255},\n                    'description': {'type': 'string'},\n                    'category': {'type': 'string', 'maxLength': 255},\n                    'school_id': {'type': 'string',\n                                  'minLength': 36,\n                                  'maxLength': 36},\n                    'status': {'description': 'A value of enum '\n                                              'TicketStatus.java',\n                               'enum': [1, 2, 3, 4]},\n                    'newComment': {'type': 'string'},\n                    'attachments': {'type': 'array',\n                                    'additionalProperties': False,\n                                    'items': {'type': 'object'.. (837 more)",
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "01234567-89ab-cdef-0123-456789abcde",
+        "Invalid school_id length": "status"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "12345678-1234-1234-1234-123456789012",
+        "status": 1,
+        "newComment": "This is a new comment.",
+        "attachments": [
+          {
+            "id": "1",
+            "name": "example_file.txt",
+            "size": 1024
+          },
+          {
+            "id": "2",
+            "name": "example_image.jpg",
+            "size": 2048
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['attachments']['items']['properties']['size']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['attachments'][0]['size']:\n    0",
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "12345678-1234-1234-1234-123456789012",
+        "status": 1,
+        "newComment": "This is a new comment.",
+        "attachments": [
+          {
+            "id": "1",
+            "name": "example_file.txt",
+            "size": 0
+          },
+          {
+            "id": "2",
+            "name": "example_image.jpg",
+            "size": 2048
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"status\" is shorter than 36 characters",
+      "python_error": "'status' is too short\n\nFailed validating 'minLength' in schema['properties']['school_id']:\n    {'type': 'string', 'minLength': 36, 'maxLength': 36}\n\nOn instance['school_id']:\n    'status'",
+      "data": {
+        "subject": "Example Ticket",
+        "description": "This is an example ticket.",
+        "category": "Example Category",
+        "school_id": "status",
+        "newComment": "This is a new comment.",
+        "attachments": [
+          {
+            "id": "",
+            "": "name",
+            "size": 1024
+          },
+          {
+            "id": "2",
+            "name": "example_image.jpg",
+            "size": 2048
+          }
+        ]
+      }
+    }
+  ]
+}

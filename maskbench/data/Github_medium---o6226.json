@@ -1,0 +1,305 @@
+{
+  "description": "sample Github_medium/o6226.json",
+  "meta": {
+    "full_size": 1569,
+    "stripped_size": 1330,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "type": "object",
+    "definitions": {
+      "_typeSet": {
+        "title": "Type",
+        "enum": [
+          "set"
+        ]
+      },
+      "_typeRemove": {
+        "title": "Type",
+        "enum": [
+          "remove"
+        ]
+      },
+      "_typeMove": {
+        "title": "Type",
+        "enum": [
+          "move"
+        ]
+      },
+      "_typeCopy": {
+        "title": "Type",
+        "enum": [
+          "copy"
+        ]
+      },
+      "destination": {
+        "title": "Destination",
+        "description": "JSON path to place result",
+        "type": "string",
+        "minLength": 1
+      },
+      "source": {
+        "title": "Source",
+        "description": "JSON path of source value",
+        "type": "string",
+        "minLength": 1
+      },
+      "valueTemplate": {
+        "title": "Value Template",
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "properties": {
+      "rules": {
+        "title": "Rules",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "title": "Rule",
+          "type": "object",
+          "oneOf": [
+            {
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/_typeSet"
+                },
+                "destination": {
+                  "$ref": "#/definitions/destination"
+                },
+                "valueTemplate": {
+                  "$ref": "#/definitions/valueTemplate"
+                }
+              },
+              "required": [
+                "type",
+                "destination",
+                "valueTemplate"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/_typeRemove"
+                },
+                "source": {
+                  "$ref": "#/definitions/source"
+                }
+              },
+              "required": [
+                "type",
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/_typeMove"
+                },
+                "destination": {
+                  "$ref": "#/definitions/destination"
+                },
+                "source": {
+                  "$ref": "#/definitions/source"
+                }
+              },
+              "required": [
+                "type",
+                "destination",
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/_typeCopy"
+                },
+                "destination": {
+                  "$ref": "#/definitions/destination"
+                },
+                "source": {
+                  "$ref": "#/definitions/source"
+                }
+              },
+              "required": [
+                "type",
+                "destination",
+                "source"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "required": [
+      "rules"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "rules": [
+          {
+            "type": "set",
+            "destination": ".path.to.destination",
+            "valueTemplate": "template value"
+          },
+          {
+            "type": "remove",
+            "source": ".path.to.source"
+          },
+          {
+            "type": "move",
+            "destination": ".path.to.destination",
+            "source": ".path.to.source"
+          },
+          {
+            "type": "copy",
+            "destination": ".path.to.destination",
+            "source": ".path.to.source"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "rules": [
+          {
+            "type": "set",
+            "destination": ".name",
+            "valueTemplate": "John Doe"
+          },
+          {
+            "type": "remove",
+            "source": ".age"
+          },
+          {
+            "type": "move",
+            "destination": ".newAddress",
+            "source": ".address"
+          },
+          {
+            "type": "copy",
+            "destination": ".newPhone",
+            "source": ".phone"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['rules']:\n    {'title': 'Rules',\n     'type': 'array',\n     'minItems': 1,\n     'items': {'title': 'Rule',\n               'type': 'object',\n               'oneOf': [{'properties': {'type': {'$ref': '#/definitions/_typeSet'},\n                                         'destination': {'$ref': '#/definitions/destination'},\n                                         'valueTemplate': {'$ref': '#/definitions/valueTemplate'}},\n                          'required': ['type',\n                                       'destination',\n                                       'valueTemplate'],\n                          'additionalProperties': False},\n                         {'properties': {'type': {'$ref': '#/definitions/_typeRemove'},\n                                         'source': {'$ref': '#/definitions/source'}},\n                          'required': ['type', 'source'],\n                          'additionalProperties': False},\n                     .. (806 more)",
+      "data": {
+        "rules": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"set\",\"destination\":\".name\",\"valueTemplate\":\"John Doe\",\"source\":\".age\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'set', 'destination': '.name', 'valueTemplate': 'John Doe', 'source': '.age'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['rules']['items']:\n    {'title': 'Rule',\n     'type': 'object',\n     'oneOf': [{'properties': {'type': {'$ref': '#/definitions/_typeSet'},\n                               'destination': {'$ref': '#/definitions/destination'},\n                               'valueTemplate': {'$ref': '#/definitions/valueTemplate'}},\n                'required': ['type', 'destination', 'valueTemplate'],\n                'additionalProperties': False},\n               {'properties': {'type': {'$ref': '#/definitions/_typeRemove'},\n                               'source': {'$ref': '#/definitions/source'}},\n                'required': ['type', 'source'],\n                'additionalProperties': False},\n               {'properties': {'type': {'$ref': '#/definitions/_typeMove'},\n                               'destination': {'$ref': '#/definitions/destination'},.. (668 more)",
+      "data": {
+        "rules": [
+          {
+            "type": "set",
+            "destination": ".name",
+            "valueTemplate": "John Doe",
+            "source": ".age"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"set\",\"destination\":\"\",\"valueTemplate\":\"John Doe\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'set', 'destination': '', 'valueTemplate': 'John Doe'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['rules']['items']:\n    {'title': 'Rule',\n     'type': 'object',\n     'oneOf': [{'properties': {'type': {'$ref': '#/definitions/_typeSet'},\n                               'destination': {'$ref': '#/definitions/destination'},\n                               'valueTemplate': {'$ref': '#/definitions/valueTemplate'}},\n                'required': ['type', 'destination', 'valueTemplate'],\n                'additionalProperties': False},\n               {'properties': {'type': {'$ref': '#/definitions/_typeRemove'},\n                               'source': {'$ref': '#/definitions/source'}},\n                'required': ['type', 'source'],\n                'additionalProperties': False},\n               {'properties': {'type': {'$ref': '#/definitions/_typeMove'},\n                               'destination': {'$ref': '#/definitions/destination'},\n                      .. (607 more)",
+      "data": {
+        "rules": [
+          {
+            "type": "set",
+            "destination": "",
+            "valueTemplate": "John Doe"
+          },
+          {
+            "type": "remove",
+            "source": ".age"
+          },
+          {
+            "type": "move",
+            "destination": ".newAddress",
+            "source": ".address"
+          },
+          {
+            "type": "copy",
+            "destination": ".newPhone",
+            "source": ".phone"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"set\",\"destination\":\"\",\"valueTemplate\":\"John Doe\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'set', 'destination': '', 'valueTemplate': 'John Doe'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['rules']['items']:\n    {'title': 'Rule',\n     'type': 'object',\n     'oneOf': [{'properties': {'type': {'$ref': '#/definitions/_typeSet'},\n                               'destination': {'$ref': '#/definitions/destination'},\n                               'valueTemplate': {'$ref': '#/definitions/valueTemplate'}},\n                'required': ['type', 'destination', 'valueTemplate'],\n                'additionalProperties': False},\n               {'properties': {'type': {'$ref': '#/definitions/_typeRemove'},\n                               'source': {'$ref': '#/definitions/source'}},\n                'required': ['type', 'source'],\n                'additionalProperties': False},\n               {'properties': {'type': {'$ref': '#/definitions/_typeMove'},\n                               'destination': {'$ref': '#/definitions/destination'},\n                      .. (607 more)",
+      "data": {
+        "rules": [
+          {
+            "type": "set",
+            "destination": "",
+            "valueTemplate": "John Doe"
+          },
+          {
+            "type": "remove",
+            "source": ".age"
+          },
+          {
+            "type": "move",
+            "destination": ".newAddress",
+            "source": ".address"
+          },
+          {
+            "type": "copy",
+            "destination": ".newPhone",
+            "source": ".phone"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "description": "sample Github_medium/o60861.json",
+  "meta": {
+    "full_size": 1123,
+    "stripped_size": 625,
+    "features": [
+      "additionalProperties",
+      "anyOf",
+      "items",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "avalon-core:application-1.0",
+    "description": "An application definition.",
+    "type": "object",
+    "additionalProperties": true,
+    "required": [
+      "schema",
+      "label",
+      "application_dir",
+      "executable"
+    ],
+    "properties": {
+      "schema": {
+        "description": "Schema identifier for payload",
+        "type": "string"
+      },
+      "label": {
+        "description": "Nice name of application.",
+        "type": "string"
+      },
+      "application_dir": {
+        "description": "Name of directory used for application resources.",
+        "type": "string"
+      },
+      "executable": {
+        "description": "Name of callable executable, this is called to launch the application",
+        "type": "string"
+      },
+      "description": {
+        "description": "Description of application.",
+        "type": "string"
+      },
+      "environment": {
+        "description": "Key/value pairs for environment variables related to this application. Supports lists for paths, such as PYTHONPATH.",
+        "type": "object",
+        "items": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      },
+      "default_dirs": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "copy": {
+        "type": "object",
+        "patternProperties": {
+          "^.*$": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "schema": "avalon-core:application-1.0",
+        "label": "My Application",
+        "application_dir": "my_app",
+        "executable": "my_app.exe",
+        "description": "This is my application.",
+        "environment": {
+          "PYTHONPATH": [
+            "/path/to/python/lib1",
+            "/path/to/python/lib2"
+          ],
+          "MY_VAR": "my_value"
+        },
+        "default_dirs": [
+          "/path/to/default/dir1",
+          "/path/to/default/dir2"
+        ],
+        "copy": {
+          "file1.txt": "/path/to/source/file1.txt",
+          "dir1": "/path/to/source/dir1",
+          "file2.txt": null
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "schema": "avalon-core:application-1.0",
+        "label": "My Application",
+        "application_dir": "my_app",
+        "executable": "my_app.exe",
+        "description": "This is a sample application.",
+        "environment": {
+          "PYTHONPATH": [
+            "/path/to/python/lib1",
+            "/path/to/python/lib2"
+          ],
+          "MY_VAR": "my_value"
+        },
+        "default_dirs": [
+          "/path/to/default/dir1",
+          "/path/to/default/dir2"
+        ],
+        "copy": {
+          "source_file1": "/path/to/source/file1",
+          "source_file2": null,
+          "source_dir": "/path/to/source/dir"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['copy']['patternProperties']['^.*$']:\n    {'anyOf': [{'type': 'string'}, {'type': 'null'}]}\n\nOn instance['copy']['source_dir_with_space']:\n    123",
+      "data": {
+        "schema": "avalon-core:application-1.0",
+        "label": "My Application",
+        "application_dir": "my_app",
+        "executable": "my_app.exe",
+        "description": "This is a sample application.",
+        "environment": {
+          "PYTHONPATH": [
+            "/path/to/python/lib1",
+            "/path/to/python/lib2"
+          ],
+          "MY_VAR": "my_value"
+        },
+        "default_dirs": [
+          "/path/to/default/dir1",
+          "/path/to/default/dir2"
+        ],
+        "copy": {
+          "source_file1": "/path/to/source/file1",
+          "source_file2": null,
+          "source_dir": "/path/to/source/dir",
+          "source_dir_with_space": 123
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['label']:\n    {'description': 'Nice name of application.', 'type': 'string'}\n\nOn instance['label']:\n    12345",
+      "data": {
+        "schema": "avalon-core:application-1.0",
+        "label": 12345,
+        "application_dir": "my_app",
+        "executable": "my_app.exe",
+        "description": "This is a sample application.",
+        "environment": {
+          "PYTHONPATH": [
+            "/path/to/python/lib1",
+            12345
+          ],
+          "MY_VAR": "my_value"
+        },
+        "default_dirs": [
+          "/path/to/default/dir1",
+          true
+        ],
+        "copy": {
+          "source_file1": "/path/to/source/file1",
+          "source_file2": null,
+          "source_dir": "/path/to/source/dir"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,308 @@
+{
+  "description": "sample JsonSchemaStore/sil-kit-registry-configuration.json",
+  "meta": {
+    "full_size": 1663,
+    "stripped_size": 871,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/sil-kit-registry-configuration.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "Logging": {
+        "type": "object",
+        "description": "Configures the properties of the SIL Kit Logging Service",
+        "properties": {
+          "FlushLevel": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "Error",
+              "Warn",
+              "Info",
+              "Debug",
+              "Trace",
+              "Off"
+            ]
+          },
+          "Sinks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Type": {
+                  "type": "string",
+                  "enum": [
+                    "File",
+                    "Stdout"
+                  ]
+                },
+                "Level": {
+                  "type": "string",
+                  "enum": [
+                    "Critical",
+                    "Error",
+                    "Warn",
+                    "Info",
+                    "Debug",
+                    "Trace",
+                    "Off"
+                  ],
+                  "default": "Info"
+                },
+                "LogName": {
+                  "type": "string",
+                  "description": "Log name; Results in the following filename: <LogName>_%y-%m-%dT%h-%m-%s.txt"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "Type"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Sinks"
+        ]
+      }
+    },
+    "description": "JSON schema for SIL KIT Registry configuration files.",
+    "properties": {
+      "$schema": {
+        "type": "string",
+        "description": "The schema file",
+        "default": "",
+        "examples": [
+          "./RegistryConfiguration.schema.json"
+        ]
+      },
+      "SchemaVersion": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "default": 0,
+        "description": "Version of the schema used to validate this document"
+      },
+      "Description": {
+        "type": "string",
+        "description": "Free text field allowing a user to describe the configuration file in their own words. The contents of this field are not parsed or used internally.",
+        "default": ""
+      },
+      "ListenUri": {
+        "type": "string",
+        "description": "The configured registry instance will listen on this address for incoming connections. Optional; This field overrides the -u, and --listen-uri command line parameters."
+      },
+      "Logging": {
+        "$ref": "#/definitions/Logging"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "$schema": "./RegistryConfiguration.schema.json",
+        "SchemaVersion": 1,
+        "Description": "Example SIL Kit Registry configuration file",
+        "ListenUri": "http://localhost:8080",
+        "Logging": {
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "File",
+              "Level": "Info",
+              "LogName": "registry"
+            },
+            {
+              "Type": "Stdout",
+              "Level": "Debug"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['SchemaVersion']:\n    {'anyOf': [{'type': 'integer'}, {'type': 'string'}],\n     'default': 0,\n     'description': 'Version of the schema used to validate this document'}\n\nOn instance['SchemaVersion']:\n    True",
+      "data": {
+        "$schema": "./RegistryConfiguration.schema.json",
+        "SchemaVersion": true,
+        "Description": "Example SIL Kit Registry configuration file",
+        "ListenUri": "http://localhost:8080",
+        "Logging": {
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "File",
+              "Level": "Info",
+              "LogName": "registry"
+            },
+            {
+              "Type": "Stdout",
+              "Level": "Debug"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"InvalidLevel\" is not one of [\"Critical\",\"Error\",\"Warn\",\"Info\",\"Debug\",\"Trace\",\"Off\"]",
+      "python_error": "'InvalidLevel' is not one of ['Critical', 'Error', 'Warn', 'Info', 'Debug', 'Trace', 'Off']\n\nFailed validating 'enum' in schema['properties']['Logging']['properties']['Sinks']['items']['properties']['Level']:\n    {'type': 'string',\n     'enum': ['Critical', 'Error', 'Warn', 'Info', 'Debug', 'Trace', 'Off'],\n     'default': 'Info'}\n\nOn instance['Logging']['Sinks'][1]['Level']:\n    'InvalidLevel'",
+      "data": {
+        "$schema": "./RegistryConfiguration.schema.json",
+        "SchemaVersion": 1,
+        "Description": "Example SIL Kit Registry configuration file",
+        "ListenUri": "http://localhost:8080",
+        "Logging": {
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "File",
+              "Level": "Info",
+              "LogName": "registry"
+            },
+            {
+              "Type": "Stdout",
+              "Level": "InvalidLevel"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "1.5 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "1.5 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['SchemaVersion']:\n    {'anyOf': [{'type': 'integer'}, {'type': 'string'}],\n     'default': 0,\n     'description': 'Version of the schema used to validate this document'}\n\nOn instance['SchemaVersion']:\n    1.5",
+      "data": {
+        "$schema": "./RegistryConfiguration.schema.json",
+        "SchemaVersion": 1.5,
+        "Description": "Example SIL Kit Registry configuration file",
+        "ListenUri": "http://localhost:8080",
+        "Logging": {
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "File",
+              "Level": "Info",
+              "LogName": "registry"
+            },
+            {
+              "Type": "Stdout",
+              "Level": "Debug"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"InvalidLevel\" is not one of [\"Critical\",\"Error\",\"Warn\",\"Info\",\"Debug\",\"Trace\",\"Off\"]",
+      "python_error": "'InvalidLevel' is not one of ['Critical', 'Error', 'Warn', 'Info', 'Debug', 'Trace', 'Off']\n\nFailed validating 'enum' in schema['properties']['Logging']['properties']['FlushLevel']:\n    {'type': 'string',\n     'enum': ['Critical', 'Error', 'Warn', 'Info', 'Debug', 'Trace', 'Off']}\n\nOn instance['Logging']['FlushLevel']:\n    'InvalidLevel'",
+      "data": {
+        "$schema": "./RegistryConfiguration.schema.json",
+        "SchemaVersion": 1,
+        "Description": "Example SIL Kit Registry configuration file",
+        "ListenUri": "http://localhost:8080",
+        "Logging": {
+          "FlushLevel": "InvalidLevel",
+          "Sinks": [
+            {
+              "Type": "File",
+              "Level": "Info",
+              "LogName": "registry"
+            },
+            {
+              "Type": "Stdout",
+              "Level": "Debug"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json.schemastore.org/sil-kit-registry-configuration.json",
+        "SchemaVersion": 1,
+        "Description": "Example SIL Kit Registry configuration file",
+        "ListenUri": "http://localhost:8080",
+        "Logging": {
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "File",
+              "Level": "Debug",
+              "LogName": "registry"
+            },
+            {
+              "Type": "Stdout",
+              "Level": "Info"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"UnknownType\" is not one of [\"File\",\"Stdout\"]",
+      "python_error": "'UnknownType' is not one of ['File', 'Stdout']\n\nFailed validating 'enum' in schema['properties']['Logging']['properties']['Sinks']['items']['properties']['Type']:\n    {'type': 'string', 'enum': ['File', 'Stdout']}\n\nOn instance['Logging']['Sinks'][1]['Type']:\n    'UnknownType'",
+      "data": {
+        "$schema": "https://json.schemastore.org/sil-kit-registry-configuration.json",
+        "SchemaVersion": 1,
+        "Description": "Example SIL Kit Registry configuration file",
+        "ListenUri": "http://localhost:8080",
+        "Logging": {
+          "FlushLevel": "Info",
+          "Sinks": [
+            {
+              "Type": "File",
+              "Level": "Debug",
+              "LogName": "registry"
+            },
+            {
+              "Type": "UnknownType",
+              "Level": "Info"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "description": "sample MCPspec/CompleteRequest.json",
+  "meta": {
+    "full_size": 1341,
+    "stripped_size": 868,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "anyOf",
+      "const",
+      "format",
+      "format:uri-template"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CompleteRequest",
+    "definitions": {
+      "CompleteRequest": {
+        "description": "A request from the client to the server, to ask for completion options.",
+        "properties": {
+          "method": {
+            "const": "completion/complete",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "argument": {
+                "description": "The argument's information",
+                "properties": {
+                  "name": {
+                    "description": "The name of the argument",
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "The value of the argument to use for completion matching.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "ref": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/PromptReference"
+                  },
+                  {
+                    "$ref": "#/definitions/ResourceReference"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "argument",
+              "ref"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "PromptReference": {
+        "description": "Identifies a prompt.",
+        "properties": {
+          "name": {
+            "description": "The name of the prompt or prompt template",
+            "type": "string"
+          },
+          "type": {
+            "const": "ref/prompt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ResourceReference": {
+        "description": "A reference to a resource or resource template definition.",
+        "properties": {
+          "type": {
+            "const": "ref/resource",
+            "type": "string"
+          },
+          "uri": {
+            "description": "The URI or URI template of the resource.",
+            "format": "uri-template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "uri"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "completion/complete",
+        "params": {
+          "argument": {
+            "name": "example-argument",
+            "value": "example-value"
+          },
+          "ref": {
+            "name": "example-prompt",
+            "type": "ref/prompt"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"example-prompt\",\"type\":\"ref/resource\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'ref/prompt' was expected\n\nFailed validating 'const' in schema[0]['properties']['type']:\n    {'const': 'ref/prompt', 'type': 'string'}\n\nOn instance['type']:\n    'ref/resource'",
+      "data": {
+        "method": "completion/complete",
+        "params": {
+          "argument": {
+            "name": "example-argument",
+            "value": "example-value"
+          },
+          "ref": {
+            "name": "example-prompt",
+            "type": "ref/resource"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"ref/resource\",\"uri\":\"http://example.com/resource/{\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'ref/prompt' was expected\n\nFailed validating 'const' in schema[0]['properties']['type']:\n    {'const': 'ref/prompt', 'type': 'string'}\n\nOn instance['type']:\n    'ref/resource'",
+      "data": {
+        "method": "completion/complete",
+        "params": {
+          "argument": {
+            "name": "example-argument",
+            "value": "example-value"
+          },
+          "ref": {
+            "type": "ref/resource",
+            "uri": "http://example.com/resource/{"
+          }
+        }
+      }
+    }
+  ]
+}

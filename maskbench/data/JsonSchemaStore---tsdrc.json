@@ -1,0 +1,78 @@
+{
+  "description": "sample JsonSchemaStore/tsdrc.json",
+  "meta": {
+    "full_size": 826,
+    "stripped_size": 257,
+    "features": [
+      "additionalProperties",
+      "format",
+      "format:uri"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "properties",
+      "type",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": true,
+    "id": "https://json.schemastore.org/tsdrc.json",
+    "properties": {
+      "strictSSL": {
+        "type": "boolean",
+        "description": "Enabled by default, setting this option to false disables strict SSL. Passed to request package. Useful behind (corporate) proxies that act like man-in-the middle on https connections.",
+        "default": true
+      },
+      "proxy": {
+        "type": "string",
+        "description": "Any standard http-proxy as supported by the request package.",
+        "format": "uri"
+      },
+      "token": {
+        "type": "string",
+        "description": "The OAuth token can be used to boost the GitHub API rate-limit from 60 to 5000 (non-cached) requests per hour. The is token needs just 'read-only access to public information' so no additional OAuth scopes are necessary."
+      }
+    },
+    "title": "JSON schema for .tsdrc files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "strictSSL": false,
+        "proxy": "http://my-proxy.com:8080",
+        "token": "ghp_1234567890abcdefghijklmnopqrstuvwxyz"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a uri\" is not a \"uri\"",
+      "python_error": "'not a uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['proxy']:\n    {'type': 'string',\n     'description': 'Any standard http-proxy as supported by the request '\n                    'package.',\n     'format': 'uri'}\n\nOn instance['proxy']:\n    'not a uri'",
+      "data": {
+        "strictSSL": false,
+        "proxy": "not a uri",
+        "token": "ghp_1234567890abcdefghijklmnopqrstuvwxyz"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"boolean\"",
+      "python_error": "None is not of type 'boolean'\n\nFailed validating 'type' in schema['properties']['strictSSL']:\n    {'type': 'boolean',\n     'description': 'Enabled by default, setting this option to false '\n                    'disables strict SSL. Passed to request package. '\n                    'Useful behind (corporate) proxies that act like '\n                    'man-in-the middle on https connections.',\n     'default': True}\n\nOn instance['strictSSL']:\n    None",
+      "data": {
+        "strictSSL": null,
+        "proxy": "http://my-proxy.com:8080",
+        "token": "ghp_1234567890abcdefghijklmnopqrstuvwxyz"
+      }
+    }
+  ]
+}

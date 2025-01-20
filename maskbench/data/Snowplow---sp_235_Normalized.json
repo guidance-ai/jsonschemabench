@@ -1,0 +1,538 @@
+{
+  "description": "sample Snowplow/sp_235_Normalized.json",
+  "meta": {
+    "full_size": 2888,
+    "stripped_size": 1207,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for a data load succeeding",
+    "properties": {
+      "application": {
+        "description": "Loader's name and version",
+        "maxLength": 128,
+        "type": "string"
+      },
+      "attempt": {
+        "description": "How many attempts were taken to load the batch",
+        "minimum": 0,
+        "type": "integer"
+      },
+      "loadingCompleted": {
+        "_format": "date-time",
+        "description": "Time when loader finished loading (should match the ingestion timestamp in manifest)",
+        "type": "string"
+      },
+      "loadingStarted": {
+        "_format": "date-time",
+        "description": "Time when loader started loading (first attempt)",
+        "type": "string"
+      },
+      "shredding": {
+        "additionalProperties": false,
+        "description": "Information about the batch taken from transformation step, isomorphic to shredding_complete schema",
+        "properties": {
+          "base": {
+            "_format": "uri",
+            "description": "Blob storage path to the root of the batch",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "compression": {
+            "description": "File compression type",
+            "enum": [
+              "GZIP",
+              "NONE"
+            ]
+          },
+          "count": {
+            "description": "Count of events in the batch, null means the count could not be calculated",
+            "properties": {
+              "good": {
+                "description": "Amount of good events in the batch",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "processor": {
+            "description": "Identificator of a shredder sent the message",
+            "properties": {
+              "artifact": {
+                "description": "Name of the artifact",
+                "maxLength": 64,
+                "type": "string"
+              },
+              "version": {
+                "description": "Semantic Version of the artifact",
+                "maxLength": 16,
+                "type": "string"
+              }
+            },
+            "required": [
+              "artifact",
+              "version"
+            ],
+            "type": "object"
+          },
+          "timestamps": {
+            "description": "Set of timestamps associated with the batch",
+            "properties": {
+              "jobCompleted": {
+                "_format": "date-time",
+                "description": "Time when the batch shredding has been finished (and the message being prepared)",
+                "type": "string"
+              },
+              "jobStarted": {
+                "_format": "date-time",
+                "description": "Time when the batch started being shredded",
+                "type": "string"
+              },
+              "max": {
+                "_format": "date-time",
+                "description": "The latest collector_tstamp available in the batch",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "min": {
+                "_format": "date-time",
+                "description": "The earliest collector_stamp available in the batch",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "jobStarted",
+              "jobCompleted",
+              "min",
+              "max"
+            ],
+            "type": "object"
+          },
+          "types": {
+            "description": "Set of Iglu URIs and the format they were shredded into",
+            "items": {
+              "properties": {
+                "format": {
+                  "description": "File format in which the entities were shredded to",
+                  "enum": [
+                    "TSV",
+                    "JSON"
+                  ]
+                },
+                "schemaKey": {
+                  "description": "Iglu URI",
+                  "maxLength": 256,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "schemaKey",
+                "format"
+              ]
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "base",
+          "compression",
+          "types",
+          "timestamps",
+          "processor"
+        ],
+        "type": "object"
+      },
+      "tags": {
+        "description": "Set of key value pairs providing additional information",
+        "type": "object"
+      }
+    },
+    "required": [
+      "shredding",
+      "application",
+      "attempt",
+      "loadingStarted",
+      "loadingCompleted",
+      "tags"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "load_succeeded",
+      "vendor": "com.snowplowanalytics.monitoring.batch",
+      "version": "2-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "application": "Snowplow Batch Loader 1.0.0",
+        "attempt": 1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "compression": "GZIP",
+          "count": {
+            "good": 100
+          },
+          "processor": {
+            "artifact": "snowplow-shredder",
+            "version": "1.2.3"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
+            },
+            {
+              "format": "JSON",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/struct_event/jsonschema/1-0-0"
+            }
+          ]
+        },
+        "tags": {
+          "batch_id": "batch-123",
+          "loader_id": "loader-456"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"100\" is not of types \"null\", \"object\"",
+      "python_error": "'100' is not of type 'object', 'null'\n\nFailed validating 'type' in schema['properties']['shredding']['properties']['count']:\n    {'description': 'Count of events in the batch, null means the count '\n                    'could not be calculated',\n     'properties': {'good': {'description': 'Amount of good events in the '\n                                            'batch',\n                             'minimum': 0,\n                             'type': 'integer'}},\n     'type': ['object', 'null']}\n\nOn instance['shredding']['count']:\n    '100'",
+      "data": {
+        "application": "Snowplow Batch Loader 1.0.0",
+        "attempt": 1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "compression": "GZIP",
+          "count": "100",
+          "processor": {
+            "artifact": "snowplow-shredder",
+            "version": "1.2.3"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
+            },
+            {
+              "format": "JSON",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/struct_event/jsonschema/1-0-0"
+            },
+            "Invalid type"
+          ]
+        },
+        "tags": {
+          "batch_id": "batch-123",
+          "loader_id": "loader-456"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['attempt']:\n    {'description': 'How many attempts were taken to load the batch',\n     'minimum': 0,\n     'type': 'integer'}\n\nOn instance['attempt']:\n    -1",
+      "data": {
+        "application": "Snowplow Batch Loader 1.0.0",
+        "attempt": -1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "compression": "GZIP",
+          "count": {
+            "good": -1
+          },
+          "processor": {
+            "artifact": "snowplow-shredder",
+            "version": "1.2.3"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
+            },
+            {
+              "format": "JSON",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/struct_event/jsonschema/1-0-0"
+            }
+          ]
+        },
+        "tags": {
+          "batch_id": "batch-123",
+          "loader_id": "loader-456"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['attempt']:\n    {'description': 'How many attempts were taken to load the batch',\n     'minimum': 0,\n     'type': 'integer'}\n\nOn instance['attempt']:\n    -1",
+      "data": {
+        "application": "Snowplow Batch Loader 1.0.0",
+        "attempt": -1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "compression": "GZIP",
+          "count": {
+            "good": 100
+          },
+          "processor": {
+            "artifact": "snowplow-shredder",
+            "version": "1.2.3"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
+            },
+            {
+              "format": "JSON",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/struct_event/jsonschema/1-0-0"
+            }
+          ]
+        },
+        "tags": {
+          "batch_id": "batch-123",
+          "loader_id": "loader-456"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['shredding']:\n    {'additionalProperties': False,\n     'description': 'Information about the batch taken from transformation '\n                    'step, isomorphic to shredding_complete schema',\n     'properties': {'base': {'_format': 'uri',\n                             'description': 'Blob storage path to the root '\n                                            'of the batch',\n                             'maxLength': 1024,\n                             'type': 'string'},\n                    'compression': {'description': 'File compression type',\n                                    'enum': ['GZIP', 'NONE']},\n                    'count': {'description': 'Count of events in the '\n                                             'batch, null means the count '\n                                             'could not be calculated',\n                              'properties': {'good':.. (9027 more)",
+      "data": {
+        "application": "Snowplow Batch Loader 1.0.0",
+        "attempt": 1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "extra_property": "extra_value",
+          "compression": "GZIP",
+          "count": {
+            "good": 100
+          },
+          "processor": {
+            "artifact": "snowplow-shredder",
+            "version": "1.2.3"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
+            },
+            {
+              "format": "JSON",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/struct_event/jsonschema/1-0-0"
+            }
+          ]
+        },
+        "tags": {
+          "batch_id": "batch-123",
+          "loader_id": "loader-456"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "application": "Snowplow Batch Loader 0.1.0",
+        "attempt": 1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "compression": "GZIP",
+          "count": {
+            "good": 100
+          },
+          "processor": {
+            "artifact": "snowplow-batch-shredder",
+            "version": "0.1.0"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/geolocation_context/jsonschema/1-0-0"
+            },
+            {
+              "format": "JSON",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/page/jsonschema/1-0-0"
+            }
+          ]
+        },
+        "tags": {
+          "batchId": "batch-12345",
+          "loaderId": "loader-67890"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['attempt']:\n    {'description': 'How many attempts were taken to load the batch',\n     'minimum': 0,\n     'type': 'integer'}\n\nOn instance['attempt']:\n    -1",
+      "data": {
+        "application": "Snowplow Batch Loader 0.1.0",
+        "attempt": -1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "compression": "GZIP",
+          "count": {
+            "good": 100
+          },
+          "processor": {
+            "artifact": "snowplow-batch-shredder",
+            "version": "0.1.0"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/geolocation_context/jsonschema/1-0-0"
+            },
+            {
+              "format": "JSON",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/page/jsonschema/1-0-0"
+            }
+          ]
+        },
+        "tags": {
+          "batchId": "batch-12345",
+          "loaderId": "loader-67890"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"XML\" is not one of [\"TSV\",\"JSON\"]",
+      "python_error": "'XML' is not one of ['TSV', 'JSON']\n\nFailed validating 'enum' in schema['properties']['shredding']['properties']['types']['items']['properties']['format']:\n    {'description': 'File format in which the entities were shredded to',\n     'enum': ['TSV', 'JSON']}\n\nOn instance['shredding']['types'][1]['format']:\n    'XML'",
+      "data": {
+        "application": "Snowplow Batch Loader 0.1.0",
+        "attempt": 1,
+        "loadingCompleted": "2022-01-01T12:00:00.000Z",
+        "loadingStarted": "2022-01-01T11:59:00.000Z",
+        "shredding": {
+          "base": "s3://my-bucket/path/to/batch/",
+          "compression": "GZIP",
+          "count": {
+            "good": 100
+          },
+          "processor": {
+            "artifact": "snowplow-batch-shredder",
+            "version": "0.1.0"
+          },
+          "timestamps": {
+            "jobCompleted": "2022-01-01T11:58:00.000Z",
+            "jobStarted": "2022-01-01T11:57:00.000Z",
+            "max": "2022-01-01T11:59:59.999Z",
+            "min": "2022-01-01T11:57:00.000Z"
+          },
+          "types": [
+            {
+              "format": "TSV",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/geolocation_context/jsonschema/1-0-0"
+            },
+            {
+              "format": "XML",
+              "schemaKey": "iglu:com.snowplowanalytics.snowplow/page/jsonschema/1-0-0"
+            }
+          ]
+        },
+        "tags": {
+          "batchId": "batch-12345",
+          "loaderId": "loader-67890"
+        }
+      }
+    }
+  ]
+}

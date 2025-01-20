@@ -1,0 +1,245 @@
+{
+  "description": "sample JsonSchemaStore/epr-manifest.json",
+  "meta": {
+    "full_size": 1141,
+    "stripped_size": 791,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:uri",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": true,
+    "definitions": {
+      "behavior": {
+        "type": "string",
+        "enum": [
+          "block",
+          "allow",
+          "noAuth"
+        ]
+      },
+      "rule": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "Relative path to resource.",
+            "type": "string"
+          },
+          "regex": {
+            "description": "A regular expression for identifying paths to resources.",
+            "type": "string"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "navigation",
+                "image",
+                "stylesheet",
+                "script",
+                "xhr",
+                "other"
+              ]
+            }
+          },
+          "allowData": {
+            "description": "Determines if data is allowed at this path.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/epr-manifest.json",
+    "properties": {
+      "site": {
+        "description": "A fully qualified URL of your website.",
+        "type": "string",
+        "format": "uri"
+      },
+      "maxAge": {
+        "description": "Set the max age HTTP cache expiration.",
+        "type": "integer"
+      },
+      "reportUrl": {
+        "type": "string",
+        "format": "uri"
+      },
+      "defaultNavBehavior": {
+        "$ref": "#/definitions/behavior"
+      },
+      "defaultResBehavior": {
+        "$ref": "#/definitions/behavior"
+      },
+      "rules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/rule"
+        }
+      }
+    },
+    "required": [
+      "rules"
+    ],
+    "title": "JSON schema for Entry Point Regulation manifest files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "site": "https://example.com",
+        "maxAge": 3600,
+        "reportUrl": "https://example.com/report",
+        "defaultNavBehavior": "allow",
+        "defaultResBehavior": "block",
+        "rules": [
+          {
+            "path": "/public",
+            "regex": "",
+            "types": [
+              "navigation",
+              "image",
+              "stylesheet",
+              "script",
+              "xhr",
+              "other"
+            ],
+            "allowData": true
+          },
+          {
+            "path": "",
+            "regex": "^/private/.*$",
+            "types": [
+              "navigation",
+              "image",
+              "stylesheet",
+              "script",
+              "xhr",
+              "other"
+            ],
+            "allowData": false
+          },
+          {
+            "path": "/admin",
+            "regex": "",
+            "types": [
+              "navigation",
+              "image",
+              "stylesheet",
+              "script",
+              "xhr",
+              "other"
+            ],
+            "allowData": true,
+            "behavior": "noAuth"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "site": "https://example.com",
+        "maxAge": 3600,
+        "reportUrl": "https://example.com/report",
+        "defaultNavBehavior": "allow",
+        "defaultResBehavior": "block",
+        "rules": [
+          {
+            "path": "/admin",
+            "regex": "^/admin/.*$",
+            "types": [
+              "navigation",
+              "xhr"
+            ],
+            "allowData": true
+          },
+          {
+            "path": "/public",
+            "regex": "^/public/.*$",
+            "types": [
+              "image",
+              "stylesheet",
+              "script"
+            ],
+            "allowData": false
+          },
+          {
+            "path": "/api",
+            "regex": "^/api/.*$",
+            "types": [
+              "xhr"
+            ],
+            "allowData": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalidBehavior\" is not one of [\"block\",\"allow\",\"noAuth\"]",
+      "python_error": "'invalidBehavior' is not one of ['block', 'allow', 'noAuth']\n\nFailed validating 'enum' in schema['properties']['defaultResBehavior']:\n    {'type': 'string', 'enum': ['block', 'allow', 'noAuth']}\n\nOn instance['defaultResBehavior']:\n    'invalidBehavior'",
+      "data": {
+        "site": "https://example.com",
+        "maxAge": 3600,
+        "reportUrl": "https://example.com/report",
+        "defaultNavBehavior": "allow",
+        "defaultResBehavior": "invalidBehavior",
+        "rules": [
+          {
+            "path": "/admin",
+            "regex": "^/admin/.*$",
+            "types": [
+              "navigation",
+              "xhr"
+            ],
+            "allowData": true
+          },
+          {
+            "path": "/public",
+            "regex": "^/public/.*$",
+            "types": [
+              "image",
+              "stylesheet",
+              "script",
+              "invalidType"
+            ],
+            "allowData": false
+          },
+          {
+            "path": "/api",
+            "regex": "^/api/.*$",
+            "types": [
+              "xhr"
+            ],
+            "allowData": true
+          }
+        ]
+      }
+    }
+  ]
+}

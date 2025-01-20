@@ -1,0 +1,286 @@
+{
+  "description": "sample JsonSchemaStore/es6importsorterrc.json",
+  "meta": {
+    "full_size": 1781,
+    "stripped_size": 693,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "id": "https://json.schemastore.org/base-04.json",
+    "properties": {
+      "sourcePrefixes": {
+        "description": "The prefixes of your source imports. Ex: import sth from '@data' => '@' can considered as a sourcePrefix",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "sectionPrefix": {
+        "description": "The prefix of your section title",
+        "type": "string"
+      },
+      "sectionNames": {
+        "description": "The names (which comes right after 'sectionPrefix') of your section title",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "startImportBlockSign": {
+        "description": "The sign to mark the start of import block. Default is '' - the start of the file",
+        "default": "",
+        "type": "string"
+      },
+      "endImportBlockSign": {
+        "description": "The sign to mark the end of import block. Default is '' - the first empty line",
+        "default": "",
+        "type": "string"
+      },
+      "statementTerminator": {
+        "description": "The sign to mark the end of an import statement. Default is ';'",
+        "default": ";",
+        "type": "string"
+      },
+      "preCommands": {
+        "description": "The command list run before sorting",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "string value means terminal command"
+            },
+            {
+              "type": "object",
+              "description": "Define command with vscode command option",
+              "properties": {
+                "command": {
+                  "type": "string",
+                  "description": "the command you need to execute before sorting. It can be terminal command or vscode command",
+                  "minLength": 1
+                },
+                "system": {
+                  "description": "Define the system will execute the command",
+                  "default": "terminal",
+                  "oneOf": [
+                    {
+                      "enum": [
+                        "vscode"
+                      ],
+                      "description": "Command will be executed as vscode command"
+                    },
+                    {
+                      "enum": [
+                        "terminal"
+                      ],
+                      "description": "Command will be executed as terminal command"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "command"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "title": "JSON schema for ES6 Import Sorter",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "sourcePrefixes": [
+          "@data",
+          "@utils"
+        ],
+        "sectionPrefix": "import",
+        "sectionNames": [
+          "react",
+          "components",
+          "utils"
+        ],
+        "startImportBlockSign": "// start imports",
+        "endImportBlockSign": "// end imports",
+        "statementTerminator": ";",
+        "preCommands": [
+          "echo 'Sorting imports...'",
+          {
+            "command": "editor.action.formatDocument",
+            "system": "vscode"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "sourcePrefixes": [
+          "@data",
+          "@utils"
+        ],
+        "sectionPrefix": "import",
+        "sectionNames": [
+          "react",
+          "components",
+          "containers",
+          "actions",
+          "reducers",
+          "selectors"
+        ],
+        "startImportBlockSign": "// Import block start",
+        "endImportBlockSign": "// Import block end",
+        "statementTerminator": ";",
+        "preCommands": [
+          "npm install",
+          {
+            "command": "editor.action.formatDocument",
+            "system": "vscode"
+          },
+          {
+            "command": "eslint --fix",
+            "system": "terminal"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"command\":\"eslint --fix\",\"command2\":\"value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('command2' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'type': 'object',\n     'description': 'Define command with vscode command option',\n     'properties': {'command': {'type': 'string',\n                                'description': 'the command you need to '\n                                               'execute before sorting. It '\n                                               'can be terminal command or '\n                                               'vscode command',\n                                'minLength': 1},\n                    'system': {'description': 'Define the system will '\n                                              'execute the command',\n                               'default': 'terminal',\n                               'oneOf': [{'enum': ['vscode'],\n                                          'description': 'Command will be '\n                                                         'executed as '\n                 .. (544 more)",
+      "data": {
+        "sourcePrefixes": [
+          "@data",
+          "@utils"
+        ],
+        "sectionPrefix": "import",
+        "sectionNames": [
+          "react",
+          "components",
+          "containers",
+          "actions",
+          "reducers",
+          "selectors"
+        ],
+        "startImportBlockSign": "// Import block start",
+        "endImportBlockSign": "// Import block end",
+        "statementTerminator": ";",
+        "preCommands": [
+          "npm install",
+          {
+            "command": "editor.action.formatDocument",
+            "system": "terminal"
+          },
+          {
+            "command": "eslint --fix",
+            "system": "vscode"
+          },
+          {
+            "command": "eslint --fix",
+            "command2": "value"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"command\":\"\",\"system\":\"vscode\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[1]['properties']['command']:\n    {'type': 'string',\n     'description': 'the command you need to execute before sorting. It '\n                    'can be terminal command or vscode command',\n     'minLength': 1}\n\nOn instance['command']:\n    ''",
+      "data": {
+        "sourcePrefixes": [
+          "@data",
+          "@utils"
+        ],
+        "sectionPrefix": "import",
+        "sectionNames": [
+          "react",
+          "components",
+          "containers",
+          "actions",
+          "reducers",
+          "selectors"
+        ],
+        "startImportBlockSign": "// Import block start",
+        "endImportBlockSign": "// Import block end",
+        "statementTerminator": ";",
+        "preCommands": [
+          "npm install",
+          {
+            "command": "",
+            "system": "vscode"
+          },
+          {
+            "command": "eslint --fix",
+            "system": "terminal"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['statementTerminator']:\n    {'description': 'The sign to mark the end of an import statement. '\n                    \"Default is ';'\",\n     'default': ';',\n     'type': 'string'}\n\nOn instance['statementTerminator']:\n    None",
+      "data": {
+        "sourcePrefixes": [
+          123,
+          "@utils"
+        ],
+        "sectionPrefix": 123,
+        "sectionNames": [
+          "react",
+          123,
+          "containers",
+          "actions",
+          "reducers",
+          "selectors"
+        ],
+        "startImportBlockSign": null,
+        "endImportBlockSign": 123,
+        "statementTerminator": null,
+        "preCommands": [
+          "npm install",
+          {
+            "command": "editor.action.formatDocument",
+            "system": "web"
+          },
+          {
+            "command": "",
+            "system": "terminal"
+          },
+          {
+            "command": "eslint --fix"
+          }
+        ]
+      }
+    }
+  ]
+}

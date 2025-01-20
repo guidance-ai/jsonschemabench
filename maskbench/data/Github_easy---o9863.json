@@ -1,0 +1,235 @@
+{
+  "description": "sample Github_easy/o9863.json",
+  "meta": {
+    "full_size": 325,
+    "stripped_size": 325,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "eventTags": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          "required": [
+            "key",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type",
+            "value": "login"
+          },
+          {
+            "key": "user-id",
+            "value": "12345"
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['eventTags']['items']['properties']['value']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['eventTags'][0]['value']:\n    ''",
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type",
+            "value": ""
+          },
+          {
+            "key": "user-id",
+            "value": "12345"
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"event-type!\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'event-type!' does not match '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'pattern' in schema['properties']['eventTags']['items']['properties']['key']:\n    {'type': 'string', 'pattern': '^[0-9a-zA-Z_-]{1,255}$'}\n\nOn instance['eventTags'][0]['key']:\n    'event-type!'",
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type!",
+            "value": "login"
+          },
+          {
+            "key": "user-id",
+            "value": "12345"
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['eventTags']['items']:\n    {'type': 'object',\n     'properties': {'key': {'type': 'string',\n                            'pattern': '^[0-9a-zA-Z_-]{1,255}$'},\n                    'value': {'type': 'string',\n                              'minLength': 1,\n                              'maxLength': 255}},\n     'required': ['key', 'value'],\n     'additionalProperties': False}\n\nOn instance['eventTags'][2]:\n    {'key': 'location', 'value': 'New York', 'extra': 'invalid'}",
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type",
+            "value": "login"
+          },
+          {
+            "key": "user-id",
+            "value": "12345"
+          },
+          {
+            "key": "location",
+            "value": "New York",
+            "extra": "invalid"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['eventTags']['items']:\n    {'type': 'object',\n     'properties': {'key': {'type': 'string',\n                            'pattern': '^[0-9a-zA-Z_-]{1,255}$'},\n                    'value': {'type': 'string',\n                              'minLength': 1,\n                              'maxLength': 255}},\n     'required': ['key', 'value'],\n     'additionalProperties': False}\n\nOn instance['eventTags'][3]:\n    {'key': 'country', 'value': 'USA', 'extra': 'extra'}",
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type",
+            "value": "login"
+          },
+          {
+            "key": "user-id",
+            "value": ""
+          },
+          {
+            "key": "location",
+            "value": "a"
+          },
+          {
+            "key": "country",
+            "value": "USA",
+            "extra": "extra"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type",
+            "value": "login"
+          },
+          {
+            "key": "event-source",
+            "value": "mobile-app"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"event!type\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'event!type' does not match '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'pattern' in schema['properties']['eventTags']['items']['properties']['key']:\n    {'type': 'string', 'pattern': '^[0-9a-zA-Z_-]{1,255}$'}\n\nOn instance['eventTags'][0]['key']:\n    'event!type'",
+      "data": {
+        "eventTags": [
+          {
+            "key": "event!type",
+            "value": "login"
+          },
+          {
+            "key": "event-source",
+            "value": "mobile-app"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['eventTags']['items']['properties']['value']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['eventTags'][0]['value']:\n    ''",
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"!@#\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'!@#' does not match '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'pattern' in schema['properties']['eventTags']['items']['properties']['key']:\n    {'type': 'string', 'pattern': '^[0-9a-zA-Z_-]{1,255}$'}\n\nOn instance['eventTags'][1]['key']:\n    '!@#'",
+      "data": {
+        "eventTags": [
+          {
+            "key": "event-type",
+            "value": "login"
+          },
+          {
+            "key": "!@#",
+            "value": "mobile-app"
+          }
+        ]
+      }
+    }
+  ]
+}

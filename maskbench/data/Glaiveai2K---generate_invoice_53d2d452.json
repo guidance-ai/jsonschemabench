@@ -1,0 +1,154 @@
+{
+  "description": "sample Glaiveai2K/generate_invoice_53d2d452.json",
+  "meta": {
+    "full_size": 679,
+    "stripped_size": 428,
+    "features": [
+      "format",
+      "format:email",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "customer": {
+        "properties": {
+          "address": {
+            "description": "The address of the customer",
+            "type": "string"
+          },
+          "email": {
+            "description": "The email address of the customer",
+            "format": "email",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the customer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "address"
+        ],
+        "type": "object"
+      },
+      "items": {
+        "items": {
+          "properties": {
+            "name": {
+              "description": "The name of the item",
+              "type": "string"
+            },
+            "price": {
+              "description": "The price of the item",
+              "type": "number"
+            },
+            "quantity": {
+              "description": "The quantity of the item",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "name",
+            "quantity",
+            "price"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "customer",
+      "items"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "customer": {
+          "address": "123 Main Street",
+          "email": "johndoe@example.com",
+          "name": "John Doe"
+        },
+        "items": [
+          {
+            "name": "Apple Watch",
+            "price": 299.99,
+            "quantity": 1
+          },
+          {
+            "name": "Samsung TV",
+            "price": 999.99,
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"johndoeexample.com\" is not a \"email\"",
+      "python_error": "'johndoeexample.com' is not a 'email'\n\nFailed validating 'format' in schema['properties']['customer']['properties']['email']:\n    {'description': 'The email address of the customer',\n     'format': 'email',\n     'type': 'string'}\n\nOn instance['customer']['email']:\n    'johndoeexample.com'",
+      "data": {
+        "customer": {
+          "address": "123 Main Street",
+          "email": "johndoeexample.com",
+          "name": "John Doe"
+        },
+        "items": [
+          {
+            "name": "Apple Watch",
+            "price": 299.99,
+            "quantity": 1
+          },
+          {
+            "name": "Samsung TV",
+            "price": 999.99,
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1.1 is not of type \"integer\"",
+      "python_error": "1.1 is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['items']['items']['properties']['quantity']:\n    {'description': 'The quantity of the item', 'type': 'integer'}\n\nOn instance['items'][0]['quantity']:\n    1.1",
+      "data": {
+        "customer": {
+          "address": "123 Main Street",
+          "email": "johndoe@example.com",
+          "name": "John Doe"
+        },
+        "items": [
+          {
+            "name": "Apple Watch",
+            "price": 299.99,
+            "quantity": 1.1
+          },
+          {
+            "name": "Samsung TV",
+            "price": 999.99,
+            "quantity": 2
+          }
+        ]
+      }
+    }
+  ]
+}

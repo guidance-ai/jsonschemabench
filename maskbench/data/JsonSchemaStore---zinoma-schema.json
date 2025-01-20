@@ -1,0 +1,1264 @@
+{
+  "description": "sample JsonSchemaStore/zinoma-schema.json",
+  "meta": {
+    "full_size": 14199,
+    "stripped_size": 1958,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Project",
+    "description": "Schema of the build flow configuration file `zinoma.yml`.\n\nIn order to use Žinoma with your project, you need to create a file named `zinoma.yml`. We recommend putting this file in the root directory of your project.\n\nThis struct describes the schema expected for this file. It assumes prior knowledge of the Yaml format.\n\n__Example__\n\n`zinoma.yml`:\n\n```yaml targets: download_dependencies: input: - paths: [package.json, package-lock.json] output: - paths: [node_modules] build: npm install\n\ntest: input: - download_dependencies.output - paths: [package.json, src, test] build: npm test\n\nlint: input: - download_dependencies.output - paths: [package.json, src, test] build: npm run lint\n\ncheck: dependencies: [test, lint]\n\nstart: input: - download_dependencies.output - paths: [package.json, src] service: exec npm run start\n\nbuild: dependencies: [check] input: - paths: - Dockerfile - package.json - package-lock.json - src output: - paths: [lambda.zip] build: | docker build -t build-my-project:latest . docker create -ti --name build-my-project build-my-project:latest bash docker cp build-my-project:/var/task/lambda.zip ./ docker rm -f build-my-project ```\n\nIn this example:\n\n- `zinoma check` will ensure the code complies to the test suites and the coding standards. - `zinoma start --watch` will run the application and restart it whenever the sources are updated. - `zinoma --clean build` will generate a clean artifact, ready to be deployed.\n\nA fully functional and more advanced example project is available in [fbecart/zinoma-node-example](https://github.com/fbecart/zinoma-node-example).",
+    "type": "object",
+    "properties": {
+      "imports": {
+        "description": "Import definitions from other Žinoma projects.\n\n`imports` should be an object, the keys being the project names and the values their respective paths.\n\nBefore importing a project, you should make sure this project has its name defined. You should use the same name as key in the `imports` object.\n\nOnce a project is imported, targets from that project can be referenced by specifying their fully qualified name: `imported_project_name::target_name`.\n\n__Example__\n\n`packages/api/zinoma.yml`:\n\n```yaml name: api\n\ntargets: test: build: cargo test ```\n\n`packages/webapp/zinoma.yml`:\n\n```yaml name: webapp\n\ntargets: test: build: cargo test ```\n\n`./zinoma.yml`:\n\n```yaml imports: api: packages/api webapp: packages/webapp\n\ntargets: test_all: dependencies: [api::test, webapp::test] ```\n\nIn this example, the target `test_all` depend from targets defined in different projects.",
+        "default": {},
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "name": {
+        "description": "Name of the project.\n\nA project name must be a string. It should start with an alphanumeric character or `_` and contain only alphanumeric characters, `-`, or `_`.\n\nProject names should be unique. Two projects cannot have the same name.\n\n__Example__\n\n```yaml name: my_project ```",
+        "default": null,
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "targets": {
+        "description": "Targets (aka tasks) of this project.\n\n[`Targets`] represent commands and scripts to execute in your build flow.\n\n[`Targets`]: struct.Target.html\n\nTargets run in parallel by default. To force targets to run sequentially, you can define [`dependencies`] on other targets.\n\n[`dependencies`]: enum.Target.html#variant.Build.field.dependencies\n\nEach target must have a unique name inside the project. The target name must be a string. It should start with an alphanumeric character or `_` and contain only alphanumeric characters, `-`, or `_`.\n\n__Example__\n\n```yaml targets: speak_cow: build: echo 'Moo' speak_dog: build: echo 'Woof!' ```\n\nIn this example:\n\n- `zinoma speak_cow` will print `Moo` - `zinoma speak_dog` will print `Woof!` - `zinoma speak_cow speak_dog` will print both `Moo` and `Woof!` (not necessarily in this order)",
+        "default": {},
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/definitions/Target"
+        }
+      }
+    },
+    "additionalProperties": false,
+    "definitions": {
+      "Dependencies": {
+        "description": "List of [`targets`] that must complete successfully before this target can be built.\n\n[`targets`]: enum.Target.html\n\nIt should be an array of strings.\n\nIf any of the dependencies fails to complete, this target will not be executed.\n\n__Example__\n\n```yaml targets: target1: dependencies: [] target2: dependencies: [target1] target3: dependencies: [target2] ```\n\nIn this example, `target1` must complete successfully before `target2` begins, while `target3` waits for `target2` to complete.\n\n`zinoma target2` will run sequentially `target1` and `target2`.\n\n`zinoma target3` will run sequentially `target1`, `target2` and `target3`.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "InputResource": {
+        "anyOf": [
+          {
+            "description": "Output resources of another target.\n\nIt should be a string with the format `<project_name>::<target_name>.output`. If the other target is located in the same project, the project name can be skipped. The `input` would then have this format: `<target_name>.output`.\n\nWhen such an input is used:\n\n- all the output resources of the other target become input resources for this target; - the other target implicitly becomes a dependency to this target.\n\n__Example__\n\n```yaml targets: node_dependencies: input: - paths: [package.json, package-lock.json] output: - paths: [node_modules] build: npm install\n\ncompile: input: - node_dependencies.output - paths: [package.json, tsconfig.json, src] output: - paths: [dist] build: tsc\n\nrun: input: - node_dependencies.output - paths: [package.json] - compile.output service: node dist/index.js ```",
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "required": [
+              "paths"
+            ],
+            "properties": {
+              "extensions": {
+                "description": "Filter files resource by file extensions.\n\nIt should be an array of strings.\n\nIf `extensions` are specified, only files matching at least one of the extensions will be included in the resource.\n\n__Example__\n\n```yaml targets: fmt: input: - paths: [src, tests] extensions: [rs] build: exec cargo fmt --all -- --check",
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "paths": {
+                "description": "Paths to files or directories.\n\nIt should be an array of strings.\n\nEach element of the array should be a path to a file or directory.\n\n__Example__\n\n```yaml targets: npm_install: input: - paths: [package.json, package-lock.json] output: - paths: [node_modules] build: npm install ```",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "cmd_stdout"
+            ],
+            "properties": {
+              "cmd_stdout": {
+                "description": "Shell script whose output identifies the state of a resource.\n\nIt should be a string.\n\n__Example__\n\n```yaml targets: build_docker_image: input: - paths: [Dockerfile, src] - cmd_stdout: 'docker image ls base:latest --format \"{{.ID}}\"' output: - cmd_stdout: 'docker image ls webapp:latest --format \"{{.ID}}\"' build: docker build -t webapp . ```",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "InputResources": {
+        "description": "List of artifacts that this target depends on.\n\n`input` should be an array of [`resources`].\n\n[`resources`]: enum.InputResource.html\n\nSpecifying a target's `input` enables the incremental build for this target. This means that, at the time of executing the target, Žinoma will skip its build if its input resources (and [`output`] resources, if any) have not changed since its last successful completion.\n\n[`output`]: struct.OutputResources.html\n\n__Example__\n\n```yaml targets: npm_install: input: - paths: [package.json, package-lock.json] build: npm install ```\n\nIn this example, running `zinoma npm_install` once will execute `npm install`. Subsequent runs of `zinoma npm_install` will return immediately — until the content of `package.json` or `package-lock.json` is modified.",
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/InputResource"
+        }
+      },
+      "OutputResource": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": [
+              "paths"
+            ],
+            "properties": {
+              "extensions": {
+                "description": "Filter files resource by file extensions.\n\nIt should be an array of strings.\n\nIf `extensions` are specified, only files matching at least one of the extensions will be included in the resource.\n\n__Example__\n\n```yaml targets: protoc: input: - paths: [protos] extensions: [proto] output: - paths: [protos] extensions: [go] build: | cd protos docker run -v `pwd`:/defs namely/protoc-all -d . -o . -l go",
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "paths": {
+                "description": "Paths to files or directories.\n\nIt should be an array of strings. Each element of the array should be a path to a file or directory.\n\nIf the `--clean` flag is provided to `zinoma`, the files or directories specified in `paths` will be deleted before running the build flow.\n\n__Example__\n\n```yaml targets: npm_install: input: - paths: [package.json, package-lock.json] output: - paths: [node_modules] build: npm install ```\n\nIn this example, as the target specifies an `input`, `zinoma npm_install` is incremental. The script `npm install` will be skipped until `package.json`, `package-lock.json` or `node_modules` are modified.\n\nAdditionally:\n\n- the command `zinoma --clean` will delete `node_modules`; - the command `zinoma --clean npm_install` will delete `node_modules`, then run `npm install`.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "cmd_stdout"
+            ],
+            "properties": {
+              "cmd_stdout": {
+                "description": "Shell script whose output identifies the state of a resource.\n\nIt should be a string.\n\n__Example__\n\n```yaml targets: build_docker_image: input: - paths: [Dockerfile, src] - cmd_stdout: 'docker image ls base:latest --format \"{{.ID}}\"' output: - cmd_stdout: 'docker image ls webapp:latest --format \"{{.ID}}\"' build: docker build -t webapp . ```",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "OutputResources": {
+        "description": "List of artifacts produced by this target.\n\nIt should be an array of [`resources`].\n\n[`resources`]: enum.OutputResource.html\n\nThe incremental build takes in account the target `output`. Just like with [`input`], if any of the target output resources were altered since its previous successful execution, the target state will be invalidated and its build will be run again.\n\n[`input`]: struct.InputResources.html\n\n__Example__\n\n```yaml targets: npm_install: input: - paths: [package.json, package-lock.json] output: - paths: [node_modules] build: npm install ```\n\nIn this example, running `zinoma npm_install` will return immediately in case `package.json`, `package-lock.json` and `node_modules` were not modified since the last completion of the target.\n\nRunning `zinoma --clean npm_install` will start by deleting `node_modules`, then will run `npm install`.",
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/OutputResource"
+        }
+      },
+      "Target": {
+        "description": "A target is a command or a set of commands to run as part of your build flow.\n\nTargets run in parallel by default. To force targets to run sequentially, you can define [`dependencies`] on other targets.\n\n[`dependencies`]: struct.Dependencies.html",
+        "anyOf": [
+          {
+            "description": "A build target represents a shell script to run as part of your build flow.\n\nThis build script is expected to eventually complete, as opposed to the run script of a [`service`] target.\n\n[`service`]: #variant.Service.field.service",
+            "type": "object",
+            "required": [
+              "build"
+            ],
+            "properties": {
+              "build": {
+                "description": "The shell script to run in order to build this target.\n\nIt should be a string. This string can be multi-line, in case of scripts with multiple commands.\n\n__Example__\n\n```yaml targets: create_file_deep: build: | mkdir -p deep/dir touch deep/dir/file output: - paths: [deep/dir/file] ```\n\nIn this example, running `zinoma create_file_deep` will execute the commands `mkdir -p deep/dir` and `touch deep/dir/my_file` sequentially.",
+                "type": "string"
+              },
+              "dependencies": {
+                "description": "Dependencies of the target.",
+                "default": [],
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/Dependencies"
+                  }
+                ]
+              },
+              "input": {
+                "description": "Input resources of the target.",
+                "default": [],
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/InputResources"
+                  }
+                ]
+              },
+              "output": {
+                "description": "Output resources of the target.",
+                "default": [],
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/OutputResources"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "description": "Service targets are useful to run scripts that do not complete.\n\nThey enable the execution of long-lasting commands, such as servers.",
+            "type": "object",
+            "required": [
+              "service"
+            ],
+            "properties": {
+              "dependencies": {
+                "description": "Dependencies of the target.",
+                "default": [],
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/Dependencies"
+                  }
+                ]
+              },
+              "input": {
+                "description": "Input resources of the target.",
+                "default": [],
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/InputResources"
+                  }
+                ]
+              },
+              "service": {
+                "description": "Shell script starting a long-lasting service.\n\nIt should be a string.\n\nIf `zinoma` has no service target to run, it will automatically exit after all build targets ran to completion. On the contrary, if at least one service target is specified in the command line, `zinoma` will keep running even after all build targets completed, so that the services can remain alive.\n\nIn watch mode (when the `--watch` flag is passed to `zinoma`), services are restarted when the relevant paths are modified.\n\n__Example__\n\n```yaml targets: npm_server: input: - paths: [package.json, index.js] service: npm start ```\n\nIn this example, `zinoma npm_server --watch` will run `npm start`, and will restart this process every time `package.json` or `index.js` are updated.",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "description": "Aggregates other targets.\n\n__Example__\n\n```yaml targets: fmt: build: cargo fmt -- --check lint: build: cargo clippy test: build: cargo test check: dependencies: [fmt, lint, test] ```\n\nIn this example, the target named `check` aggregates the 3 other targets. `zinoma check` is equivalent to running `zinoma fmt lint test`.",
+            "type": "object",
+            "required": [
+              "dependencies"
+            ],
+            "properties": {
+              "dependencies": {
+                "description": "Dependencies of the target.",
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/Dependencies"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "example_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "service": "npm install"
+          },
+          "test": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm test"
+          },
+          "lint": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "docker build -t build-my-project:latest ."
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"invalid_property\":\"invalid_value\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'invalid_property': 'invalid_value'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['targets']['additionalProperties']:\n    {'description': 'A target is a command or a set of commands to run as '\n                    'part of your build flow.\\n'\n                    '\\n'\n                    'Targets run in parallel by default. To force targets '\n                    'to run sequentially, you can define [`dependencies`] '\n                    'on other targets.\\n'\n                    '\\n'\n                    '[`dependencies`]: struct.Dependencies.html',\n     'anyOf': [{'description': 'A build target represents a shell script '\n                               'to run as part of your build flow.\\n'\n                               '\\n'\n                               'This build script is expected to '\n                               'eventually complete, as opposed to the run '\n                               'script of a [`service`] target.\\n'\n                            .. (11023 more)",
+      "data": {
+        "name": "example_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "service": "npm install"
+          },
+          "test": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm test"
+          },
+          "lint": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "docker build -t build-my-project:latest ."
+          },
+          "invalid_target": {
+            "invalid_property": "invalid_value"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['name']:\n    {'description': 'Name of the project.\\n'\n                    '\\n'\n                    'A project name must be a string. It should start with '\n                    'an alphanumeric character or `_` and contain only '\n                    'alphanumeric characters, `-`, or `_`.\\n'\n                    '\\n'\n                    'Project names should be unique. Two projects cannot '\n                    'have the same name.\\n'\n                    '\\n'\n                    '__Example__\\n'\n                    '\\n'\n                    '```yaml name: my_project ```',\n     'default': None,\n     'type': ['string', 'null']}\n\nOn instance['name']:\n    123",
+      "data": {
+        "name": 123,
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "service": "npm install"
+          },
+          "test": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm test"
+          },
+          "lint": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "docker build -t build-my-project:latest ."
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"dependencies\":[\"check\"],\"input\":[{\"paths\":[\"Dockerfile\",\"package.json\",\"package-lock.json\",\"src\"]}],\"service\":\"docker build -t build-my-project:latest .\",\"build\":\"docker build -t build-my-project:latest .\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'dependencies': ['check'], 'input': [{'paths': ['Dockerfile', 'package.json', 'package-lock.json', 'src']}], 'service': 'docker build -t build-my-project:latest .', 'build': 'docker build -t build-my-project:latest .'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['targets']['additionalProperties']:\n    {'description': 'A target is a command or a set of commands to run as '\n                    'part of your build flow.\\n'\n                    '\\n'\n                    'Targets run in parallel by default. To force targets '\n                    'to run sequentially, you can define [`dependencies`] '\n                    'on other targets.\\n'\n                    '\\n'\n                    '[`dependencies`]: struct.Dependencies.html',\n     'anyOf': [{'description': 'A build target represents a shell script '\n                               'to run as part of your build flow.\\n'\n                               '\\n'\n                               'This build script is expe.. (11471 more)",
+      "data": {
+        "name": "example_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "service": "npm install"
+          },
+          "test": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm test"
+          },
+          "lint": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "docker build -t build-my-project:latest .",
+            "build": "docker build -t build-my-project:latest ."
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"dependencies\":[\"check\"],\"input\":[{\"paths\":[\"Dockerfile\",\"package.json\",\"package-lock.json\",\"src\"]}],\"service\":123} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['service']:\n    {'description': 'Shell script starting a long-lasting service.\\n'\n                    '\\n'\n                    'It should be a string.\\n'\n                    '\\n'\n                    'If `zinoma` has no service target to run, it will '\n                    'automatically exit after all build targets ran to '\n                    'completion. On the contrary, if at least one service '\n                    'target is specified in the command line, `zinoma` '\n                    'will keep running even after all build targets '\n                    'completed, so that the services can remain alive.\\n'\n                    '\\n'\n                    'In watch mode (when the `--watch` flag is passed to '\n                    '`zinoma`), services are restarted when the relevant '\n                    'paths are modified.\\n'\n                    '\\n'\n                    '__Example__\\n'\n                    '\\n'\n                    .. (419 more)",
+      "data": {
+        "name": "example_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "service": "npm install"
+          },
+          "test": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm test"
+          },
+          "lint": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": 123
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"input\":[{\"paths\":[\"package.json\",\"package-lock.json\"],\"cmd_stdout\":\"echo 'Hello World!'\"}],\"service\":\"npm install\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'input': [{'paths': ['package.json', 'package-lock.json'], 'cmd_stdout': \"echo 'Hello World!'\"}], 'service': 'npm install'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['targets']['additionalProperties']:\n    {'description': 'A target is a command or a set of commands to run as '\n                    'part of your build flow.\\n'\n                    '\\n'\n                    'Targets run in parallel by default. To force targets '\n                    'to run sequentially, you can define [`dependencies`] '\n                    'on other targets.\\n'\n                    '\\n'\n                    '[`dependencies`]: struct.Dependencies.html',\n     'anyOf': [{'description': 'A build target represents a shell script '\n                               'to run as part of your build flow.\\n'\n                               '\\n'\n                               'This build script is expected to '\n                               'eventually complete, as opposed to the run '\n        .. (11225 more)",
+      "data": {
+        "name": "example_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ],
+                "cmd_stdout": "echo 'Hello World!'"
+              }
+            ],
+            "service": "npm install"
+          },
+          "test": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm test"
+          },
+          "lint": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "docker build -t build-my-project:latest ."
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"input\":[{\"paths\":[\"package.json\",\"package-lock.json\"]}],\"service\":\"npm install\",\"extra_property\":\"extra_value\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'input': [{'paths': ['package.json', 'package-lock.json']}], 'service': 'npm install', 'extra_property': 'extra_value'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['targets']['additionalProperties']:\n    {'description': 'A target is a command or a set of commands to run as '\n                    'part of your build flow.\\n'\n                    '\\n'\n                    'Targets run in parallel by default. To force targets '\n                    'to run sequentially, you can define [`dependencies`] '\n                    'on other targets.\\n'\n                    '\\n'\n                    '[`dependencies`]: struct.Dependencies.html',\n     'anyOf': [{'description': 'A build target represents a shell script '\n                               'to run as part of your build flow.\\n'\n                               '\\n'\n                               'This build script is expected to '\n                               'eventually complete, as opposed to the run '\n            .. (11206 more)",
+      "data": {
+        "name": "example_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "service": "npm install",
+            "extra_property": "extra_value"
+          },
+          "test": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm test"
+          },
+          "lint": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              },
+              "download_dependencies.output"
+            ],
+            "service": "npm run start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "docker build -t build-my-project:latest ."
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "my_project",
+        "targets": {
+          "download_dependencies": {
+            "build": "npm install",
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "node_modules"
+                ]
+              }
+            ]
+          },
+          "test": {
+            "build": "npm test",
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ]
+          },
+          "lint": {
+            "build": "npm run lint",
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ]
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "npm start"
+          },
+          "build": {
+            "build": "docker build -t build-my-project:latest .\ndocker create -ti --name build-my-project build-my-project:latest bash\ndocker cp build-my-project:/var/task/lambda.zip ./\ndocker rm -f build-my-project",
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "lambda.zip"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"input\":[{\"paths\":[\"package.json\",\"package-lock.json\"],\"cmd_stdout\":\"echo 'Invalid input'\"}],\"output\":[{\"paths\":[\"node_modules\"]}],\"build\":\"npm install\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'input': [{'paths': ['package.json', 'package-lock.json'], 'cmd_stdout': \"echo 'Invalid input'\"}], 'output': [{'paths': ['node_modules']}], 'build': 'npm install'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['targets']['additionalProperties']:\n    {'description': 'A target is a command or a set of commands to run as '\n                    'part of your build flow.\\n'\n                    '\\n'\n                    'Targets run in parallel by default. To force targets '\n                    'to run sequentially, you can define [`dependencies`] '\n                    'on other targets.\\n'\n                    '\\n'\n                    '[`dependencies`]: struct.Dependencies.html',\n     'anyOf': [{'description': 'A build target represents a shell script '\n                               'to run as part of your build flow.\\n'\n                               '\\n'\n                               'This build script is expected to '\n                               'eventually co.. (11310 more)",
+      "data": {
+        "name": "my_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ],
+                "cmd_stdout": "echo 'Invalid input'"
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "node_modules"
+                ]
+              }
+            ],
+            "build": "npm install"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"input\":[\"download_dependencies.output\",{\"paths\":[\"package.json\",\"src\",\"test\"]}],\"build\":123} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[0]['properties']['build']:\n    {'description': 'The shell script to run in order to build this '\n                    'target.\\n'\n                    '\\n'\n                    'It should be a string. This string can be multi-line, '\n                    'in case of scripts with multiple commands.\\n'\n                    '\\n'\n                    '__Example__\\n'\n                    '\\n'\n                    '```yaml targets: create_file_deep: build: | mkdir -p '\n                    'deep/dir touch deep/dir/file output: - paths: '\n                    '[deep/dir/file] ```\\n'\n                    '\\n'\n                    'In this example, running `zinoma create_file_deep` '\n                    'will execute the commands `mkdir -p deep/dir` and '\n                    '`touch deep/dir/my_file` sequentially.',\n     'type': 'string'}\n\nOn instance['build']:\n    123",
+      "data": {
+        "name": "my_project",
+        "targets": {
+          "download_dependencies": {
+            "build": "npm install",
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "node_modules"
+                ]
+              }
+            ]
+          },
+          "test": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ],
+            "build": 123
+          },
+          "lint": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ],
+            "build": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "npm start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "lambda.zip"
+                ]
+              }
+            ],
+            "build": "docker build -t build-my-project:latest .\ndocker create -ti --name build-my-project build-my-project:latest bash\ndocker cp build-my-project:/var/task/lambda.zip ./\ndocker rm -f build-my-project"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"input\":[{\"paths\":[\"package.json\",\"package-lock.json\"]}],\"output\":[{\"paths\":[\"node_modules\"]}],\"build\":\"npm install\",\"extra_property\":\"This should cause an error\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'input': [{'paths': ['package.json', 'package-lock.json']}], 'output': [{'paths': ['node_modules']}], 'build': 'npm install', 'extra_property': 'This should cause an error'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['targets']['additionalProperties']:\n    {'description': 'A target is a command or a set of commands to run as '\n                    'part of your build flow.\\n'\n                    '\\n'\n                    'Targets run in parallel by default. To force targets '\n                    'to run sequentially, you can define [`dependencies`] '\n                    'on other targets.\\n'\n                    '\\n'\n                    '[`dependencies`]: struct.Dependencies.html',\n     'anyOf': [{'description': 'A build target represents a shell script '\n                               'to run as part of your build flow.\\n'\n                               '\\n'\n                               'This build script is expected to '\n                               'eve.. (11319 more)",
+      "data": {
+        "name": "my_project",
+        "targets": {
+          "download_dependencies": {
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "node_modules"
+                ]
+              }
+            ],
+            "build": "npm install",
+            "extra_property": "This should cause an error"
+          },
+          "test": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ],
+            "build": "npm test"
+          },
+          "lint": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ],
+            "build": "npm run lint"
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint"
+            ]
+          },
+          "start": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "npm start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "lambda.zip"
+                ]
+              }
+            ],
+            "build": "docker build -t build-my-project:latest .\ndocker create -ti --name build-my-project build-my-project:latest bash\ndocker cp build-my-project:/var/task/lambda.zip ./\ndocker rm -f build-my-project"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"dependencies\":[\"test\",\"lint\",123]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'dependencies': ['test', 'lint', 123]} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['targets']['additionalProperties']:\n    {'description': 'A target is a command or a set of commands to run as '\n                    'part of your build flow.\\n'\n                    '\\n'\n                    'Targets run in parallel by default. To force targets '\n                    'to run sequentially, you can define [`dependencies`] '\n                    'on other targets.\\n'\n                    '\\n'\n                    '[`dependencies`]: struct.Dependencies.html',\n     'anyOf': [{'description': 'A build target represents a shell script '\n                               'to run as part of your build flow.\\n'\n                               '\\n'\n                               'This build script is expected to '\n                               'eventually complete, as opposed to the run '\n                               'script of a [`service`] target.\\n'\n                          .. (11018 more)",
+      "data": {
+        "name": "my_project",
+        "targets": {
+          "download_dependencies": {
+            "build": "npm install",
+            "input": [
+              {
+                "paths": [
+                  "package.json",
+                  "package-lock.json"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "node_modules"
+                ]
+              }
+            ]
+          },
+          "test": {
+            "build": "npm test",
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ]
+          },
+          "lint": {
+            "build": "npm run lint",
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src",
+                  "test"
+                ]
+              }
+            ]
+          },
+          "check": {
+            "dependencies": [
+              "test",
+              "lint",
+              123
+            ]
+          },
+          "start": {
+            "input": [
+              "download_dependencies.output",
+              {
+                "paths": [
+                  "package.json",
+                  "src"
+                ]
+              }
+            ],
+            "service": "npm start"
+          },
+          "build": {
+            "dependencies": [
+              "check"
+            ],
+            "input": [
+              {
+                "paths": [
+                  "Dockerfile",
+                  "package.json",
+                  "package-lock.json",
+                  "src"
+                ]
+              }
+            ],
+            "output": [
+              {
+                "paths": [
+                  "lambda.zip"
+                ]
+              }
+            ],
+            "build": "docker build -t build-my-project:latest .\ndocker create -ti --name build-my-project build-my-project:latest bash\ndocker cp build-my-project:/var/task/lambda.zip ./\ndocker rm -f build-my-project"
+          }
+        }
+      }
+    }
+  ]
+}

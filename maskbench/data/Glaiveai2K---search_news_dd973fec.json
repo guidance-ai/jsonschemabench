@@ -1,0 +1,106 @@
+{
+  "description": "sample Glaiveai2K/search_news_dd973fec.json",
+  "meta": {
+    "full_size": 462,
+    "stripped_size": 298,
+    "features": [
+      "format",
+      "format:date",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "date_range": {
+        "properties": {
+          "end_date": {
+            "description": "The ending date of the news articles",
+            "format": "date",
+            "type": "string"
+          },
+          "start_date": {
+            "description": "The starting date of the news articles",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date"
+        ],
+        "type": "object"
+      },
+      "keywords": {
+        "description": "Keywords to search for in news articles",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "keywords",
+      "date_range"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "date_range": {
+          "end_date": "2022-01-31",
+          "start_date": "2022-01-01"
+        },
+        "keywords": [
+          "technology",
+          "news",
+          "articles"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-02-31\" is not a \"date\"",
+      "python_error": "'2022-02-31' is not a 'date'\n\nFailed validating 'format' in schema['properties']['date_range']['properties']['start_date']:\n    {'description': 'The starting date of the news articles',\n     'format': 'date',\n     'type': 'string'}\n\nOn instance['date_range']['start_date']:\n    '2022-02-31'",
+      "data": {
+        "date_range": {
+          "end_date": "2022-01-31",
+          "start_date": "2022-02-31"
+        },
+        "keywords": [
+          "technology",
+          "news",
+          "articles"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['keywords']['items']:\n    {'type': 'string'}\n\nOn instance['keywords'][1]:\n    123",
+      "data": {
+        "date_range": {
+          "end_date": "2022-01-01",
+          "start_date": "2022-01-31"
+        },
+        "keywords": [
+          "technology",
+          123,
+          "articles"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+{
+  "description": "sample Github_medium/o85913.json",
+  "meta": {
+    "full_size": 1853,
+    "stripped_size": 760,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "format",
+      "format:date-time",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "maxItems",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://raw.githubusercontent.com/washingtonpost/ans-schema/master/src/main/resources/schema/ans/0.10.5/traits/trait_content_restrictions.json",
+    "title": "Content Restrictions",
+    "description": "Trait that applies contains the content restrictions of an ANS object.",
+    "type": "object",
+    "properties": {
+      "content_code": {
+        "type": "string",
+        "description": "The content restriction code/level/flag associated with the ANS object"
+      },
+      "embargo": {
+        "description": "Embargo configuration to enforce publishing restrictions. Embargoed content must not go live.",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "description": "The boolean flag to indicate if the embargo is active or not. If this field is false, ignore the embargo."
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "An optional end time for the embargo to indicate when it ends. When it's not defined, it means the embargo keeps applying. The end time should be ignored if active flag is false."
+          },
+          "description": {
+            "description": "An optional description for the embargo.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "geo": {
+        "type": "object",
+        "description": "Geo-Restriction configuration that contains the restriction ids that this content should be associated with.",
+        "additionalProperties": false,
+        "properties": {
+          "restrictions": {
+            "type": "array",
+            "description": "An array containing the geo-restriction objects. Limited to a size of 1 for now.",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "object",
+              "description": "An object specifying the _id of the restriction this content should be associated with.",
+              "additionalProperties": false,
+              "properties": {
+                "restriction_id": {
+                  "type": "string",
+                  "description": "The _id of the restriction that is stored in Global Settings."
+                }
+              },
+              "required": [
+                "restriction_id"
+              ]
+            }
+          }
+        },
+        "required": [
+          "restrictions"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "content_code": "Mature",
+        "embargo": {
+          "active": true,
+          "end_time": "2024-12-31T23:59:59Z",
+          "description": "Embargoed until the end of the year"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[{\"restriction_id\":\"US-Only\"},{\"restriction_id\":\"Canada-Only\"}] has more than 1 item",
+      "python_error": "[{'restriction_id': 'US-Only'}, {'restriction_id': 'Canada-Only'}] is too long\n\nFailed validating 'maxItems' in schema['properties']['geo']['properties']['restrictions']:\n    {'type': 'array',\n     'description': 'An array containing the geo-restriction objects. '\n                    'Limited to a size of 1 for now.',\n     'minItems': 1,\n     'maxItems': 1,\n     'items': {'type': 'object',\n               'description': 'An object specifying the _id of the '\n                              'restriction this content should be '\n                              'associated with.',\n               'additionalProperties': False,\n               'properties': {'restriction_id': {'type': 'string',\n                                                 'description': 'The _id '\n                                                                'of the '\n                                                                'restriction '\n                                                                'that is '\n                            .. (357 more)",
+      "data": {
+        "content_code": "Mature",
+        "embargo": {
+          "active": true,
+          "end_time": "2024-12-31T23:59:59Z",
+          "description": "Embargoed until the end of the year"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            },
+            {
+              "restriction_id": "Canada-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid Date\" is not a \"date-time\"",
+      "python_error": "'Invalid Date' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['embargo']['properties']['end_time']:\n    {'type': 'string',\n     'format': 'date-time',\n     'description': 'An optional end time for the embargo to indicate when '\n                    \"it ends. When it's not defined, it means the embargo \"\n                    'keeps applying. The end time should be ignored if '\n                    'active flag is false.'}\n\nOn instance['embargo']['end_time']:\n    'Invalid Date'",
+      "data": {
+        "content_code": "Mature",
+        "embargo": {
+          "active": true,
+          "end_time": "Invalid Date",
+          "description": "Embargoed until the end of the year"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_field' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_field' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['embargo']:\n    {'description': 'Embargo configuration to enforce publishing '\n                    'restrictions. Embargoed content must not go live.',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'active': {'type': 'boolean',\n                               'description': 'The boolean flag to '\n                                              'indicate if the embargo is '\n                                              'active or not. If this '\n                                              'field is false, ignore the '\n                                              'embargo.'},\n                    'end_time': {'type': 'string',\n                                 'format': 'date-time',\n                                 'description': 'An optional end time for '\n                                                'the embargo to indicate '\n                  .. (889 more)",
+      "data": {
+        "content_code": "Mature",
+        "embargo": {
+          "active": true,
+          "end_time": "2024-12-31T23:59:59Z",
+          "description": "Embargoed until the end of the year",
+          "extra_field": "Invalid field"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['geo']['properties']['restrictions']:\n    {'type': 'array',\n     'description': 'An array containing the geo-restriction objects. '\n                    'Limited to a size of 1 for now.',\n     'minItems': 1,\n     'maxItems': 1,\n     'items': {'type': 'object',\n               'description': 'An object specifying the _id of the '\n                              'restriction this content should be '\n                              'associated with.',\n               'additionalProperties': False,\n               'properties': {'restriction_id': {'type': 'string',\n                                                 'description': 'The _id '\n                                                                'of the '\n                                                                'restriction '\n                                                                'that is '\n                                                                'stored in '\n       .. (237 more)",
+      "data": {
+        "content_code": "Mature",
+        "embargo": {
+          "active": true,
+          "end_time": "2024-12-31T23:59:59Z",
+          "description": "Embargoed until the end of the year"
+        },
+        "geo": {
+          "restrictions": []
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_field' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_field' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['embargo']:\n    {'description': 'Embargo configuration to enforce publishing '\n                    'restrictions. Embargoed content must not go live.',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'active': {'type': 'boolean',\n                               'description': 'The boolean flag to '\n                                              'indicate if the embargo is '\n                                              'active or not. If this '\n                                              'field is false, ignore the '\n                                              'embargo.'},\n                    'end_time': {'type': 'string',\n                                 'format': 'date-time',\n                                 'description': 'An optional end time for '\n                                                'the embargo to indicate '\n                  .. (901 more)",
+      "data": {
+        "content_code": "Mature",
+        "embargo": {
+          "active": true,
+          "end_time": "2024-12-31T23:59:59Z",
+          "description": "Embargoed until the end of the year",
+          "extra_field": "This field is not allowed"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "end_time": "2024-12-31T23:59:59Z",
+          "description": "Embargo until the end of the year"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a date\" is not a \"date-time\"",
+      "python_error": "'not a date' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['embargo']['properties']['end_time']:\n    {'type': 'string',\n     'format': 'date-time',\n     'description': 'An optional end time for the embargo to indicate when '\n                    \"it ends. When it's not defined, it means the embargo \"\n                    'keeps applying. The end time should be ignored if '\n                    'active flag is false.'}\n\nOn instance['embargo']['end_time']:\n    'not a date'",
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "end_time": "not a date",
+          "description": "Embargo until the end of the year"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[{\"restriction_id\":\"US-Only\"},{\"restriction_id\":\"Canada-Only\"}] has more than 1 item",
+      "python_error": "[{'restriction_id': 'US-Only'}, {'restriction_id': 'Canada-Only'}] is too long\n\nFailed validating 'maxItems' in schema['properties']['geo']['properties']['restrictions']:\n    {'type': 'array',\n     'description': 'An array containing the geo-restriction objects. '\n                    'Limited to a size of 1 for now.',\n     'minItems': 1,\n     'maxItems': 1,\n     'items': {'type': 'object',\n               'description': 'An object specifying the _id of the '\n                              'restriction this content should be '\n                              'associated with.',\n               'additionalProperties': False,\n               'properties': {'restriction_id': {'type': 'string',\n                                                 'description': 'The _id '\n                                                                'of the '\n                                                                'restriction '\n                                                                'that is '\n                            .. (357 more)",
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "end_time": "2024-12-31T23:59:59Z",
+          "description": "Embargo until the end of the year"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            },
+            {
+              "restriction_id": "Canada-Only"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

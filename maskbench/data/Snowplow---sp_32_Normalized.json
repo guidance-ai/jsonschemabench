@@ -1,0 +1,104 @@
+{
+  "description": "sample Snowplow/sp_32_Normalized.json",
+  "meta": {
+    "full_size": 520,
+    "stripped_size": 340,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "multipleOf",
+      "multipleOf:0.01"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for a Google Analytics Ecommerce transaction",
+    "properties": {
+      "affiliation": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "currency": {
+        "maxLength": 3,
+        "minLength": 3,
+        "type": "string"
+      },
+      "id": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "revenue": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "shipping": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "tax": {
+        "multipleOf": 0.01,
+        "type": "number"
+      }
+    },
+    "self": {
+      "format": "jsonschema",
+      "name": "transaction",
+      "vendor": "com.google.analytics.ecommerce",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "affiliation": "Example Store",
+        "currency": "USD",
+        "id": "ORDER-12345",
+        "revenue": 100.0,
+        "shipping": 5.0,
+        "tax": 8.25
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"US\" is shorter than 3 characters",
+      "python_error": "'US' is too short\n\nFailed validating 'minLength' in schema['properties']['currency']:\n    {'maxLength': 3, 'minLength': 3, 'type': 'string'}\n\nOn instance['currency']:\n    'US'",
+      "data": {
+        "affiliation": "Example Store",
+        "currency": "US",
+        "id": "ORDER-12345",
+        "revenue": 100.0,
+        "shipping": 5.0,
+        "tax": 8.25
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for a Google Analytics Ecommerce transaction',\n     'properties': {'affiliation': {'maxLength': 500, 'type': 'string'},\n                    'currency': {'maxLength': 3,\n                                 'minLength': 3,\n                                 'type': 'string'},\n                    'id': {'maxLength': 500, 'type': 'string'},\n                    'revenue': {'multipleOf': 0.01, 'type': 'number'},\n                    'shipping': {'multipleOf': 0.01, 'type': 'number'},\n                    'tax': {'multipleOf': 0.01, 'type': 'number'}},\n     'self': {'format': 'jsonschema',\n              'name': 'transaction',\n              'vendor': 'com.google.analytics.ecommerce',\n              'version': '1-0-0'},\n     'type': 'object'}\n\nOn instance:\n    {'affiliation': 'Example Store',\n     'currency': 'USD',\n     'id': 'ORDER-12345',.. (100 more)",
+      "data": {
+        "affiliation": "Example Store",
+        "currency": "USD",
+        "id": "ORDER-12345",
+        "revenue": 100.01,
+        "shipping": 5.0,
+        "tax": 8.25,
+        "extraProperty": "extraValue"
+      }
+    }
+  ]
+}

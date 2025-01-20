@@ -1,0 +1,123 @@
+{
+  "description": "sample Glaiveai2K/generate_invoice_fddbd043.json",
+  "meta": {
+    "full_size": 616,
+    "stripped_size": 415,
+    "features": [
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "customer_details": {
+        "properties": {
+          "address": {
+            "description": "The address of the customer",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the customer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "address"
+        ],
+        "type": "object"
+      },
+      "itemized_charges": {
+        "items": {
+          "properties": {
+            "item": {
+              "description": "The name of the item",
+              "type": "string"
+            },
+            "price": {
+              "description": "The price of the item",
+              "type": "number"
+            },
+            "quantity": {
+              "description": "The quantity of the item",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "item",
+            "price",
+            "quantity"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "customer_details",
+      "itemized_charges"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "customer_details": {
+          "address": "123 Main St, Anytown, USA",
+          "name": "John Doe"
+        },
+        "itemized_charges": [
+          {
+            "item": "Item A",
+            "price": 9.99,
+            "quantity": 2
+          },
+          {
+            "item": "Item B",
+            "price": 19.99,
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"quantity\" is a required property",
+      "python_error": "'quantity' is a required property\n\nFailed validating 'required' in schema['properties']['itemized_charges']['items']:\n    {'properties': {'item': {'description': 'The name of the item',\n                             'type': 'string'},\n                    'price': {'description': 'The price of the item',\n                              'type': 'number'},\n                    'quantity': {'description': 'The quantity of the item',\n                                 'type': 'integer'}},\n     'required': ['item', 'price', 'quantity'],\n     'type': 'object'}\n\nOn instance['itemized_charges'][2]:\n    {'item': 'Item C', 'price': 29.99}",
+      "data": {
+        "customer_details": {
+          "address": "123 Main St, Anytown, USA",
+          "name": "John Doe"
+        },
+        "itemized_charges": [
+          {
+            "item": "Item A",
+            "price": 9.99,
+            "quantity": 0
+          },
+          {
+            "item": "Item B",
+            "price": 19.99,
+            "quantity": 1
+          },
+          {
+            "item": "Item C",
+            "price": 29.99
+          }
+        ]
+      }
+    }
+  ]
+}

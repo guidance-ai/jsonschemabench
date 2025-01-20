@@ -1,0 +1,529 @@
+{
+  "description": "sample Github_medium/o27788.json",
+  "meta": {
+    "full_size": 1551,
+    "stripped_size": 1390,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "Mapping": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "remediation_advice"
+            ]
+          },
+          {
+            "required": [
+              "references"
+            ]
+          }
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/VRTid"
+          },
+          "references": {
+            "$ref": "#/definitions/References"
+          },
+          "remediation_advice": {
+            "$ref": "#/definitions/RemediationAdvice"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "MappingMetadata": {
+        "properties": {
+          "default": {
+            "type": "null"
+          },
+          "keys": {
+            "items": {
+              "enum": [
+                "remediation_advice",
+                "references"
+              ],
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array",
+            "_uniqueItems": true
+          }
+        },
+        "required": [
+          "default",
+          "keys"
+        ],
+        "type": "object"
+      },
+      "MappingParent": {
+        "additionalProperties": false,
+        "properties": {
+          "children": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/MappingParent"
+                },
+                {
+                  "$ref": "#/definitions/Mapping"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "id": {
+            "$ref": "#/definitions/VRTid"
+          },
+          "references": {
+            "$ref": "#/definitions/References"
+          },
+          "remediation_advice": {
+            "$ref": "#/definitions/RemediationAdvice"
+          }
+        },
+        "required": [
+          "id",
+          "children"
+        ],
+        "type": "object"
+      },
+      "References": {
+        "items": {
+          "pattern": "^http[s]?://.*$",
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "_uniqueItems": true
+      },
+      "RemediationAdvice": {
+        "type": "string"
+      },
+      "VRTid": {
+        "pattern": "^[a-z_]*$",
+        "type": "string"
+      }
+    },
+    "description": "Mapping from the Vulnerability Rating Taxonomy to Remediation Advice",
+    "properties": {
+      "content": {
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/MappingParent"
+            },
+            {
+              "$ref": "#/definitions/Mapping"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "metadata": {
+        "$ref": "#/definitions/MappingMetadata"
+      }
+    },
+    "required": [
+      "metadata",
+      "content"
+    ],
+    "title": "VRT to Remediation Advice",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "content": [
+          {
+            "id": "vrt_abc",
+            "remediation_advice": "Apply the latest security patches to the system."
+          },
+          {
+            "id": "vrt_def",
+            "references": [
+              "https://example.com/security-advice",
+              "https://example.com/patching-guidelines"
+            ]
+          },
+          {
+            "id": "vrt_ghi",
+            "remediation_advice": "Disable the vulnerable service until a patch is available."
+          },
+          {
+            "id": "vrt_jkl",
+            "references": [
+              "https://example.com/vulnerability-description",
+              "https://example.com/mitigation-strategies"
+            ]
+          },
+          {
+            "id": "vrt_mno",
+            "remediation_advice": "Implement a web application firewall to filter incoming traffic."
+          },
+          {
+            "id": "vrt_pqr",
+            "references": [
+              "https://example.com/web-application-firewall",
+              "https://example.com/intrusion-detection-systems"
+            ]
+          },
+          {
+            "id": "vrt_stu",
+            "remediation_advice": "Use a secure protocol for communication, such as HTTPS."
+          },
+          {
+            "id": "vrt_vwx",
+            "references": [
+              "https://example.com/secure-communication-protocols",
+              "https://example.com/data-encryption"
+            ]
+          },
+          {
+            "id": "vrt_yza",
+            "remediation_advice": "Limit access to sensitive data and systems."
+          },
+          {
+            "id": "vrt_bcd",
+            "references": [
+              "https://example.com/access-control",
+              "https://example.com/data-classification"
+            ]
+          }
+        ],
+        "metadata": {
+          "default": null,
+          "keys": [
+            "remediation_advice",
+            "references"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_def\",\"references\":[\"https://example.com/security-advice\",\"ftp://example.com/patching-guidelines\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_def', 'references': ['https://example.com/security-advice', 'ftp://example.com/patching-guidelines']} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][1]:\n    {'id': 'vrt_def',\n     'references': ['https://example.com/security-advice',\n                    'ftp://example.com/patching-guidelines']}",
+      "data": {
+        "content": [
+          {
+            "id": "vrt_abc",
+            "remediation_advice": "Apply the latest security patches to the system."
+          },
+          {
+            "id": "vrt_def",
+            "references": [
+              "https://example.com/security-advice",
+              "ftp://example.com/patching-guidelines"
+            ]
+          },
+          {
+            "id": "vrt_ghi",
+            "remediation_advice": "Disable the vulnerable service until a patch is available."
+          },
+          {
+            "id": "vrt_jkl",
+            "references": [
+              "https://example.com/vulnerability-description",
+              "https://example.com/mitigation-strategies"
+            ]
+          },
+          {
+            "id": "vrt_mno",
+            "remediation_advice": "Implement a web application firewall to filter incoming traffic."
+          },
+          {
+            "id": "vrt_pqr",
+            "references": [
+              "https://example.com/web-application-firewall",
+              "https://example.com/intrusion-detection-systems"
+            ]
+          },
+          {
+            "id": "vrt_stu",
+            "remediation_advice": "Use a secure protocol for communication, such as HTTPS."
+          },
+          {
+            "id": "vrt_vwx",
+            "references": [
+              "https://example.com/secure-communication-protocols",
+              "https://example.com/data-encryption"
+            ]
+          },
+          {
+            "id": "vrt_yza",
+            "remediation_advice": "Limit access to sensitive data and systems."
+          },
+          {
+            "id": "vrt_bcd",
+            "references": [
+              "https://example.com/access-control",
+              "https://example.com/data-classification"
+            ]
+          }
+        ],
+        "metadata": {
+          "default": null,
+          "keys": [
+            "remediation_advice",
+            "references"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[\"remediation_advice\"] has less than 2 items",
+      "python_error": "['remediation_advice'] is too short\n\nFailed validating 'minItems' in schema['properties']['metadata']['properties']['keys']:\n    {'items': {'enum': ['remediation_advice', 'references'],\n               'type': 'string'},\n     'minItems': 2,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['metadata']['keys']:\n    ['remediation_advice']",
+      "data": {
+        "content": [
+          {
+            "id": "vrt_abc",
+            "remediation_advice": "Apply the latest security patches to the system."
+          },
+          {
+            "id": "vrt_def",
+            "references": [
+              "https://example.com/security-advice",
+              "https://example.com/patching-guidelines"
+            ]
+          },
+          {
+            "id": "vrt_ghi",
+            "remediation_advice": "Disable the vulnerable service until a patch is available."
+          },
+          {
+            "id": "vrt_jkl",
+            "references": [
+              "https://example.com/vulnerability-description",
+              "https://example.com/mitigation-strategies"
+            ]
+          },
+          {
+            "id": "vrt_mno",
+            "remediation_advice": "Implement a web application firewall to filter incoming traffic."
+          },
+          {
+            "id": "vrt_pqr",
+            "references": [
+              "https://example.com/web-application-firewall",
+              "https://example.com/intrusion-detection-systems"
+            ]
+          },
+          {
+            "id": "vrt_stu",
+            "remediation_advice": "Use a secure protocol for communication, such as HTTPS."
+          },
+          {
+            "id": "vrt_vwx",
+            "references": [
+              "https://example.com/secure-communication-protocols",
+              "https://example.com/data-encryption"
+            ]
+          },
+          {
+            "id": "vrt_yza",
+            "remediation_advice": "Limit access to sensitive data and systems."
+          },
+          {
+            "id": "vrt_bcd",
+            "references": [
+              "https://example.com/access-control",
+              "https://example.com/data-classification"
+            ]
+          }
+        ],
+        "metadata": {
+          "default": null,
+          "keys": [
+            "remediation_advice"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_123\",\"remediation_advice\":\"Limit access to sensitive data and systems.\",\"references\":[\"https://example.com/access-control\",\"https://example.com/data-classification\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_123', 'remediation_advice': 'Limit access to sensitive data and systems.', 'references': ['https://example.com/access-control', 'https://example.com/data-classification']} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][10]:\n    {'id': 'vrt_123',\n     'remediation_advice': 'Limit access to sensitive data and systems.',\n     'references': ['https://example.com/access-control',\n                    'https://example.com/data-classification']}",
+      "data": {
+        "content": [
+          {
+            "id": "vrt_abc",
+            "remediation_advice": "Apply the latest security patches to the system."
+          },
+          {
+            "id": "vrt_def",
+            "references": [
+              "https://example.com/security-advice",
+              "https://example.com/patching-guidelines"
+            ]
+          },
+          {
+            "id": "vrt_ghi",
+            "remediation_advice": "Disable the vulnerable service until a patch is available."
+          },
+          {
+            "id": "vrt_jkl",
+            "references": [
+              "https://example.com/vulnerability-description",
+              "https://example.com/mitigation-strategies"
+            ]
+          },
+          {
+            "id": "vrt_mno",
+            "remediation_advice": "Implement a web application firewall to filter incoming traffic."
+          },
+          {
+            "id": "vrt_pqr",
+            "references": [
+              "https://example.com/web-application-firewall",
+              "https://example.com/intrusion-detection-systems"
+            ]
+          },
+          {
+            "id": "vrt_stu",
+            "remediation_advice": "Use a secure protocol for communication, such as HTTPS."
+          },
+          {
+            "id": "vrt_vwx",
+            "references": [
+              "https://example.com/secure-communication-protocols",
+              "https://example.com/data-encryption"
+            ]
+          },
+          {
+            "id": "vrt_yza",
+            "remediation_advice": "Limit access to sensitive data and systems."
+          },
+          {
+            "id": "vrt_bcd",
+            "references": [
+              "https://example.com/access-control",
+              "https://example.com/data-classification"
+            ]
+          },
+          {
+            "id": "vrt_123",
+            "remediation_advice": "Limit access to sensitive data and systems.",
+            "references": [
+              "https://example.com/access-control",
+              "https://example.com/data-classification"
+            ]
+          }
+        ],
+        "metadata": {
+          "default": null,
+          "keys": [
+            "remediation_advice",
+            "references"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_abc!\",\"remediation_advice\":\"Apply the latest security patches to the system.\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_abc!', 'remediation_advice': 'Apply the latest security patches to the system.'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][0]:\n    {'id': 'vrt_abc!',\n     'remediation_advice': 'Apply the latest security patches to the '\n                           'system.'}",
+      "data": {
+        "content": [
+          {
+            "id": "vrt_abc!",
+            "remediation_advice": "Apply the latest security patches to the system."
+          },
+          {
+            "id": "vrt_def",
+            "references": [
+              "https://example.com/security-advice",
+              "https://example.com/patching-guidelines"
+            ]
+          },
+          {
+            "id": "vrt_ghi",
+            "remediation_advice": "Disable the vulnerable service until a patch is available."
+          },
+          {
+            "id": "vrt_jkl",
+            "references": [
+              "https://example.com/vulnerability-description",
+              "https://example.com/mitigation-strategies"
+            ]
+          },
+          {
+            "id": "vrt_mno",
+            "remediation_advice": "Implement a web application firewall to filter incoming traffic."
+          },
+          {
+            "id": "vrt_pqr",
+            "references": [
+              "https://example.com/web-application-firewall",
+              "https://example.com/intrusion-detection-systems"
+            ]
+          },
+          {
+            "id": "vrt_stu",
+            "remediation_advice": "Use a secure protocol for communication, such as HTTPS."
+          },
+          {
+            "id": "vrt_vwx",
+            "references": [
+              "https://example.com/secure-communication-protocols",
+              "https://example.com/data-encryption"
+            ]
+          },
+          {
+            "id": "vrt_yza",
+            "remediation_advice": "Limit access to sensitive data and systems."
+          },
+          {
+            "id": "vrt_bcd",
+            "references": [
+              "https://example.com/access-control",
+              "https://example.com/data-classification"
+            ]
+          }
+        ],
+        "metadata": {
+          "default": null,
+          "keys": [
+            "remediation_advice",
+            "references"
+          ]
+        }
+      }
+    }
+  ]
+}

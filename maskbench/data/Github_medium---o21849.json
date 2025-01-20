@@ -1,0 +1,211 @@
+{
+  "description": "sample Github_medium/o21849.json",
+  "meta": {
+    "full_size": 1009,
+    "stripped_size": 1009,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "Type",
+      "HttpMethod",
+      "ResourceId",
+      "RestApiId"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "Type": {
+        "type": "string",
+        "enum": [
+          "HTTP",
+          "AWS",
+          "MOCK"
+        ]
+      },
+      "HttpMethod": {
+        "type": "string",
+        "enum": [
+          "DELETE",
+          "GET",
+          "HEAD",
+          "OPTIONS",
+          "PATCH",
+          "POST",
+          "PUT"
+        ]
+      },
+      "ResourceId": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+$"
+      },
+      "RestApiId": {
+        "type": "string",
+        "pattern": "^[a-z0-9]{10}$"
+      },
+      "CacheKeyParameters": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "CacheNamespace": {
+        "type": "string"
+      },
+      "Credentials": {
+        "type": "string"
+      },
+      "IntegrationHttpMethod": {
+        "type": "string"
+      },
+      "RequestTemplates": {
+        "type": "object",
+        "properties": {},
+        "patternProperties": {
+          ".+": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestParameters": {
+        "type": "object",
+        "properties": {},
+        "patternProperties": {
+          "^integration\\.request\\.(querystring|path|header)\\..+$": {
+            "type": "string",
+            "pattern": "^(method\\.request\\.(querystring|header|path)\\..+)|('.*')$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Uri": {
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "Type": "HTTP",
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "RestApiId": "1234567890",
+        "CacheKeyParameters": [
+          "param1",
+          "param2"
+        ],
+        "CacheNamespace": "my-cache",
+        "Credentials": "arn:aws:iam::123456789012:role/my-role",
+        "IntegrationHttpMethod": "GET",
+        "RequestTemplates": {
+          "application/json": "{\"key\":\"value\"}"
+        },
+        "RequestParameters": {
+          "integration.request.querystring.param1": "method.request.querystring.param1",
+          "integration.request.header.param2": "method.request.header.param2"
+        },
+        "Uri": "https://example.com/api/endpoint"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "Type": "HTTP",
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "RestApiId": "1234567890",
+        "CacheKeyParameters": [
+          "param1",
+          "param2"
+        ],
+        "CacheNamespace": "my-cache",
+        "Credentials": "arn:aws:iam::123456789012:role/my-role",
+        "IntegrationHttpMethod": "POST",
+        "RequestTemplates": {
+          "application/json": "{\"key\":\"value\"}"
+        },
+        "RequestParameters": {
+          "integration.request.querystring.param1": "method.request.querystring.param1",
+          "integration.request.header.param2": "method.request.header.param2"
+        },
+        "Uri": "https://example.com/api/endpoint"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('integration.request.body.param3' was unexpected)",
+      "python_error": "'integration.request.body.param3' does not match any of the regexes: '^integration\\\\.request\\\\.(querystring|path|header)\\\\..+$'\n\nFailed validating 'additionalProperties' in schema['properties']['RequestParameters']:\n    {'type': 'object',\n     'properties': {},\n     'patternProperties': {'^integration\\\\.request\\\\.(querystring|path|header)\\\\..+$': {'type': 'string',\n                                                                                        'pattern': \"^(method\\\\.request\\\\.(querystring|header|path)\\\\..+)|('.*')$\"}},\n     'additionalProperties': False}\n\nOn instance['RequestParameters']:\n    {'integration.request.querystring.param1': 'method.request.querystring.param1',\n     'integration.request.header.param2': 'method.request.header.param2',\n     'integration.request.body.param3': 'method.request.querystring.param3'}",
+      "data": {
+        "Type": "HTTP",
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "RestApiId": "1234567890",
+        "CacheKeyParameters": [
+          "param1",
+          "param2"
+        ],
+        "CacheNamespace": "my-cache",
+        "Credentials": "arn:aws:iam::123456789012:role/my-role",
+        "IntegrationHttpMethod": "POST",
+        "RequestTemplates": {
+          "application/json": "{\"key\":\"value\"}"
+        },
+        "RequestParameters": {
+          "integration.request.querystring.param1": "method.request.querystring.param1",
+          "integration.request.header.param2": "method.request.header.param2",
+          "integration.request.body.param3": "method.request.querystring.param3"
+        },
+        "Uri": "https://example.com/api/endpoint"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123abc!\" does not match \"^[a-z0-9]+$\"",
+      "python_error": "'123abc!' does not match '^[a-z0-9]+$'\n\nFailed validating 'pattern' in schema['properties']['ResourceId']:\n    {'type': 'string', 'pattern': '^[a-z0-9]+$'}\n\nOn instance['ResourceId']:\n    '123abc!'",
+      "data": {
+        "Type": "HTTP",
+        "HttpMethod": "GET",
+        "ResourceId": "123abc!",
+        "RestApiId": "1234567890",
+        "CacheKeyParameters": [
+          "param1",
+          "param2"
+        ],
+        "CacheNamespace": "my-cache",
+        "Credentials": "arn:aws:iam::123456789012:role/my-role",
+        "IntegrationHttpMethod": "POST",
+        "RequestTemplates": {
+          "application/json": "{\"key\":\"value\"}"
+        },
+        "RequestParameters": {
+          "integration.request.querystring.param1": "method.request.querystring.param1",
+          "integration.request.header.param2": "method.request.header.param2"
+        },
+        "Uri": "https://example.com/api/endpoint"
+      }
+    }
+  ]
+}

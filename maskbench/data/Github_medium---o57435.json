@@ -1,0 +1,269 @@
+{
+  "description": "sample Github_medium/o57435.json",
+  "meta": {
+    "full_size": 1763,
+    "stripped_size": 944,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Claim",
+    "description": "Claim provided by a service",
+    "type": "object",
+    "properties": {
+      "claimant": {
+        "description": "Short name of the service used for subscription",
+        "value": "string"
+      },
+      "subject": {
+        "description": "subject of the predicate (claim)",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Type of persistent identifier (e.g. INSPIRE_RECORD_ID)",
+            "type": "string"
+          },
+          "value": {
+            "description": "Actual value of the identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "claim": {
+        "description": "type of claim",
+        "type": "object",
+        "properties": {
+          "predicate": {
+            "description": "predicate of the claim",
+            "type": "string",
+            "enum": [
+              "is_same_as",
+              "is_different_than",
+              "is_erratum_of",
+              "is_superseded_by",
+              "is_cited_by",
+              "is_software_for",
+              "is_dataset_for"
+            ]
+          },
+          "datetime": {
+            "description": "#TODO: which date time is this?",
+            "type": "string"
+          },
+          "certainty": {
+            "description": "certainty of the claim",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "arguments": {
+            "description": "arguments supporting the certainty",
+            "type": "object",
+            "properties": {
+              "human": {
+                "description": "the claim was done by a human or an algorithm",
+                "type": "string",
+                "enum": [
+                  "True",
+                  "False"
+                ]
+              },
+              "actor": {
+                "description": "who assessed the certainty",
+                "type": "string"
+              },
+              "role": {
+                "description": "role of the actor",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "predicate",
+          "certainty"
+        ]
+      },
+      "object": {
+        "description": "object of the predicate (claim)",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Type of persistent identifier (e.g. INSPIRE_RECORD_ID)",
+            "type": "string"
+          },
+          "value": {
+            "description": "Actual value of the identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "claimant",
+      "subject",
+      "claim",
+      "object"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "claimant": "Service Name",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "claim": {
+          "predicate": "is_same_as",
+          "datetime": "2022-01-01T12:00:00Z",
+          "certainty": 90,
+          "arguments": {
+            "human": "True",
+            "actor": "John Doe",
+            "role": "Data Curator"
+          }
+        },
+        "object": {
+          "type": "DOI",
+          "value": "10.1234/56789"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "101 is greater than the maximum of 100",
+      "python_error": "101 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['claim']['properties']['certainty']:\n    {'description': 'certainty of the claim',\n     'type': 'number',\n     'minimum': 0,\n     'maximum': 100}\n\nOn instance['claim']['certainty']:\n    101",
+      "data": {
+        "claimant": "Service Name",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "claim": {
+          "predicate": "is_same_as",
+          "datetime": "2022-01-01T12:00:00Z",
+          "certainty": 101,
+          "arguments": {
+            "human": "True",
+            "actor": "John Doe",
+            "role": "Data Curator"
+          }
+        },
+        "object": {
+          "type": "DOI",
+          "value": "10.1234/56789"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"is_similar_to\" is not one of [\"is_same_as\",\"is_different_than\",\"is_erratum_of\",\"is_superseded_by\",\"is_cited_by\",\"is_software_for\",\"is_dataset_for\"]",
+      "python_error": "'is_similar_to' is not one of ['is_same_as', 'is_different_than', 'is_erratum_of', 'is_superseded_by', 'is_cited_by', 'is_software_for', 'is_dataset_for']\n\nFailed validating 'enum' in schema['properties']['claim']['properties']['predicate']:\n    {'description': 'predicate of the claim',\n     'type': 'string',\n     'enum': ['is_same_as',\n              'is_different_than',\n              'is_erratum_of',\n              'is_superseded_by',\n              'is_cited_by',\n              'is_software_for',\n              'is_dataset_for']}\n\nOn instance['claim']['predicate']:\n    'is_similar_to'",
+      "data": {
+        "claimant": "Service Name",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "claim": {
+          "predicate": "is_similar_to",
+          "datetime": "2022-01-01T12:00:00Z",
+          "certainty": 90,
+          "arguments": {
+            "human": "True",
+            "actor": "John Doe",
+            "role": "Data Curator"
+          }
+        },
+        "object": {
+          "type": "DOI",
+          "value": "10.1234/56789"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "claimant": "Example Service",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "claim": {
+          "predicate": "is_same_as",
+          "datetime": "2022-01-01T12:00:00Z",
+          "certainty": 80,
+          "arguments": {
+            "human": "False",
+            "actor": "John Doe",
+            "role": "Data Curator"
+          }
+        },
+        "object": {
+          "type": "DOI",
+          "value": "10.1234/567890"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "100.1 is greater than the maximum of 100",
+      "python_error": "100.1 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['claim']['properties']['certainty']:\n    {'description': 'certainty of the claim',\n     'type': 'number',\n     'minimum': 0,\n     'maximum': 100}\n\nOn instance['claim']['certainty']:\n    100.1",
+      "data": {
+        "claimant": "Example Service",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "claim": {
+          "predicate": "is_same_as",
+          "datetime": "2022-01-01T12:00:00Z",
+          "certainty": 100.1,
+          "arguments": {
+            "human": "False",
+            "actor": "John Doe",
+            "role": "Data Curator"
+          }
+        },
+        "object": {
+          "type": "DOI",
+          "value": "10.1234/567890"
+        }
+      }
+    }
+  ]
+}

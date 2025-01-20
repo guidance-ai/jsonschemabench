@@ -1,0 +1,257 @@
+{
+  "description": "sample Github_medium/o48095.json",
+  "meta": {
+    "full_size": 779,
+    "stripped_size": 697,
+    "features": [
+      "items",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Root iAgree states schema.",
+    "description": "iAgree v2 states JSON schema",
+    "type": "object",
+    "properties": {
+      "agreementId": {
+        "type": "string"
+      },
+      "stateType": {
+        "type": "string"
+      },
+      "id": {
+        "type": "string"
+      },
+      "period": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ]
+      },
+      "scope": {
+        "type": "object",
+        "patternProperties": {
+          "^[a-zA-Z0-9]*$": {}
+        }
+      },
+      "window": {
+        "type": "object",
+        "patternProperties": {
+          "^[a-zA-Z0-9]*$": {}
+        }
+      },
+      "records": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "time": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "time"
+          ]
+        }
+      }
+    },
+    "required": [
+      "agreementId",
+      "stateType",
+      "id",
+      "period",
+      "scope",
+      "window",
+      "records"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "agreementId": "agreement-123",
+        "stateType": "active",
+        "id": "state-1",
+        "period": {
+          "from": "2022-01-01T00:00:00Z",
+          "to": "2022-12-31T23:59:59Z"
+        },
+        "scope": {
+          "user": {},
+          "admin": {}
+        },
+        "window": {
+          "daily": {},
+          "weekly": {}
+        },
+        "records": [
+          {
+            "value": "Hello, World!",
+            "time": "2022-01-01T12:00:00Z"
+          },
+          {
+            "value": 42,
+            "time": "2022-01-02T12:00:00Z"
+          },
+          {
+            "value": true,
+            "time": "2022-01-03T12:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "agreementId": "12345",
+        "stateType": "active",
+        "id": "abcde",
+        "period": {
+          "from": "2022-01-01T00:00:00Z",
+          "to": "2022-12-31T23:59:59Z"
+        },
+        "scope": {
+          "key1": {},
+          "key2": {}
+        },
+        "window": {
+          "windowKey1": {},
+          "windowKey2": {}
+        },
+        "records": [
+          {
+            "value": "stringValue",
+            "time": "2022-01-01T00:00:00Z"
+          },
+          {
+            "value": 123,
+            "time": "2022-01-02T00:00:00Z"
+          },
+          {
+            "value": true,
+            "time": "2022-01-03T00:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['records']['items']['properties']['value']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}, {'type': 'boolean'}]}\n\nOn instance['records'][3]['value']:\n    None",
+      "data": {
+        "agreementId": "12345",
+        "stateType": "active",
+        "id": "abcde",
+        "period": {
+          "from": "2022-01-01T00:00:00Z",
+          "to": "2022-12-31T23:59:59Z"
+        },
+        "scope": {
+          "key1": {},
+          "key2": {}
+        },
+        "window": {
+          "windowKey1": {},
+          "windowKey2": {}
+        },
+        "records": [
+          {
+            "value": "stringValue",
+            "time": "2022-01-01T00:00:00Z"
+          },
+          {
+            "value": 123,
+            "time": "2022-01-02T00:00:00Z"
+          },
+          {
+            "value": true,
+            "time": "2022-01-03T00:00:00Z"
+          },
+          {
+            "value": null,
+            "time": "2022-01-04T00:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"time\" is a required property",
+      "python_error": "'time' is a required property\n\nFailed validating 'required' in schema['properties']['records']['items']:\n    {'type': 'object',\n     'properties': {'value': {'oneOf': [{'type': 'string'},\n                                        {'type': 'number'},\n                                        {'type': 'boolean'}]},\n                    'time': {'type': 'string'}},\n     'required': ['value', 'time']}\n\nOn instance['records'][2]:\n    {'value': 'stringValue', 'extra': 'extra'}",
+      "data": {
+        "agreementId": "12345",
+        "stateType": "active",
+        "id": "abcde",
+        "period": {
+          "from": "2022-01-01T00:00:00Z",
+          "to": "2022-01-01T00:00:00Z",
+          "extra": "extra"
+        },
+        "scope": {
+          "key1": {},
+          "key2": {},
+          "!@#$%^&*()": {}
+        },
+        "window": {
+          "windowKey1": {},
+          "windowKey2": {}
+        },
+        "records": [
+          {
+            "value": "stringValue",
+            "time": "2022-01-01T00:00:00Z",
+            "extra": "extra"
+          },
+          {
+            "value": 123,
+            "time": "2022-01-02T00:00:00Z"
+          },
+          {
+            "value": "stringValue",
+            "extra": "extra"
+          }
+        ]
+      }
+    }
+  ]
+}

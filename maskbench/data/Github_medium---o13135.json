@@ -1,0 +1,484 @@
+{
+  "description": "sample Github_medium/o13135.json",
+  "meta": {
+    "full_size": 1135,
+    "stripped_size": 574,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "listItem": {
+        "title": "List item",
+        "description": "Single list item definition (hierarchical)",
+        "type": "object",
+        "properties": {
+          "value": {
+            "title": "Value",
+            "description": "Value to be stored in the database",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "label": {
+            "title": "Label",
+            "description": "User-friendly label",
+            "type": "string",
+            "minLength": 1
+          },
+          "inactive": {
+            "title": "Inactive",
+            "description": "Whether or not the item is active",
+            "type": "boolean",
+            "default": false
+          },
+          "children": {
+            "title": "List item children",
+            "description": "Direct children items of the current list item",
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/listItem"
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value",
+          "label",
+          "inactive",
+          "children"
+        ]
+      }
+    },
+    "title": "CSV List Configuration",
+    "description": "List items configuration for a single CSV list",
+    "type": "object",
+    "properties": {
+      "items": {
+        "title": "List items",
+        "description": "A list of items for a given list",
+        "type": "array",
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/listItem"
+            }
+          ]
+        },
+        "minItems": 1,
+        "_uniqueItems": true
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "items"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "items": [
+          {
+            "value": "item1",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['items']['items']['allOf'][0]['properties']['value']:\n    {'title': 'Value',\n     'description': 'Value to be stored in the database',\n     'type': 'string',\n     'minLength': 1,\n     'maxLength': 255}\n\nOn instance['items'][0]['value']:\n    ''",
+      "data": {
+        "items": [
+          {
+            "value": "",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"children\" is a required property",
+      "python_error": "'children' is a required property\n\nFailed validating 'required' in schema['properties']['items']['items']['allOf'][0]['properties']['children']['items']['allOf'][0]['properties']['children']['items']['allOf'][0]:\n    {'title': 'List item',\n     'description': 'Single list item definition (hierarchical)',\n     'type': 'object',\n     'properties': {'value': {'title': 'Value',\n                              'description': 'Value to be stored in the '\n                                             'database',\n                              'type': 'string',\n                              'minLength': 1,\n                              'maxLength': 255},\n                    'label': {'title': 'Label',\n                              'description': 'User-friendly label',\n                              'type': 'string',\n                              'minLength': 1},\n                    'inactive': {'title': 'Inactive',\n                                 'description': 'Whether or not the item '\n                                 .. (709 more)",
+      "data": {
+        "items": [
+          {
+            "value": "item1",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": [
+                  {
+                    "value": "item1-1-1",
+                    "label": "Item 1-1-1",
+                    "inactive": false
+                  }
+                ]
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['items']:\n    {'title': 'List items',\n     'description': 'A list of items for a given list',\n     'type': 'array',\n     'items': {'allOf': [{'$ref': '#/definitions/listItem'}]},\n     'minItems': 1,\n     '_uniqueItems': True}\n\nOn instance['items']:\n    []",
+      "data": {
+        "items": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('Duplicate value' was unexpected)",
+      "python_error": "Additional properties are not allowed (' Renamed label to invalid name', 'Duplicate value' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['items']['items']['allOf'][0]['properties']['children']['items']['allOf'][0]:\n    {'title': 'List item',\n     'description': 'Single list item definition (hierarchical)',\n     'type': 'object',\n     'properties': {'value': {'title': 'Value',\n                              'description': 'Value to be stored in the '\n                                             'database',\n                              'type': 'string',\n                              'minLength': 1,\n                              'maxLength': 255},\n                    'label': {'title': 'Label',\n                              'description': 'User-friendly label',\n                              'type': 'string',\n                              'minLength': 1},\n                    'inactive': {'title': 'Inactive',\n                                 'description': 'Whether or not the i.. (818 more)",
+      "data": {
+        "items": [
+          {
+            "value": "item1",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item2-1",
+                "Duplicate value": "label",
+                " Renamed label to invalid name": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "items": [
+          {
+            "value": "item1",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item3",
+            "label": "Item 3",
+            "inactive": true,
+            "children": []
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('additionalProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('additionalProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['items']['items']['allOf'][0]['properties']['children']['items']['allOf'][0]:\n    {'title': 'List item',\n     'description': 'Single list item definition (hierarchical)',\n     'type': 'object',\n     'properties': {'value': {'title': 'Value',\n                              'description': 'Value to be stored in the '\n                                             'database',\n                              'type': 'string',\n                              'minLength': 1,\n                              'maxLength': 255},\n                    'label': {'title': 'Label',\n                              'description': 'User-friendly label',\n                              'type': 'string',\n                              'minLength': 1},\n                    'inactive': {'title': 'Inactive',\n                                 'description': 'Whether or not the item '\n                          .. (762 more)",
+      "data": {
+        "items": [
+          {
+            "value": "item1",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": false,
+                "additionalProperty": "bug",
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item3",
+            "label": "Item 3",
+            "inactive": true,
+            "children": []
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['items']['items']['allOf'][0]['properties']['value']:\n    {'title': 'Value',\n     'description': 'Value to be stored in the database',\n     'type': 'string',\n     'minLength': 1,\n     'maxLength': 255}\n\nOn instance['items'][0]['value']:\n    ''",
+      "data": {
+        "items": [
+          {
+            "value": "",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item3",
+            "label": "Item 3",
+            "inactive": true,
+            "children": []
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['items']['items']['allOf'][0]['properties']['value']:\n    {'title': 'Value',\n     'description': 'Value to be stored in the database',\n     'type': 'string',\n     'minLength': 1,\n     'maxLength': 255}\n\nOn instance['items'][0]['value']:\n    ''",
+      "data": {
+        "items": [
+          {
+            "value": "",
+            "label": "Item 1",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item1-1",
+                "label": "Item 1-1",
+                "inactive": false,
+                "children": []
+              },
+              {
+                "value": "item1-2",
+                "label": "Item 1-2",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item2",
+            "label": "Item 2",
+            "inactive": false,
+            "children": [
+              {
+                "value": "item2-1",
+                "label": "Item 2-1",
+                "inactive": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "value": "item3",
+            "label": "Item 3",
+            "inactive": true,
+            "children": []
+          }
+        ]
+      }
+    }
+  ]
+}

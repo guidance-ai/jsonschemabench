@@ -1,0 +1,144 @@
+{
+  "description": "sample Github_easy/o68355.json",
+  "meta": {
+    "full_size": 546,
+    "stripped_size": 516,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "_requiredEmpty",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Place Search Schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "q": {
+        "type": "string"
+      },
+      "id": {
+        "type": "array"
+      },
+      "country": {
+        "type": "array"
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 200
+      },
+      "location": {
+        "type": "string",
+        "pattern": "@([\\-\\+]?\\d+(\\.\\d+)?),([\\-\\+]?\\d+(\\.\\d+)?)"
+      },
+      "type": {
+        "items": {
+          "enum": [
+            "neighbourhood",
+            "locality",
+            "localadmin",
+            "county",
+            "region",
+            "country",
+            "continent",
+            "country",
+            "planet",
+            "local",
+            "metro",
+            "major"
+          ]
+        },
+        "type": "array"
+      }
+    },
+    "required": []
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "q": "New York",
+        "id": [
+          "12345",
+          "67890"
+        ],
+        "country": [
+          "US",
+          "CA"
+        ],
+        "limit": 100,
+        "location": "@40.7128,-74.0060",
+        "type": [
+          "locality",
+          "region"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['limit']:\n    {'type': 'integer', 'minimum': 1, 'maximum': 200}\n\nOn instance['limit']:\n    0",
+      "data": {
+        "q": "New York",
+        "id": [
+          "12345",
+          "67890"
+        ],
+        "country": [
+          "US",
+          "CA"
+        ],
+        "limit": 0,
+        "location": "@40.7128,-74.0060",
+        "type": [
+          "locality",
+          "region"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "201 is greater than the maximum of 200",
+      "python_error": "Additional properties are not allowed ('invalidProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'https://json-schema.org/draft/2020-12/schema',\n     'title': 'Place Search Schema',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'q': {'type': 'string'},\n                    'id': {'type': 'array'},\n                    'country': {'type': 'array'},\n                    'limit': {'type': 'integer',\n                              'minimum': 1,\n                              'maximum': 200},\n                    'location': {'type': 'string',\n                                 'pattern': '@([\\\\-\\\\+]?\\\\d+(\\\\.\\\\d+)?),([\\\\-\\\\+]?\\\\d+(\\\\.\\\\d+)?)'},\n                    'type': {'items': {'enum': ['neighbourhood',\n                                                'locality',\n                                                'localadmin',\n                                                'county',\n                                                'region',\n   .. (699 more)",
+      "data": {
+        "q": "New York",
+        "id": [
+          "12345",
+          "67890"
+        ],
+        "country": [
+          "US",
+          "CA"
+        ],
+        "limit": 201,
+        "location": "@40.7128,-74.0060",
+        "type": [
+          "locality",
+          "region"
+        ],
+        "invalidProperty": "value"
+      }
+    }
+  ]
+}

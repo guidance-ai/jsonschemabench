@@ -1,0 +1,290 @@
+{
+  "description": "sample Github_trivial/o40350.json",
+  "meta": {
+    "full_size": 1560,
+    "stripped_size": 1487,
+    "features": [
+      "@minmaxItems",
+      "@siblingKeys",
+      "anyOf",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://letsencrypt.org/schema/01/challengeobject#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Subschema for an individual challenge (within challenge)",
+    "anyOf": [
+      {
+        "type": "object",
+        "required": [
+          "type",
+          "token"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "simpleHttps"
+            ]
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "required": [
+          "type",
+          "r",
+          "nonce"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "dvsni"
+            ]
+          },
+          "r": {
+            "type": [
+              "string"
+            ],
+            "pattern": "^[-_=0-9A-Za-z]+$"
+          },
+          "nonce": {
+            "type": "string",
+            "pattern": "^[0-9a-f]+$"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "recoveryContact"
+            ]
+          },
+          "activationURL": {
+            "type": "string"
+          },
+          "successURL": {
+            "type": "string"
+          },
+          "contact": {
+            "type": "string"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "recoveryToken"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "required": [
+          "type",
+          "alg",
+          "nonce",
+          "hints"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "proofOfPossession"
+            ]
+          },
+          "alg": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "string",
+            "pattern": "^[-_=0-9A-Za-z]+$"
+          },
+          "hints": {
+            "type": "object",
+            "properties": {
+              "jwk": {
+                "type": "object"
+              },
+              "certFingerprints": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]+$"
+                }
+              },
+              "subjectKeyIdentifiers": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]+$"
+                }
+              },
+              "serialNumbers": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "issuers": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "authorizedFor": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "required": [
+          "type",
+          "token"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "dns"
+            ]
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "type": "dns",
+        "token": "example-token"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"dvsni\",\"r\":\"example-string!\",\"nonce\":\"example-nonce\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'example-nonce' does not match '^[0-9a-f]+$'\n\nFailed validating 'pattern' in schema[1]['properties']['nonce']:\n    {'type': 'string', 'pattern': '^[0-9a-f]+$'}\n\nOn instance['nonce']:\n    'example-nonce'",
+      "data": {
+        "type": "dvsni",
+        "r": "example-string!",
+        "nonce": "example-nonce"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"proofOfPossession\",\"alg\":\"example-alg\",\"nonce\":\"example-nonce\",\"hints\":{\"certFingerprints\":[]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema[4]['properties']['hints']['properties']['certFingerprints']:\n    {'type': 'array',\n     'minItems': 1,\n     'items': {'type': 'string', 'pattern': '^[0-9a-f]+$'}}\n\nOn instance['hints']['certFingerprints']:\n    []",
+      "data": {
+        "type": "proofOfPossession",
+        "alg": "example-alg",
+        "nonce": "example-nonce",
+        "hints": {
+          "certFingerprints": []
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"dns\",\"token\":123} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'type': 'dns', 'token': 123} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema:\n    {'id': 'https://letsencrypt.org/schema/01/challengeobject#',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'Subschema for an individual challenge (within '\n                    'challenge)',\n     'anyOf': [{'type': 'object',\n                'required': ['type', 'token'],\n                'properties': {'type': {'enum': ['simpleHttps']},\n                               'token': {'type': 'string'}}},\n               {'type': 'object',\n                'required': ['type', 'r', 'nonce'],\n                'properties': {'type': {'enum': ['dvsni']},\n                               'r': {'type': ['string'],\n                                     'pattern': '^[-_=0-9A-Za-z]+$'},\n                               'nonce': {'type': 'string',\n                                         'pattern': '^[0-9a-f]+$'}}},\n               {'type': 'object',\n                'required': ['type'],\n  .. (2829 more)",
+      "data": {
+        "type": "dns",
+        "token": 123
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"proofOfPossession\",\"alg\":\"example-alg\",\"nonce\":\"example-nonce!\",\"hints\":{\"certFingerprints\":[\"example-fingerprint\"]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'example-fingerprint' does not match '^[0-9a-f]+$'\n\nFailed validating 'pattern' in schema[4]['properties']['hints']['properties']['certFingerprints']['items']:\n    {'type': 'string', 'pattern': '^[0-9a-f]+$'}\n\nOn instance['hints']['certFingerprints'][0]:\n    'example-fingerprint'",
+      "data": {
+        "type": "proofOfPossession",
+        "alg": "example-alg",
+        "nonce": "example-nonce!",
+        "hints": {
+          "certFingerprints": [
+            "example-fingerprint"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"dns\",\"r\":\"example-r\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'type': 'dns', 'r': 'example-r'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema:\n    {'id': 'https://letsencrypt.org/schema/01/challengeobject#',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'Subschema for an individual challenge (within '\n                    'challenge)',\n     'anyOf': [{'type': 'object',\n                'required': ['type', 'token'],\n                'properties': {'type': {'enum': ['simpleHttps']},\n                               'token': {'type': 'string'}}},\n               {'type': 'object',\n                'required': ['type', 'r', 'nonce'],\n                'properties': {'type': {'enum': ['dvsni']},\n                               'r': {'type': ['string'],\n                                     'pattern': '^[-_=0-9A-Za-z]+$'},\n                               'nonce': {'type': 'string',\n                                         'pattern': '^[0-9a-f]+$'}}},\n               {'type': 'object',\n                'required': ['type'].. (2837 more)",
+      "data": {
+        "type": "dns",
+        "r": "example-r"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"type\":[\"dns\"],\"token\":\"example-token\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'type': ['dns'], 'token': 'example-token'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema:\n    {'id': 'https://letsencrypt.org/schema/01/challengeobject#',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'Subschema for an individual challenge (within '\n                    'challenge)',\n     'anyOf': [{'type': 'object',\n                'required': ['type', 'token'],\n                'properties': {'type': {'enum': ['simpleHttps']},\n                               'token': {'type': 'string'}}},\n               {'type': 'object',\n                'required': ['type', 'r', 'nonce'],\n                'properties': {'type': {'enum': ['dvsni']},\n                               'r': {'type': ['string'],\n                                     'pattern': '^[-_=0-9A-Za-z]+$'},\n                               'nonce': {'type': 'string',\n                                         'pattern': '^[0-9a-f]+$'}}},\n               {'type': 'object',\n                'required'.. (2857 more)",
+      "data": {
+        "type": [
+          "dns"
+        ],
+        "token": "example-token"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"dns\",\"token\":12345} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'type': 'dns', 'token': 12345} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema:\n    {'id': 'https://letsencrypt.org/schema/01/challengeobject#',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'Subschema for an individual challenge (within '\n                    'challenge)',\n     'anyOf': [{'type': 'object',\n                'required': ['type', 'token'],\n                'properties': {'type': {'enum': ['simpleHttps']},\n                               'token': {'type': 'string'}}},\n               {'type': 'object',\n                'required': ['type', 'r', 'nonce'],\n                'properties': {'type': {'enum': ['dvsni']},\n                               'r': {'type': ['string'],\n                                     'pattern': '^[-_=0-9A-Za-z]+$'},\n                               'nonce': {'type': 'string',\n                                         'pattern': '^[0-9a-f]+$'}}},\n               {'type': 'object',\n                'required': ['type'],\n.. (2833 more)",
+      "data": {
+        "type": "dns",
+        "token": 12345
+      }
+    }
+  ]
+}

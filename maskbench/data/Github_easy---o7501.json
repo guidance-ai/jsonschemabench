@@ -1,0 +1,179 @@
+{
+  "description": "sample Github_easy/o7501.json",
+  "meta": {
+    "full_size": 1107,
+    "stripped_size": 463,
+    "features": [
+      "@siblingKeys",
+      "allOf",
+      "anyOf",
+      "dependencies",
+      "enum"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "dependencies": {
+      "mandatory": [
+        "enum"
+      ]
+    },
+    "properties": {
+      "allOf": {
+        "allOf": [
+          {
+            "description": "Object of type 1.",
+            "properties": {
+              "key1": {
+                "description": "Key for type 1.",
+                "title": "Key1",
+                "type": "string"
+              }
+            },
+            "title": "Type1",
+            "type": "object"
+          },
+          {
+            "description": "Object of type 2.",
+            "properties": {
+              "key2": {
+                "description": "Key for type 2.",
+                "title": "Key2",
+                "type": "string"
+              }
+            },
+            "title": "Type2",
+            "type": "object"
+          }
+        ],
+        "description": "A merge of two or more complex types.",
+        "title": "AllOf",
+        "type": "object"
+      },
+      "anyOf": {
+        "anyOf": [
+          {
+            "description": "Object of type 1.",
+            "properties": {
+              "type": {
+                "description": "Object type.",
+                "enum": [
+                  "Type1"
+                ],
+                "title": "Type"
+              }
+            },
+            "title": "Type1",
+            "type": "object"
+          },
+          {
+            "description": "Object of type 2.",
+            "properties": {
+              "type": {
+                "description": "Object type.",
+                "enum": [
+                  "Type2"
+                ],
+                "title": "Type"
+              }
+            },
+            "title": "Type2",
+            "type": "object"
+          }
+        ],
+        "description": "A choice between multiple complex types.",
+        "title": "AnyOf",
+        "type": "object"
+      },
+      "enum": {
+        "description": "A choice between multiple values.",
+        "enum": [
+          "choice1",
+          "choice2",
+          "choice3"
+        ],
+        "title": "Enum"
+      },
+      "mandatory": {
+        "description": "A required field.",
+        "title": "Mandatory",
+        "type": "string"
+      }
+    },
+    "required": [
+      "mandatory"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "allOf": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "anyOf": {
+          "type": "Type1"
+        },
+        "enum": "choice1",
+        "mandatory": "required_value"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "allOf": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "anyOf": {
+          "type": "Type1"
+        },
+        "enum": "choice1",
+        "mandatory": "required value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"InvalidType\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'type': 'InvalidType'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['anyOf']:\n    {'anyOf': [{'description': 'Object of type 1.',\n                'properties': {'type': {'description': 'Object type.',\n                                        'enum': ['Type1'],\n                                        'title': 'Type'}},\n                'title': 'Type1',\n                'type': 'object'},\n               {'description': 'Object of type 2.',\n                'properties': {'type': {'description': 'Object type.',\n                                        'enum': ['Type2'],\n                                        'title': 'Type'}},\n                'title': 'Type2',\n                'type': 'object'}],\n     'description': 'A choice between multiple complex types.',\n     'title': 'AnyOf',\n     'type': 'object'}\n\nOn instance['anyOf']:\n    {'type': 'InvalidType'}",
+      "data": {
+        "allOf": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "anyOf": {
+          "type": "InvalidType"
+        },
+        "enum": "choice1",
+        "mandatory": "required value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on dependencies keyword",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['mandatory']:\n    {'description': 'A required field.',\n     'title': 'Mandatory',\n     'type': 'string'}\n\nOn instance['mandatory']:\n    None",
+      "data": {
+        "allOf": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "anyOf": {
+          "type": "Type1"
+        },
+        "enum": "choice1",
+        "mandatory": null
+      }
+    }
+  ]
+}

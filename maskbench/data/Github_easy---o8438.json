@@ -1,0 +1,201 @@
+{
+  "description": "sample Github_easy/o8438.json",
+  "meta": {
+    "full_size": 352,
+    "stripped_size": 332,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "items",
+      "multipleOf",
+      "multipleOf:4",
+      "pattern"
+    ],
+    "raw_features": [
+      "maxItems",
+      "maxLength",
+      "maximum",
+      "minItems",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "ID": {
+        "maxLength": 8,
+        "minLength": 4,
+        "type": "string"
+      },
+      "age": {
+        "maximum": 100,
+        "minimum": 16,
+        "multipleOf": 4,
+        "type": "integer"
+      },
+      "grades": {
+        "items": {
+          "type": "integer"
+        },
+        "maxItems": 5,
+        "minItems": 2,
+        "type": "array",
+        "_uniqueItems": true
+      },
+      "item": {
+        "minLength": 2,
+        "pattern": "^[a-zA-Z]+$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "ID",
+      "age",
+      "grades",
+      "item"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "ID": "ABC123",
+        "age": 20,
+        "grades": [
+          80,
+          90,
+          70,
+          85,
+          95
+        ],
+        "item": "Apple"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "ID": "ABC123",
+        "age": 20,
+        "grades": [
+          80,
+          90,
+          70,
+          85
+        ],
+        "item": "Apple"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Apple123\" does not match \"^[a-zA-Z]+$\"",
+      "python_error": "'Apple123' does not match '^[a-zA-Z]+$'\n\nFailed validating 'pattern' in schema['properties']['item']:\n    {'minLength': 2, 'pattern': '^[a-zA-Z]+$', 'type': 'string'}\n\nOn instance['item']:\n    'Apple123'",
+      "data": {
+        "ID": "ABC123",
+        "age": 20,
+        "grades": [
+          80,
+          90,
+          70,
+          85
+        ],
+        "item": "Apple123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on multipleOf keyword",
+      "valid": false,
+      "rust_error": "21 is not a multiple of 4",
+      "python_error": "21 is not a multiple of 4\n\nFailed validating 'multipleOf' in schema['properties']['age']:\n    {'maximum': 100, 'minimum': 16, 'multipleOf': 4, 'type': 'integer'}\n\nOn instance['age']:\n    21",
+      "data": {
+        "ID": "ABC123",
+        "age": 21,
+        "grades": [
+          80,
+          90,
+          70,
+          85
+        ],
+        "item": "Apple"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"A\" is shorter than 4 characters",
+      "python_error": "'A' is too short\n\nFailed validating 'minLength' in schema['properties']['ID']:\n    {'maxLength': 8, 'minLength': 4, 'type': 'string'}\n\nOn instance['ID']:\n    'A'",
+      "data": {
+        "ID": "A",
+        "age": 20,
+        "grades": [
+          80,
+          90,
+          70,
+          85
+        ],
+        "item": "Apple"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "101 is greater than the maximum of 100",
+      "python_error": "101 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['age']:\n    {'maximum': 100, 'minimum': 16, 'multipleOf': 4, 'type': 'integer'}\n\nOn instance['age']:\n    101",
+      "data": {
+        "ID": "ABC123",
+        "age": 101,
+        "grades": [
+          80,
+          90,
+          70,
+          85
+        ],
+        "item": "Apple"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[80] has less than 2 items",
+      "python_error": "[80] is too short\n\nFailed validating 'minItems' in schema['properties']['grades']:\n    {'items': {'type': 'integer'},\n     'maxItems': 5,\n     'minItems': 2,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['grades']:\n    [80]",
+      "data": {
+        "ID": "ABC123",
+        "age": 20,
+        "grades": [
+          80
+        ],
+        "item": "Apple"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ABC1234AB\" is longer than 8 characters",
+      "python_error": "[80, 90, 70, 85, 82, 92] is too long\n\nFailed validating 'maxItems' in schema['properties']['grades']:\n    {'items': {'type': 'integer'},\n     'maxItems': 5,\n     'minItems': 2,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['grades']:\n    [80, 90, 70, 85, 82, 92]",
+      "data": {
+        "ID": "ABC1234AB",
+        "age": 20,
+        "grades": [
+          80,
+          90,
+          70,
+          85,
+          82,
+          92
+        ],
+        "item": "Apple"
+      }
+    }
+  ]
+}

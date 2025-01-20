@@ -1,0 +1,534 @@
+{
+  "description": "sample JsonSchemaStore/foxx-manifest.json",
+  "meta": {
+    "full_size": 5751,
+    "stripped_size": 1599,
+    "features": [
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for ArangoDB Foxx service manifests",
+    "id": "https://json.schemastore.org/foxx-manifest.json",
+    "properties": {
+      "configuration": {
+        "type": "object",
+        "description": "An object defining the configuration options this service requires.",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "A human-readable description of the option."
+            },
+            "type": {
+              "type": "string",
+              "description": "The type of value expected for this option.",
+              "enum": [
+                "integer",
+                "boolean",
+                "number",
+                "string",
+                "json",
+                "password",
+                "int",
+                "bool"
+              ],
+              "default": "string"
+            },
+            "default": {
+              "description": "The default value for this option in plain JSON. Can be omitted to provide no default value."
+            },
+            "required": {
+              "type": "boolean",
+              "description": "Whether the service can not function without this option. Defaults to true unless a default value is provided.",
+              "default": true
+            }
+          },
+          "required": [
+            "type"
+          ]
+        }
+      },
+      "defaultDocument": {
+        "type": "string",
+        "description": "If specified, the / (root) route of the service will automatically redirect to the given relative path, e.g. \"index.html\"."
+      },
+      "dependencies": {
+        "type": "object",
+        "description": "The dependencies this service uses, i.e. which APIs its dependencies need to be compatible with.",
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "The semantic version ranges of the API the service expects.",
+              "default": "*"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the API the service expects.",
+                  "default": "*"
+                },
+                "version": {
+                  "type": "string",
+                  "description": "The semantic version ranges of the API the service expects.",
+                  "default": "*"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of how the API is used or why it is needed."
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether the service can not function without this dependency.",
+                  "default": true
+                },
+                "multiple": {
+                  "type": "boolean",
+                  "description": "Whether the dependency can be specified more than once.",
+                  "default": false
+                }
+              }
+            }
+          ]
+        }
+      },
+      "provides": {
+        "type": "object",
+        "description": "The dependencies this provides, i.e. which APIs it claims to be compatible with.",
+        "additionalProperties": {
+          "type": "string",
+          "description": "The semantic version ranges of the API the service implements.",
+          "default": "*"
+        }
+      },
+      "engines": {
+        "type": "object",
+        "description": "An object indicating the semantic version ranges of ArangoDB (or compatible environments) the service will be compatible with.",
+        "properties": {
+          "arangodb": {
+            "type": "string",
+            "default": "^3.0.0"
+          }
+        },
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "files": {
+        "type": "object",
+        "description": "An object defining file assets served by this service.",
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Relative path of the file or folder within the service."
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Relative path of the file or folder within the service."
+                },
+                "gzip": {
+                  "type": "boolean",
+                  "description": "If set to true the file will be served with gzip-encoding if supported by the client. This can be useful when serving text files like client-side JavaScript, CSS or HTML.",
+                  "default": false
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The MIME content type of the file. Defaults to an intelligent guess based on the filename's extension."
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          ]
+        }
+      },
+      "lib": {
+        "type": "string",
+        "description": "The relative path to the Foxx JavaScript files in the service, e.g. \"lib\". Defaults to the folder containing this manifest.",
+        "default": "."
+      },
+      "main": {
+        "type": "string",
+        "description": "The relative path to the main entry point of this service (relative to lib), e.g. \"index.js\".",
+        "default": "index.js"
+      },
+      "scripts": {
+        "type": "object",
+        "description": "An object defining named scripts provided by this service, which can either be used directly or as queued jobs by other services.",
+        "additionalProperties": {
+          "type": "string",
+          "description": "Path of the script (relative to lib), e.g. \"scripts/setup.js\"."
+        }
+      },
+      "tests": {
+        "description": "A path/pattern or list of paths/patterns of JavaScript tests provided for this service.",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "A single path/pattern of JavaScript tests provided for this service."
+            }
+          }
+        ],
+        "default": "test/**/*.js"
+      },
+      "author": {
+        "type": "string",
+        "description": "The full name of the author of the service (i.e. you). This will be shown in the web interface."
+      },
+      "contributors": {
+        "type": "array",
+        "description": "A list of names of people that have contributed to the development of the service in some way. This will be shown in the web interface.",
+        "items": {
+          "type": "string",
+          "description": "Human-readable representation of the contributor, e.g. their name."
+        }
+      },
+      "description": {
+        "type": "string",
+        "description": "A human-readable description of the service. This will be shown in the web interface."
+      },
+      "keywords": {
+        "type": "array",
+        "description": "A list of keywords that help categorize this service. This is used by the Foxx Store installers to organize services.",
+        "items": {
+          "type": "string",
+          "description": "A keyword relevant to the service."
+        }
+      },
+      "license": {
+        "type": "string",
+        "description": "A string identifying the license under which the service is published, ideally in the form of an SPDX license identifier. This will be shown in the web interface."
+      },
+      "name": {
+        "type": "string",
+        "description": "The name of the Foxx service. This will be shown in the web interface."
+      },
+      "thumbnail": {
+        "type": "string",
+        "description": "The filename of a thumbnail that will be used alongside the service in the web interface. This should be a JPEG or PNG image that looks good at sizes 50x50 and 160x160."
+      },
+      "version": {
+        "type": "string",
+        "description": "The version number of the Foxx service. The version number must follow the semantic versioning format. This will be shown in the web interface."
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "configuration": {
+          "option1": {
+            "description": "A human-readable description of the option.",
+            "type": "string"
+          },
+          "option2": {
+            "type": "integer",
+            "default": 10,
+            "required": true
+          },
+          "option3": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "defaultDocument": "index.html",
+        "dependencies": {
+          "arango": {
+            "name": "arango",
+            "version": "^3.0.0"
+          },
+          "other": {
+            "name": "other",
+            "version": "^1.0.0",
+            "description": "This is another dependency",
+            "required": true,
+            "multiple": false
+          }
+        },
+        "provides": {
+          "api": "^1.0.0"
+        },
+        "engines": {
+          "arangodb": "^3.0.0"
+        },
+        "files": {
+          "index.html": {
+            "path": "index.html",
+            "gzip": true
+          },
+          "script.js": {
+            "path": "script.js",
+            "gzip": true,
+            "type": "application/javascript"
+          }
+        },
+        "lib": "lib",
+        "main": "index.js",
+        "scripts": {
+          "setup": "scripts/setup.js"
+        },
+        "tests": [
+          "test/**/*.js"
+        ],
+        "author": "John Doe",
+        "contributors": [
+          "Jane Doe",
+          "Bob Smith"
+        ],
+        "description": "This is a Foxx service.",
+        "keywords": [
+          "foxx",
+          "service"
+        ],
+        "license": "MIT",
+        "name": "my-foxx-service",
+        "thumbnail": "thumbnail.png",
+        "version": "1.0.0",
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "configuration": {
+          "option1": {
+            "description": "This is a string option",
+            "type": "string",
+            "default": "default value"
+          },
+          "option2": {
+            "description": "This is an integer option",
+            "type": "integer",
+            "required": false
+          }
+        },
+        "defaultDocument": "index.html",
+        "dependencies": {
+          "arangoDB": "^3.0.0",
+          "otherDependency": {
+            "name": "otherDependency",
+            "version": "^1.0.0",
+            "description": "This is another dependency",
+            "required": true
+          }
+        },
+        "provides": {
+          "api1": "^1.0.0",
+          "api2": "^2.0.0"
+        },
+        "engines": {
+          "arangodb": "^3.0.0",
+          "node": "^14.0.0"
+        },
+        "files": {
+          "index.html": "index.html",
+          "style.css": {
+            "path": "style.css",
+            "gzip": true
+          }
+        },
+        "lib": "lib",
+        "main": "index.js",
+        "scripts": {
+          "setup": "scripts/setup.js"
+        },
+        "tests": "test/**/*.js",
+        "author": "John Doe",
+        "contributors": [
+          "Jane Doe",
+          "Bob Smith"
+        ],
+        "description": "This is a Foxx service",
+        "keywords": [
+          "Foxx",
+          "ArangoDB"
+        ],
+        "license": "MIT",
+        "name": "my-foxx-service",
+        "thumbnail": "thumbnail.png",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"multipleDependency\",\"version\":\"^1.0.0\",\"description\":\"This is another dependency\",\"required\":true,\"multiple\":\"not a boolean\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'not a boolean' is not of type 'boolean'\n\nFailed validating 'type' in schema[1]['properties']['multiple']:\n    {'type': 'boolean',\n     'description': 'Whether the dependency can be specified more than '\n                    'once.',\n     'default': False}\n\nOn instance['multiple']:\n    'not a boolean'",
+      "data": {
+        "configuration": {
+          "option1": {
+            "description": "This is a string option",
+            "type": "string",
+            "default": "default value"
+          },
+          "option2": {
+            "description": "This is an integer option",
+            "type": "integer",
+            "required": false
+          }
+        },
+        "defaultDocument": "index.html",
+        "dependencies": {
+          "arangoDB": "^3.0.0",
+          "otherDependency": {
+            "name": "otherDependency",
+            "version": "^1.0.0",
+            "description": "This is another dependency",
+            "required": true,
+            "type": "string"
+          },
+          "multipleDependency": {
+            "name": "multipleDependency",
+            "version": "^1.0.0",
+            "description": "This is another dependency",
+            "required": true,
+            "multiple": "not a boolean"
+          }
+        },
+        "provides": {
+          "api1": "^1.0.0",
+          "api2": "^2.0.0"
+        },
+        "engines": {
+          "arangodb": "^3.0.0",
+          "node": "^14.0.0"
+        },
+        "files": {
+          "index.html": "index.html",
+          "style.css": {
+            "path": "style.css",
+            "gzip": true
+          },
+          "script.js": {
+            "path": "script.js",
+            "type": "script",
+            "gzip": true
+          }
+        },
+        "lib": "lib",
+        "main": "index.js",
+        "scripts": {
+          "setup": "scripts/setup.js"
+        },
+        "tests": "test/**/*.js",
+        "author": "John Doe",
+        "contributors": [
+          "Jane Doe",
+          "Bob Smith"
+        ],
+        "description": "This is a Foxx service",
+        "keywords": [
+          "Foxx",
+          "ArangoDB"
+        ],
+        "license": "MIT",
+        "name": "my-foxx-service",
+        "thumbnail": "thumbnail.png",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"unknown-type\" is not one of [\"integer\",\"boolean\",\"number\",\"string\",\"json\",\"password\",\"int\",\"bool\"]",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['thumbnail']:\n    {'type': 'string',\n     'description': 'The filename of a thumbnail that will be used '\n                    'alongside the service in the web interface. This '\n                    'should be a JPEG or PNG image that looks good at '\n                    'sizes 50x50 and 160x160.'}\n\nOn instance['thumbnail']:\n    123",
+      "data": {
+        "configuration": {
+          "option1": {
+            "type": "unknown-type",
+            "description": "This is a string option",
+            "default": "default value"
+          },
+          "option2": {
+            "type": "integer",
+            "description": "This is an integer option",
+            "required": "true"
+          }
+        },
+        "defaultDocument": 123,
+        "dependencies": {
+          "arangoDB": "^3.0.0",
+          "otherDependency": {
+            "name": "otherDependency",
+            "version": "^1.0.0",
+            "required": "maybe"
+          }
+        },
+        "provides": {
+          "api1": "^1.0.0",
+          "api2": [
+            "^2.0.0"
+          ]
+        },
+        "engines": {
+          "arangodb": "^3.0.0",
+          "node": "^14.0.0",
+          "unknown-engine": true
+        },
+        "files": {
+          "index.html": 123,
+          "style.css": {
+            "path": "style.css",
+            "gzip": "yes"
+          }
+        },
+        "lib": "lib",
+        "main": "index.js",
+        "scripts": {
+          "setup": "scripts/setup.js"
+        },
+        "tests": 123,
+        "author": 123,
+        "contributors": [
+          "Jane Doe",
+          123,
+          "Bob Smith"
+        ],
+        "description": 123,
+        "keywords": [
+          "Foxx",
+          123,
+          "ArangoDB"
+        ],
+        "license": 123,
+        "name": 123,
+        "thumbnail": 123,
+        "version": "1.0.0.1"
+      }
+    }
+  ]
+}

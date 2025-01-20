@@ -1,0 +1,134 @@
+{
+  "description": "sample Github_easy/o9931.json",
+  "meta": {
+    "full_size": 397,
+    "stripped_size": 397,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "format",
+      "format:email",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 1024
+      },
+      "relativeTo": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "$date": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "$date"
+            ]
+          }
+        ]
+      },
+      "templateContext": {
+        "type": "string",
+        "maxLength": 32767
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "email": "example@example.com",
+        "relativeTo": {
+          "$date": "2022-01-01T00:00:00.000Z"
+        },
+        "templateContext": "This is a template context string."
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "email": "example@example.com",
+        "relativeTo": "2022-01-01",
+        "templateContext": "This is a template context string."
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"example\" is not a \"email\"",
+      "python_error": "'example' is not a 'email'\n\nFailed validating 'format' in schema['properties']['email']:\n    {'type': 'string', 'format': 'email', 'maxLength': 1024}\n\nOn instance['email']:\n    'example'",
+      "data": {
+        "email": "example",
+        "relativeTo": "2022-01-01",
+        "templateContext": "This is a template context string."
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"$date\":\"2022-01-01\",\"extraProperty\":\"value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema[2]:\n    {'type': 'object',\n     'properties': {'$date': {'type': 'string'}},\n     'additionalProperties': False,\n     'required': ['$date']}\n\nOn instance:\n    {'$date': '2022-01-01', 'extraProperty': 'value'}",
+      "data": {
+        "email": "example@example.com",
+        "relativeTo": {
+          "$date": "2022-01-01",
+          "extraProperty": "value"
+        },
+        "templateContext": "This is a template context string."
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('anotherKey' was unexpected)",
+      "python_error": "Additional properties are not allowed ('anotherKey' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'email': {'type': 'string',\n                              'format': 'email',\n                              'maxLength': 1024},\n                    'relativeTo': {'oneOf': [{'type': 'string'},\n                                             {'type': 'number'},\n                                             {'type': 'object',\n                                              'properties': {'$date': {'type': 'string'}},\n                                              'additionalProperties': False,\n                                              'required': ['$date']}]},\n                    'templateContext': {'type': 'string',\n                                        'maxLength': 32767}},\n     'additionalProperties': False}\n\nOn instance:\n    {'email': 'a@b.com',\n     'relativeTo': '2022-01-01',\n     'templateContext': 'a',\n     'anotherKey': 'This is another key.'}",
+      "data": {
+        "email": "a@b.com",
+        "relativeTo": "2022-01-01",
+        "templateContext": "a",
+        "anotherKey": "This is another key."
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'email': {'type': 'string',\n                              'format': 'email',\n                              'maxLength': 1024},\n                    'relativeTo': {'oneOf': [{'type': 'string'},\n                                             {'type': 'number'},\n                                             {'type': 'object',\n                                              'properties': {'$date': {'type': 'string'}},\n                                              'additionalProperties': False,\n                                              'required': ['$date']}]},\n                    'templateContext': {'type': 'string',\n                                        'maxLength': 32767}},\n     'additionalProperties': False}\n\nOn instance:\n    {'email': 'example@example.com',\n     'relativeTo': 2147483648,.. (109 more)",
+      "data": {
+        "email": "example@example.com",
+        "relativeTo": 2147483648,
+        "templateContext": "This is a template context string.",
+        "extraProperty": "Should not be allowed"
+      }
+    }
+  ]
+}

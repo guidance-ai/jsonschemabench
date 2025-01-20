@@ -1,0 +1,315 @@
+{
+  "description": "sample Github_medium/o83357.json",
+  "meta": {
+    "full_size": 765,
+    "stripped_size": 765,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "beforeCmd": {
+        "type": "string"
+      },
+      "copySources": {
+        "items": {
+          "properties": {
+            "destination": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "source": {
+              "oneOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "required": [
+            "destination",
+            "source"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "db": {
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pass": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "port",
+          "user",
+          "pass",
+          "name"
+        ],
+        "type": "object"
+      },
+      "pause": {
+        "enum": [
+          "never",
+          "onFailure",
+          "always"
+        ],
+        "type": "string"
+      },
+      "testCmd": {
+        "type": "string"
+      },
+      "testTags": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "tmpDir": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "beforeCmd": "echo 'Before command executed'",
+        "copySources": [
+          {
+            "destination": "/path/to/destination",
+            "source": "/path/to/source"
+          },
+          {
+            "destination": "/path/to/destination2",
+            "source": [
+              "/path/to/source1",
+              "/path/to/source2"
+            ]
+          }
+        ],
+        "db": {
+          "host": "localhost",
+          "name": "mydatabase",
+          "pass": "mypassword",
+          "port": 5432,
+          "user": "myuser"
+        },
+        "pause": "onFailure",
+        "testCmd": "echo 'Test command executed'",
+        "testTags": [
+          "tag1",
+          "tag2"
+        ],
+        "tmpDir": "/path/to/tmp/directory"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "beforeCmd": "echo 'Starting test...'",
+        "copySources": [
+          {
+            "destination": "/tmp/test",
+            "source": "/path/to/source"
+          },
+          {
+            "destination": "/tmp/test2",
+            "source": [
+              "/path/to/source1",
+              "/path/to/source2"
+            ]
+          }
+        ],
+        "db": {
+          "host": "localhost",
+          "name": "test_db",
+          "pass": "password",
+          "port": 5432,
+          "user": "test_user"
+        },
+        "pause": "onFailure",
+        "testCmd": "npm run test",
+        "testTags": [
+          "unit",
+          "integration"
+        ],
+        "tmpDir": "/tmp"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['testTags']:\n    {'items': {'minLength': 1, 'type': 'string'},\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['testTags']:\n    []",
+      "data": {
+        "beforeCmd": "echo 'Starting test...'",
+        "copySources": [
+          {
+            "destination": "/tmp/test",
+            "source": "/path/to/source"
+          },
+          {
+            "destination": "/tmp/test2",
+            "source": []
+          }
+        ],
+        "db": {
+          "host": "localhost",
+          "name": "test_db",
+          "pass": "password",
+          "port": 5432,
+          "user": "test_user"
+        },
+        "pause": "onFailure",
+        "testCmd": "npm run test",
+        "testTags": [],
+        "tmpDir": "/tmp"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"foo\":\"bar\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'foo': 'bar'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['copySources']['items']['properties']['source']:\n    {'oneOf': [{'minLength': 1, 'type': 'string'},\n               {'items': {'minLength': 1, 'type': 'string'},\n                'minItems': 1,\n                'type': 'array'}]}\n\nOn instance['copySources'][1]['source']:\n    {'foo': 'bar'}",
+      "data": {
+        "beforeCmd": "echo 'Starting test...'",
+        "copySources": [
+          {
+            "destination": "/tmp/test",
+            "source": "/path/to/source"
+          },
+          {
+            "destination": "/tmp/test2",
+            "source": {
+              "foo": "bar"
+            }
+          }
+        ],
+        "db": {
+          "host": "localhost",
+          "name": "test_db",
+          "pass": "password",
+          "port": 5432,
+          "user": "test_user"
+        },
+        "pause": "onFailure",
+        "testCmd": "npm run test",
+        "testTags": [
+          "unit",
+          "integration"
+        ],
+        "tmpDir": "/tmp"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['tmpDir']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['tmpDir']:\n    ''",
+      "data": {
+        "beforeCmd": "echo 'Starting test...'",
+        "copySources": [
+          {
+            "destination": "",
+            "source": "/path/to/source"
+          },
+          {
+            "destination": "/tmp/test2",
+            "source": [
+              "/path/to/source1",
+              "/path/to/source2"
+            ]
+          }
+        ],
+        "db": {
+          "host": "localhost",
+          "name": "test_db",
+          "pass": "password",
+          "port": 5432,
+          "user": "test_user"
+        },
+        "pause": "onFailure",
+        "testCmd": "npm run test",
+        "testTags": [
+          "unit",
+          "integration"
+        ],
+        "tmpDir": ""
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['tmpDir']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['tmpDir']:\n    ''",
+      "data": {
+        "beforeCmd": "echo 'Starting test...'",
+        "copySources": [
+          {
+            "destination": "/tmp/test",
+            "source": ""
+          },
+          "db"
+        ],
+        "db": {
+          "host": "localhost",
+          "name": "test_db",
+          "pass": "password",
+          "port": 5432,
+          "user": "test_user"
+        },
+        "pause": "onFailure",
+        "testCmd": "npm run test",
+        "testTags": [
+          ""
+        ],
+        "tmpDir": ""
+      }
+    }
+  ]
+}

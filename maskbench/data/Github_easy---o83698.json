@@ -1,0 +1,158 @@
+{
+  "description": "sample Github_easy/o83698.json",
+  "meta": {
+    "full_size": 557,
+    "stripped_size": 486,
+    "features": [
+      "additionalProperties",
+      "dependencies",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Order",
+    "description": "Order billing and shipping information",
+    "type": "object",
+    "properties": {
+      "orders": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "order": {
+              "type": "string"
+            },
+            "billTo": {
+              "type": "string"
+            },
+            "billAddress": {
+              "type": "string"
+            },
+            "shipTo": {
+              "type": "string"
+            },
+            "shipAddress": {
+              "type": "string"
+            },
+            "loyaltyId": {
+              "type": "string"
+            },
+            "loyaltyBonus": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "order",
+            "billTo",
+            "billAddress"
+          ],
+          "dependencies": {
+            "shipTo": [
+              "shipAddress"
+            ],
+            "loyaltyId": [
+              "loyaltyBonus"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "orders": [
+          {
+            "order": "Order123",
+            "billTo": "John Doe",
+            "billAddress": "123 Main St, New York, NY 10001",
+            "shipTo": "Jane Doe",
+            "shipAddress": "456 Elm St, New York, NY 10001",
+            "loyaltyId": "Loyalty123",
+            "loyaltyBonus": "10%"
+          },
+          {
+            "order": "Order456",
+            "billTo": "Bob Smith",
+            "billAddress": "789 Oak St, Chicago, IL 60611",
+            "shipTo": "Bob Smith",
+            "shipAddress": "789 Oak St, Chicago, IL 60611"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "orders": [
+          {
+            "order": "Order 1",
+            "billTo": "John Doe",
+            "billAddress": "123 Main St, Anytown, USA",
+            "shipTo": "Jane Doe",
+            "shipAddress": "456 Elm St, Anytown, USA",
+            "loyaltyId": "L12345",
+            "loyaltyBonus": "10%"
+          },
+          {
+            "order": "Order 2",
+            "billTo": "Bob Smith",
+            "billAddress": "789 Oak St, Anytown, USA"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on dependencies keyword",
+      "valid": false,
+      "rust_error": "\"shipAddress\" is a required property",
+      "python_error": "'shipAddress' is a dependency of 'shipTo'\n\nFailed validating 'dependencies' in schema['properties']['orders']['items']:\n    {'properties': {'order': {'type': 'string'},\n                    'billTo': {'type': 'string'},\n                    'billAddress': {'type': 'string'},\n                    'shipTo': {'type': 'string'},\n                    'shipAddress': {'type': 'string'},\n                    'loyaltyId': {'type': 'string'},\n                    'loyaltyBonus': {'type': 'string'}},\n     'additionalProperties': False,\n     'required': ['order', 'billTo', 'billAddress'],\n     'dependencies': {'shipTo': ['shipAddress'],\n                      'loyaltyId': ['loyaltyBonus']}}\n\nOn instance['orders'][0]:\n    {'order': 'Order 1',\n     'billTo': 'John Doe',\n     'billAddress': '123 Main St, Anytown, USA',\n     'shipTo': 'Jane Doe'}",
+      "data": {
+        "orders": [
+          {
+            "order": "Order 1",
+            "billTo": "John Doe",
+            "billAddress": "123 Main St, Anytown, USA",
+            "shipTo": "Jane Doe"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"shipAddress\" is a required property",
+      "python_error": "'billTo' is a required property\n\nFailed validating 'required' in schema['properties']['orders']['items']:\n    {'properties': {'order': {'type': 'string'},\n                    'billTo': {'type': 'string'},\n                    'billAddress': {'type': 'string'},\n                    'shipTo': {'type': 'string'},\n                    'shipAddress': {'type': 'string'},\n                    'loyaltyId': {'type': 'string'},\n                    'loyaltyBonus': {'type': 'string'}},\n     'additionalProperties': False,\n     'required': ['order', 'billTo', 'billAddress'],\n     'dependencies': {'shipTo': ['shipAddress'],\n                      'loyaltyId': ['loyaltyBonus']}}\n\nOn instance['orders'][1]:\n    {'order': 'Order 2', 'billAddress': '789 Oak St, Anytown, USA'}",
+      "data": {
+        "orders": [
+          {
+            "order": "Order 1",
+            "billTo": "John Doe",
+            "billAddress": "123 Main St, Anytown, USA",
+            "shipTo": "Jane Doe",
+            "loyaltyId": "L12345",
+            "loyaltyBonus": "10%"
+          },
+          {
+            "order": "Order 2",
+            "billAddress": "789 Oak St, Anytown, USA"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "description": "sample Github_easy/o6225.json",
+  "meta": {
+    "full_size": 601,
+    "stripped_size": 381,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "type": "object",
+    "properties": {
+      "statements": {
+        "title": "Statements",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "title": "Statement",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "expression": {
+              "title": "Expression",
+              "description": "JSON Paths are allowed, wrapped in {{this.is.a.path}}",
+              "type": "string",
+              "minLength": 1
+            },
+            "resultPath": {
+              "title": "Result Path",
+              "description": "JSON path to place result of evaluated expression",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "expression",
+            "resultPath"
+          ]
+        }
+      }
+    },
+    "required": [
+      "statements"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "statements": [
+          {
+            "expression": "{{this.name}}",
+            "resultPath": "result"
+          },
+          {
+            "expression": "{{this.age}}",
+            "resultPath": "ageResult"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['statements']['items']['properties']['expression']:\n    {'title': 'Expression',\n     'description': 'JSON Paths are allowed, wrapped in {{this.is.a.path}}',\n     'type': 'string',\n     'minLength': 1}\n\nOn instance['statements'][0]['expression']:\n    ''",
+      "data": {
+        "statements": [
+          {
+            "expression": "",
+            "resultPath": "result"
+          },
+          {
+            "expression": "{{this.age}}",
+            "resultPath": "ageResult"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['statements']:\n    {'title': 'Statements',\n     'type': 'array',\n     'minItems': 1,\n     'items': {'title': 'Statement',\n               'type': 'object',\n               'additionalProperties': False,\n               'properties': {'expression': {'title': 'Expression',\n                                             'description': 'JSON Paths '\n                                                            'are allowed, '\n                                                            'wrapped in '\n                                                            '{{this.is.a.path}}',\n                                             'type': 'string',\n                                             'minLength': 1},\n                              'resultPath': {'title': 'Result Path',\n                                             'description': 'JSON path to '\n                                                            'place result '\n                          .. (342 more)",
+      "data": {
+        "statements": []
+      }
+    }
+  ]
+}

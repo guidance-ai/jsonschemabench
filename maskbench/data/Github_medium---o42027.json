@@ -1,0 +1,285 @@
+{
+  "description": "sample Github_medium/o42027.json",
+  "meta": {
+    "full_size": 1133,
+    "stripped_size": 825,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:uri",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "binwalk_details": {
+        "type": "object",
+        "description": "Details of Binwalk run on one file",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "output": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "path",
+          "output"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "type": "object",
+    "description": "Result of Binwalk worker",
+    "properties": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the schema",
+            "pattern": "^[a-zA-Z0-9_]+$"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the schema",
+            "pattern": "^[0-9]+-[0-9]+-[0-9]+$"
+          },
+          "url": {
+            "type": "string",
+            "description": "Full URL of the schema",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "_release": {
+        "type": "string",
+        "description": "Unique release id in form of \"ecosystem:package:version\""
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "success",
+          "error"
+        ]
+      },
+      "details": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/binwalk_details"
+        }
+      },
+      "summary": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "status",
+      "details",
+      "summary"
+    ],
+    "additionalProperties": false,
+    "title": "binary_data-v1-0-0"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "schema": {
+          "name": "binary_data",
+          "version": "1-0-0",
+          "url": "https://example.com/schema/binary_data-v1-0-0.json"
+        },
+        "_release": "ecosystem:package:version",
+        "status": "success",
+        "details": [
+          {
+            "path": "/path/to/file1.bin",
+            "output": [
+              "0x0: ELF, 32-bit LSB executable, ARM, version 1 (SYSV)",
+              "0x100: gzip compressed data, was \"file1.bin\", from Unix, last modified: Mon Jan  1 00:00:00 2001"
+            ]
+          },
+          {
+            "path": "/path/to/file2.bin",
+            "output": [
+              "0x0: ELF, 64-bit LSB executable, x86-64, version 1 (SYSV)",
+              "0x200: gzip compressed data, was \"file2.bin\", from Unix, last modified: Tue Jan  2 00:00:00 2002"
+            ]
+          }
+        ],
+        "summary": [
+          "Found 2 ELF files",
+          "Found 2 gzip compressed files"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "schema": {
+          "name": "binary_data",
+          "version": "1-0-0",
+          "url": "https://example.com/schema/binary_data-v1-0-0.json"
+        },
+        "_release": "ecosystem:package:version",
+        "status": "success",
+        "details": [
+          {
+            "path": "/path/to/file1.bin",
+            "output": [
+              "Output line 1 from Binwalk for file1.bin",
+              "Output line 2 from Binwalk for file1.bin"
+            ]
+          },
+          {
+            "path": "/path/to/file2.bin",
+            "output": [
+              "Output line 1 from Binwalk for file2.bin",
+              "Output line 2 from Binwalk for file2.bin"
+            ]
+          }
+        ],
+        "summary": [
+          "Summary line 1",
+          "Summary line 2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"!@#$%^&*()\" does not match \"^[a-zA-Z0-9_]+$\"",
+      "python_error": "'!@#$%^&*()' does not match '^[a-zA-Z0-9_]+$'\n\nFailed validating 'pattern' in schema['properties']['schema']['properties']['name']:\n    {'type': 'string',\n     'description': 'Name of the schema',\n     'pattern': '^[a-zA-Z0-9_]+$'}\n\nOn instance['schema']['name']:\n    '!@#$%^&*()'",
+      "data": {
+        "schema": {
+          "name": "!@#$%^&*()",
+          "version": "1-0-0",
+          "url": "https://example.com/schema/binary_data-v1-0-0.json"
+        },
+        "_release": "ecosystem:package:version",
+        "status": "success",
+        "details": [
+          {
+            "path": "/path/to/file1.bin",
+            "output": [
+              "Output line 1 from Binwalk for file1.bin",
+              "Output line 2 from Binwalk for file1.bin"
+            ]
+          },
+          {
+            "path": "/path/to/file2.bin",
+            "output": [
+              "Output line 1 from Binwalk for file2.bin",
+              "Output line 2 from Binwalk for file2.bin"
+            ]
+          }
+        ],
+        "summary": [
+          "Summary line 1",
+          "Summary line 2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a valid uri\" is not a \"uri\"",
+      "python_error": "'not a valid uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['schema']['properties']['url']:\n    {'type': 'string',\n     'description': 'Full URL of the schema',\n     'format': 'uri'}\n\nOn instance['schema']['url']:\n    'not a valid uri'",
+      "data": {
+        "schema": {
+          "name": "binary_data",
+          "version": "1-0-0",
+          "url": "not a valid uri"
+        },
+        "_release": "ecosystem:package:version",
+        "status": "success",
+        "details": [
+          {
+            "path": "/path/to/file1.bin",
+            "output": [
+              "Output line 1 from Binwalk for file1.bin",
+              "Output line 2 from Binwalk for file1.bin"
+            ]
+          },
+          {
+            "path": "/path/to/file2.bin",
+            "output": [
+              "Output line 1 from Binwalk for file2.bin",
+              "Output line 2 from Binwalk for file2.bin"
+            ]
+          }
+        ],
+        "summary": [
+          "Summary line 1",
+          "Summary line 2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"binary_data!\" does not match \"^[a-zA-Z0-9_]+$\"",
+      "python_error": "'binary_data!' does not match '^[a-zA-Z0-9_]+$'\n\nFailed validating 'pattern' in schema['properties']['schema']['properties']['name']:\n    {'type': 'string',\n     'description': 'Name of the schema',\n     'pattern': '^[a-zA-Z0-9_]+$'}\n\nOn instance['schema']['name']:\n    'binary_data!'",
+      "data": {
+        "schema": {
+          "name": "binary_data!",
+          "version": "1-0-0",
+          "url": "https://example.com/schema/binary_data-v1-0-0.json"
+        },
+        "_release": "ecosystem:package:version",
+        "status": "success",
+        "details": [
+          {
+            "path": "/path/to/file1.bin",
+            "output": [
+              "Output line 1 from Binwalk for file1.bin",
+              "Output line 2 from Binwalk for file1.bin"
+            ]
+          },
+          {
+            "path": "/path/to/file2.bin",
+            "output": [
+              "Output line 1 from Binwalk for file2.bin",
+              123,
+              " This should fail because output should be a string"
+            ]
+          }
+        ],
+        "summary": [
+          "Summary line 1",
+          "Summary line 2"
+        ]
+      }
+    }
+  ]
+}

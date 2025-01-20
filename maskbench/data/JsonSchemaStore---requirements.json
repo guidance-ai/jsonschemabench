@@ -1,0 +1,436 @@
+{
+  "description": "sample JsonSchemaStore/requirements.json",
+  "meta": {
+    "full_size": 1676,
+    "stripped_size": 1267,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$defs",
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$defs": {
+      "CollectionModel": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "galaxy",
+              "url",
+              "file",
+              "git",
+              "dir",
+              "subdirs"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "title": "CollectionModel",
+        "type": "object"
+      },
+      "CollectionStringModel": {
+        "title": "CollectionStringModel",
+        "type": "string"
+      },
+      "IncludeModel": {
+        "properties": {
+          "include": {
+            "title": "Include",
+            "type": "string"
+          }
+        },
+        "required": [
+          "include"
+        ],
+        "title": "IncludeModel",
+        "type": "object"
+      },
+      "RequirementsV2Model": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "collections"
+            ]
+          },
+          {
+            "required": [
+              "roles"
+            ]
+          }
+        ],
+        "properties": {
+          "collections": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/CollectionModel"
+                },
+                {
+                  "$ref": "#/$defs/CollectionStringModel"
+                }
+              ]
+            },
+            "title": "Collections",
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/$defs/RoleModel"
+            },
+            "title": "Roles",
+            "type": "array"
+          }
+        },
+        "title": "Requirements v2",
+        "type": "object"
+      },
+      "RoleModel": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scm": {
+            "anyOf": [
+              {
+                "enum": [
+                  "git"
+                ],
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "hg"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": "git",
+            "title": "Scm"
+          },
+          "src": {
+            "title": "Src",
+            "type": "string"
+          },
+          "version": {
+            "default": "master",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "title": "Role",
+        "type": "object"
+      }
+    },
+    "$id": "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/requirements.json",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "anyOf": [
+      {
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RoleModel"
+            },
+            {
+              "$ref": "#/$defs/IncludeModel"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      {
+        "$ref": "#/$defs/RequirementsV2Model"
+      }
+    ],
+    "examples": [
+      "requirements.yml"
+    ],
+    "title": "Ansible Requirements Schema"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "collections": [
+          {
+            "name": "ansible.posix",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.3.0"
+          },
+          {
+            "name": "ansible.windows",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.10.0"
+          },
+          "https://github.com/ansible-collections/ansible.windows"
+        ],
+        "roles": [
+          {
+            "name": "geerlingguy.docker",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-docker.git",
+            "version": "master"
+          },
+          {
+            "name": "geerlingguy.java",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-java.git",
+            "version": "master"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"collections\":[{\"name\":\"ansible.posix\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.3.0\"},{\"name\":\"ansible.windows\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.10.0\"},\"https://github.com/ansible-collections/ansible.windows\"],\"roles\":[{\"name\":\"geerlingguy.docker\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-docker.git\",\"version\":\"master\"},{\"name\":\"geerlingguy.java\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-java.git\",\"version\":\"master\"}],\"invalid_key\":\"invalid_value\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "Additional properties are not allowed ('invalid_key' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'additionalProperties': False,\n     'anyOf': [{'required': ['collections']}, {'required': ['roles']}],\n     'properties': {'collections': {'items': {'anyOf': [{'$ref': '#/$defs/CollectionModel'},\n                                                        {'$ref': '#/$defs/CollectionStringModel'}]},\n                                    'title': 'Collections',\n                                    'type': 'array'},\n                    'roles': {'items': {'$ref': '#/$defs/RoleModel'},\n                              'title': 'Roles',\n                              'type': 'array'}},\n     'title': 'Requirements v2',\n     'type': 'object'}\n\nOn instance:\n    {'collections': [{'name': 'ansible.posix',\n                      'source': 'https://galaxy.ansible.com',\n                      'type': 'galaxy',\n                      'version': '1.3.0'},\n                     {'name': 'ansible.windows',\n     .. (644 more)",
+      "data": {
+        "collections": [
+          {
+            "name": "ansible.posix",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.3.0"
+          },
+          {
+            "name": "ansible.windows",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.10.0"
+          },
+          "https://github.com/ansible-collections/ansible.windows"
+        ],
+        "roles": [
+          {
+            "name": "geerlingguy.docker",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-docker.git",
+            "version": "master"
+          },
+          {
+            "name": "geerlingguy.java",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-java.git",
+            "version": "master"
+          }
+        ],
+        "invalid_key": "invalid_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"collections\":[{\"name\":\"ansible.posix\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.3.0\"},{\"name\":\"ansible.windows\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.10.0\"},\"https://github.com/ansible-collections/ansible.windows\",12345],\"roles\":[{\"name\":\"geerlingguy.docker\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-docker.git\",\"version\":\"master\"},{\"name\":\"geerlingguy.java\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-java.git\",\"version\":\"master\"}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "12345 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[1]['properties']['collections']['items']:\n    {'anyOf': [{'$ref': '#/$defs/CollectionModel'},\n               {'$ref': '#/$defs/CollectionStringModel'}]}\n\nOn instance['collections'][3]:\n    12345",
+      "data": {
+        "collections": [
+          {
+            "name": "ansible.posix",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.3.0"
+          },
+          {
+            "name": "ansible.windows",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.10.0"
+          },
+          "https://github.com/ansible-collections/ansible.windows",
+          12345
+        ],
+        "roles": [
+          {
+            "name": "geerlingguy.docker",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-docker.git",
+            "version": "master"
+          },
+          {
+            "name": "geerlingguy.java",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-java.git",
+            "version": "master"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"collections\":[{\"name\":\"ansible.posix\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.3.0\"},{\"name\":\"ansible.windows\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.10.0\"},\"https://github.com/ansible-collections/ansible.windows\"],\"roles\":[{\"name\":\"geerlingguy.docker\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-docker.git\",\"version\":\"master\"},{\"name\":\"geerlingguy.java\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-java.git\",\"version\":\"master\"}],\"collections2\":[]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "Additional properties are not allowed ('collections2' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'additionalProperties': False,\n     'anyOf': [{'required': ['collections']}, {'required': ['roles']}],\n     'properties': {'collections': {'items': {'anyOf': [{'$ref': '#/$defs/CollectionModel'},\n                                                        {'$ref': '#/$defs/CollectionStringModel'}]},\n                                    'title': 'Collections',\n                                    'type': 'array'},\n                    'roles': {'items': {'$ref': '#/$defs/RoleModel'},\n                              'title': 'Roles',\n                              'type': 'array'}},\n     'title': 'Requirements v2',\n     'type': 'object'}\n\nOn instance:\n    {'collections': [{'name': 'ansible.posix',\n                      'source': 'https://galaxy.ansible.com',\n                      'type': 'galaxy',\n                      'version': '1.3.0'},\n                     {'name': 'ansible.windows',\n    .. (633 more)",
+      "data": {
+        "collections": [
+          {
+            "name": "ansible.posix",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.3.0"
+          },
+          {
+            "name": "ansible.windows",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.10.0"
+          },
+          "https://github.com/ansible-collections/ansible.windows"
+        ],
+        "roles": [
+          {
+            "name": "geerlingguy.docker",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-docker.git",
+            "version": "master"
+          },
+          {
+            "name": "geerlingguy.java",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-java.git",
+            "version": "master"
+          }
+        ],
+        "collections2": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"collections\":[{\"name\":\"ansible.posix\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.3.0\",\"extra\":\"field\"}],\"roles\":[{\"name\":\"geerlingguy.docker\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-docker.git\",\"version\":\"master\"},{\"name\":\"geerlingguy.java\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-java.git\",\"version\":\"master\"}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema[0]:\n    {'additionalProperties': False,\n     'properties': {'name': {'title': 'Name', 'type': 'string'},\n                    'source': {'title': 'Source', 'type': 'string'},\n                    'type': {'enum': ['galaxy',\n                                      'url',\n                                      'file',\n                                      'git',\n                                      'dir',\n                                      'subdirs'],\n                             'title': 'Type',\n                             'type': 'string'},\n                    'version': {'title': 'Version', 'type': 'string'}},\n     'title': 'CollectionModel',\n     'type': 'object'}\n\nOn instance:\n    {'name': 'ansible.posix',\n     'source': 'https://galaxy.ansible.com',\n     'type': 'galaxy',\n     'version': '1.3.0',\n     'extra': 'field'}",
+      "data": {
+        "collections": [
+          {
+            "name": "ansible.posix",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.3.0",
+            "extra": "field"
+          }
+        ],
+        "roles": [
+          {
+            "name": "geerlingguy.docker",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-docker.git",
+            "version": "master"
+          },
+          {
+            "name": "geerlingguy.java",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-java.git",
+            "version": "master"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "collections": [
+          {
+            "name": "ansible.posix",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.3.0"
+          },
+          {
+            "name": "ansible.windows",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.10.0"
+          },
+          "https://github.com/ansible-collections/ansible.windows.git"
+        ],
+        "roles": [
+          {
+            "name": "geerlingguy.docker",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-docker.git",
+            "version": "master"
+          },
+          {
+            "name": "geerlingguy.java",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-java.git",
+            "version": "master"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"collections\":[{\"name\":\"ansible.posix\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.3.0\"},{\"name\":\"ansible.windows\",\"source\":\"https://galaxy.ansible.com\",\"type\":\"galaxy\",\"version\":\"1.10.0\"},\"https://github.com/ansible-collections/ansible.windows.git\"],\"roles\":[{\"name\":\"geerlingguy.docker\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-docker.git\",\"version\":\"master\"},{\"name\":\"geerlingguy.java\",\"scm\":\"git\",\"src\":\"https://github.com/geerlingguy/ansible-role-java.git\",\"version\":\"master\"}],\"roles2\":[]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "Additional properties are not allowed ('roles2' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'additionalProperties': False,\n     'anyOf': [{'required': ['collections']}, {'required': ['roles']}],\n     'properties': {'collections': {'items': {'anyOf': [{'$ref': '#/$defs/CollectionModel'},\n                                                        {'$ref': '#/$defs/CollectionStringModel'}]},\n                                    'title': 'Collections',\n                                    'type': 'array'},\n                    'roles': {'items': {'$ref': '#/$defs/RoleModel'},\n                              'title': 'Roles',\n                              'type': 'array'}},\n     'title': 'Requirements v2',\n     'type': 'object'}\n\nOn instance:\n    {'collections': [{'name': 'ansible.posix',\n                      'source': 'https://galaxy.ansible.com',\n                      'type': 'galaxy',\n                      'version': '1.3.0'},\n                     {'name': 'ansible.windows',\n          .. (625 more)",
+      "data": {
+        "collections": [
+          {
+            "name": "ansible.posix",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.3.0"
+          },
+          {
+            "name": "ansible.windows",
+            "source": "https://galaxy.ansible.com",
+            "type": "galaxy",
+            "version": "1.10.0"
+          },
+          "https://github.com/ansible-collections/ansible.windows.git"
+        ],
+        "roles": [
+          {
+            "name": "geerlingguy.docker",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-docker.git",
+            "version": "master"
+          },
+          {
+            "name": "geerlingguy.java",
+            "scm": "git",
+            "src": "https://github.com/geerlingguy/ansible-role-java.git",
+            "version": "master"
+          }
+        ],
+        "roles2": []
+      }
+    }
+  ]
+}

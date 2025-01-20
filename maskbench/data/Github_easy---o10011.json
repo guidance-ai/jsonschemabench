@@ -1,0 +1,156 @@
+{
+  "description": "sample Github_easy/o10011.json",
+  "meta": {
+    "full_size": 587,
+    "stripped_size": 483,
+    "features": [
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Client creation request",
+    "oneOf": [
+      {
+        "properties": {
+          "grantType": {
+            "enum": [
+              "authorization_code"
+            ]
+          },
+          "responseType": {
+            "default": "code",
+            "enum": [
+              "code"
+            ]
+          }
+        },
+        "required": [
+          "grantType"
+        ]
+      },
+      {
+        "properties": {
+          "grantType": {
+            "enum": [
+              "client_credentials"
+            ]
+          },
+          "responseType": {
+            "default": "token",
+            "enum": [
+              "token"
+            ]
+          }
+        },
+        "required": [
+          "grantType"
+        ]
+      }
+    ],
+    "properties": {
+      "grantType": {
+        "type": "string"
+      },
+      "redirectUris": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "responseType": {
+        "type": "string"
+      },
+      "scopes": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "title": "OAuthClientRequest",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "grantType": "authorization_code",
+        "redirectUris": [
+          "https://example.com/callback"
+        ],
+        "responseType": "code",
+        "scopes": [
+          "read",
+          "write"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "grantType": "authorization_code",
+        "redirectUris": [
+          "https://example.com/callback",
+          "https://example.com/callback2"
+        ],
+        "responseType": "code",
+        "scopes": [
+          "read",
+          "write"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"grantType\":\"authorization_code\",\"responseType\":\"token\",\"redirectUris\":[\"https://example.com/callback\",\"https://example.com/callback2\"],\"scopes\":[\"read\",\"write\"]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'authorization_code' is not one of ['client_credentials']\n\nFailed validating 'enum' in schema[1]['properties']['grantType']:\n    {'enum': ['client_credentials']}\n\nOn instance['grantType']:\n    'authorization_code'",
+      "data": {
+        "grantType": "authorization_code",
+        "responseType": "token",
+        "redirectUris": [
+          "https://example.com/callback",
+          "https://example.com/callback2"
+        ],
+        "scopes": [
+          "read",
+          "write"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['redirectUris']['items']:\n    {'type': 'string'}\n\nOn instance['redirectUris'][0]:\n    123",
+      "data": {
+        "grantType": "authorization_code",
+        "responseType": "code",
+        "redirectUris": [
+          123,
+          "https://example.com/callback2"
+        ],
+        "scopes": [
+          "read",
+          "write"
+        ]
+      }
+    }
+  ]
+}

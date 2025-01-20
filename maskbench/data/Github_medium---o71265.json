@@ -1,0 +1,230 @@
+{
+  "description": "sample Github_medium/o71265.json",
+  "meta": {
+    "full_size": 3994,
+    "stripped_size": 1178,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@siblingKeys",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-extend-fail-error-json-schema.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "jsend-extend-fail-error json schema",
+    "description": "This is a json-schema that extends the jsend format for json responses for applications. It provides structured information about the 'status':'fail|error' reason(s) by specifying the structure of the 'data' key. Since the returned data for 'status':'success' depends on the API, the JSend spec is enough. The  returned data for 'status':'fail|error' should be in a format that is consumable by API consumers in a generic way. The JSend specification leaves this too open for interpretation. To provide a uniform way of consuming data for failures and errors, this schema defines an array of objects in the 'data' key. Each item in that array has at least the key 'message' with a human readable description of the failure. For an error, this will most likely be a single object specifying the error. In case it is possible to map it to an input field, an optional 'field' key can be used with a string representation of the map to the field. Even input in complex datastructures can be mapped this way. see https://labs.omniti.com/labs/jsend/wiki",
+    "type": "object",
+    "oneOf": [
+      {
+        "$ref": "#/definitions/success"
+      },
+      {
+        "$ref": "#/definitions/fail"
+      },
+      {
+        "$ref": "#/definitions/error"
+      }
+    ],
+    "definitions": {
+      "success": {
+        "description": "All went well, and (usually) some data was returned.",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^success$",
+            "description": "the status for a succesful handling"
+          },
+          "data": {
+            "description": "Acts as the wrapper for any data returned by the API call. If the call returns no data (as in the last example), data should be set to null.",
+            "$ref": "#/definitions/data"
+          }
+        }
+      },
+      "fail": {
+        "description": "There was a problem with the data submitted, or some pre-condition of the API call wasn't satisfied. this is a '400' http status type error (recoverable by client)",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^fail$",
+            "description": "the status for a failure handling"
+          },
+          "data": {
+            "description": "provides the wrapper for the details of why the request failed.",
+            "$ref": "#/definitions/data-fail-error"
+          }
+        }
+      },
+      "error": {
+        "description": "An error occurred in processing the request, i.e. an exception was thrown. this is a '500' http status type error (unrecoverable by client)",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^error$",
+            "description": "the status for a failure handling"
+          },
+          "data": {
+            "description": "provides the wrapper for the details of why the request failed.",
+            "$ref": "#/definitions/data-fail-error"
+          }
+        }
+      },
+      "code": {
+        "description": "A numeric code providing info about a failure or error in a result, if applicable",
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "data-fail-error": {
+        "description": "a container for information about failures or errors",
+        "type": [
+          "array"
+        ],
+        "minItems": 0,
+        "items": {
+          "$ref": "#/definitions/data-fail-error-item"
+        }
+      },
+      "data-fail-error-item": {
+        "description": "an object that contains fields related to a failure",
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "description": "a human readable failure or error message",
+            "$ref": "#/definitions/message"
+          },
+          "code": {
+            "description": "an optional numeric code, could be used for translations (incl gettext .po strings)",
+            "$ref": "#/definitions/code"
+          },
+          "field": {
+            "description": "an optional string representation that maps to input. POST keys, a query parameter, a header key etc. For complex datastructures you could use different solutions like a dot seperated tree representation, an xpath expression etc.",
+            "type": "string"
+          }
+        }
+      },
+      "data": {
+        "description": "a generic container for data returned for success, fail or error",
+        "type": [
+          "string",
+          "null",
+          "array",
+          "object",
+          "integer",
+          "boolean"
+        ]
+      },
+      "message": {
+        "description": "A meaningful, end-user-readable (or at the least log-worthy) message, explaining what happened.",
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "fail",
+        "data": [
+          {
+            "message": "Invalid email address",
+            "field": "email",
+            "code": 1001
+          },
+          {
+            "message": "Password must be at least 8 characters long",
+            "field": "password"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "fail",
+        "data": [
+          {
+            "message": "The provided email address is already in use.",
+            "field": "email",
+            "code": 1001
+          },
+          {
+            "message": "The provided password is too short.",
+            "field": "password"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"status\":\"fa\",\"data\":[{\"message\":\"The provided email address is already in use.\",\"field\":\"email\",\"code\":1001},{\"message\":\"The provided password is too short.\",\"field\":\"password\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'status': 'fa', 'data': [{'message': 'The provided email address is already in use.', 'field': 'email', 'code': 1001}, {'message': 'The provided password is too short.', 'field': 'password'}]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'id': 'https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-extend-fail-error-json-schema.json',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'jsend-extend-fail-error json schema',\n     'description': 'This is a json-schema that extends the jsend format '\n                    'for json responses for applications. It provides '\n                    'structured information about the '\n                    \"'status':'fail|error' reason(s) by specifying the \"\n                    \"structure of the 'data' key. Since the returned data \"\n                    \"for 'status':'success' depends on the API, the JSend \"\n                    'spec is enough. The  returned data for '\n             .. (16927 more)",
+      "data": {
+        "status": "fa",
+        "data": [
+          {
+            "message": "The provided email address is already in use.",
+            "field": "email",
+            "code": 1001
+          },
+          {
+            "message": "The provided password is too short.",
+            "field": "password"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"status\":\"fail\",\"data\":{\"message\":\"The provided email address is already in use.\",\"field\":\"email\",\"code\":1001}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'status': 'fail', 'data': {'message': 'The provided email address is already in use.', 'field': 'email', 'code': 1001}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'id': 'https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-extend-fail-error-json-schema.json',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'jsend-extend-fail-error json schema',\n     'description': 'This is a json-schema that extends the jsend format '\n                    'for json responses for applications. It provides '\n                    'structured information about the '\n                    \"'status':'fail|error' reason(s) by specifying the \"\n                    \"structure of the 'data' key. Since the returned data \"\n                    \"for 'status':'success' depends on the API, the JSend \"\n                    'spec is enough. The  returned data for '\n                    \"'status':'fail|error' should be in a format that is \"\n           .. (16750 more)",
+      "data": {
+        "status": "fail",
+        "data": {
+          "message": "The provided email address is already in use.",
+          "field": "email",
+          "code": 1001
+        }
+      }
+    }
+  ]
+}

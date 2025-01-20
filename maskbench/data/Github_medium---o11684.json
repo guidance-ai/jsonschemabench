@@ -1,0 +1,324 @@
+{
+  "description": "sample Github_medium/o11684.json",
+  "meta": {
+    "full_size": 1683,
+    "stripped_size": 977,
+    "features": [
+      "@minmaxLength",
+      "format",
+      "format:email",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Cluster Config",
+    "description": "Configuration for forwarding metrics from Atlas LWC to AWS CloudWatch",
+    "type": "object",
+    "required": [
+      "email",
+      "expressions"
+    ],
+    "properties": {
+      "email": {
+        "description": "Email address of the service owner",
+        "type": "string",
+        "format": "email"
+      },
+      "expressions": {
+        "description": "List of metric expressions",
+        "type": "array",
+        "_uniqueItems": true,
+        "items": {
+          "type": "object",
+          "required": [
+            "metricName",
+            "atlasUri",
+            "account"
+          ],
+          "properties": {
+            "metricName": {
+              "description": "Name of the metric that will be created in CloudWatch",
+              "type": "string",
+              "pattern": "^(?:(?:[\\w\\-\\.\\s]+)|(?:\\$\\([\\w\\-\\.]+\\)))+$"
+            },
+            "atlasUri": {
+              "description": "Atlas query",
+              "type": "string",
+              "pattern": "^(https?://)?[\\w-]+(\\.[\\w-]+)*(:\\d+)?/api/v(\\d+){1}/graph\\?.+$"
+            },
+            "comment": {
+              "type": "string"
+            },
+            "dimensions": {
+              "description": "Details about AWS CloudWatch dimension that will be created",
+              "type": "array",
+              "_uniqueItems": true,
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "value"
+                ],
+                "properties": {
+                  "name": {
+                    "description": "Name of the CloudWatch dimension",
+                    "type": "string",
+                    "pattern": "^[\\w\\-\\.]+$"
+                  },
+                  "value": {
+                    "description": "Atlas tag. Example: $(nf.asg)",
+                    "type": "string",
+                    "pattern": "^(?:(?:[\\w\\-\\.]+)|(?:\\$\\([\\w\\-\\.]+\\)))+$"
+                  }
+                }
+              }
+            },
+            "account": {
+              "description": "AWS account to send the metric to. Typically $(nf.account)",
+              "type": "string",
+              "pattern": "^([\\d]+|\\$\\([\\w\\-\\.]+\\))$"
+            },
+            "region": {
+              "description": "AWS region to send the metric to",
+              "type": "string",
+              "pattern": "^([\\w\\-\\.]+|\\$\\([\\w\\-\\.]+\\))$"
+            }
+          }
+        }
+      },
+      "checksToSkip": {
+        "description": "The list of validations to skip",
+        "type": "array",
+        "_uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "email": "example@example.com",
+        "expressions": [
+          {
+            "metricName": "My Metric",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric1",
+            "comment": "This is a comment",
+            "dimensions": [
+              {
+                "name": "Dimension1",
+                "value": "$(nf.asg)"
+              },
+              {
+                "name": "Dimension2",
+                "value": "static-value"
+              }
+            ],
+            "account": "$(nf.account)",
+            "region": "us-east-1"
+          },
+          {
+            "metricName": "My Metric 2",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric2",
+            "dimensions": [
+              {
+                "name": "Dimension3",
+                "value": "$(nf.instance)"
+              }
+            ],
+            "account": "123456789012",
+            "region": "$(nf.region)"
+          }
+        ],
+        "checksToSkip": [
+          "check1",
+          "check2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"$(invalid)\" does not match \"^[\\w\\-\\.]+$\"",
+      "python_error": "'$(invalid)' does not match '^[\\\\w\\\\-\\\\.]+$'\n\nFailed validating 'pattern' in schema['properties']['expressions']['items']['properties']['dimensions']['items']['properties']['name']:\n    {'description': 'Name of the CloudWatch dimension',\n     'type': 'string',\n     'pattern': '^[\\\\w\\\\-\\\\.]+$'}\n\nOn instance['expressions'][1]['dimensions'][0]['name']:\n    '$(invalid)'",
+      "data": {
+        "email": "example@example.com",
+        "expressions": [
+          {
+            "metricName": "My Metric",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric1",
+            "comment": "This is a comment",
+            "dimensions": [
+              {
+                "name": "Dimension1",
+                "value": "$(nf.asg)"
+              },
+              {
+                "name": "Dimension2",
+                "value": "static-value"
+              }
+            ],
+            "account": "$(nf.account)",
+            "region": "us-east-1"
+          },
+          {
+            "metricName": "My Metric 2",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric2",
+            "dimensions": [
+              {
+                "name": "$(invalid)",
+                "value": "$(nf.instance)"
+              }
+            ],
+            "account": "123456789012",
+            "region": "$(nf.region)"
+          }
+        ],
+        "checksToSkip": [
+          "check1",
+          "check2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid-email\" is not a \"email\"",
+      "python_error": "'invalid-email' is not a 'email'\n\nFailed validating 'format' in schema['properties']['email']:\n    {'description': 'Email address of the service owner',\n     'type': 'string',\n     'format': 'email'}\n\nOn instance['email']:\n    'invalid-email'",
+      "data": {
+        "email": "invalid-email",
+        "expressions": [
+          {
+            "metricName": "My Metric",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric1",
+            "comment": "This is a comment",
+            "dimensions": [
+              {
+                "name": "Dimension1",
+                "value": "$(nf.asg)"
+              },
+              {
+                "name": "Dimension2",
+                "value": "static-value"
+              }
+            ],
+            "account": "$(nf.account)",
+            "region": "us-east-1"
+          },
+          {
+            "metricName": "My Metric 2",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric2",
+            "dimensions": [
+              {
+                "name": "Dimension3",
+                "value": "$(nf.instance)"
+              }
+            ],
+            "account": "123456789012",
+            "region": "$(nf.region)"
+          }
+        ],
+        "checksToSkip": [
+          "check1",
+          "check2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['checksToSkip']['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['checksToSkip'][0]:\n    ''",
+      "data": {
+        "email": "example@example.com",
+        "expressions": [
+          {
+            "metricName": "My Metric",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric1",
+            "comment": "This is a comment",
+            "dimensions": [
+              {
+                "name": "Dimension1",
+                "value": "$(nf.asg)"
+              },
+              {
+                "name": "Dimension2",
+                "value": "static-value"
+              }
+            ],
+            "account": "$(nf.account)",
+            "region": "us-east-1"
+          },
+          {
+            "metricName": "My Metric 2",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric2",
+            "dimensions": [
+              {
+                "name": "Dimension3",
+                "value": "$(nf.instance)"
+              }
+            ],
+            "account": "123456789012",
+            "region": "$(nf.region)"
+          }
+        ],
+        "checksToSkip": [
+          "",
+          "check2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"value\" is a required property",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['checksToSkip']['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['checksToSkip'][0]:\n    ''",
+      "data": {
+        "email": "example@example.com",
+        "expressions": [
+          {
+            "metricName": "My Metric",
+            "atlasUri": "https://example.com/api/v1/graph?q=metric1",
+            "account": "$(nf.account)",
+            "region": "us-east-1",
+            "dimensions": [
+              {
+                "name": "Dimension1",
+                "value": "$(nf.asg)"
+              },
+              {
+                "name": "Dimension2",
+                "value": "static-value"
+              },
+              {
+                "name": "Dimension1",
+                "Duplicate dimension name, _uniqueItems is set to true": "value2"
+              }
+            ],
+            "comment": "This is a comment"
+          }
+        ],
+        "checksToSkip": [
+          "",
+          "Empty string is invalid, minLength is set to 1"
+        ]
+      }
+    }
+  ]
+}

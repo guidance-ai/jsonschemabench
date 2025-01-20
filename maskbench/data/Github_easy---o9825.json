@@ -1,0 +1,116 @@
+{
+  "description": "sample Github_easy/o9825.json",
+  "meta": {
+    "full_size": 365,
+    "stripped_size": 365,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "time": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "$date": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "$date"
+            ]
+          }
+        ]
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "payload": {}
+    },
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "time": {
+          "$date": "2022-01-01T00:00:00.000Z"
+        },
+        "name": "John Doe",
+        "payload": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"$date\":\"2022-01-01T00:00:00.000Z\",\"extra\":\"field\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema[2]:\n    {'type': 'object',\n     'properties': {'$date': {'type': 'string'}},\n     'additionalProperties': False,\n     'required': ['$date']}\n\nOn instance:\n    {'$date': '2022-01-01T00:00:00.000Z', 'extra': 'field'}",
+      "data": {
+        "time": {
+          "$date": "2022-01-01T00:00:00.000Z",
+          "extra": "field"
+        },
+        "name": "John Doe",
+        "payload": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "time": {
+          "$date": "2022-01-01T00:00:00.000Z"
+        },
+        "name": "",
+        "payload": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"$date\":12345} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'time': {'oneOf': [{'type': 'string'},\n                                       {'type': 'number'},\n                                       {'type': 'object',\n                                        'properties': {'$date': {'type': 'string'}},\n                                        'additionalProperties': False,\n                                        'required': ['$date']}]},\n                    'name': {'type': 'string',\n                             'minLength': 1,\n                             'maxLength': 255},\n                    'payload': {}},\n     'required': ['name'],\n     'additionalProperties': False}\n\nOn instance:\n    {'time': {'$date': 12345}, 'name': '', 'payload': {}, 'extra': {}}",
+      "data": {
+        "time": {
+          "$date": 12345
+        },
+        "name": "",
+        "payload": {},
+        "extra": {}
+      }
+    }
+  ]
+}

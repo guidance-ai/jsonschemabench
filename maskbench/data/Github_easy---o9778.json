@@ -1,0 +1,146 @@
+{
+  "description": "sample Github_easy/o9778.json",
+  "meta": {
+    "full_size": 524,
+    "stripped_size": 460,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:email",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "type",
+      "type:boolean",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "dryRun": {
+        "type": "boolean",
+        "default": false
+      },
+      "includeFiles": {
+        "type": "boolean",
+        "default": false
+      },
+      "includeDataTableRows": {
+        "type": "boolean",
+        "default": false
+      },
+      "includeDevices": {
+        "type": "boolean",
+        "default": false
+      },
+      "ownerId": {
+        "oneOf": [
+          {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "ownerType": {
+        "type": "string",
+        "enum": [
+          "user",
+          "organization"
+        ]
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 1024
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dryRun": true,
+        "includeFiles": true,
+        "includeDataTableRows": false,
+        "includeDevices": true,
+        "ownerId": "1234567890abcdef12345678",
+        "ownerType": "user",
+        "email": "example@example.com"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dryRun": true,
+        "includeFiles": true,
+        "includeDataTableRows": false,
+        "includeDevices": true,
+        "ownerId": "5f5f5f5f5f5f5f5f5f5f5f5f",
+        "ownerType": "organization",
+        "email": "example@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"5f5f5f5f5f5f5f5f5f5f5f5g\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'5f5f5f5f5f5f5f5f5f5f5f5g' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema[0]:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance:\n    '5f5f5f5f5f5f5f5f5f5f5f5g'",
+      "data": {
+        "dryRun": true,
+        "includeFiles": true,
+        "includeDataTableRows": false,
+        "includeDevices": true,
+        "ownerId": "5f5f5f5f5f5f5f5f5f5f5f5g",
+        "ownerType": "organization",
+        "email": "example@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"example\" is not a \"email\"",
+      "python_error": "'example' is not a 'email'\n\nFailed validating 'format' in schema['properties']['email']:\n    {'type': 'string', 'format': 'email', 'maxLength': 1024}\n\nOn instance['email']:\n    'example'",
+      "data": {
+        "dryRun": true,
+        "includeFiles": true,
+        "includeDataTableRows": false,
+        "includeDevices": true,
+        "ownerId": "5f5f5f5f5f5f5f5f5f5f5f5f",
+        "ownerType": "organization",
+        "email": "example"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['ownerId']:\n    {'oneOf': [{'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'},\n               {'type': 'null'}]}\n\nOn instance['ownerId']:\n    123",
+      "data": {
+        "dryRun": true,
+        "includeFiles": true,
+        "includeDataTableRows": false,
+        "includeDevices": true,
+        "ownerId": 123,
+        "ownerType": "organization",
+        "email": "example@example.com"
+      }
+    }
+  ]
+}

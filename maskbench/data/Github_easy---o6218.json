@@ -1,0 +1,152 @@
+{
+  "description": "sample Github_easy/o6218.json",
+  "meta": {
+    "full_size": 449,
+    "stripped_size": 449,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "attribute": {
+        "type": "string",
+        "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+      },
+      "deviceTags": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          }
+        }
+      },
+      "deviceIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Fa-f\\d]{24}$"
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "attribute": "example-attribute",
+        "deviceTags": [
+          {
+            "key": "example-key",
+            "value": "example-value"
+          },
+          {
+            "key": "another-key",
+            "value": "another-value"
+          }
+        ],
+        "deviceIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba98"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"example-attribute!\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'example-attribute!' does not match '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'pattern' in schema['properties']['attribute']:\n    {'type': 'string', 'pattern': '^[0-9a-zA-Z_-]{1,255}$'}\n\nOn instance['attribute']:\n    'example-attribute!'",
+      "data": {
+        "attribute": "example-attribute!",
+        "deviceTags": [
+          {
+            "key": "example-key",
+            "value": "example-value"
+          },
+          {
+            "key": "another-key",
+            "value": "another-value"
+          }
+        ],
+        "deviceIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba98"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"fedcba9876543210fedcba9\" does not match \"^[A-Fa-f\\d]{24}$\"",
+      "python_error": "'invalid-device-id' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['deviceIds']['items']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['deviceIds'][2]:\n    'invalid-device-id'",
+      "data": {
+        "attribute": "example-attribute",
+        "deviceTags": [
+          {
+            "key": "example-key",
+            "value": "example-value"
+          },
+          {
+            "key": "another-key",
+            "value": "another-value"
+          }
+        ],
+        "deviceIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba9",
+          "invalid-device-id"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['deviceTags']['items']['properties']['value']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['deviceTags'][0]['value']:\n    ''",
+      "data": {
+        "attribute": "example-attribute",
+        "deviceTags": [
+          {
+            "key": "example-key",
+            "value": ""
+          },
+          {
+            "key": "another-key",
+            "value": "another-value"
+          }
+        ],
+        "deviceIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba98"
+        ]
+      }
+    }
+  ]
+}

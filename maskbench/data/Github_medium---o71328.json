@@ -1,0 +1,248 @@
+{
+  "description": "sample Github_medium/o71328.json",
+  "meta": {
+    "full_size": 1372,
+    "stripped_size": 590,
+    "features": [
+      "@minmaxItems"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "docs/spec/stacktrace.json",
+    "title": "Stacktrace",
+    "type": "object",
+    "description": "A stacktrace frame, contains various bits (most optional) describing the context of the frame",
+    "properties": {
+      "abs_path": {
+        "description": "The absolute path of the file involved in the stack frame",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "colno": {
+        "description": "Column number",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "context_line": {
+        "description": "The line of code part of the stack frame",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "filename": {
+        "description": "The relative filename of the code involved in the stack frame, used e.g. to do error checksumming",
+        "type": "string"
+      },
+      "function": {
+        "description": "The function involved in the stack frame",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "in_app": {
+        "type": [
+          "boolean",
+          "null"
+        ]
+      },
+      "lineno": {
+        "description": "The line number of code part of the stack frame, used e.g. to do error checksumming",
+        "type": "number"
+      },
+      "module": {
+        "description": "The module to which frame belongs to",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "post_context": {
+        "description": "The lines of code after the stack frame",
+        "type": [
+          "array",
+          "null"
+        ],
+        "minItems": 0
+      },
+      "pre_context": {
+        "description": "The lines of code before the stack frame",
+        "type": [
+          "array",
+          "null"
+        ],
+        "minItems": 0
+      },
+      "vars": {
+        "description": "Local variables for this stack frame",
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {}
+      }
+    },
+    "required": [
+      "filename",
+      "lineno"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "abs_path": "/path/to/file.py",
+        "colno": 10,
+        "context_line": "print('Hello World')",
+        "filename": "file.py",
+        "function": "main",
+        "in_app": true,
+        "lineno": 5,
+        "module": "my_module",
+        "post_context": [
+          "print('This is the next line')",
+          "print('This is the line after that')"
+        ],
+        "pre_context": [
+          "def main():",
+          "    print('This is the previous line')"
+        ],
+        "vars": {
+          "x": 5,
+          "y": 10
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"ten\" is not of types \"null\", \"number\"",
+      "python_error": "'ten' is not of type 'number', 'null'\n\nFailed validating 'type' in schema['properties']['colno']:\n    {'description': 'Column number', 'type': ['number', 'null']}\n\nOn instance['colno']:\n    'ten'",
+      "data": {
+        "abs_path": "/path/to/file.py",
+        "colno": "ten",
+        "context_line": "print('Hello World')",
+        "filename": "file.py",
+        "function": "main",
+        "in_app": true,
+        "lineno": 5,
+        "module": "my_module",
+        "post_context": [
+          "print('This is the next line')",
+          "print('This is the line after that')"
+        ],
+        "pre_context": [
+          "def main():",
+          "    print('This is the previous line')"
+        ],
+        "vars": {
+          "x": 5,
+          "y": 10
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "'5' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['lineno']:\n    {'description': 'The line number of code part of the stack frame, used '\n                    'e.g. to do error checksumming',\n     'type': 'number'}\n\nOn instance['lineno']:\n    '5'",
+      "data": {
+        "abs_path": "/path/to/file.py",
+        "colno": 10,
+        "context_line": "print('Hello World')",
+        "filename": 123,
+        "Invalid: filename should be a string": "function",
+        "Invalid: missing colon after property name": "my_module",
+        "in_app": true,
+        "lineno": "5",
+        "Invalid: lineno should be a number": "module",
+        "post_context": [
+          "print('This is the next line')",
+          "print('This is the line after that')"
+        ],
+        "pre_context": [
+          "def main():",
+          "    print('This is the previous line')"
+        ],
+        "vars": {
+          "x": 5,
+          "y": 10
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "abs_path": "/path/to/file.py",
+        "colno": 10,
+        "context_line": "print('Hello World')",
+        "filename": "file.py",
+        "function": "main",
+        "in_app": true,
+        "lineno": 5,
+        "module": "my_module",
+        "post_context": [
+          "print('This is the next line')",
+          "print('And this is the line after that')"
+        ],
+        "pre_context": [
+          "def main():",
+          "    print('This is the line before the context line')"
+        ],
+        "vars": {
+          "my_variable": "my_value"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"5\" is not of type \"number\"",
+      "python_error": "'5' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['lineno']:\n    {'description': 'The line number of code part of the stack frame, used '\n                    'e.g. to do error checksumming',\n     'type': 'number'}\n\nOn instance['lineno']:\n    '5'",
+      "data": {
+        "abs_path": "/path/to/file.py",
+        "colno": 10,
+        "context_line": "print('Hello World')",
+        "filename": "file.py",
+        "function": "main",
+        "in_app": true,
+        "lineno": "5",
+        "module": "my_module",
+        "post_context": [
+          "print('This is the next line')",
+          "print('And this is the line after that')"
+        ],
+        "pre_context": [
+          "def main():",
+          "    print('This is the line before the context line')"
+        ],
+        "vars": {
+          "my_variable": "my_value"
+        }
+      }
+    }
+  ]
+}

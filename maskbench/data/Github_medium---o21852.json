@@ -1,0 +1,176 @@
+{
+  "description": "sample Github_medium/o21852.json",
+  "meta": {
+    "full_size": 743,
+    "stripped_size": 743,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "HttpMethod": {
+        "enum": [
+          "DELETE",
+          "GET",
+          "HEAD",
+          "OPTIONS",
+          "PATCH",
+          "POST",
+          "PUT"
+        ],
+        "type": "string"
+      },
+      "ResourceId": {
+        "pattern": "^[a-z0-9]+$",
+        "type": "string"
+      },
+      "ResponseModels": {
+        "additionalProperties": false,
+        "patternProperties": {
+          ".+": {
+            "type": "string"
+          }
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "ResponseParameters": {
+        "additionalProperties": false,
+        "patternProperties": {
+          "^method\\.response\\.header\\..+$": {
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string"
+          }
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "RestApiId": {
+        "pattern": "^[a-z0-9]{10}$",
+        "type": "string"
+      },
+      "StatusCode": {
+        "pattern": "^\\d{3}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "StatusCode",
+      "HttpMethod",
+      "ResourceId",
+      "RestApiId"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "resource123",
+        "RestApiId": "1234567890",
+        "StatusCode": "200",
+        "ResponseModels": {
+          "application/json": "Model"
+        },
+        "ResponseParameters": {
+          "method.response.header.Access-Control-Allow-Origin": "true"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "ResponseModels": {
+          "application/json": "Model"
+        },
+        "ResponseParameters": {
+          "method.response.header.Access-Control-Allow-Origin": "true"
+        },
+        "RestApiId": "1234567890",
+        "StatusCode": "200"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "1234 is not of type \"string\"",
+      "python_error": "'Invalid-patternlug', 'method.response.header', 'method.response.header.' do not match any of the regexes: '^method\\\\.response\\\\.header\\\\..+$'\n\nFailed validating 'additionalProperties' in schema['properties']['ResponseParameters']:\n    {'additionalProperties': False,\n     'patternProperties': {'^method\\\\.response\\\\.header\\\\..+$': {'enum': ['true',\n                                                                          'false'],\n                                                                 'type': 'string'}},\n     'properties': {},\n     'type': 'object'}\n\nOn instance['ResponseParameters']:\n    {'method.response.header.Access-Control-Allow-Origin': 'true',\n     'method.response.header.': 'true',\n     'method.response.header. Invalid-patternлуг': 'true',\n     'method.response.header': 'Invalid Value',\n     'Invalid-patternlug': 'true'}",
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "ResponseModels": {
+          "application/json": 1234,
+          "application/xml": 1
+        },
+        "ResponseParameters": {
+          "method.response.header.Access-Control-Allow-Origin": "true",
+          "method.response.header.": "true",
+          "method.response.header. Invalid-patternлуг": "true",
+          "method.response.header": "Invalid Value",
+          "Invalid-patternlug": "true"
+        },
+        "RestApiId": "1234567890",
+        "StatusCode": "200"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123abc-\" does not match \"^[a-z0-9]+$\"",
+      "python_error": "'123abc-' does not match '^[a-z0-9]+$'\n\nFailed validating 'pattern' in schema['properties']['ResourceId']:\n    {'pattern': '^[a-z0-9]+$', 'type': 'string'}\n\nOn instance['ResourceId']:\n    '123abc-'",
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "123abc-",
+        "ResponseModels": {
+          "application/json": "Model"
+        },
+        "ResponseParameters": {
+          "method.response.header.Access-Control-Allow-Origin": "true"
+        },
+        "RestApiId": "1234567890",
+        "StatusCode": "200"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"Invalid\" is not one of [\"true\",\"false\"]",
+      "python_error": "'Invalid' is not one of ['true', 'false']\n\nFailed validating 'enum' in schema['properties']['ResponseParameters']['patternProperties']['^method\\\\.response\\\\.header\\\\..+$']:\n    {'enum': ['true', 'false'], 'type': 'string'}\n\nOn instance['ResponseParameters']['method.response.header.Access-Control-Allow-Origin']:\n    'Invalid'",
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "ResponseModels": {
+          "application/json": "Model"
+        },
+        "ResponseParameters": {
+          "method.response.header.Access-Control-Allow-Origin": "Invalid"
+        },
+        "RestApiId": "1234567890",
+        "StatusCode": "200"
+      }
+    }
+  ]
+}

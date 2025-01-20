@@ -1,0 +1,1440 @@
+{
+  "description": "sample JsonSchemaStore/vs-nesting.json",
+  "meta": {
+    "full_size": 4947,
+    "stripped_size": 2365,
+    "features": [
+      "$ref",
+      "@minmaxProperties",
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties",
+      "uniqueItems"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "id",
+      "maxProperties",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "fileExtension": {
+        "pattern": "^\\.[^/\\\\]+$"
+      },
+      "fileName": {
+        "pattern": "^[^/\\\\|:><\"?\\*]+$"
+      },
+      "ext-ext": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^(\\.[^/\\\\]+|\\*)$": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/definitions/fileExtension"
+            }
+          }
+        }
+      },
+      "file-file": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^[^/\\\\|:><\"?\\*]+$": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/definitions/fileName"
+            }
+          }
+        }
+      },
+      "file-ext": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^([^/\\\\|:><\"?\\*]+|\\*)$": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/definitions/fileExtension"
+            }
+          }
+        }
+      },
+      "providers": {
+        "type": "object",
+        "properties": {
+          "addedExtension": {
+            "description": "If this exist, files with an additional extension should nest under file without additional extension. Example: file.html.css nest under file.html",
+            "type": "object",
+            "maxProperties": 0
+          },
+          "pathSegment": {
+            "description": "If this exists, files with \"extra\" extension part in the file name should nest under files without it, but having same name and last extension. Example: file.min.js nest under file.js.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "add": {
+                "description": "Add nesting rules in the order to be applied by corresponding provider, where each rule entry has a form 'child: collection of potential parents'.",
+                "properties": {
+                  ".*": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "$ref": "#/definitions/fileExtension"
+                    }
+                  }
+                }
+              },
+              "remove": {
+                "description": "Remove specified nesting rules if they are merged from higher level nesting settings.",
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "$ref": "#/definitions/fileExtension"
+                      }
+                    }
+                  },
+                  {
+                    "enum": [
+                      "*"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "extensionToExtension": {
+            "description": "Nest files with specific extensions under other specific extensions",
+            "additionalProperties": false,
+            "properties": {
+              "add": {
+                "description": "Add nesting rules in the order to be applied by corresponding provider, where each rule entry has a form 'child: collection of potential parents'.",
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/ext-ext"
+                  }
+                ]
+              },
+              "remove": {
+                "description": "Remove specified nesting rules if they are merged from higher level nesting settings.",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/ext-ext"
+                  },
+                  {
+                    "enum": [
+                      "*"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "fileToFile": {
+            "description": "Nest specific file names under other specific file names",
+            "additionalProperties": false,
+            "properties": {
+              "add": {
+                "description": "Add nesting rules in the order to be applied by corresponding provider, where each rule entry has a form 'child: collection of potential parents'.",
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/file-file"
+                  }
+                ]
+              },
+              "remove": {
+                "description": "Remove specified nesting rules if they are merged from higher level nesting settings.",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/file-file"
+                  },
+                  {
+                    "enum": [
+                      "*"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "fileSuffixToExtension": {
+            "description": "Nest files with specified suffixes under files with specified extensions.",
+            "additionalProperties": false,
+            "properties": {
+              "add": {
+                "description": "Add nesting rules in the order to be applied by corresponding provider, where each rule entry has a form 'child: collection of potential parents'.",
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/file-ext"
+                  }
+                ]
+              },
+              "remove": {
+                "description": "Remove specified nesting rules if they are merged from higher level nesting settings.",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/file-ext"
+                  },
+                  {
+                    "enum": [
+                      "*"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "allExtensions": {
+            "description": "A greedy version of 'extensionToExtension' and has * as the only child key",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "add": {
+                "description": "Add nesting rules in the order to be applied by corresponding provider, where each rule entry has a form 'child: collection of potential parents'.",
+                "properties": {
+                  ".*": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "$ref": "#/definitions/fileExtension"
+                    }
+                  }
+                }
+              },
+              "remove": {
+                "description": "Remove specified nesting rules if they are merged from higher level nesting settings.",
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      ".*": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/fileExtension"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "*"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/vs-nesting.json",
+    "properties": {
+      "root": {
+        "description": "Determines if this is the root nesting config file and no further inheritance is required.",
+        "type": "boolean",
+        "default": false
+      },
+      "dependentFileProviders": {
+        "description": "Contains a collection of nesting rule providers specified in the order to be applied.",
+        "type": "object",
+        "properties": {
+          "add": {
+            "description": "Add nesting rules in the order to be applied by corresponding provider, where each rule entry has a form 'child: collection of potential parents'.",
+            "allOf": [
+              {
+                "$ref": "#/definitions/providers"
+              }
+            ]
+          },
+          "remove": {
+            "description": "Remove specified nesting rules if they are merged from higher level nesting settings.",
+            "oneOf": [
+              {
+                "$ref": "#/definitions/providers"
+              },
+              {
+                "enum": [
+                  "*"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "title": "JSON schema for Visual Studio's file nesting feature",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js",
+                  ".min.css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.js",
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts",
+                  ".tsx"
+                ],
+                ".css": [
+                  ".scss",
+                  ".sass"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".ts",
+                  ".tsx"
+                ],
+                ".css": [
+                  ".scss",
+                  ".sass"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "index.html",
+                  "index.js",
+                  "index.css"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "index.html",
+                  "index.js",
+                  "index.css"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min.js": [
+                  ".js"
+                ],
+                "min.css": [
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min.js": [
+                  ".js"
+                ],
+                "min.css": [
+                  ".css"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css",
+                  ".html"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".js",
+                  ".css",
+                  ".html"
+                ]
+              }
+            }
+          },
+          "remove": "*"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          },
+          "remove": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('/invalid' was unexpected)",
+      "python_error": "'/invalid' does not match any of the regexes: '^(\\\\.[^/\\\\\\\\]+|\\\\*)$'\n\nFailed validating 'additionalProperties' in schema['properties']['dependentFileProviders']['properties']['add']['allOf'][0]['properties']['extensionToExtension']['properties']['add']['allOf'][0]:\n    {'type': 'object',\n     'additionalProperties': False,\n     'patternProperties': {'^(\\\\.[^/\\\\\\\\]+|\\\\*)$': {'type': 'array',\n                                                    'uniqueItems': True,\n                                                    'items': {'$ref': '#/definitions/fileExtension'}}}}\n\nOn instance['dependentFileProviders']['add']['extensionToExtension']['add']:\n    {'.js': ['.ts'], '.css': ['.scss'], '/invalid': ['.scss']}",
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ],
+                "/invalid": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          },
+          "remove": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('invalidKey' was unexpected)",
+      "python_error": "'invalidKey' does not match any of the regexes: '^(\\\\.[^/\\\\\\\\]+|\\\\*)$'\n\nFailed validating 'additionalProperties' in schema[0]['properties']['extensionToExtension']['properties']['add']['allOf'][0]:\n    {'type': 'object',\n     'additionalProperties': False,\n     'patternProperties': {'^(\\\\.[^/\\\\\\\\]+|\\\\*)$': {'type': 'array',\n                                                    'uniqueItems': True,\n                                                    'items': {'$ref': '#/definitions/fileExtension'}}}}\n\nOn instance['extensionToExtension']['add']:\n    {'.js': ['.ts'], 'invalidKey': ['.scss'], '.css': ['.scss']}",
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                "invalidKey": [
+                  ".scss"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          },
+          "remove": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                "invalidKey": [
+                  ".scss"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxProperties keyword",
+      "valid": false,
+      "rust_error": "{\"extraProperty\":true} has more than 0 properties",
+      "python_error": "{'extraProperty': True} is expected to be empty\n\nFailed validating 'maxProperties' in schema['properties']['dependentFileProviders']['properties']['add']['allOf'][0]['properties']['addedExtension']:\n    {'description': 'If this exist, files with an additional extension '\n                    'should nest under file without additional extension. '\n                    'Example: file.html.css nest under file.html',\n     'type': 'object',\n     'maxProperties': 0}\n\nOn instance['dependentFileProviders']['add']['addedExtension']:\n    {'extraProperty': True}",
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {
+              "extraProperty": true
+            },
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          },
+          "remove": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['dependentFileProviders']['properties']['add']['allOf'][0]['properties']['pathSegment']:\n    {'description': 'If this exists, files with \"extra\" extension part in '\n                    'the file name should nest under files without it, but '\n                    'having same name and last extension. Example: '\n                    'file.min.js nest under file.js.',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'add': {'description': 'Add nesting rules in the order '\n                                           'to be applied by corresponding '\n                                           'provider, where each rule '\n                                           \"entry has a form 'child: \"\n                                           'collection of potential '\n                                           \"parents'.\",\n                            'properties.. (1063 more)",
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              },
+              "extraProperty": "extraValue"
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          },
+          "remove": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on uniqueItems keyword",
+      "valid": false,
+      "rust_error": "[\".min.js\",\".min.js\"] has non-unique elements",
+      "python_error": "['.min.js', '.min.js'] has non-unique elements\n\nFailed validating 'uniqueItems' in schema['properties']['dependentFileProviders']['properties']['add']['allOf'][0]['properties']['pathSegment']['properties']['add']['properties']['.*']:\n    {'type': 'array',\n     'uniqueItems': True,\n     'items': {'$ref': '#/definitions/fileExtension'}}\n\nOn instance['dependentFileProviders']['add']['pathSegment']['add']['.*']:\n    ['.min.js', '.min.js']",
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js",
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          },
+          "remove": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"app/app\" does not match \"^[^/\\\\|:><\"?\\*]+$\"",
+      "python_error": "'app/app' does not match '^[^/\\\\\\\\|:><\"?\\\\*]+$'\n\nFailed validating 'pattern' in schema['properties']['dependentFileProviders']['properties']['add']['allOf'][0]['properties']['fileToFile']['properties']['add']['allOf'][0]['patternProperties']['^[^/\\\\\\\\|:><\"?\\\\*]+$']['items']:\n    {'pattern': '^[^/\\\\\\\\|:><\"?\\\\*]+$'}\n\nOn instance['dependentFileProviders']['add']['fileToFile']['add']['index'][0]:\n    'app/app'",
+      "data": {
+        "$schema": "https://json.schemastore.org/vs-nesting.json",
+        "root": true,
+        "dependentFileProviders": {
+          "add": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js.js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app/app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          },
+          "remove": {
+            "addedExtension": {},
+            "pathSegment": {
+              "add": {
+                ".*": [
+                  ".min.js"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".min.css"
+                ]
+              }
+            },
+            "extensionToExtension": {
+              "add": {
+                ".js": [
+                  ".ts"
+                ],
+                ".css": [
+                  ".scss"
+                ]
+              },
+              "remove": {
+                ".js": [
+                  ".jsx"
+                ]
+              }
+            },
+            "fileToFile": {
+              "add": {
+                "index": [
+                  "app"
+                ]
+              },
+              "remove": {
+                "index": [
+                  "app.min"
+                ]
+              }
+            },
+            "fileSuffixToExtension": {
+              "add": {
+                "min": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                "min": [
+                  ".scss"
+                ]
+              }
+            },
+            "allExtensions": {
+              "add": {
+                ".*": [
+                  ".js",
+                  ".css"
+                ]
+              },
+              "remove": {
+                ".*": [
+                  ".scss"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

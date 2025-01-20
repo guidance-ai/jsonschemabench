@@ -1,0 +1,245 @@
+{
+  "description": "sample Github_trivial/o9840.json",
+  "meta": {
+    "full_size": 1225,
+    "stripped_size": 1004,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "items",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "oneOf": [
+      {
+        "title": "Device State",
+        "description": "Schema for a single Device state",
+        "type": "object",
+        "properties": {
+          "time": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "$date": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "$date"
+                ]
+              }
+            ]
+          },
+          "meta": {},
+          "data": {
+            "type": "object",
+            "patternProperties": {
+              "^[0-9a-zA-Z_-]{1,255}$": {
+                "type": [
+                  "number",
+                  "string",
+                  "boolean"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "flowVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "title": "Device States",
+        "description": "Schema for an array of Device states",
+        "type": "array",
+        "items": {
+          "title": "Device State",
+          "description": "Schema for a single Device state",
+          "type": "object",
+          "properties": {
+            "time": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "$date": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "$date"
+                  ]
+                }
+              ]
+            },
+            "meta": {},
+            "data": {
+              "type": "object",
+              "patternProperties": {
+                "^[0-9a-zA-Z_-]{1,255}$": {
+                  "type": [
+                    "number",
+                    "string",
+                    "boolean"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "flowVersion": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "time": {
+          "$date": "2022-01-01T00:00:00.000Z"
+        },
+        "meta": {},
+        "data": {
+          "temperature": 25,
+          "humidity": 60,
+          "is_online": true
+        },
+        "flowVersion": "1.0.0"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "time": "2022-01-01T12:00:00.000Z",
+        "meta": {},
+        "data": {
+          "temperature": 25.5,
+          "humidity": "60%",
+          "is_online": true
+        },
+        "flowVersion": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"time\":\"2022-01-01T12:00:00.000Z\",\"meta\":{},\"data\":{\"temperature\":25.5,\"humidity\":\"60%\",\"is_online\":true,\"invalid-key!\":true},\"flowVersion\":\"1.0.0\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'invalid-key!' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema[0]['properties']['data']:\n    {'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': ['number',\n                                                               'string',\n                                                               'boolean']}},\n     'additionalProperties': False}\n\nOn instance['data']:\n    {'temperature': 25.5,\n     'humidity': '60%',\n     'is_online': True,\n     'invalid-key!': True}",
+      "data": {
+        "time": "2022-01-01T12:00:00.000Z",
+        "meta": {},
+        "data": {
+          "temperature": 25.5,
+          "humidity": "60%",
+          "is_online": true,
+          "invalid-key!": true
+        },
+        "flowVersion": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"time\":\"2022-01-01T12:00:00.000Z\",\"meta\":{},\"data\":{\"temperature\":null,\"humidity\":\"60%\",\"is_online\":true},\"flowVersion\":\"1.0.0\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not of type 'number', 'string', 'boolean'\n\nFailed validating 'type' in schema[0]['properties']['data']['patternProperties']['^[0-9a-zA-Z_-]{1,255}$']:\n    {'type': ['number', 'string', 'boolean']}\n\nOn instance['data']['temperature']:\n    None",
+      "data": {
+        "time": "2022-01-01T12:00:00.000Z",
+        "meta": {},
+        "data": {
+          "temperature": null,
+          "humidity": "60%",
+          "is_online": true
+        },
+        "flowVersion": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"time\":{\"type\":\"string\",\"$date\":\"2022-01-01T12:00:00.000Z\",\"extraProperty\":true},\"meta\":{},\"data\":{\"temperature\":25.5,\"humidity\":\"60%\",\"is_online\":true},\"flowVersion\":\"1.0.0\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extraProperty', 'type' were unexpected)\n\nFailed validating 'additionalProperties' in schema[2]:\n    {'type': 'object',\n     'properties': {'$date': {'type': 'string'}},\n     'additionalProperties': False,\n     'required': ['$date']}\n\nOn instance:\n    {'type': 'string',\n     '$date': '2022-01-01T12:00:00.000Z',\n     'extraProperty': True}",
+      "data": {
+        "time": {
+          "type": "string",
+          "$date": "2022-01-01T12:00:00.000Z",
+          "extraProperty": true
+        },
+        "meta": {},
+        "data": {
+          "temperature": 25.5,
+          "humidity": "60%",
+          "is_online": true
+        },
+        "flowVersion": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"time\":\"2022-01-01T12:00:00.000Z\",\"meta\":{},\"data\":{\"temperature\":25.5,\"humidity\":\"60%\",\"is_online\":true},\"flowVersion\":\"\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[0]['properties']['flowVersion']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['flowVersion']:\n    ''",
+      "data": {
+        "time": "2022-01-01T12:00:00.000Z",
+        "meta": {},
+        "data": {
+          "temperature": 25.5,
+          "humidity": "60%",
+          "is_online": true
+        },
+        "flowVersion": ""
+      }
+    }
+  ]
+}

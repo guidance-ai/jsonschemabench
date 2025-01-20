@@ -1,0 +1,239 @@
+{
+  "description": "sample Github_medium/o37614.json",
+  "meta": {
+    "full_size": 975,
+    "stripped_size": 955,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "anyOf",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://www.yacpdb.org/schemas/yacpdb-source.schema.json",
+    "type": "object",
+    "properties": {
+      "name": {
+        "$ref": "#/definitions/text"
+      },
+      "type": {
+        "$ref": "#/definitions/source_type_type"
+      },
+      "foreignids": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/foreignid_type"
+        },
+        "minItems": 1
+      },
+      "comments": {
+        "$ref": "#/definitions/text_list"
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+      "text": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "string",
+            "minLength": 1
+          }
+        ]
+      },
+      "text_list": {
+        "type": "array",
+        "elements": {
+          "$ref": "#/definitions/text"
+        },
+        "minItems": 1,
+        "_uniqueItems": true
+      },
+      "source_type_type": {
+        "type": "string",
+        "pattern": "^(magazine|newspaper|award booklet|book|anthology|article|lecture|solving event|website|booklet)$",
+        "maxLength": 255
+      },
+      "foreignid_type": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "pattern": "^database\\.wfcc\\.ch$"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "domain",
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example Source",
+        "type": "book",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 1
+          }
+        ],
+        "comments": [
+          "This is an example comment.",
+          "This is another example comment."
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example Source",
+        "type": "book",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 1
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid type\" does not match \"^(magazine|newspaper|award booklet|book|anthology|article|lecture|solving event|website|booklet)$\"",
+      "python_error": "'invalid type' does not match '^(magazine|newspaper|award booklet|book|anthology|article|lecture|solving event|website|booklet)$'\n\nFailed validating 'pattern' in schema['properties']['type']:\n    {'type': 'string',\n     'pattern': '^(magazine|newspaper|award '\n                'booklet|book|anthology|article|lecture|solving '\n                'event|website|booklet)$',\n     'maxLength': 255}\n\nOn instance['type']:\n    'invalid type'",
+      "data": {
+        "name": "Example Source",
+        "type": "invalid type",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 1
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[1]:\n    {'type': 'string', 'minLength': 1}\n\nOn instance:\n    ''",
+      "data": {
+        "name": "",
+        "type": "book",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 1
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['foreignids']['items']['properties']['id']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['foreignids'][0]['id']:\n    0",
+      "data": {
+        "name": "Example Source",
+        "type": "book",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 0
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['foreignids']:\n    {'type': 'array',\n     'items': {'$ref': '#/definitions/foreignid_type'},\n     'minItems': 1}\n\nOn instance['foreignids']:\n    []",
+      "data": {
+        "name": "Example Source",
+        "type": "book",
+        "foreignids": [],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['name']:\n    {'anyOf': [{'type': 'number'}, {'type': 'string', 'minLength': 1}]}\n\nOn instance['name']:\n    True",
+      "data": {
+        "name": true,
+        "type": "book",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 1
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    }
+  ]
+}

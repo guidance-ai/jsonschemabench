@@ -1,0 +1,301 @@
+{
+  "description": "sample Github_hard/o84049.json",
+  "meta": {
+    "full_size": 3003,
+    "stripped_size": 816,
+    "features": [],
+    "raw_features": [
+      "properties",
+      "type",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "db": {
+        "properties": {
+          "name": {
+            "description": "Name of the custom database to be created during the 1st initialization of MariaDB",
+            "form": true,
+            "title": "MariaDB custom database",
+            "type": "string"
+          },
+          "password": {
+            "description": "Defaults to a random 10-character alphanumeric string if not set",
+            "form": true,
+            "hidden": {
+              "condition": false,
+              "value": "usePassword"
+            },
+            "title": "Password for MariaDB custom user",
+            "type": "string"
+          },
+          "user": {
+            "description": "Name of the custom user to be created during the 1st initialization of MariaDB. This user only has permissions on the MariaDB custom database",
+            "form": true,
+            "title": "MariaDB custom user",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "master": {
+        "form": true,
+        "properties": {
+          "persistence": {
+            "form": true,
+            "properties": {
+              "enabled": {
+                "description": "Enable persistence using Persistent Volume Claims",
+                "form": true,
+                "title": "Enable persistence",
+                "type": "boolean"
+              },
+              "size": {
+                "form": true,
+                "hidden": {
+                  "condition": false,
+                  "value": "persistence.enabled"
+                },
+                "render": "slider",
+                "sliderMax": 100,
+                "sliderMin": 1,
+                "sliderUnit": "Gi",
+                "title": "Persistent Volume Size",
+                "type": "string"
+              }
+            },
+            "title": "Persistence for master replicas",
+            "type": "object"
+          }
+        },
+        "title": "Master replicas settings",
+        "type": "object"
+      },
+      "metrics": {
+        "form": true,
+        "properties": {
+          "enabled": {
+            "description": "Create a side-car container to expose Prometheus metrics",
+            "form": true,
+            "title": "Create Prometheus metrics exporter",
+            "type": "boolean"
+          },
+          "serviceMonitor": {
+            "properties": {
+              "enabled": {
+                "description": "Create a ServiceMonitor to track metrics using Prometheus Operator",
+                "form": true,
+                "hidden": {
+                  "condition": false,
+                  "value": "metrics.enabled"
+                },
+                "title": "Create Prometheus Operator ServiceMonitor",
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": "Prometheus metrics details",
+        "type": "object"
+      },
+      "replication": {
+        "form": true,
+        "properties": {
+          "enabled": {
+            "form": true,
+            "title": "Enable replication configuration",
+            "type": "boolean"
+          }
+        },
+        "title": "Replication configuration",
+        "type": "object"
+      },
+      "rootUser": {
+        "properties": {
+          "password": {
+            "description": "Defaults to a random 10-character alphanumeric string if not set",
+            "form": true,
+            "hidden": {
+              "condition": false,
+              "value": "usePassword"
+            },
+            "title": "MariaDB admin password",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "slave": {
+        "form": true,
+        "hidden": {
+          "condition": false,
+          "value": "replication.enabled"
+        },
+        "properties": {
+          "persistence": {
+            "form": true,
+            "properties": {
+              "enabled": {
+                "description": "Enable persistence using Persistent Volume Claims",
+                "form": true,
+                "title": "Enable persistence",
+                "type": "boolean"
+              },
+              "size": {
+                "form": true,
+                "hidden": {
+                  "condition": false,
+                  "value": "persistence.enabled"
+                },
+                "render": "slider",
+                "sliderMax": 100,
+                "sliderMin": 1,
+                "sliderUnit": "Gi",
+                "title": "Persistent Volume Size",
+                "type": "string"
+              }
+            },
+            "title": "Persistence for slave replicas",
+            "type": "object"
+          }
+        },
+        "title": "Slave replicas settings",
+        "type": "object"
+      },
+      "volumePermissions": {
+        "properties": {
+          "enabled": {
+            "description": "Use an init container to set required folder permissions on the data volume before mounting it in the final destination",
+            "form": true,
+            "title": "Enable Init Containers",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "db": {
+          "name": "my_database",
+          "password": "my_password",
+          "user": "my_user"
+        },
+        "master": {
+          "persistence": {
+            "enabled": true,
+            "size": "10Gi"
+          }
+        },
+        "metrics": {
+          "enabled": true,
+          "serviceMonitor": {
+            "enabled": true
+          }
+        },
+        "replication": {
+          "enabled": true
+        },
+        "rootUser": {
+          "password": "my_root_password"
+        },
+        "slave": {
+          "persistence": {
+            "enabled": true,
+            "size": "10Gi"
+          }
+        },
+        "volumePermissions": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['db']['properties']['name']:\n    {'description': 'Name of the custom database to be created during the '\n                    '1st initialization of MariaDB',\n     'form': True,\n     'title': 'MariaDB custom database',\n     'type': 'string'}\n\nOn instance['db']['name']:\n    123",
+      "data": {
+        "db": {
+          "name": 123,
+          "password": "my_password",
+          "user": "my_user"
+        },
+        "master": {
+          "persistence": {
+            "enabled": true,
+            "size": "10Gi"
+          }
+        },
+        "metrics": {
+          "enabled": true,
+          "serviceMonitor": {
+            "enabled": true
+          }
+        },
+        "replication": {
+          "enabled": true
+        },
+        "rootUser": {
+          "password": "my_root_password"
+        },
+        "slave": {
+          "persistence": {
+            "enabled": true,
+            "size": "10Gi"
+          }
+        },
+        "volumePermissions": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "db": {
+          "name": "mydatabase",
+          "password": "mysecretpassword",
+          "user": "myuser"
+        },
+        "master": {
+          "persistence": {
+            "enabled": true,
+            "size": "10Gi"
+          }
+        },
+        "metrics": {
+          "enabled": true,
+          "serviceMonitor": {
+            "enabled": true
+          }
+        },
+        "replication": {
+          "enabled": true
+        },
+        "rootUser": {
+          "password": "myrootpassword"
+        },
+        "slave": {
+          "persistence": {
+            "enabled": true,
+            "size": "20Gi"
+          }
+        },
+        "volumePermissions": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}

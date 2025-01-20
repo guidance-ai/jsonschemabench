@@ -1,0 +1,196 @@
+{
+  "description": "sample Github_easy/o9924.json",
+  "meta": {
+    "full_size": 415,
+    "stripped_size": 415,
+    "features": [
+      "additionalProperties",
+      "format",
+      "format:date-time",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "patternProperties": {
+      "^[A-Fa-f\\d]{24}$": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "data": {
+            "type": "object",
+            "patternProperties": {
+              "^[0-9a-zA-Z_-]{1,255}$": {
+                "type": [
+                  "number",
+                  "string",
+                  "boolean"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "data",
+          "time"
+        ]
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "1234567890abcdef12345678": {
+          "time": "2022-01-01T12:00:00Z",
+          "data": {
+            "temperature": 25.5,
+            "humidity": true,
+            "pressure": "1013.25 mbar"
+          }
+        },
+        "fedcba9876543210fedcba98": {
+          "time": "2022-01-02T13:00:00Z",
+          "data": {
+            "temperature": 26.2,
+            "humidity": false,
+            "pressure": 1014.5
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('1234567890abcdef123456789' was unexpected)",
+      "python_error": "'1234567890abcdef123456789' does not match any of the regexes: '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'patternProperties': {'^[A-Fa-f\\\\d]{24}$': {'type': 'object',\n                                                 'properties': {'time': {'type': 'string',\n                                                                         'format': 'date-time'},\n                                                                'data': {'type': 'object',\n                                                                         'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': ['number',\n                                                                                                                                   'string',\n                                                                                                                                   'boolean']}},\n                                 .. (870 more)",
+      "data": {
+        "1234567890abcdef123456789": {
+          "time": "2022-01-01T12:00:00Z",
+          "data": {
+            "temperature": 25.5,
+            "humidity": true,
+            "pressure": "1013.25 mbar"
+          }
+        },
+        "fedcba9876543210fedcba98": {
+          "time": "2022-01-02T13:00:00Z",
+          "data": {
+            "temperature": 26.2,
+            "humidity": false,
+            "pressure": 1014.5
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of types \"boolean\", \"number\", \"string\"",
+      "python_error": "None is not of type 'number', 'string', 'boolean'\n\nFailed validating 'type' in schema['patternProperties']['^[A-Fa-f\\\\d]{24}$']['properties']['data']['patternProperties']['^[0-9a-zA-Z_-]{1,255}$']:\n    {'type': ['number', 'string', 'boolean']}\n\nOn instance['1234567890abcdef12345678']['data']['pressure']:\n    None",
+      "data": {
+        "1234567890abcdef12345678": {
+          "time": "2022-01-01T12:00:00Z",
+          "data": {
+            "temperature": 25.5,
+            "humidity": true,
+            "pressure": null
+          }
+        },
+        "fedcba9876543210fedcba98": {
+          "time": "2022-01-02T13:00:00Z",
+          "data": {
+            "temperature": 26.2,
+            "humidity": false,
+            "pressure": 1014.5
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-01-01T12:00:00\" is not a \"date-time\"",
+      "python_error": "'humidity', 'pressure', 'temperature' do not match any of the regexes: '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'patternProperties': {'^[A-Fa-f\\\\d]{24}$': {'type': 'object',\n                                                 'properties': {'time': {'type': 'string',\n                                                                         'format': 'date-time'},\n                                                                'data': {'type': 'object',\n                                                                         'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': ['number',\n                                                                                                                                   'string',\n                                                                                                                                   'boolean']}},\n                         .. (669 more)",
+      "data": {
+        "1234567890abcdef12345678": {
+          "time": "2022-01-01T12:00:00",
+          "Invalid because of missing timezone": "data: { "
+        },
+        "temperature": "humidity",
+        "humidity": false,
+        "pressure": "1013.25 mbar"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('temperature.123.abc.123-abc' was unexpected)",
+      "python_error": "'fedcba9876543210fedcba981', 'fedcba9876543210fedcba989-1', 'fedcba9876543210fedcba98abc' do not match any of the regexes: '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'patternProperties': {'^[A-Fa-f\\\\d]{24}$': {'type': 'object',\n                                                 'properties': {'time': {'type': 'string',\n                                                                         'format': 'date-time'},\n                                                                'data': {'type': 'object',\n                                                                         'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': ['number',\n                                                                                                                                   'string',\n                                                                                                                      .. (1875 more)",
+      "data": {
+        "1234567890abcdef12345678": {
+          "time": "2022-01-01T12:00:00Z",
+          "data": {
+            "temperature": 25.5,
+            "humidity": true,
+            "pressure": "1013.25 mbar",
+            "temperature-2": "25.5"
+          }
+        },
+        "fedcba9876543210fedcba98": {
+          "time": "2022-01-02T13:00:00Z",
+          "data": {
+            "temperature": 26.2,
+            "humidity": false,
+            "pressure": 1014.5,
+            "temperature.123.abc.123-abc": "26.2"
+          }
+        },
+        "fedcba9876543210fedcba981": {
+          "time": "2022-01-02T13:00:00Z",
+          "data": {
+            "temperature": 26.2,
+            "humidity": false,
+            "pressure": 1014.5
+          }
+        },
+        "fedcba9876543210fedcba98abc": {
+          "time": "2022-01-02T13:00:00Z",
+          "data": {
+            "temperature": 26.2,
+            "humidity": false,
+            "pressure": 1014.5
+          }
+        },
+        "fedcba9876543210fedcba989-1": {
+          "time": "2022-01-02T13:00:00Z",
+          "data": {
+            "temperature": 26.2,
+            "humidity": false,
+            "pressure": 1014.5
+          }
+        }
+      }
+    }
+  ]
+}

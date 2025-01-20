@@ -1,0 +1,297 @@
+{
+  "description": "sample Github_medium/o55254.json",
+  "meta": {
+    "full_size": 2051,
+    "stripped_size": 671,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "enum",
+      "format",
+      "format:hostname"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "maximum",
+      "minimum",
+      "properties",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Test schema.",
+    "type": "object",
+    "definitions": {
+      "port": {
+        "description": "schema for a server port",
+        "type": "integer",
+        "minimum": 1024,
+        "maximum": 65536,
+        "messages": {
+          "type": "invalid type. Must be an integer.",
+          "minimum": "invalid value. Must be an integer greater than or equal to 1024.",
+          "maximum": "invalid value. Must be an integer less than or equal to 65536."
+        }
+      },
+      "address": {
+        "description": "schema for a server host address",
+        "type": "string",
+        "format": "hostname",
+        "messages": {
+          "type": "invalid type. Must be a string.",
+          "format": "invalid format. Must be a valid hostname."
+        }
+      },
+      "loglevel": {
+        "description": "schema for a log level",
+        "type": "string",
+        "enum": [
+          "fatal",
+          "error",
+          "warn",
+          "info",
+          "debug",
+          "trace"
+        ],
+        "messages": {
+          "type": "invalid type. Must be a string.",
+          "enum": "invalid value. Must be one of the following: ['fatal','error','warn','info','debug','trace']."
+        }
+      },
+      "env": {
+        "description": "schema for an environment name",
+        "type": "string",
+        "enum": [
+          "local",
+          "test",
+          "dev",
+          "production"
+        ],
+        "messages": {
+          "type": "invalid type. Must be a string.",
+          "enum": "invalid value. Must be one of the following: ['local','test','dev','production']."
+        }
+      }
+    },
+    "properties": {
+      "server": {
+        "description": "schema for server configuration",
+        "type": "object",
+        "properties": {
+          "port": {
+            "$ref": "#/definitions/port"
+          },
+          "address": {
+            "$ref": "#/definitions/address"
+          },
+          "ssl": {
+            "description": "schema for SSL flag",
+            "type": "boolean",
+            "messages": {
+              "type": "invalid type. Must be a boolean."
+            }
+          },
+          "key": {
+            "description": "schema for private key",
+            "type": "string",
+            "messages": {
+              "type": "invalid type. Must be a string."
+            }
+          },
+          "cert": {
+            "description": "schema for public certificate",
+            "type": "string",
+            "messages": {
+              "type": "invalid type. Must be a string."
+            }
+          }
+        },
+        "messages": {
+          "type": "invalid type. Must be an object."
+        }
+      },
+      "logger": {
+        "description": "schema for logger configuration",
+        "type": "object",
+        "properties": {
+          "level": {
+            "$ref": "#/definitions/loglevel"
+          }
+        },
+        "messages": {
+          "type": "invalid type. Must be an object."
+        }
+      },
+      "env": {
+        "$ref": "#/definitions/env"
+      }
+    },
+    "messages": {
+      "type": "invalid data type where an object is expected"
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "server": {
+          "port": 8080,
+          "address": "example.com",
+          "ssl": true,
+          "key": "path/to/private/key",
+          "cert": "path/to/public/cert"
+        },
+        "logger": {
+          "level": "info"
+        },
+        "env": "production"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"example.com:8080\" is not a \"hostname\"",
+      "python_error": "'example.com:8080' is not a 'hostname'\n\nFailed validating 'format' in schema['properties']['server']['properties']['address']:\n    {'description': 'schema for a server host address',\n     'type': 'string',\n     'format': 'hostname',\n     'messages': {'type': 'invalid type. Must be a string.',\n                  'format': 'invalid format. Must be a valid hostname.'}}\n\nOn instance['server']['address']:\n    'example.com:8080'",
+      "data": {
+        "server": {
+          "port": 8080,
+          "address": "example.com:8080",
+          "ssl": true,
+          "key": "path/to/private/key",
+          "cert": "path/to/public/cert"
+        },
+        "logger": {
+          "level": "info"
+        },
+        "env": "production"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "1023 is less than the minimum of 1024",
+      "python_error": "1023 is less than the minimum of 1024\n\nFailed validating 'minimum' in schema['properties']['server']['properties']['port']:\n    {'description': 'schema for a server port',\n     'type': 'integer',\n     'minimum': 1024,\n     'maximum': 65536,\n     'messages': {'type': 'invalid type. Must be an integer.',\n                  'minimum': 'invalid value. Must be an integer greater '\n                             'than or equal to 1024.',\n                  'maximum': 'invalid value. Must be an integer less than '\n                             'or equal to 65536.'}}\n\nOn instance['server']['port']:\n    1023",
+      "data": {
+        "server": {
+          "port": 1023,
+          "address": "example.com",
+          "ssl": true,
+          "key": "path/to/private/key",
+          "cert": "path/to/public/cert"
+        },
+        "logger": {
+          "level": "info"
+        },
+        "env": "production"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"verbose\" is not one of [\"fatal\",\"error\",\"warn\",\"info\",\"debug\",\"trace\"]",
+      "python_error": "'verbose' is not one of ['fatal', 'error', 'warn', 'info', 'debug', 'trace']\n\nFailed validating 'enum' in schema['properties']['logger']['properties']['level']:\n    {'description': 'schema for a log level',\n     'type': 'string',\n     'enum': ['fatal', 'error', 'warn', 'info', 'debug', 'trace'],\n     'messages': {'type': 'invalid type. Must be a string.',\n                  'enum': 'invalid value. Must be one of the following: '\n                          \"['fatal','error','warn','info','debug','trace'].\"}}\n\nOn instance['logger']['level']:\n    'verbose'",
+      "data": {
+        "server": {
+          "port": 8080,
+          "address": "example.com",
+          "ssl": true,
+          "key": "path/to/private/key",
+          "cert": "path/to/public/cert"
+        },
+        "logger": {
+          "level": "verbose"
+        },
+        "env": "production"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "server": {
+          "port": 8080,
+          "address": "localhost",
+          "ssl": true,
+          "key": "/path/to/private/key",
+          "cert": "/path/to/public/cert"
+        },
+        "logger": {
+          "level": "info"
+        },
+        "env": "dev"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"localhost:8080\" is not a \"hostname\"",
+      "python_error": "'localhost:8080' is not a 'hostname'\n\nFailed validating 'format' in schema['properties']['server']['properties']['address']:\n    {'description': 'schema for a server host address',\n     'type': 'string',\n     'format': 'hostname',\n     'messages': {'type': 'invalid type. Must be a string.',\n                  'format': 'invalid format. Must be a valid hostname.'}}\n\nOn instance['server']['address']:\n    'localhost:8080'",
+      "data": {
+        "server": {
+          "port": 8080,
+          "address": "localhost:8080",
+          "ssl": true,
+          "key": "/path/to/private/key",
+          "cert": "/path/to/public/cert"
+        },
+        "logger": {
+          "level": "info"
+        },
+        "env": "dev"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "1023 is less than the minimum of 1024",
+      "python_error": "1023 is less than the minimum of 1024\n\nFailed validating 'minimum' in schema['properties']['server']['properties']['port']:\n    {'description': 'schema for a server port',\n     'type': 'integer',\n     'minimum': 1024,\n     'maximum': 65536,\n     'messages': {'type': 'invalid type. Must be an integer.',\n                  'minimum': 'invalid value. Must be an integer greater '\n                             'than or equal to 1024.',\n                  'maximum': 'invalid value. Must be an integer less than '\n                             'or equal to 65536.'}}\n\nOn instance['server']['port']:\n    1023",
+      "data": {
+        "server": {
+          "port": 1023,
+          "address": "localhost",
+          "ssl": true,
+          "key": "/path/to/private/key",
+          "cert": "/path/to/public/cert"
+        },
+        "logger": {
+          "level": "info"
+        },
+        "env": "dev"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1023 is less than the minimum of 1024",
+      "python_error": "1023 is less than the minimum of 1024\n\nFailed validating 'minimum' in schema['properties']['server']['properties']['port']:\n    {'description': 'schema for a server port',\n     'type': 'integer',\n     'minimum': 1024,\n     'maximum': 65536,\n     'messages': {'type': 'invalid type. Must be an integer.',\n                  'minimum': 'invalid value. Must be an integer greater '\n                             'than or equal to 1024.',\n                  'maximum': 'invalid value. Must be an integer less than '\n                             'or equal to 65536.'}}\n\nOn instance['server']['port']:\n    1023",
+      "data": {
+        "server": {
+          "port": 1023,
+          "address": "localhost",
+          "ssl": true,
+          "key": "/path/to/private/key",
+          "cert": "/path/to/public/cert"
+        },
+        "logger": {
+          "level": "info"
+        },
+        "env": "dev",
+        "extra": "extra",
+        "server2": {
+          "port": 8080,
+          "address": "localhost",
+          "ssl": true,
+          "key": "/path/to/private/key",
+          "cert": "/path/to/public/cert"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,559 @@
+{
+  "description": "sample JsonSchemaStore/catalogue-entry-schema.json",
+  "meta": {
+    "full_size": 4588,
+    "stripped_size": 2438,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "const",
+      "enum",
+      "if",
+      "items",
+      "pattern",
+      "then"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://dwp.gov.uk/exchange/publishing-tools/apigw/catalogue-entry-schema.json",
+    "title": "Catalogue entry",
+    "type": "object",
+    "required": [
+      "description",
+      "primaryContact",
+      "filters",
+      "searchTags"
+    ],
+    "properties": {
+      "description": {
+        "type": "string",
+        "minLength": 10,
+        "maxLength": 200
+      },
+      "primaryContact": {
+        "type": "object",
+        "title": "Primary contact",
+        "description": "Contact details for the owner of the asset, i.e. the Product Owner.These details will be used when customers make enquiries or request access to the asset through the portal.",
+        "required": [
+          "emailAddress"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 35
+          },
+          "emailAddress": {
+            "type": "string",
+            "description": "must end with `gov.uk`",
+            "pattern": "^.*@.*gov\\.uk$"
+          },
+          "role": {
+            "type": "string",
+            "minLength": 2
+          }
+        },
+        "additionalProperties": false,
+        "examples": [
+          {
+            "name": "Jo Doe",
+            "emailAddress": "jo.doe@dwp.gov.uk",
+            "role": "PO"
+          }
+        ]
+      },
+      "technical_documentation": {
+        "type": "object",
+        "title": "Technical documentation",
+        "description": "Allows you to provide paths to technical documentation to be published to the portal.",
+        "required": [
+          "oas_path"
+        ],
+        "properties": {
+          "oas_path": {
+            "type": "string",
+            "description": "Path to the technical documentation, relative to the current working directory.",
+            "pattern": "((?:[^/]*/)*)(?=\\.(yaml|yml|json))"
+          }
+        },
+        "additionalProperties": false,
+        "examples": [
+          {
+            "oas_path": "../oas/pet-store.yaml"
+          }
+        ]
+      },
+      "filters": {
+        "title": "Filters",
+        "type": "object",
+        "description": "A list of filtering options to improve searchability on the portal. Please check the README file to check the valid combinations of `lifecycle`, `profile`, and `access`.",
+        "required": [
+          "asset_type",
+          "owner",
+          "categories",
+          "visibility",
+          "lifecycle",
+          "profile",
+          "access"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/properties/filters/definitions/active-lifecycle"
+          },
+          {
+            "$ref": "#/properties/filters/definitions/deprecated-lifecycle"
+          }
+        ],
+        "definitions": {
+          "active-lifecycle": {
+            "if": {
+              "properties": {
+                "lifecycle": {
+                  "enum": [
+                    "In Development",
+                    "Pre-Prod",
+                    "Prod"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "profile": {
+                  "enum": [
+                    "Strategic",
+                    "Transitional"
+                  ]
+                },
+                "access": {
+                  "enum": [
+                    "Open",
+                    "Closed"
+                  ]
+                }
+              }
+            }
+          },
+          "deprecated-lifecycle": {
+            "if": {
+              "properties": {
+                "lifecycle": {
+                  "enum": [
+                    "Deprecated",
+                    "Removed"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "profile": {
+                  "const": "Legacy"
+                },
+                "access": {
+                  "const": "Closed"
+                }
+              }
+            }
+          }
+        },
+        "properties": {
+          "asset_type": {
+            "type": "string",
+            "enum": [
+              "REST API",
+              "SOAP API",
+              "Event",
+              "Datasets"
+            ],
+            "examples": [
+              "REST API"
+            ]
+          },
+          "owner": {
+            "type": "string",
+            "enum": [
+              "AME Payments",
+              "Citizen Income",
+              "Citizen Information",
+              "Document Repository Services",
+              "Integration",
+              "Legacy Bridge",
+              "Notifications Platform",
+              "Personal Independence Payment",
+              "Reference Data Service",
+              "Retirement, Bereavement & Care",
+              "Common Capabilities",
+              "Other"
+            ],
+            "examples": [
+              "Integration"
+            ]
+          },
+          "categories": {
+            "title": "Categories",
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 3,
+            "items": {
+              "type": "string",
+              "enum": [
+                "Address",
+                "Awards",
+                "Citizen",
+                "Data",
+                "Document Services",
+                "Financial",
+                "GUID",
+                "SMS",
+                "Other"
+              ]
+            },
+            "examples": [
+              [
+                "Address"
+              ]
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "Internal",
+              "Public"
+            ],
+            "examples": [
+              "Internal"
+            ]
+          },
+          "lifecycle": {
+            "type": "string",
+            "enum": [
+              "In Development",
+              "Pre-Prod",
+              "Prod",
+              "Deprecated",
+              "Removed"
+            ],
+            "examples": [
+              "In Development"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "title": "The profile Schema",
+            "enum": [
+              "Strategic",
+              "Transitional",
+              "Legacy"
+            ],
+            "examples": [
+              "Strategic"
+            ]
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "Open",
+              "Closed"
+            ],
+            "examples": [
+              "Open"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "examples": [
+          {
+            "asset_type": "REST API",
+            "owner": "Integration",
+            "categories": [
+              "Address"
+            ],
+            "visibility": "Internal",
+            "lifecycle": "Prod",
+            "profile": "Transitional",
+            "access": "Open"
+          }
+        ]
+      },
+      "searchTags": {
+        "type": "string",
+        "description": "Tags to label the asset in order to increase discoverability. Minimum of 3 in CSV format.",
+        "pattern": "^([^,]+(,|$)){3,}$",
+        "examples": [
+          "tag1, tag2, tag3"
+        ]
+      },
+      "relatedAssets": {
+        "title": "Related assets",
+        "description": "A list of other assets that are related to the asset being published. Must match the Asset ID on the related asset's business documentation page on the portal at https://gitlab.com/dwp/integration/api-exchange/exchange-content/-/tree/main/output/dwp/portal/workspaces/primary/content/_catalogueEntries.",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "examples": [
+            "integration-alive-check-service-v1"
+          ]
+        }
+      }
+    },
+    "additionalProperties": false,
+    "examples": [
+      {
+        "description": "This is an example service",
+        "primaryContact": {
+          "emailAddress": "test@gov.uk"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/path-to-spec.yml"
+        },
+        "filters": {
+          "asset_type": "REST API",
+          "owner": "Integration",
+          "categories": [
+            "Address"
+          ],
+          "visibility": "Internal",
+          "lifecycle": "Pre-Prod",
+          "profile": "Transitional",
+          "access": "Closed"
+        },
+        "searchTags": "test1,test2,test3"
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "description": "This is an example service for demonstration purposes.",
+        "primaryContact": {
+          "name": "John Doe",
+          "emailAddress": "john.doe@dwp.gov.uk",
+          "role": "Product Owner"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/example-service.yaml"
+        },
+        "filters": {
+          "asset_type": "REST API",
+          "owner": "Integration",
+          "categories": [
+            "Address",
+            "Citizen"
+          ],
+          "visibility": "Internal",
+          "lifecycle": "Prod",
+          "profile": "Strategic",
+          "access": "Open"
+        },
+        "searchTags": "example-service,rest-api,integration"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "description": "This is an example service for the catalogue entry",
+        "primaryContact": {
+          "name": "John Doe",
+          "emailAddress": "john.doe@dwp.gov.uk",
+          "role": "Product Owner"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/path-to-spec.yaml"
+        },
+        "filters": {
+          "asset_type": "REST API",
+          "owner": "Integration",
+          "categories": [
+            "Address",
+            "Citizen"
+          ],
+          "visibility": "Internal",
+          "lifecycle": "Prod",
+          "profile": "Strategic",
+          "access": "Open"
+        },
+        "searchTags": "tag1, tag2, tag3, tag4"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"Legacy\" was expected",
+      "python_error": "'Legacy' was expected\n\nFailed validating 'const' in schema['properties']['filters']['allOf'][1]['then']['properties']['profile']:\n    {'const': 'Legacy'}\n\nOn instance['filters']['profile']:\n    'Strategic'",
+      "data": {
+        "description": "This is an example service for the catalogue entry",
+        "primaryContact": {
+          "name": "John Doe",
+          "emailAddress": "john.doe@dwp.gov.uk",
+          "role": "Product Owner"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/path-to-spec.yaml"
+        },
+        "filters": {
+          "asset_type": "REST API",
+          "owner": "Integration",
+          "categories": [
+            "Address",
+            "Citizen"
+          ],
+          "visibility": "Internal",
+          "lifecycle": "Deprecated",
+          "profile": "Strategic",
+          "access": "Open"
+        },
+        "searchTags": "tag1, tag2, tag3, tag4"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on if keyword or then keyword",
+      "valid": false,
+      "rust_error": "\"Legacy\" was expected",
+      "python_error": "'Legacy' was expected\n\nFailed validating 'const' in schema['properties']['filters']['allOf'][1]['then']['properties']['profile']:\n    {'const': 'Legacy'}\n\nOn instance['filters']['profile']:\n    'Strategic'",
+      "data": {
+        "description": "This is an example service for the catalogue entry",
+        "primaryContact": {
+          "name": "John Doe",
+          "emailAddress": "john.doe@dwp.gov.uk",
+          "role": "Product Owner"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/path-to-spec.yaml"
+        },
+        "filters": {
+          "asset_type": "REST API",
+          "owner": "Integration",
+          "categories": [
+            "Address",
+            "Citizen"
+          ],
+          "visibility": "Internal",
+          "lifecycle": "Deprecated",
+          "profile": "Strategic",
+          "access": "Open"
+        },
+        "searchTags": "tag1, tag2, tag3, tag4"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 10 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['description']:\n    {'type': 'string', 'minLength': 10, 'maxLength': 200}\n\nOn instance['description']:\n    'a'",
+      "data": {
+        "description": "a",
+        "primaryContact": {
+          "name": "John Doe",
+          "emailAddress": "john.doe@dwp.gov.uk",
+          "role": "Product Owner"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/path-to-spec.yaml"
+        },
+        "filters": {
+          "asset_type": "REST API",
+          "owner": "Integration",
+          "categories": [
+            "Address",
+            "Citizen"
+          ],
+          "visibility": "Internal",
+          "lifecycle": "Prod",
+          "profile": "Strategic",
+          "access": "Open"
+        },
+        "searchTags": "tag1, tag2, tag3, tag4"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"filters\" is a required property",
+      "python_error": "'filters' is a required property\n\nFailed validating 'required' in schema:\n    {'$schema': 'http://json-schema.org/draft-07/schema',\n     '$id': 'https://dwp.gov.uk/exchange/publishing-tools/apigw/catalogue-entry-schema.json',\n     'title': 'Catalogue entry',\n     'type': 'object',\n     'required': ['description', 'primaryContact', 'filters', 'searchTags'],\n     'properties': {'description': {'type': 'string',\n                                    'minLength': 10,\n                                    'maxLength': 200},\n                    'primaryContact': {'type': 'object',\n                                       'title': 'Primary contact',\n                                       'description': 'Contact details for '\n                                                      'the owner of the '\n                                                      'asset, i.e. the '\n                                                      'Product Owner.These '\n                                                      'details will be '\n     .. (18779 more)",
+      "data": {
+        "description": "This is an example service for the catalogue entry",
+        "primaryContact": {
+          "name": "John Doe",
+          "emailAddress": "john.doe@example.com",
+          "Invalid pattern, email doesn't end with 'gov.uk'": "role",
+          "Missing colon after role (this will be invalid JSON and cause parser errors)": "Product Owner"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/path-to-spec.pdf",
+          "Invalid pattern, oas_path doesn't match the expected YAML or JSON file extension": {},
+          "filters": {
+            "asset_type": "REST API",
+            "owner": "Integration",
+            "categories": [
+              "Address",
+              "Citizen",
+              "Invalid Category",
+              "Invalid category, not one of the enum values"
+            ],
+            "visibility": "Invalid visibility",
+            "Invalid visibility, not one of the enum values": "Internal",
+            "lifecycle": "Invalid lifecycle",
+            "Invalid lifecycle, not one of the enum values": "Prod",
+            "profile": "Invalid profile",
+            "Invalid profile, not one of the enum values": "Strategic",
+            "access": "Invalid access",
+            "Invalid access, not one of the enum values": "Open"
+          },
+          "searchTags": "tag1,tag2",
+          "Invalid pattern, searchTags must have at least 3 tags": {}
+        },
+        "Invalid JSON": "tag"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 10 characters",
+      "python_error": "'tag1, tag2' does not match '^([^,]+(,|$)){3,}$'\n\nFailed validating 'pattern' in schema['properties']['searchTags']:\n    {'type': 'string',\n     'description': 'Tags to label the asset in order to increase '\n                    'discoverability. Minimum of 3 in CSV format.',\n     'pattern': '^([^,]+(,|$)){3,}$',\n     'examples': ['tag1, tag2, tag3']}\n\nOn instance['searchTags']:\n    'tag1, tag2'",
+      "data": {
+        "description": "a",
+        "primaryContact": {
+          "name": "J",
+          "emailAddress": "john.doe@dwp.com",
+          "role": "P"
+        },
+        "technical_documentation": {
+          "oas_path": "../oas/path-to-spec"
+        },
+        "filters": {
+          "asset_type": "Invalid API",
+          "owner": "Invalid",
+          "categories": [
+            "Invalid"
+          ],
+          "visibility": "Invalid",
+          "lifecycle": "Invalid",
+          "profile": "Invalid",
+          "access": "Invalid"
+        },
+        "searchTags": "tag1, tag2"
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "description": "sample MCPspec/CancelledNotification.json",
+  "meta": {
+    "full_size": 1243,
+    "stripped_size": 446,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "const"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CancelledNotification",
+    "definitions": {
+      "CancelledNotification": {
+        "description": "This notification can be sent by either side to indicate that it is cancelling a previously-issued request.\n\nThe request SHOULD still be in-flight, but due to communication latency, it is always possible that this notification MAY arrive after the request has already finished.\n\nThis notification indicates that the result will be unused, so any associated processing SHOULD cease.\n\nA client MUST NOT attempt to cancel its `initialize` request.",
+        "properties": {
+          "method": {
+            "const": "notifications/cancelled",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "reason": {
+                "description": "An optional string describing the reason for the cancellation. This MAY be logged or presented to the user.",
+                "type": "string"
+              },
+              "requestId": {
+                "$ref": "#/definitions/RequestId",
+                "description": "The ID of the request to cancel.\n\nThis MUST correspond to the ID of a request previously issued in the same direction."
+              }
+            },
+            "required": [
+              "requestId"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "RequestId": {
+        "description": "A uniquely identifying ID for a request in JSON-RPC.",
+        "type": [
+          "string",
+          "integer"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "notifications/cancelled",
+        "params": {
+          "reason": "The request was cancelled due to a timeout.",
+          "requestId": "exampleRequestId"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of types \"integer\", \"string\"",
+      "python_error": "None is not of type 'string', 'integer'\n\nFailed validating 'type' in schema['properties']['params']['properties']['requestId']:\n    {'description': 'A uniquely identifying ID for a request in JSON-RPC.',\n     'type': ['string', 'integer']}\n\nOn instance['params']['requestId']:\n    None",
+      "data": {
+        "method": "notifications/cancelled",
+        "params": {
+          "requestId": null
+        }
+      }
+    }
+  ]
+}

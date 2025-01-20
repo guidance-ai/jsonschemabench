@@ -1,0 +1,456 @@
+{
+  "description": "sample JsonSchemaStore/safebox-schema-v1.0.0.json",
+  "meta": {
+    "full_size": 2920,
+    "stripped_size": 1225,
+    "features": [
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "description": "Configuration for safebox to deploy parameters to various parameter stores",
+    "id": "https://json.schemastore.org/safebox-schema-v1.0.0.json",
+    "properties": {
+      "service": {
+        "type": "string",
+        "description": "Name of the service. parameters will be prefixed by the value provided"
+      },
+      "provider": {
+        "type": "string",
+        "enum": [
+          "ssm",
+          "secrets-manager"
+        ],
+        "description": "Deploy parameters to the given provider. Eg. ssm, secrets-manager"
+      },
+      "region": {
+        "anyOf": [
+          {
+            "enum": [
+              "us-east-2",
+              "us-east-1",
+              "us-west-1",
+              "us-west-2",
+              "af-south-1",
+              "ap-east-1",
+              "ap-south-2",
+              "ap-southeast-3",
+              "ap-southeast-4",
+              "ap-south-1",
+              "ap-northeast-3",
+              "ap-northeast-2",
+              "ap-northeast-1",
+              "ap-southeast-1",
+              "ap-southeast-2",
+              "ca-central-1",
+              "eu-central-1",
+              "eu-west-1",
+              "eu-west-2",
+              "eu-south-1",
+              "eu-west-3",
+              "eu-south-2",
+              "eu-north-1",
+              "eu-central-2",
+              "me-south-1",
+              "me-central-1",
+              "sa-east-1",
+              "us-gov-east-1",
+              "us-gov-west-1"
+            ]
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Region to deploy the parameters to. Eg. us-east-1"
+      },
+      "prefix": {
+        "type": "string",
+        "description": "Prefix to apply to all parameters. Does not apply for shared",
+        "default": "/<stage>/<service>/"
+      },
+      "generate": {
+        "type": "array",
+        "description": "Generate different files based on the parameter name and values",
+        "items": {
+          "type": "object",
+          "required": [
+            "type",
+            "path"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "json",
+                "yaml",
+                "dotenv",
+                "types-node"
+              ],
+              "description": "Type of file to generate"
+            },
+            "path": {
+              "type": "string",
+              "description": "Full path with filename for writing the output"
+            }
+          }
+        }
+      },
+      "cloudformation-stacks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Cloudformation stack names. Any output values from the stacks can be interpolated. Eg. DB_NAME: \"{{.myDbName}}\"\nmyDbName is the output of one of the cloudformation stacks"
+      },
+      "config": {
+        "type": "object",
+        "description": "Parameters to deploy as non secret. You can also specify stage specific key value pairs. Same key in the defaults will be ignored and stage specific value will be used.",
+        "properties": {
+          "defaults": {
+            "type": "object",
+            "description": "parameter name and value. Output is /<stage>/<service>/<param name>"
+          },
+          "shared": {
+            "type": "object",
+            "description": "Params that are to be shared between multiple services. The parameter name wont be prefixed by service name. Output is /<stage>/shared/<param name>"
+          }
+        }
+      },
+      "secret": {
+        "type": "object",
+        "description": "Parameters to deploy as secret. You cannot specify stage specific key value pairs. Value is the description. You will need to run safebox deploy in prompt mode to provide the actual value.",
+        "properties": {
+          "defaults": {
+            "type": "object",
+            "description": "parameter name and value. Output is /<stage>/<service>/<param name>"
+          },
+          "shared": {
+            "type": "object",
+            "description": "Params that are to be shared between multiple services. The parameter name wont be prefixed by service name. Output is /<stage>/shared/<param name>"
+          }
+        }
+      }
+    },
+    "required": [
+      "service",
+      "provider"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "service": "my-service",
+        "provider": "ssm",
+        "region": "us-east-1",
+        "prefix": "/dev/my-service/",
+        "generate": [
+          {
+            "type": "json",
+            "path": "/path/to/config.json"
+          },
+          {
+            "type": "dotenv",
+            "path": "/path/to/config.env"
+          }
+        ],
+        "cloudformation-stacks": [
+          "my-stack-1",
+          "my-stack-2"
+        ],
+        "config": {
+          "defaults": {
+            "DB_HOST": "localhost",
+            "DB_PORT": 5432
+          },
+          "shared": {
+            "SHARED_PARAM": "shared-value"
+          }
+        },
+        "secret": {
+          "defaults": {
+            "DB_PASSWORD": "Enter the database password"
+          },
+          "shared": {
+            "SHARED_SECRET": "Enter the shared secret"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "12345 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "12345 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['region']:\n    {'anyOf': [{'enum': ['us-east-2',\n                         'us-east-1',\n                         'us-west-1',\n                         'us-west-2',\n                         'af-south-1',\n                         'ap-east-1',\n                         'ap-south-2',\n                         'ap-southeast-3',\n                         'ap-southeast-4',\n                         'ap-south-1',\n                         'ap-northeast-3',\n                         'ap-northeast-2',\n                         'ap-northeast-1',\n                         'ap-southeast-1',\n                         'ap-southeast-2',\n                         'ca-central-1',\n                         'eu-central-1',\n                         'eu-west-1',\n                         'eu-west-2',\n                         'eu-south-1',\n                         'eu-west-3',\n                         'eu-south-2',\n                         'eu-n.. (396 more)",
+      "data": {
+        "service": "my-service",
+        "provider": "ssm",
+        "region": 12345,
+        "prefix": "/dev/my-service/",
+        "generate": [
+          {
+            "type": "json",
+            "path": "/path/to/config.json"
+          },
+          {
+            "type": "dotenv",
+            "path": "/path/to/config.env"
+          }
+        ],
+        "cloudformation-stacks": [
+          "my-stack-1",
+          "my-stack-2"
+        ],
+        "config": {
+          "defaults": {
+            "DB_HOST": "localhost",
+            "DB_PORT": 5432
+          },
+          "shared": {
+            "SHARED_PARAM": "shared-value"
+          }
+        },
+        "secret": {
+          "defaults": {
+            "DB_PASSWORD": "Enter the database password"
+          },
+          "shared": {
+            "SHARED_SECRET": "Enter the shared secret"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['region']:\n    {'anyOf': [{'enum': ['us-east-2',\n                         'us-east-1',\n                         'us-west-1',\n                         'us-west-2',\n                         'af-south-1',\n                         'ap-east-1',\n                         'ap-south-2',\n                         'ap-southeast-3',\n                         'ap-southeast-4',\n                         'ap-south-1',\n                         'ap-northeast-3',\n                         'ap-northeast-2',\n                         'ap-northeast-1',\n                         'ap-southeast-1',\n                         'ap-southeast-2',\n                         'ca-central-1',\n                         'eu-central-1',\n                         'eu-west-1',\n                         'eu-west-2',\n                         'eu-south-1',\n                         'eu-west-3',\n                         'eu-south-2',\n                         'eu-nor.. (392 more)",
+      "data": {
+        "service": "my-service",
+        "provider": "ssm",
+        "region": 123,
+        "prefix": "/dev/my-service/",
+        "generate": [
+          {
+            "type": "json",
+            "path": "/path/to/config.json"
+          },
+          {
+            "type": "dotenv",
+            "path": "/path/to/config.env"
+          }
+        ],
+        "cloudformation-stacks": [
+          "my-stack-1",
+          "my-stack-2"
+        ],
+        "config": {
+          "defaults": {
+            "DB_HOST": "localhost",
+            "DB_PORT": 5432
+          },
+          "shared": {
+            "SHARED_PARAM": "shared-value"
+          }
+        },
+        "secret": {
+          "defaults": {
+            "DB_PASSWORD": "Enter the database password"
+          },
+          "shared": {
+            "SHARED_SECRET": "Enter the shared secret"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-type\" is not one of [\"json\",\"yaml\",\"dotenv\",\"types-node\"]",
+      "python_error": "Additional properties are not allowed ('extra-key' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'description': 'Configuration for safebox to deploy parameters to '\n                    'various parameter stores',\n     'id': 'https://json.schemastore.org/safebox-schema-v1.0.0.json',\n     'properties': {'service': {'type': 'string',\n                                'description': 'Name of the service. '\n                                               'parameters will be '\n                                               'prefixed by the value '\n                                               'provided'},\n                    'provider': {'type': 'string',\n                                 'enum': ['ssm', 'secrets-manager'],\n                                 'description': 'Deploy parameters to the '\n                                                'given provider. Eg. ssm, '\n                        .. (13012 more)",
+      "data": {
+        "service": "my-service",
+        "provider": "ssm",
+        "region": "us-east-1",
+        "prefix": "/dev/my-service/",
+        "generate": [
+          {
+            "type": "json",
+            "path": "/path/to/config.json"
+          },
+          {
+            "type": "invalid-type",
+            "path": "/path/to/config.env"
+          }
+        ],
+        "cloudformation-stacks": [
+          "my-stack-1",
+          "my-stack-2"
+        ],
+        "config": {
+          "defaults": {
+            "DB_HOST": "localhost",
+            "DB_PORT": 5432
+          },
+          "shared": {
+            "SHARED_PARAM": "shared-value"
+          }
+        },
+        "secret": {
+          "defaults": {
+            "DB_PASSWORD": "Enter the database password"
+          },
+          "shared": {
+            "SHARED_SECRET": "Enter the shared secret"
+          }
+        },
+        "extra-key": "extra-value"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "service": "my-service",
+        "provider": "ssm",
+        "region": "us-east-1",
+        "prefix": "/dev/my-service/",
+        "generate": [
+          {
+            "type": "json",
+            "path": "/path/to/config.json"
+          },
+          {
+            "type": "dotenv",
+            "path": "/path/to/config.env"
+          }
+        ],
+        "cloudformation-stacks": [
+          "my-stack-1",
+          "my-stack-2"
+        ],
+        "config": {
+          "defaults": {
+            "DB_HOST": "localhost",
+            "DB_PORT": 5432
+          },
+          "shared": {
+            "API_KEY": "my-api-key"
+          }
+        },
+        "secret": {
+          "defaults": {
+            "DB_PASSWORD": "Enter database password"
+          },
+          "shared": {
+            "SHARED_SECRET": "Enter shared secret"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "5 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "5 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['region']:\n    {'anyOf': [{'enum': ['us-east-2',\n                         'us-east-1',\n                         'us-west-1',\n                         'us-west-2',\n                         'af-south-1',\n                         'ap-east-1',\n                         'ap-south-2',\n                         'ap-southeast-3',\n                         'ap-southeast-4',\n                         'ap-south-1',\n                         'ap-northeast-3',\n                         'ap-northeast-2',\n                         'ap-northeast-1',\n                         'ap-southeast-1',\n                         'ap-southeast-2',\n                         'ca-central-1',\n                         'eu-central-1',\n                         'eu-west-1',\n                         'eu-west-2',\n                         'eu-south-1',\n                         'eu-west-3',\n                         'eu-south-2',\n                         'eu-north.. (388 more)",
+      "data": {
+        "service": "my-service",
+        "provider": "ssm",
+        "region": 5,
+        "prefix": "/dev/my-service/",
+        "generate": [
+          {
+            "type": "json",
+            "path": "/path/to/config.json"
+          },
+          {
+            "type": "dotenv",
+            "path": "/path/to/config.env"
+          }
+        ],
+        "cloudformation-stacks": [
+          "my-stack-1",
+          "my-stack-2"
+        ],
+        "config": {
+          "defaults": {
+            "DB_HOST": "localhost",
+            "DB_PORT": 5432
+          },
+          "shared": {
+            "API_KEY": "my-api-key"
+          }
+        },
+        "secret": {
+          "defaults": {
+            "DB_PASSWORD": "Enter database password"
+          },
+          "shared": {
+            "SHARED_SECRET": "Enter shared secret"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-type\" is not one of [\"json\",\"yaml\",\"dotenv\",\"types-node\"]",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['cloudformation-stacks']['items']:\n    {'type': 'string'}\n\nOn instance['cloudformation-stacks'][1]:\n    123",
+      "data": {
+        "service": "my-service",
+        "provider": "ssm",
+        "region": "us-east-1",
+        "generate": [
+          {
+            "type": "invalid-type",
+            "path": "/path/to/config.json"
+          },
+          {
+            "type": "dotenv",
+            "path": "/path/to/config.env"
+          }
+        ],
+        "cloudformation-stacks": [
+          "my-stack-1",
+          123
+        ],
+        "config": {
+          "defaults": {
+            "DB_HOST": "localhost",
+            "DB_PORT": "non-numeric-value"
+          },
+          "shared": {
+            "API_KEY": "my-api-key"
+          }
+        },
+        "secret": {
+          "defaults": {
+            "DB_PASSWORD": "Enter database password"
+          },
+          "shared": {
+            "SHARED_SECRET": "Enter shared secret"
+          },
+          "invalid-key": "Invalid value"
+        }
+      }
+    }
+  ]
+}

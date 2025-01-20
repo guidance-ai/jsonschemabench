@@ -1,0 +1,794 @@
+{
+  "description": "sample Github_medium/o42985.json",
+  "meta": {
+    "full_size": 2031,
+    "stripped_size": 1005,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "anyOf",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxItems",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Shader Asset",
+    "description": "The asset.json file for shaders.",
+    "type": "object",
+    "properties": {
+      "asset_type": {
+        "type": "string",
+        "pattern": "shader"
+      },
+      "vert_source": {
+        "description": "The source file for the GLSL vertex shader, relative to the current asset path. Defaults to vert.glsl",
+        "type": "string"
+      },
+      "frag_source": {
+        "description": "The source file for the GLSL frragment shader, relative to the current asset path. Defaults to frag.glsl",
+        "type": "string"
+      },
+      "location_attribute_glsl_name": {
+        "description": "The name of the vertex location attribute",
+        "type": "string",
+        "pattern": "\\w+"
+      },
+      "vertex_attributes": {
+        "description": "The vertex attributes that this shader expects. These are to be added to a mesh.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "The name of the attribute in the mesh.",
+              "type": "string"
+            },
+            "glsl_name": {
+              "description": "The name of the attribute in GLSL",
+              "type": "string",
+              "pattern": "\\w+"
+            },
+            "type": {
+              "description": "The type of the data",
+              "type": "string",
+              "pattern": "int|float|vec2|vec3|vec4"
+            }
+          },
+          "required": [
+            "name",
+            "glsl_id",
+            "type"
+          ]
+        }
+      },
+      "parameters": {
+        "description": "The parameters (uniforms in GLSL) for the shader.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The type of the object",
+              "type": "string",
+              "pattern": "int|float|vec2|vec3|vec4|texture"
+            },
+            "glsl_name": {
+              "description": "The name of the uniorm in GLSL",
+              "type": "string",
+              "pattern": "\\w+"
+            },
+            "glsl_offset": {
+              "description": "The offset from the uniorm location fetched by glsl_name. Used for arrays, 0 by default",
+              "type": "integer",
+              "minimum": 0
+            },
+            "name": {
+              "description": "The name that will be exposed to the interface",
+              "type": "string"
+            },
+            "default": {
+              "description": "The default value for the parameter",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 4
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "description": {
+              "description": "A description of the parameter",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "glsl_name",
+            "name",
+            "defualt"
+          ]
+        }
+      }
+    },
+    "required": [
+      "asset_type"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds",
+            "defualt": 0.0
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "description": "The position of the light source",
+            "defualt": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied",
+            "defualt": "texture.png"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"foo\":\"bar\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'foo': 'bar'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['parameters']['items']['properties']['default']:\n    {'description': 'The default value for the parameter',\n     'anyOf': [{'type': 'string'},\n               {'type': 'array',\n                'items': {'type': 'number'},\n                'minItems': 2,\n                'maxItems': 4},\n               {'type': 'number'}]}\n\nOn instance['parameters'][0]['default']:\n    {'foo': 'bar'}",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": {
+              "foo": "bar"
+            },
+            "description": "The current time in seconds",
+            "defualt": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[0.0] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[0.0] is too short\n\nFailed validating 'minItems' in schema[1]:\n    {'type': 'array',\n     'items': {'type': 'number'},\n     'minItems': 2,\n     'maxItems': 4}\n\nOn instance:\n    [0.0]",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds",
+            "defualt": 0.0
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0
+            ],
+            "description": "The position of the light source",
+            "defualt": [
+              0.0
+            ]
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied",
+            "defualt": "texture.png"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['parameters']['items']['properties']['glsl_offset']:\n    {'description': 'The offset from the uniorm location fetched by '\n                    'glsl_name. Used for arrays, 0 by default',\n     'type': 'integer',\n     'minimum': 0}\n\nOn instance['parameters'][0]['glsl_offset']:\n    -1",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": -1,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds",
+            "defualt": 0.0
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "description": "The position of the light source",
+            "defualt": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied",
+            "defualt": "texture.png"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[0.0,0.0,0.0,0.0,0.0] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'defualt' is a required property\n\nFailed validating 'required' in schema['properties']['parameters']['items']:\n    {'type': 'object',\n     'properties': {'type': {'description': 'The type of the object',\n                             'type': 'string',\n                             'pattern': 'int|float|vec2|vec3|vec4|texture'},\n                    'glsl_name': {'description': 'The name of the uniorm '\n                                                 'in GLSL',\n                                  'type': 'string',\n                                  'pattern': '\\\\w+'},\n                    'glsl_offset': {'description': 'The offset from the '\n                                                   'uniorm location '\n                                                   'fetched by glsl_name. '\n                                                   'Used for arrays, 0 by '\n                                                   'default',\n                                    'type': 'integer',\n                                    'minim.. (1181 more)",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "description": "The current time in seconds"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid_type\" does not match \"int|float|vec2|vec3|vec4\"",
+      "python_error": "'invalid_type' does not match 'int|float|vec2|vec3|vec4'\n\nFailed validating 'pattern' in schema['properties']['vertex_attributes']['items']['properties']['type']:\n    {'description': 'The type of the data',\n     'type': 'string',\n     'pattern': 'int|float|vec2|vec3|vec4'}\n\nOn instance['vertex_attributes'][2]['type']:\n    'invalid_type'",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          },
+          {
+            "name": "invalid",
+            "glsl_name": "a_invalid",
+            "type": "invalid_type",
+            "glsl_id": 2
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds",
+            "defualt": 0.0
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0,
+              0.0
+            ],
+            "description": "The position of the light source",
+            "defualt": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied",
+            "defualt": "texture.png"
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied",
+            "defualt": "texture.png"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"defualt\" is a required property",
+      "python_error": "'defualt' is a required property\n\nFailed validating 'required' in schema['properties']['parameters']['items']:\n    {'type': 'object',\n     'properties': {'type': {'description': 'The type of the object',\n                             'type': 'string',\n                             'pattern': 'int|float|vec2|vec3|vec4|texture'},\n                    'glsl_name': {'description': 'The name of the uniorm '\n                                                 'in GLSL',\n                                  'type': 'string',\n                                  'pattern': '\\\\w+'},\n                    'glsl_offset': {'description': 'The offset from the '\n                                                   'uniorm location '\n                                                   'fetched by glsl_name. '\n                                                   'Used for arrays, 0 by '\n                                                   'default',\n                                    'type': 'integer',\n                                    'minim.. (1175 more)",
+      "data": {
+        "asset_type": "shader123",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds"
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "description": "The position of the light source"
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "'defualt' is a required property\n\nFailed validating 'required' in schema['properties']['parameters']['items']:\n    {'type': 'object',\n     'properties': {'type': {'description': 'The type of the object',\n                             'type': 'string',\n                             'pattern': 'int|float|vec2|vec3|vec4|texture'},\n                    'glsl_name': {'description': 'The name of the uniorm '\n                                                 'in GLSL',\n                                  'type': 'string',\n                                  'pattern': '\\\\w+'},\n                    'glsl_offset': {'description': 'The offset from the '\n                                                   'uniorm location '\n                                                   'fetched by glsl_name. '\n                                                   'Used for arrays, 0 by '\n                                                   'default',\n                                    'type': 'integer',\n                                    'minim.. (1175 more)",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": -1,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds"
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "description": "The position of the light source"
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[1,2,3,4,5] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'defualt' is a required property\n\nFailed validating 'required' in schema['properties']['parameters']['items']:\n    {'type': 'object',\n     'properties': {'type': {'description': 'The type of the object',\n                             'type': 'string',\n                             'pattern': 'int|float|vec2|vec3|vec4|texture'},\n                    'glsl_name': {'description': 'The name of the uniorm '\n                                                 'in GLSL',\n                                  'type': 'string',\n                                  'pattern': '\\\\w+'},\n                    'glsl_offset': {'description': 'The offset from the '\n                                                   'uniorm location '\n                                                   'fetched by glsl_name. '\n                                                   'Used for arrays, 0 by '\n                                                   'default',\n                                    'type': 'integer',\n                                    'minim.. (1171 more)",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "description": "The current time in seconds"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"!@#\" does not match \"shader\"",
+      "python_error": "'!@#' does not match 'shader'\n\nFailed validating 'pattern' in schema['properties']['asset_type']:\n    {'type': 'string', 'pattern': 'shader'}\n\nOn instance['asset_type']:\n    '!@#'",
+      "data": {
+        "asset_type": "!@#",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position!",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds",
+            "defualt": 0.0
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "description": "The position of the light source",
+            "defualt": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": "texture.png",
+            "description": "The texture to be applied",
+            "defualt": "texture.png"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[0.0] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[0.0] is too short\n\nFailed validating 'minItems' in schema[1]:\n    {'type': 'array',\n     'items': {'type': 'number'},\n     'minItems': 2,\n     'maxItems': 4}\n\nOn instance:\n    [0.0]",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": "vert.glsl",
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "a_position",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": 0,
+            "name": "Time",
+            "default": [
+              0.0
+            ],
+            "description": "The current time in seconds",
+            "defualt": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['vert_source']:\n    {'description': 'The source file for the GLSL vertex shader, relative '\n                    'to the current asset path. Defaults to vert.glsl',\n     'type': 'string'}\n\nOn instance['vert_source']:\n    123",
+      "data": {
+        "asset_type": "shader",
+        "vert_source": 123,
+        "frag_source": "frag.glsl",
+        "location_attribute_glsl_name": "a_position",
+        "vertex_attributes": [
+          {
+            "name": "position",
+            "glsl_name": "",
+            "type": "vec3",
+            "glsl_id": 0
+          },
+          {
+            "name": "color",
+            "glsl_name": "a_color",
+            "type": "vec4",
+            "glsl_id": 1
+          }
+        ],
+        "parameters": [
+          {
+            "type": "float",
+            "glsl_name": "u_time",
+            "glsl_offset": -1,
+            "name": "Time",
+            "default": 0.0,
+            "description": "The current time in seconds"
+          },
+          {
+            "type": "vec3",
+            "glsl_name": "u_light_position",
+            "glsl_offset": 0,
+            "name": "Light Position",
+            "default": [
+              0.0,
+              0.0
+            ],
+            "description": "The position of the light source"
+          },
+          {
+            "type": "texture",
+            "glsl_name": "u_texture",
+            "glsl_offset": 0,
+            "name": "Texture",
+            "default": null,
+            "description": "The texture to be applied"
+          }
+        ]
+      }
+    }
+  ]
+}

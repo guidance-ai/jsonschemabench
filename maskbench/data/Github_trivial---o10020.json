@@ -1,0 +1,102 @@
+{
+  "description": "sample Github_trivial/o10020.json",
+  "meta": {
+    "full_size": 309,
+    "stripped_size": 285,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "oneOf": [
+      {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "maxLength": 12,
+            "pattern": "^[a-zA-Z0-9_\\.]+$",
+            "type": "string"
+          }
+        }
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "keys": {
+            "items": {
+              "maxLength": 12,
+              "pattern": "^[a-zA-Z0-9_\\.]+$",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        }
+      }
+    ],
+    "title": "ForgetRequest",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "key": "example_key"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"key\":\"!example_key\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'!example_key' does not match '^[a-zA-Z0-9_\\\\.]+$'\n\nFailed validating 'pattern' in schema[0]['properties']['key']:\n    {'maxLength': 12, 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'type': 'string'}\n\nOn instance['key']:\n    '!example_key'",
+      "data": {
+        "key": "!example_key"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"key\":\"example_key\",\"keys\":[\"example_key\"]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'key': 'example_key', 'keys': ['example_key']} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'oneOf': [{'additionalProperties': False,\n                'properties': {'key': {'maxLength': 12,\n                                       'pattern': '^[a-zA-Z0-9_\\\\.]+$',\n                                       'type': 'string'}}},\n               {'additionalProperties': False,\n                'properties': {'keys': {'items': {'maxLength': 12,\n                                                  'pattern': '^[a-zA-Z0-9_\\\\.]+$',\n                                                  'type': 'string'},\n                                        'type': 'array'}}}],\n     'title': 'ForgetRequest',\n     'type': 'object'}\n\nOn instance:\n    {'key': 'example_key', 'keys': ['example_key']}",
+      "data": {
+        "key": "example_key",
+        "keys": [
+          "example_key"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"key\":\"example_key_this_is_too_long\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'example_key_this_is_too_long' is too long\n\nFailed validating 'maxLength' in schema[0]['properties']['key']:\n    {'maxLength': 12, 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'type': 'string'}\n\nOn instance['key']:\n    'example_key_this_is_too_long'",
+      "data": {
+        "key": "example_key_this_is_too_long"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"key\":\"example_key_12345_67890\",\"extra_property\":\"extra\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'example_key_12345_67890' is too long\n\nFailed validating 'maxLength' in schema[0]['properties']['key']:\n    {'maxLength': 12, 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'type': 'string'}\n\nOn instance['key']:\n    'example_key_12345_67890'",
+      "data": {
+        "key": "example_key_12345_67890",
+        "extra_property": "extra"
+      }
+    }
+  ]
+}

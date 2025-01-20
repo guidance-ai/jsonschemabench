@@ -1,0 +1,101 @@
+{
+  "description": "sample Github_trivial/o51159.json",
+  "meta": {
+    "full_size": 485,
+    "stripped_size": 394,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Credit card with or without security code",
+    "properties": {
+      "creditcard": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "provider": {
+                "enum": [
+                  "mastercard"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "provider": {
+                "enum": [
+                  "visa"
+                ],
+                "type": "string"
+              },
+              "securitycode": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "provider",
+              "securitycode"
+            ]
+          }
+        ]
+      }
+    },
+    "title": "Credit card validation",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "creditcard": {
+          "provider": "mastercard"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"provider\":\"mastercard\",\"securitycode\":123} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'mastercard' is not one of ['visa']\n\nFailed validating 'enum' in schema[1]['properties']['provider']:\n    {'enum': ['visa'], 'type': 'string'}\n\nOn instance['provider']:\n    'mastercard'",
+      "data": {
+        "creditcard": {
+          "provider": "mastercard",
+          "securitycode": 123
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"provider\":\"mastercard\",\"securitycode\":123} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'mastercard' is not one of ['visa']\n\nFailed validating 'enum' in schema[1]['properties']['provider']:\n    {'enum': ['visa'], 'type': 'string'}\n\nOn instance['provider']:\n    'mastercard'",
+      "data": {
+        "creditcard": {
+          "provider": "mastercard",
+          "securitycode": 123
+        }
+      }
+    }
+  ]
+}

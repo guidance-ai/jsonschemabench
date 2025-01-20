@@ -1,0 +1,952 @@
+{
+  "description": "sample JsonSchemaStore/dart-test.json",
+  "meta": {
+    "full_size": 7466,
+    "stripped_size": 3300,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "allOf",
+      "enum",
+      "format",
+      "format:uri",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/dart-test",
+    "$ref": "#/definitions/runnerConfiguration",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "timeout": {
+        "$comment": "Based on https://github.com/dart-lang/test/blob/3b8d3b90efd24f55f7316cd414716d1cb031761c/pkgs/test_api/lib/src/frontend/timeout.dart#L55-L68",
+        "oneOf": [
+          {
+            "enum": [
+              "none"
+            ],
+            "title": "No timeout",
+            "description": "Indicates that tests should never time out."
+          },
+          {
+            "type": "string",
+            "title": "Exact timeout",
+            "description": "Exact timeout duration for a test.",
+            "pattern": "^(?:[^a-df-zA-DF-Z\\s]+(?:[umUM][sS]|[dhmsDHMS])\\s?)+$",
+            "examples": [
+              "1m",
+              "30s",
+              "1m 30s"
+            ]
+          },
+          {
+            "type": "string",
+            "title": "Multiplicative timeout",
+            "description": "Timeout is applied as a multiple of the default value (30 seconds)",
+            "pattern": "^[^a-df-zA-DF-Z\\s]+[xX]$",
+            "examples": [
+              "12x",
+              "1.5X"
+            ]
+          }
+        ]
+      },
+      "skip": {
+        "oneOf": [
+          {
+            "type": "boolean",
+            "title": "Skip the test if true"
+          },
+          {
+            "type": "string",
+            "title": "Reason for skipping the test"
+          }
+        ]
+      },
+      "executable": {
+        "type": "string",
+        "description": "The executable to run. Can be a plain basename, an absolute path or a relative path on Windows."
+      },
+      "browserAndNodeSettings": {
+        "type": "object",
+        "title": "Settings for browsers and Node.js",
+        "additionalProperties": false,
+        "properties": {
+          "arguments": {
+            "type": "string",
+            "title": "Extra arguments to the executable",
+            "description": "The arguments are parsed in the same way as the POSIX shell"
+          },
+          "executable": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/executable"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "linux": {
+                    "$ref": "#/definitions/executable"
+                  },
+                  "mac_os": {
+                    "$ref": "#/definitions/executable"
+                  },
+                  "windows": {
+                    "$ref": "#/definitions/executable"
+                  }
+                }
+              }
+            ]
+          },
+          "headless": {
+            "type": "boolean",
+            "title": "Run the browser in headless mode"
+          }
+        }
+      },
+      "foldStackFrameOptions": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "except": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "only": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "testConfiguration": {
+        "type": "object",
+        "$comment": "Based on https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md#test-configuration",
+        "properties": {
+          "timeout": {
+            "$ref": "#/definitions/timeout"
+          },
+          "verbose_trace": {
+            "type": "boolean",
+            "title": "Remove internal stack frames",
+            "description": "This field controls whether or not traces caused by errors are trimmed to remove internal stack frames. This includes frames from the Dart core libraries, the stack_trace package, and the test package itself.",
+            "default": false
+          },
+          "chain_stack_traces": {
+            "type": "boolean",
+            "title": "Whether stack traces are chained",
+            "description": "Disabling stack trace chaining will improve performance for heavily async code at the cost of debuggability."
+          },
+          "js_trace": {
+            "type": "boolean",
+            "title": "Convert JS traces to Dart traces",
+            "description": "Whether or not stack traces caused by errors while running Dart compiled to JS are converted back to Dart style.",
+            "default": false
+          },
+          "skip": {
+            "$ref": "#/definitions/skip"
+          },
+          "retry": {
+            "type": "number",
+            "description": "This field controls how many times a test is retried upon failure."
+          },
+          "test_on": {
+            "type": "string",
+            "examples": [
+              "browser && !ie"
+            ]
+          },
+          "tags": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/_testConfigurationInner"
+            }
+          },
+          "add_tags": {
+            "type": "array",
+            "description": "Adds additional tags. This is usually used in a tag definition to enable tag inheritance.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "on_platform": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/_testConfigurationInner"
+            }
+          }
+        }
+      },
+      "_testConfigurationInner": {
+        "$comment": "presets and on_os can have different properties when used in a test vs runner configuration. We make runnerConfiguration extend from testConfiguration, so this configuration is used when we're definitely in a non-runner configuration context.",
+        "allOf": [
+          {
+            "$ref": "#/definitions/testConfiguration"
+          },
+          {
+            "properties": {
+              "presets": {
+                "type": "object",
+                "description": "A preset used in a test configuration can contain test configuration.",
+                "additionalProperties": {
+                  "$ref": "#/definitions/testConfiguration"
+                }
+              },
+              "on_os": {
+                "type": "object",
+                "description": "Applies test options when a specific operating system is used",
+                "additionalProperties": {
+                  "$ref": "#/definitions/testConfiguration"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "runnerConfiguration": {
+        "allOf": [
+          {
+            "$comment": "Runner configurations are a superset of test configurations",
+            "$ref": "#/definitions/testConfiguration"
+          },
+          {
+            "properties": {
+              "include": {
+                "type": "string",
+                "format": "uri"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [
+                  "test"
+                ]
+              },
+              "filename": {
+                "type": "string",
+                "description": "Filename pattern that the test runner uses to find test files in directories."
+              },
+              "names": {
+                "type": "array",
+                "description": "Only run tests whose names match the given regular expressions A test's name must match all regular expressions in names in order to be run.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "plain_names": {
+                "type": "array",
+                "description": "This field causes the runner to only run tests whose names contain the given strings. A test's name must contain all strings in order to be run.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "include_tags": {
+                "type": "string",
+                "description": "This field causes the runner to only run tests whose tags match the given boolean selector."
+              },
+              "exclude_tags": {
+                "type": "string",
+                "description": "This field causes the runner to only run tests whose tags match the given boolean selector. This takes precedence over include_tags"
+              },
+              "platforms": {
+                "description": "The platforms on which tests should be run.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [
+                  "vm"
+                ]
+              },
+              "concurrency": {
+                "type": "integer",
+                "description": "The default number of test suites to run in parallel. This defaults to approximately half the number of processors on the current machine. Setting it to 1 will disable concurrency"
+              },
+              "pause_after_load": {
+                "type": "boolean",
+                "description": "Indicates that the test runner should pause for debugging after each test suite is loaded but before its tests are executed. This disables concurrency and timeouts."
+              },
+              "run_skipped": {
+                "type": "boolean",
+                "description": "Run tests even if they're marked as skipped."
+              },
+              "reporter": {
+                "type": "string",
+                "description": "This field indicates the default reporter to use.",
+                "examples": [
+                  "compact",
+                  "expanded",
+                  "json"
+                ]
+              },
+              "file_reporters": {
+                "type": "object",
+                "description": "Specifies additional reporters that will write their output to a file rather than stdout",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "fold_stack_frames": {
+                "$ref": "#/definitions/foldStackFrameOptions"
+              },
+              "custom_html_template_path": {
+                "description": "This field specifies the path of the HTML template to be used for tests run in an HTML environment.",
+                "type": "string"
+              },
+              "presets": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/definitions/runnerConfiguration"
+                }
+              },
+              "add_presets": {
+                "type": "array",
+                "description": "Commonly used in a preset, it can be used to enable present inheritance by adding the configuration from another preset.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "on_os": {
+                "type": "object",
+                "description": "Applies test or runner options when a specific operating system is used",
+                "additionalProperties": {
+                  "$ref": "#/definitions/runnerConfiguration"
+                }
+              },
+              "override_platforms": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "$ref": "#/definitions/browserAndNodeSettings"
+                    }
+                  }
+                }
+              },
+              "define_platforms": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "extends": {
+                      "type": "string"
+                    },
+                    "settings": {
+                      "$ref": "#/definitions/browserAndNodeSettings"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "description": "Configuration for Dart tests",
+    "title": "dart_test.yaml"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "timeout": "30s",
+        "verbose_trace": true,
+        "chain_stack_traces": true,
+        "js_trace": true,
+        "skip": false,
+        "retry": 2,
+        "test_on": "browser && !ie",
+        "tags": {
+          "unit": {
+            "timeout": "1m",
+            "verbose_trace": false
+          },
+          "integration": {
+            "timeout": "2m",
+            "verbose_trace": true
+          }
+        },
+        "add_tags": [
+          "unit",
+          "integration"
+        ],
+        "on_platform": {
+          "windows": {
+            "timeout": "1m",
+            "verbose_trace": false
+          },
+          "linux": {
+            "timeout": "2m",
+            "verbose_trace": true
+          }
+        },
+        "include": "http://yaml.org/test.yaml",
+        "paths": [
+          "test"
+        ],
+        "filename": "*.dart",
+        "names": [
+          "^test"
+        ],
+        "plain_names": [
+          "test"
+        ],
+        "include_tags": "unit || integration",
+        "exclude_tags": "!unit",
+        "platforms": [
+          "vm",
+          "chrome"
+        ],
+        "concurrency": 4,
+        "pause_after_load": true,
+        "run_skipped": true,
+        "reporter": "compact",
+        "file_reporters": {
+          "json": "test_results.json"
+        },
+        "fold_stack_frames": {
+          "except": [
+            "package:test"
+          ]
+        },
+        "custom_html_template_path": "test_template.html",
+        "presets": {
+          "unit": {
+            "timeout": "1m",
+            "verbose_trace": false
+          },
+          "integration": {
+            "timeout": "2m",
+            "verbose_trace": true
+          }
+        },
+        "add_presets": [
+          "unit",
+          "integration"
+        ],
+        "on_os": {
+          "windows": {
+            "timeout": "1m",
+            "verbose_trace": false
+          },
+          "linux": {
+            "timeout": "2m",
+            "verbose_trace": true
+          }
+        },
+        "override_platforms": {
+          "chrome": {
+            "settings": {
+              "executable": "chrome.exe",
+              "arguments": "--headless --disable-gpu"
+            }
+          }
+        },
+        "define_platforms": {
+          "chrome_headless": {
+            "name": "chrome_headless",
+            "extends": "chrome",
+            "settings": {
+              "executable": "chrome.exe",
+              "arguments": "--headless --disable-gpu"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "dart_test.yaml",
+        "description": "Configuration for Dart tests",
+        "include": "http://yaml.org/test.yaml",
+        "paths": [
+          "test",
+          "integration_test"
+        ],
+        "filename": "*.dart",
+        "names": [
+          ".*_test\\.dart$"
+        ],
+        "plain_names": [
+          "test"
+        ],
+        "include_tags": "vm && !js",
+        "exclude_tags": "!slow",
+        "platforms": [
+          "vm",
+          "chrome",
+          "firefox"
+        ],
+        "concurrency": 4,
+        "pause_after_load": false,
+        "run_skipped": false,
+        "reporter": "compact",
+        "file_reporters": {
+          "json": "test_results.json"
+        },
+        "fold_stack_frames": {
+          "except": [
+            "package:test",
+            "package:stack_trace"
+          ]
+        },
+        "custom_html_template_path": "test/html_template.html",
+        "presets": {
+          "vm": {
+            "timeout": "1m",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm",
+            "tags": {
+              "vm": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            },
+            "add_tags": [
+              "vm"
+            ],
+            "on_platform": {
+              "windows": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            }
+          }
+        },
+        "add_presets": [
+          "vm"
+        ],
+        "on_os": {
+          "windows": {
+            "timeout": "1m",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm"
+          }
+        },
+        "override_platforms": {
+          "chrome": {
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": "chrome",
+              "headless": true
+            }
+          }
+        },
+        "define_platforms": {
+          "my_platform": {
+            "name": "My Platform",
+            "extends": "chrome",
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": "chrome",
+              "headless": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "\"1 minute\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'1 minute' is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['allOf'][1]['properties']['presets']['additionalProperties']['allOf'][0]['properties']['timeout']:\n    {'$comment': 'Based on '\n                 'https://github.com/dart-lang/test/blob/3b8d3b90efd24f55f7316cd414716d1cb031761c/pkgs/test_api/lib/src/frontend/timeout.dart#L55-L68',\n     'oneOf': [{'enum': ['none'],\n                'title': 'No timeout',\n                'description': 'Indicates that tests should never time '\n                               'out.'},\n               {'type': 'string',\n                'title': 'Exact timeout',\n                'description': 'Exact timeout duration for a test.',\n                'pattern': '^(?:[^a-df-zA-DF-Z\\\\s]+(?:[umUM][sS]|[dhmsDHMS])\\\\s?)+$',\n                'examples': ['1m', '30s', '1m 30s']},\n               {'type': 'string',\n                'title': 'Multiplicative timeout',\n                'description': 'Timeout is applied as a multiple of the '\n                      .. (198 more)",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "dart_test.yaml",
+        "description": "Configuration for Dart tests",
+        "include": "http://yaml.org/test.yaml",
+        "paths": [
+          "test",
+          "integration_test"
+        ],
+        "filename": "*.dart",
+        "names": [
+          ".*_test\\.dart$"
+        ],
+        "plain_names": [
+          "test"
+        ],
+        "include_tags": "vm && !js",
+        "exclude_tags": "!slow",
+        "platforms": [
+          "vm",
+          "chrome",
+          "firefox"
+        ],
+        "concurrency": 4,
+        "pause_after_load": false,
+        "run_skipped": false,
+        "reporter": "compact",
+        "file_reporters": {
+          "json": "test_results.json"
+        },
+        "fold_stack_frames": {
+          "except": [
+            "package:test",
+            "package:stack_trace"
+          ]
+        },
+        "custom_html_template_path": "test/html_template.html",
+        "presets": {
+          "vm": {
+            "timeout": "1 minute",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm",
+            "tags": {
+              "vm": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            },
+            "add_tags": [
+              "vm"
+            ],
+            "on_platform": {
+              "windows": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            }
+          }
+        },
+        "add_presets": [
+          "vm"
+        ],
+        "on_os": {
+          "windows": {
+            "timeout": "1m",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm"
+          }
+        },
+        "override_platforms": {
+          "chrome": {
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": "chrome",
+              "headless": true
+            }
+          }
+        },
+        "define_platforms": {
+          "my_platform": {
+            "name": "My Platform",
+            "extends": "chrome",
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": "chrome",
+              "headless": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a uri\" is not a \"uri\"",
+      "python_error": "'not a uri' is not a 'uri'\n\nFailed validating 'format' in schema['allOf'][1]['properties']['include']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['include']:\n    'not a uri'",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "dart_test.yaml",
+        "description": "Configuration for Dart tests",
+        "include": "not a uri",
+        "paths": [
+          "test",
+          "integration_test"
+        ],
+        "filename": "*.dart",
+        "names": [
+          ".*_test\\.dart$"
+        ],
+        "plain_names": [
+          "test"
+        ],
+        "include_tags": "vm && !js",
+        "exclude_tags": "!slow",
+        "platforms": [
+          "vm",
+          "chrome",
+          "firefox"
+        ],
+        "concurrency": 4,
+        "pause_after_load": false,
+        "run_skipped": false,
+        "reporter": "compact",
+        "file_reporters": {
+          "json": "test_results.json"
+        },
+        "fold_stack_frames": {
+          "except": [
+            "package:test",
+            "package:stack_trace"
+          ]
+        },
+        "custom_html_template_path": "test/html_template.html",
+        "presets": {
+          "vm": {
+            "timeout": "1m",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm",
+            "tags": {
+              "vm": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            },
+            "add_tags": [
+              "vm"
+            ],
+            "on_platform": {
+              "windows": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            }
+          }
+        },
+        "add_presets": [
+          "vm"
+        ],
+        "on_os": {
+          "windows": {
+            "timeout": "1m",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm"
+          }
+        },
+        "override_platforms": {
+          "chrome": {
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": "chrome",
+              "headless": true
+            }
+          }
+        },
+        "define_platforms": {
+          "my_platform": {
+            "name": "My Platform",
+            "extends": "chrome",
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": "chrome",
+              "headless": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "0.5 is not of type 'integer'\n\nFailed validating 'type' in schema['allOf'][1]['properties']['concurrency']:\n    {'type': 'integer',\n     'description': 'The default number of test suites to run in parallel. '\n                    'This defaults to approximately half the number of '\n                    'processors on the current machine. Setting it to 1 '\n                    'will disable concurrency'}\n\nOn instance['concurrency']:\n    0.5",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "dart_test.yaml",
+        "description": "Configuration for Dart tests",
+        "include": "http://yaml.org/test.yaml",
+        "paths": [
+          "test",
+          123
+        ],
+        "filename": "*.dart",
+        "names": [
+          ".*_test\\.dart$"
+        ],
+        "plain_names": [
+          "test"
+        ],
+        "include_tags": "vm && !js",
+        "exclude_tags": "!slow",
+        "platforms": [
+          "vm",
+          "chrome",
+          "firefox"
+        ],
+        "concurrency": 0.5,
+        "pause_after_load": false,
+        "run_skipped": false,
+        "reporter": "compact",
+        "file_reporters": {
+          "json": "test_results.json"
+        },
+        "fold_stack_frames": {
+          "except": [
+            "package:test",
+            "package:stack_trace"
+          ]
+        },
+        "custom_html_template_path": "test/html_template.html",
+        "presets": {
+          "vm": {
+            "timeout": "1m",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm",
+            "tags": {
+              "vm": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            },
+            "add_tags": [
+              "vm"
+            ],
+            "on_platform": {
+              "windows": {
+                "timeout": "1m",
+                "verbose_trace": true,
+                "chain_stack_traces": false,
+                "js_trace": true,
+                "skip": false,
+                "retry": 2,
+                "test_on": "vm"
+              }
+            }
+          }
+        },
+        "add_presets": [
+          "vm"
+        ],
+        "on_os": {
+          "windows": {
+            "timeout": "1m",
+            "verbose_trace": true,
+            "chain_stack_traces": false,
+            "js_trace": true,
+            "skip": false,
+            "retry": 2,
+            "test_on": "vm"
+          }
+        },
+        "override_platforms": {
+          "chrome": {
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": 123,
+              "headless": true
+            }
+          }
+        },
+        "define_platforms": {
+          "my_platform": {
+            "name": "My Platform",
+            "extends": "chrome",
+            "settings": {
+              "arguments": "--headless --disable-gpu",
+              "executable": "chrome",
+              "headless": true
+            }
+          }
+        }
+      }
+    }
+  ]
+}

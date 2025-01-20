@@ -1,0 +1,158 @@
+{
+  "description": "sample Github_medium/o21850.json",
+  "meta": {
+    "full_size": 855,
+    "stripped_size": 855,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "HttpMethod": {
+        "enum": [
+          "DELETE",
+          "GET",
+          "HEAD",
+          "OPTIONS",
+          "PATCH",
+          "POST",
+          "PUT"
+        ],
+        "type": "string"
+      },
+      "ResourceId": {
+        "pattern": "^[a-z0-9]+$",
+        "type": "string"
+      },
+      "ResponseParameters": {
+        "additionalProperties": false,
+        "patternProperties": {
+          "^method\\.response\\.header\\..+$": {
+            "pattern": "^(integration\\.response\\.header\\..)|(integration\\.response\\.body\\..)|('.*')+$",
+            "type": "string"
+          }
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "ResponseTemplates": {
+        "additionalProperties": false,
+        "patternProperties": {
+          ".+": {
+            "type": "string"
+          }
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "RestApiId": {
+        "pattern": "^[a-z0-9]{10}$",
+        "type": "string"
+      },
+      "SelectionPattern": {
+        "type": "string"
+      },
+      "StatusCode": {
+        "pattern": "^\\d{3}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "StatusCode",
+      "HttpMethod",
+      "ResourceId",
+      "RestApiId"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "1234567890",
+        "RestApiId": "123456789a",
+        "StatusCode": "200",
+        "ResponseParameters": {
+          "method.response.header.Content-Type": "integration.response.header.Content-Type"
+        },
+        "ResponseTemplates": {
+          "application/json": "{\"message\": \"Hello, World!\"}"
+        },
+        "SelectionPattern": ""
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "ResponseParameters": {
+          "method.response.header.X-Amz-Date": "integration.response.header.X-Amz-Date",
+          "method.response.header.Content-Type": "integration.response.body.Content-Type"
+        },
+        "ResponseTemplates": {
+          "application/json": "{\"message\": \"Hello World\"}"
+        },
+        "RestApiId": "1234567890",
+        "SelectionPattern": "",
+        "StatusCode": "200"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('foo' was unexpected)",
+      "python_error": "'foo' does not match any of the regexes: '^method\\\\.response\\\\.header\\\\..+$'\n\nFailed validating 'additionalProperties' in schema['properties']['ResponseParameters']:\n    {'additionalProperties': False,\n     'patternProperties': {'^method\\\\.response\\\\.header\\\\..+$': {'pattern': \"^(integration\\\\.response\\\\.header\\\\..)|(integration\\\\.response\\\\.body\\\\..)|('.*')+$\",\n                                                                 'type': 'string'}},\n     'properties': {},\n     'type': 'object'}\n\nOn instance['ResponseParameters']:\n    {'method.response.header.X-Amz-Date': 'integration.response.header.X-Amz-Date',\n     'foo': 'bar'}",
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "ResponseParameters": {
+          "method.response.header.X-Amz-Date": "integration.response.header.X-Amz-Date",
+          "foo": "bar"
+        },
+        "ResponseTemplates": {
+          "application/json": "{\"message\": \"Hello World\"}"
+        },
+        "RestApiId": "1234567890",
+        "SelectionPattern": "",
+        "StatusCode": "200"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "11 is not of type \"string\"",
+      "python_error": "'StatusCode' is a required property\n\nFailed validating 'required' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'properties': {'HttpMethod': {'enum': ['DELETE',\n                                            'GET',\n                                            'HEAD',\n                                            'OPTIONS',\n                                            'PATCH',\n                                            'POST',\n                                            'PUT'],\n                                   'type': 'string'},\n                    'ResourceId': {'pattern': '^[a-z0-9]+$',\n                                   'type': 'string'},\n                    'ResponseParameters': {'additionalProperties': False,\n                                           'patternProperties': {'^method\\\\.response\\\\.header\\\\..+$': {'pattern': \"^(integration\\\\.response\\\\.header\\\\..)|(integration\\\\.response\\\\.body\\\\..)|('.*')+$\",\n                                       .. (1313 more)",
+      "data": {
+        "HttpMethod": "GET",
+        "ResourceId": "123abc",
+        "ResponseParameters": {
+          "method.response.header.X-Amz-Date": "integration.response.header.X-Amz-Date",
+          "method.response.header.Content-Type": "integration.response.body.Content-Type"
+        },
+        "ResponseTemplates": {
+          "application/json": "{\"message\": \"Hello World\"}"
+        },
+        "RestApiId": 11
+      }
+    }
+  ]
+}

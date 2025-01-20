@@ -1,0 +1,193 @@
+{
+  "description": "sample Snowplow/sp_34_Normalized.json",
+  "meta": {
+    "full_size": 728,
+    "stripped_size": 526,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "multipleOf",
+      "multipleOf:0.01"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "type",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for Google Analytics Enhanced Ecommerce action data",
+    "properties": {
+      "affiliation": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "coupon": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "currency": {
+        "maxLength": 3,
+        "minLength": 3,
+        "type": "string"
+      },
+      "id": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "list": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "option": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "revenue": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "shipping": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "step": {
+        "maximum": 2147483647,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "tax": {
+        "multipleOf": 0.01,
+        "type": "number"
+      }
+    },
+    "self": {
+      "format": "jsonschema",
+      "name": "actionFieldObject",
+      "vendor": "com.google.analytics.enhanced-ecommerce",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "affiliation": "Example affiliation",
+        "coupon": "Example coupon",
+        "currency": "USD",
+        "id": "Example transaction ID",
+        "list": "Example product list",
+        "option": "Example product option",
+        "revenue": 100.0,
+        "shipping": 10.0,
+        "step": 1,
+        "tax": 8.0
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "affiliation": "Example Store",
+        "coupon": "SUMMER20",
+        "currency": "USD",
+        "id": "ORDER123",
+        "list": "Search Results",
+        "option": "Free Shipping",
+        "revenue": 99.99,
+        "shipping": 10.0,
+        "step": 1,
+        "tax": 8.99
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on multipleOf keyword",
+      "valid": false,
+      "rust_error": "99.991 is not a multiple of 0.01",
+      "python_error": "99.991 is not a multiple of 0.01\n\nFailed validating 'multipleOf' in schema['properties']['revenue']:\n    {'multipleOf': 0.01, 'type': 'number'}\n\nOn instance['revenue']:\n    99.991",
+      "data": {
+        "affiliation": "Example Store",
+        "coupon": "SUMMER20",
+        "currency": "USD",
+        "id": "ORDER123",
+        "list": "Search Results",
+        "option": "Free Shipping",
+        "revenue": 99.991,
+        "shipping": 10.0,
+        "step": 1,
+        "tax": 8.99
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"US\" is shorter than 3 characters",
+      "python_error": "'US' is too short\n\nFailed validating 'minLength' in schema['properties']['currency']:\n    {'maxLength': 3, 'minLength': 3, 'type': 'string'}\n\nOn instance['currency']:\n    'US'",
+      "data": {
+        "affiliation": "Example Store",
+        "coupon": "SUMMER20",
+        "currency": "US",
+        "id": "ORDER123",
+        "list": "Search Results",
+        "option": "Free Shipping",
+        "revenue": 99.99,
+        "shipping": 10.0,
+        "step": 1,
+        "tax": 8.99
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "99.986 is not a multiple of 0.01",
+      "python_error": "Additional properties are not allowed ('additionalProperty', 'step2' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for Google Analytics Enhanced Ecommerce action '\n                    'data',\n     'properties': {'affiliation': {'maxLength': 500, 'type': 'string'},\n                    'coupon': {'maxLength': 500, 'type': 'string'},\n                    'currency': {'maxLength': 3,\n                                 'minLength': 3,\n                                 'type': 'string'},\n                    'id': {'maxLength': 500, 'type': 'string'},\n                    'list': {'maxLength': 500, 'type': 'string'},\n                    'option': {'maxLength': 500, 'type': 'string'},\n                    'revenue': {'multipleOf': 0.01, 'type': 'number'},\n                    'shipping': {'multipleOf': 0.01, 'type': 'number'},\n                    'step': {'maximum': 2147483647,\n                             'minimum': 0,\n                 .. (714 more)",
+      "data": {
+        "affiliation": "Example Store",
+        "coupon": "SUMMER20",
+        "currency": "USD",
+        "id": "ORDER123",
+        "list": "Search Results",
+        "option": "Free Shipping",
+        "revenue": 99.986,
+        "shipping": 10.0,
+        "step": 2147483648,
+        "tax": 8.99,
+        "additionalProperty": "This should fail the additionalProperties constraint",
+        "step2": -1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"US\" is shorter than 3 characters",
+      "python_error": "Additional properties are not allowed ('Invalid: Currency should have exactly 3 characters', 'Invalid: Revenue should be a multiple of 0.01', 'Invalid: Step should be greater than or equal to 0', 'Invalid: Tax should be a multiple of 0.01' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for Google Analytics Enhanced Ecommerce action '\n                    'data',\n     'properties': {'affiliation': {'maxLength': 500, 'type': 'string'},\n                    'coupon': {'maxLength': 500, 'type': 'string'},\n                    'currency': {'maxLength': 3,\n                                 'minLength': 3,\n                                 'type': 'string'},\n                    'id': {'maxLength': 500, 'type': 'string'},\n                    'list': {'maxLength': 500, 'type': 'string'},\n                    'option': {'maxLength': 500, 'type': 'string'},\n                    'revenue': {'multipleOf': 0.01, 'type': 'number'},\n             .. (967 more)",
+      "data": {
+        "affiliation": "Example Store",
+        "coupon": "SUMMER20",
+        "currency": "US",
+        "Invalid: Currency should have exactly 3 characters": "id",
+        "list": "Search Results",
+        "option": "Free Shipping",
+        "revenue": 99.991,
+        "Invalid: Revenue should be a multiple of 0.01": 123,
+        "shipping": 10.0,
+        "step": -1,
+        "Invalid: Step should be greater than or equal to 0": 8.99,
+        "tax": 8.991,
+        "Invalid: Tax should be a multiple of 0.01": 321
+      }
+    }
+  ]
+}

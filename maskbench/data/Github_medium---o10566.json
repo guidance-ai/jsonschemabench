@@ -1,0 +1,427 @@
+{
+  "description": "sample Github_medium/o10566.json",
+  "meta": {
+    "full_size": 1253,
+    "stripped_size": 1253,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "subdocument": {
+        "type": "object",
+        "patternProperties": {
+          "^[^$]": {
+            "$ref": "#/definitions/value"
+          }
+        },
+        "additionalProperties": false
+      },
+      "value": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          },
+          {
+            "$ref": "#/definitions/$binary"
+          },
+          {
+            "$ref": "#/definitions/$date"
+          },
+          {
+            "$ref": "#/definitions/$oid"
+          },
+          {
+            "$ref": "#/definitions/$timestamp"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/value"
+            }
+          },
+          {
+            "$ref": "#/definitions/subdocument"
+          }
+        ]
+      },
+      "$binary": {
+        "type": "object",
+        "properties": {
+          "$binary": {
+            "type": "string"
+          },
+          "$type": {
+            "type": "string",
+            "pattern": "[a-z0-9]"
+          }
+        },
+        "required": [
+          "$binary",
+          "$type"
+        ],
+        "additionalProperties": false
+      },
+      "$date": {
+        "type": "object",
+        "properties": {
+          "$date": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "$date"
+        ],
+        "additionalProperties": false
+      },
+      "$oid": {
+        "type": "object",
+        "properties": {
+          "$oid": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{24}$"
+          }
+        },
+        "required": [
+          "$oid"
+        ],
+        "additionalProperties": false
+      },
+      "$timestamp": {
+        "type": "object",
+        "properties": {
+          "$timestamp": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "integer"
+              },
+              "i": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "t",
+              "i"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "$timestamp"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/subdocument"
+      },
+      {
+        "required": [
+          "_id"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_id": {
+          "$oid": "5f9f1b5b9b9b9b9b9b9b9b9b"
+        },
+        "name": "John Doe",
+        "age": 30,
+        "isMarried": false,
+        "address": {
+          "street": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "zip": "12345"
+        },
+        "phoneNumbers": [
+          "123-456-7890",
+          "098-765-4321"
+        ],
+        "createdDate": {
+          "$date": 1643723400
+        },
+        "binaryData": {
+          "$binary": "SGVsbG8gd29ybGQ=",
+          "$type": "00"
+        },
+        "timestamp": {
+          "$timestamp": {
+            "t": 1643723400,
+            "i": 1
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_id": {
+          "$oid": "0123456789abcdef01234567"
+        },
+        "name": "John Doe",
+        "age": 30,
+        "isMarried": false,
+        "address": {
+          "street": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "zip": "12345"
+        },
+        "interests": [
+          "reading",
+          "hiking",
+          "coding"
+        ],
+        "created": {
+          "$date": 1643723400
+        },
+        "updated": {
+          "$timestamp": {
+            "t": 1643723400,
+            "i": 1
+          }
+        },
+        "profilePicture": {
+          "$binary": "iVBORw0KGg...kJggg==",
+          "$type": "00"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"$binary\":\"iVBORw0KGg...kJggg==\",\"$type\":\"00\",\"extra\":\"property\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'$additional' does not match any of the regexes: '^[^$]'\n\nFailed validating 'additionalProperties' in schema['allOf'][0]:\n    {'type': 'object',\n     'patternProperties': {'^[^$]': {'$ref': '#/definitions/value'}},\n     'additionalProperties': False}\n\nOn instance:\n    {'_id': {'$oid': '0123456789abcdef01234567'},\n     'name': 'John Doe',\n     'age': 30,\n     'isMarried': False,\n     'address': {'street': '123 Main St',\n                 'city': 'Anytown',\n                 'state': 'CA',\n                 'zip': '12345'},\n     'interests': ['reading', 'hiking', 'coding'],\n     'created': {'$date': 1643723400},\n     'updated': {'$timestamp': {'t': 1643723400, 'i': 1}},\n     'profilePicture': {'$binary': 'iVBORw0KGg...kJggg==',\n                        '$type': '00',\n                        'extra': 'property'},\n     '$additional': 'property'}",
+      "data": {
+        "_id": {
+          "$oid": "0123456789abcdef01234567"
+        },
+        "name": "John Doe",
+        "age": 30,
+        "isMarried": false,
+        "address": {
+          "street": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "zip": "12345"
+        },
+        "interests": [
+          "reading",
+          "hiking",
+          "coding"
+        ],
+        "created": {
+          "$date": 1643723400
+        },
+        "updated": {
+          "$timestamp": {
+            "t": 1643723400,
+            "i": 1
+          }
+        },
+        "profilePicture": {
+          "$binary": "iVBORw0KGg...kJggg==",
+          "$type": "00",
+          "extra": "property"
+        },
+        "$additional": "property"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('$name' was unexpected)",
+      "python_error": "'$name' does not match any of the regexes: '^[^$]'\n\nFailed validating 'additionalProperties' in schema['allOf'][0]:\n    {'type': 'object',\n     'patternProperties': {'^[^$]': {'$ref': '#/definitions/value'}},\n     'additionalProperties': False}\n\nOn instance:\n    {'_id': {'$oid': '0123456789abcdef01234567'},\n     '$name': 'John Doe',\n     'age': 30,\n     'isMarried': False,\n     'address': {'street': '123 Main St',\n                 'city': 'Anytown',\n                 'state': 'CA',\n                 'zip': '12345'},\n     'interests': ['reading', 'hiking', 'coding'],\n     'created': {'$date': 1643723400},\n     'updated': {'$timestamp': {'t': 1643723400, 'i': 1}},\n     'profilePicture': {'$binary': 'iVBORw0KGg...kJggg==', '$type': '00'}}",
+      "data": {
+        "_id": {
+          "$oid": "0123456789abcdef01234567"
+        },
+        "$name": "John Doe",
+        "age": 30,
+        "isMarried": false,
+        "address": {
+          "street": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "zip": "12345"
+        },
+        "interests": [
+          "reading",
+          "hiking",
+          "coding"
+        ],
+        "created": {
+          "$date": 1643723400
+        },
+        "updated": {
+          "$timestamp": {
+            "t": 1643723400,
+            "i": 1
+          }
+        },
+        "profilePicture": {
+          "$binary": "iVBORw0KGg...kJggg==",
+          "$type": "00"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"$oid\":\"0123456789abcdef01234567$\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'0123456789abcdef01234567$' does not match '^[0-9a-f]{24}$'\n\nFailed validating 'pattern' in schema[6]['properties']['$oid']:\n    {'type': 'string', 'pattern': '^[0-9a-f]{24}$'}\n\nOn instance['$oid']:\n    '0123456789abcdef01234567$'",
+      "data": {
+        "_id": {
+          "$oid": "0123456789abcdef01234567$"
+        },
+        "name": "John Doe",
+        "age": 30,
+        "isMarried": false,
+        "address": {
+          "street": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "zip": "12345"
+        },
+        "interests": [
+          "reading",
+          "hiking",
+          "coding"
+        ],
+        "created": {
+          "$date": 1643723400
+        },
+        "updated": {
+          "$timestamp": {
+            "t": 1643723400,
+            "i": 1
+          }
+        },
+        "profilePicture": {
+          "$binary": "iVBORw0KGg...kJggg==",
+          "$type": "00"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"$binary\":\"iVBORw0KGg...kJggg==\",\"$type\":\"00\",\"additional\":\"property\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'$binary': 'iVBORw0KGg...kJggg==', '$type': '00', 'additional': 'property'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['allOf'][0]['patternProperties']['^[^$]']:\n    {'oneOf': [{'type': 'string'},\n               {'type': 'number'},\n               {'type': 'boolean'},\n               {'type': 'null'},\n               {'$ref': '#/definitions/$binary'},\n               {'$ref': '#/definitions/$date'},\n               {'$ref': '#/definitions/$oid'},\n               {'$ref': '#/definitions/$timestamp'},\n               {'type': 'array', 'items': {'$ref': '#/definitions/value'}},\n               {'$ref': '#/definitions/subdocument'}]}\n\nOn instance['profilePicture']:\n    {'$binary': 'iVBORw0KGg...kJggg==',\n     '$type': '00',\n     'additional': 'property'}",
+      "data": {
+        "_id": {
+          "$oid": "0123456789abcdef01234567"
+        },
+        "name": "John Doe",
+        "age": 30,
+        "isMarried": false,
+        "address": {
+          "street": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "zip": "12345"
+        },
+        "interests": [
+          "reading",
+          "hiking",
+          "coding"
+        ],
+        "created": {
+          "$date": 1643723400
+        },
+        "updated": {
+          "$timestamp": {
+            "t": 1643723400,
+            "i": 1
+          }
+        },
+        "profilePicture": {
+          "$binary": "iVBORw0KGg...kJggg==",
+          "$type": "00",
+          "additional": "property"
+        },
+        "newField": "value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"$oid\":\"0123456789abcdef0123456\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'0123456789abcdef0123456' does not match '^[0-9a-f]{24}$'\n\nFailed validating 'pattern' in schema[6]['properties']['$oid']:\n    {'type': 'string', 'pattern': '^[0-9a-f]{24}$'}\n\nOn instance['$oid']:\n    '0123456789abcdef0123456'",
+      "data": {
+        "_id": {
+          "$oid": "0123456789abcdef0123456"
+        },
+        "name": "John Doe",
+        "age": 30,
+        "isMarried": false,
+        "address": {
+          "street": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "zip": "12345"
+        },
+        "interests": [
+          "reading",
+          "hiking",
+          "coding"
+        ],
+        "created": {
+          "$date": 1643723400
+        },
+        "updated": {
+          "$timestamp": {
+            "t": 1643723400,
+            "i": 1
+          }
+        },
+        "profilePicture": {
+          "$binary": "iVBORw0KGg...kJggg==",
+          "$type": "00"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1593 @@
+{
+  "description": "sample Github_hard/o64563.json",
+  "meta": {
+    "full_size": 5462,
+    "stripped_size": 2395,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "format",
+      "format:date-time",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "anyOf:trivial",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "SSM model",
+    "description": "Description of a state space model following the grammar of the SSM inference package",
+    "definitions": {
+      "require": {
+        "type": "object",
+        "properties": {
+          "datapackage": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "populations": {
+        "type": "array",
+        "description": "Grouping of the state variables comprised in your compartmental model. For each group, provide a name and the list of corresponding states. By adding an optional remainder field, you will ensure the population size remains positive.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "composition": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "remainder": {
+              "type": "object",
+              "description": "Following this instruction, the value of the remainder variable at every time will be determined by the size of the population minus the sum of the other compartments. Note that SSM will discard scenarios where this variable becomes negative.",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pop_size": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "pop_size"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "composition"
+          ]
+        }
+      },
+      "reactions": {
+        "type": "array",
+        "description": "Description of the dynamics of your compartmental model. We only consider density-dependent reactions: each rate will be multiplied by the size of the compartment individuals are leaving. See the accumulators and white_noise optional fields for additional options.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string"
+            },
+            "to": {
+              "type": "string"
+            },
+            "rate": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "white_noise": {
+              "type": "object",
+              "description": "In order to cope with the absence or mis-specification of environmental factors in the model, you can multiply the rate of each reaction by a white gamma noise. To correlate these noises, use the same name. For more information, see Breto et al. 2009, Time series analysis via mechanistic models.",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "sd": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "sd"
+              ]
+            },
+            "accumulators": {
+              "type": "array",
+              "description": "When your are monitoring or fitting the integrated flow of a given reaction, you can store it in one or several variables defined in this list. If a given flow variable is repeated in several reactions, it will correspond of the sum of the flows of these reactions.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "keywords": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "from",
+            "to",
+            "rate"
+          ]
+        }
+      },
+      "sde": {
+        "type": "object",
+        "description": "System of stochastic differential equations, defined by their drift vector and dispersion matrix",
+        "properties": {
+          "drift": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "State variable which dynamic is determined by this line of the system."
+                },
+                "f": {
+                  "type": [
+                    "number",
+                    "string"
+                  ],
+                  "description": "Deterministic component of the equation."
+                },
+                "transformation": {
+                  "type": "string",
+                  "description": "In case you want to express the equation in terms of a function of X and avoid applying the Ito formula."
+                }
+              },
+              "required": [
+                "name",
+                "f"
+              ]
+            }
+          },
+          "dispersion": {
+            "type": "array",
+            "description": "Dispersion matrix L. It needs to have as many rows as objects in drifts, and as many colums as independent sources of noise.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "number",
+                  "string"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "drift",
+          "dispersion"
+        ]
+      },
+      "ode": {
+        "type": "array",
+        "description": "System of ordinary differential equations.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "State variable which dynamic is determined by this line of the system."
+            },
+            "f": {
+              "type": [
+                "number",
+                "string"
+              ],
+              "description": "Deterministic component of the equation."
+            },
+            "transformation": {
+              "type": "string",
+              "description": "In case you want to express the equation in terms of a function of X and avoid applying the Ito formula."
+            }
+          },
+          "required": [
+            "name",
+            "f"
+          ]
+        }
+      },
+      "observations": {
+        "type": "array",
+        "description": "Name each of the observed time series, determine when observations started to be collected and what is the distribution of the observation process.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "distribution": {
+              "type": "string"
+            },
+            "mean": {
+              "type": "string"
+            },
+            "sd": {
+              "type": "string"
+            },
+            "n": {
+              "type": "string"
+            },
+            "p": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "start",
+            "distribution"
+          ]
+        }
+      },
+      "data": {
+        "type": "array",
+        "description": "Link each of the observed variables to a data resource.",
+        "items": {
+          "type": "object",
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "require": {
+                  "$ref": "#/definitions/require"
+                },
+                "transformation": {
+                  "description": "When the parameters used in the model are functions of the data resources, specify the relation here.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "require"
+              ]
+            }
+          ]
+        }
+      },
+      "inputs": {
+        "type": "array",
+        "description": "Link each of the parameters or covariates at stake in your model to a data resource.",
+        "items": {
+          "type": "object",
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "require": {
+                  "$ref": "#/definitions/require"
+                },
+                "transformation": {
+                  "description": "When the parameters used in the model are functions of the data resources, specify the relation here.",
+                  "type": "string"
+                },
+                "to_resource": {
+                  "description": "In order to make predictions after fitting your data, specify how to invert the transformation relation at a later time than t0.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "populations": [
+          {
+            "name": "Population1",
+            "composition": [
+              "State1",
+              "State2"
+            ],
+            "remainder": {
+              "name": "Remainder1",
+              "pop_size": "Population1_size"
+            }
+          },
+          {
+            "name": "Population2",
+            "composition": [
+              "State3",
+              "State4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State1",
+            "to": "State2",
+            "rate": "Rate1",
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise1",
+              "sd": "SD1"
+            },
+            "accumulators": [
+              "Accumulator1"
+            ],
+            "keywords": [
+              "Keyword1",
+              "Keyword2"
+            ]
+          },
+          {
+            "from": "State3",
+            "to": "State4",
+            "rate": "Rate2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State1",
+              "f": "F1",
+              "transformation": "Transformation1"
+            },
+            {
+              "name": "State2",
+              "f": "F2"
+            }
+          ],
+          "dispersion": [
+            [
+              "Dispersion11",
+              "Dispersion12"
+            ],
+            [
+              "Dispersion21",
+              "Dispersion22"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State3",
+            "f": "F3"
+          },
+          {
+            "name": "State4",
+            "f": "F4",
+            "transformation": "Transformation4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation1",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "Normal",
+            "mean": "Mean1",
+            "sd": "SD1",
+            "n": "N1",
+            "p": "P1"
+          },
+          {
+            "name": "Observation2",
+            "start": "2020-01-02T00:00:00Z",
+            "distribution": "Poisson",
+            "mean": "Mean2"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1"
+          },
+          {
+            "name": "Data2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1",
+            "to_resource": "ToResource1"
+          },
+          {
+            "name": "Input2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid Date\" is not a \"date-time\"",
+      "python_error": "'Invalid Date' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['observations']['items']['properties']['start']:\n    {'type': 'string', 'format': 'date-time'}\n\nOn instance['observations'][0]['start']:\n    'Invalid Date'",
+      "data": {
+        "populations": [
+          {
+            "name": "Population1",
+            "composition": [
+              "State1",
+              "State2"
+            ],
+            "remainder": {
+              "name": "Remainder1",
+              "pop_size": "Population1_size"
+            }
+          },
+          {
+            "name": "Population2",
+            "composition": [
+              "State3",
+              "State4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State1",
+            "to": "State2",
+            "rate": "Rate1",
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise1",
+              "sd": "SD1"
+            },
+            "accumulators": [
+              "Accumulator1"
+            ],
+            "keywords": [
+              "Keyword1",
+              "Keyword2"
+            ]
+          },
+          {
+            "from": "State3",
+            "to": "State4",
+            "rate": "Rate2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State1",
+              "f": "F1",
+              "transformation": "Transformation1"
+            },
+            {
+              "name": "State2",
+              "f": "F2"
+            }
+          ],
+          "dispersion": [
+            [
+              "Dispersion11",
+              "Dispersion12"
+            ],
+            [
+              "Dispersion21",
+              "Dispersion22"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State3",
+            "f": "F3"
+          },
+          {
+            "name": "State4",
+            "f": "F4",
+            "transformation": "Transformation4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation1",
+            "start": "Invalid Date",
+            "distribution": "Normal",
+            "mean": "Mean1",
+            "sd": "SD1",
+            "n": "N1",
+            "p": "P1"
+          },
+          {
+            "name": "Observation2",
+            "start": "2020-01-02T00:00:00Z",
+            "distribution": "Poisson",
+            "mean": "Mean2"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1"
+          },
+          {
+            "name": "Data2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1",
+            "to_resource": "ToResource1"
+          },
+          {
+            "name": "Input2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"number\", \"string\"",
+      "python_error": "True is not of type 'number', 'string'\n\nFailed validating 'type' in schema['properties']['sde']['properties']['drift']['items']['properties']['f']:\n    {'type': ['number', 'string'],\n     'description': 'Deterministic component of the equation.'}\n\nOn instance['sde']['drift'][1]['f']:\n    True",
+      "data": {
+        "populations": [
+          {
+            "name": "Population1",
+            "composition": [
+              "State1",
+              "State2"
+            ],
+            "remainder": {
+              "name": "Remainder1",
+              "pop_size": "Population1_size"
+            }
+          },
+          {
+            "name": "Population2",
+            "composition": [
+              "State3",
+              "State4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State1",
+            "to": "State2",
+            "rate": "Rate1",
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise1",
+              "sd": "SD1"
+            },
+            "accumulators": [
+              "Accumulator1"
+            ],
+            "keywords": [
+              "Keyword1",
+              "Keyword2"
+            ]
+          },
+          {
+            "from": "State3",
+            "to": "State4",
+            "rate": "Rate2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State1",
+              "f": "F1",
+              "transformation": "Transformation1"
+            },
+            {
+              "name": "State2",
+              "f": true,
+              "transformation": "Transformation2"
+            }
+          ],
+          "dispersion": [
+            [
+              "Dispersion11",
+              "Dispersion12"
+            ],
+            [
+              "Dispersion21",
+              "Dispersion22"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State3",
+            "f": "F3"
+          },
+          {
+            "name": "State4",
+            "f": "F4",
+            "transformation": "Transformation4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation1",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "Normal",
+            "mean": "Mean1",
+            "sd": "SD1",
+            "n": "N1",
+            "p": "P1"
+          },
+          {
+            "name": "Observation2",
+            "start": "2020-01-02T00:00:00Z",
+            "distribution": "Poisson",
+            "mean": "Mean2"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1"
+          },
+          {
+            "name": "Data2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1",
+            "to_resource": "ToResource1"
+          },
+          {
+            "name": "Input2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of types \"number\", \"string\"",
+      "python_error": "None is not of type 'number', 'string'\n\nFailed validating 'type' in schema['properties']['sde']['properties']['drift']['items']['properties']['f']:\n    {'type': ['number', 'string'],\n     'description': 'Deterministic component of the equation.'}\n\nOn instance['sde']['drift'][0]['f']:\n    None",
+      "data": {
+        "populations": [
+          {
+            "name": "Population1",
+            "composition": [
+              "State1",
+              "State2"
+            ],
+            "remainder": {
+              "name": "Remainder1",
+              "pop_size": "Population1_size"
+            }
+          },
+          {
+            "name": "Population2",
+            "composition": [
+              "State3",
+              "State4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State1",
+            "to": "State2",
+            "rate": "Rate1",
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise1",
+              "sd": "SD1"
+            },
+            "accumulators": [
+              "Accumulator1"
+            ],
+            "keywords": [
+              "Keyword1",
+              "Keyword2"
+            ]
+          },
+          {
+            "from": "State3",
+            "to": "State4",
+            "rate": "Rate2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State1",
+              "f": null,
+              "transformation": "Transformation1"
+            },
+            {
+              "name": "State2",
+              "f": "F2"
+            }
+          ],
+          "dispersion": [
+            [
+              "Dispersion11",
+              "Dispersion12"
+            ],
+            [
+              "Dispersion21",
+              "Dispersion22"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State3",
+            "f": "F3"
+          },
+          {
+            "name": "State4",
+            "f": "F4",
+            "transformation": "Transformation4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation1",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "Normal",
+            "mean": "Mean1",
+            "sd": "SD1",
+            "n": "N1",
+            "p": "P1"
+          },
+          {
+            "name": "Observation2",
+            "start": "2020-01-02T00:00:00Z",
+            "distribution": "Poisson",
+            "mean": "Mean2"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1"
+          },
+          {
+            "name": "Data2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input1",
+            "description": "Description1",
+            "require": {
+              "datapackage": "Datapackage1",
+              "resource": "Resource1",
+              "fields": [
+                "Field1",
+                "Field2"
+              ]
+            },
+            "transformation": "Transformation1",
+            "to_resource": "ToResource1"
+          },
+          {
+            "name": "Input2",
+            "require": {
+              "datapackage": "Datapackage2",
+              "resource": "Resource2",
+              "fields": [
+                "Field3",
+                "Field4"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "populations": [
+          {
+            "name": "Population 1",
+            "composition": [
+              "State 1",
+              "State 2"
+            ],
+            "remainder": {
+              "name": "Remainder 1",
+              "pop_size": "Population 1"
+            }
+          },
+          {
+            "name": "Population 2",
+            "composition": [
+              "State 3",
+              "State 4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State 1",
+            "to": "State 2",
+            "rate": "Rate 1",
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise 1",
+              "sd": "0.1"
+            },
+            "accumulators": [
+              "Accumulator 1"
+            ],
+            "keywords": [
+              "Keyword 1"
+            ]
+          },
+          {
+            "from": "State 3",
+            "to": "State 4",
+            "rate": "Rate 2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State 1",
+              "f": "0.5 * State 1",
+              "transformation": "log"
+            },
+            {
+              "name": "State 2",
+              "f": "0.2 * State 2"
+            }
+          ],
+          "dispersion": [
+            [
+              "0.1",
+              "0.2"
+            ],
+            [
+              "0.3",
+              "0.4"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State 3",
+            "f": "0.1 * State 3",
+            "transformation": "exp"
+          },
+          {
+            "name": "State 4",
+            "f": "0.2 * State 4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation 1",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "normal",
+            "mean": "0",
+            "sd": "1"
+          },
+          {
+            "name": "Observation 2",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "poisson",
+            "n": "10",
+            "p": "0.5"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data 1",
+            "description": "Description of Data 1",
+            "require": {
+              "datapackage": "datapackage1",
+              "resource": "resource1",
+              "fields": [
+                "field1",
+                "field2"
+              ]
+            },
+            "transformation": "log"
+          },
+          {
+            "name": "Data 2",
+            "description": "Description of Data 2",
+            "require": {
+              "datapackage": "datapackage2",
+              "resource": "resource2",
+              "fields": [
+                "field3",
+                "field4"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input 1",
+            "description": "Description of Input 1",
+            "require": {
+              "datapackage": "datapackage3",
+              "resource": "resource3",
+              "fields": [
+                "field5",
+                "field6"
+              ]
+            },
+            "transformation": "exp",
+            "to_resource": "resource4"
+          },
+          {
+            "name": "Input 2",
+            "description": "Description of Input 2",
+            "require": {
+              "datapackage": "datapackage4",
+              "resource": "resource4",
+              "fields": [
+                "field7",
+                "field8"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"description\":\"Description of Data 3\",\"require\":{\"datapackage\":\"datapackage3\",\"resource\":\"resource3\",\"fields\":[\"field5\",\"field6\"]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'name' is a required property\n\nFailed validating 'required' in schema[0]:\n    {'type': 'object',\n     'properties': {'name': {'type': 'string'},\n                    'description': {'type': 'string'},\n                    'require': {'$ref': '#/definitions/require'},\n                    'transformation': {'description': 'When the parameters '\n                                                      'used in the model '\n                                                      'are functions of '\n                                                      'the data resources, '\n                                                      'specify the '\n                                                      'relation here.',\n                                       'type': 'string'}},\n     'required': ['name', 'require']}\n\nOn instance:\n    {'description': 'Description of Data 3',\n     'require': {'datapackage': 'datapackage3',\n                 'resource': 'resource3',\n                 'fields': ['field5', 'field6']}}",
+      "data": {
+        "populations": [
+          {
+            "name": "Population 1",
+            "composition": [
+              "State 1",
+              "State 2"
+            ],
+            "remainder": {
+              "name": "Remainder 1",
+              "pop_size": "Population 1"
+            }
+          },
+          {
+            "name": "Population 2",
+            "composition": [
+              "State 3",
+              "State 4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State 1",
+            "to": "State 2",
+            "rate": "Rate 1",
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise 1",
+              "sd": "0.1"
+            },
+            "accumulators": [
+              "Accumulator 1"
+            ],
+            "keywords": [
+              "Keyword 1"
+            ]
+          },
+          {
+            "from": "State 3",
+            "to": "State 4",
+            "rate": "Rate 2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State 1",
+              "f": "0.5 * State 1",
+              "transformation": "log"
+            },
+            {
+              "name": "State 2",
+              "f": "0.2 * State 2"
+            }
+          ],
+          "dispersion": [
+            [
+              "0.1",
+              "0.2"
+            ],
+            [
+              "0.3",
+              "0.4"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State 3",
+            "f": "0.1 * State 3",
+            "transformation": "exp"
+          },
+          {
+            "name": "State 4",
+            "f": "0.2 * State 4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation 1",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "normal",
+            "mean": "0",
+            "sd": "1"
+          },
+          {
+            "name": "Observation 2",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "poisson",
+            "n": "10",
+            "p": "0.5"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data 1",
+            "description": "Description of Data 1",
+            "require": {
+              "datapackage": "datapackage1",
+              "resource": "resource1",
+              "fields": [
+                "field1",
+                "field2"
+              ]
+            },
+            "transformation": "log"
+          },
+          {
+            "name": "Data 2",
+            "description": "Description of Data 2",
+            "require": {
+              "datapackage": "datapackage2",
+              "resource": "resource2",
+              "fields": [
+                "field3",
+                "field4"
+              ]
+            }
+          },
+          {
+            "description": "Description of Data 3",
+            "require": {
+              "datapackage": "datapackage3",
+              "resource": "resource3",
+              "fields": [
+                "field5",
+                "field6"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input 1",
+            "description": "Description of Input 1",
+            "require": {
+              "datapackage": "datapackage3",
+              "resource": "resource3",
+              "fields": [
+                "field5",
+                "field6"
+              ]
+            },
+            "transformation": "exp",
+            "to_resource": "resource4"
+          },
+          {
+            "name": "Input 2",
+            "description": "Description of Input 2",
+            "require": {
+              "datapackage": "datapackage4",
+              "resource": "resource4",
+              "fields": [
+                "field7",
+                "field8"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid date\" is not a \"date-time\"",
+      "python_error": "'Invalid date' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['observations']['items']['properties']['start']:\n    {'type': 'string', 'format': 'date-time'}\n\nOn instance['observations'][0]['start']:\n    'Invalid date'",
+      "data": {
+        "populations": [
+          {
+            "name": "Population 1",
+            "composition": [
+              "State 1",
+              "State 2"
+            ],
+            "remainder": {
+              "name": "Remainder 1",
+              "pop_size": "Population 1"
+            }
+          },
+          {
+            "name": "Population 2",
+            "composition": [
+              "State 3",
+              "State 4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State 1",
+            "to": "State 2",
+            "rate": "Rate 1",
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise 1",
+              "sd": "0.1"
+            },
+            "accumulators": [
+              "Accumulator 1"
+            ],
+            "keywords": [
+              "Keyword 1"
+            ]
+          },
+          {
+            "from": "State 3",
+            "to": "State 4",
+            "rate": "Rate 2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State 1",
+              "f": "0.5 * State 1",
+              "transformation": "log"
+            },
+            {
+              "name": "State 2",
+              "f": "0.2 * State 2"
+            }
+          ],
+          "dispersion": [
+            [
+              "0.1",
+              "0.2"
+            ],
+            [
+              "0.3",
+              "0.4"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State 3",
+            "f": "0.1 * State 3",
+            "transformation": "exp"
+          },
+          {
+            "name": "State 4",
+            "f": "0.2 * State 4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation 1",
+            "start": "Invalid date",
+            "distribution": "normal",
+            "mean": "0",
+            "sd": "1"
+          },
+          {
+            "name": "Observation 2",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "poisson",
+            "n": "10",
+            "p": "0.5"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data 1",
+            "description": "Description of Data 1",
+            "require": {
+              "datapackage": "datapackage1",
+              "resource": "resource1",
+              "fields": [
+                "field1",
+                "field2"
+              ]
+            },
+            "transformation": "log"
+          },
+          {
+            "name": "Data 2",
+            "description": "Description of Data 2",
+            "require": {
+              "datapackage": "datapackage2",
+              "resource": "resource2",
+              "fields": [
+                "field3",
+                "field4"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input 1",
+            "description": "Description of Input 1",
+            "require": {
+              "datapackage": "datapackage3",
+              "resource": "resource3",
+              "fields": [
+                "field5",
+                "field6"
+              ]
+            },
+            "transformation": "exp",
+            "to_resource": "resource4"
+          },
+          {
+            "name": "Input 2",
+            "description": "Description of Input 2",
+            "require": {
+              "datapackage": "datapackage4",
+              "resource": "resource4",
+              "fields": [
+                "field7",
+                "field8"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[0]['properties']['transformation']:\n    {'description': 'When the parameters used in the model are functions '\n                    'of the data resources, specify the relation here.',\n     'type': 'string'}\n\nOn instance['transformation']:\n    123",
+      "data": {
+        "populations": [
+          {
+            "name": "Population 1",
+            "composition": [
+              "State 1",
+              "State 2"
+            ],
+            "remainder": {
+              "name": "Remainder 1",
+              "pop_size": 123
+            }
+          },
+          {
+            "name": "Population 2",
+            "composition": [
+              "State 3",
+              "State 4"
+            ]
+          }
+        ],
+        "reactions": [
+          {
+            "from": "State 1",
+            "to": "State 2",
+            "rate": null,
+            "description": "Reaction 1",
+            "white_noise": {
+              "name": "Noise 1",
+              "sd": "0.1"
+            },
+            "accumulators": [
+              "Accumulator 1"
+            ],
+            "keywords": [
+              "Keyword 1"
+            ]
+          },
+          {
+            "from": "State 3",
+            "to": "State 4",
+            "rate": "Rate 2",
+            "description": "Reaction 2"
+          }
+        ],
+        "sde": {
+          "drift": [
+            {
+              "name": "State 1",
+              "f": "0.5 * State 1",
+              "transformation": "log"
+            },
+            {
+              "name": "State 2",
+              "f": true
+            }
+          ],
+          "dispersion": [
+            [
+              "0.1",
+              "0.2"
+            ],
+            [
+              "0.3",
+              "0.4",
+              "0.5"
+            ]
+          ]
+        },
+        "ode": [
+          {
+            "name": "State 3",
+            "f": "0.1 * State 3",
+            "transformation": "exp"
+          },
+          {
+            "name": "State 4",
+            "f": "0.2 * State 4"
+          }
+        ],
+        "observations": [
+          {
+            "name": "Observation 1",
+            "start": "2020-01-01T00:00:00",
+            "distribution": "normal",
+            "mean": "0",
+            "sd": "1"
+          },
+          {
+            "name": "Observation 2",
+            "start": "2020-01-01T00:00:00Z",
+            "distribution": "poisson",
+            "n": "ten",
+            "p": "0.5"
+          }
+        ],
+        "data": [
+          {
+            "name": "Data 1",
+            "description": "Description of Data 1",
+            "require": {
+              "datapackage": "datapackage1",
+              "resource": "resource1",
+              "fields": [
+                "field1",
+                "field2"
+              ]
+            },
+            "transformation": 123
+          },
+          {
+            "name": "Data 2",
+            "description": "Description of Data 2",
+            "require": {
+              "datapackage": "datapackage2",
+              "resource": "resource2",
+              "fields": [
+                "field3",
+                "field4"
+              ]
+            }
+          }
+        ],
+        "inputs": [
+          {
+            "name": "Input 1",
+            "description": "Description of Input 1",
+            "require": {
+              "datapackage": "datapackage3",
+              "resource": "resource3",
+              "fields": [
+                "field5",
+                "field6"
+              ]
+            },
+            "transformation": "exp",
+            "to_resource": "resource4"
+          },
+          {
+            "name": "Input 2",
+            "description": "Description of Input 2",
+            "require": {
+              "datapackage": "datapackage4",
+              "resource": "resource4",
+              "fields": [
+                "field7",
+                "field8"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

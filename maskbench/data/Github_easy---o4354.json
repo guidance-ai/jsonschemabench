@@ -1,0 +1,410 @@
+{
+  "description": "sample Github_easy/o4354.json",
+  "meta": {
+    "full_size": 1868,
+    "stripped_size": 1848,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "light": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "adafruit_lpd8806",
+                  "epistar_lpd8806"
+                ]
+              },
+              "num_leds": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "simulate_mode": {
+                "type": "boolean"
+              },
+              "spidev": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "num_leds"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "console"
+                ]
+              },
+              "num_leds": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "type",
+              "num_leds"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "ci_server": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "jenkins"
+                ]
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https?://[0-9a-zA-Z-_.]+:?[0-9]+$"
+              },
+              "pollrate_s": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "type",
+              "url",
+              "pollrate_s"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "circleci",
+                  "buildkite"
+                ]
+              },
+              "api_token": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              },
+              "pollrate_s": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "type",
+              "api_token",
+              "username",
+              "pollrate_s"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "travisci"
+                ]
+              },
+              "username": {
+                "type": "string"
+              },
+              "pollrate_s": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "type",
+              "username",
+              "pollrate_s"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "bamboo"
+                ]
+              },
+              "username": {
+                "$ref": "#/definitions/nonEmptyString"
+              },
+              "password": {
+                "$ref": "#/definitions/nonEmptyString"
+              },
+              "url": {
+                "type": "string"
+              },
+              "pollrate_s": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "type",
+              "url",
+              "pollrate_s"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "jobs": {
+        "type": "array",
+        "_uniqueItems": true,
+        "minItems": 0,
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "branch": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "branch"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "light",
+      "ci_server",
+      "jobs"
+    ],
+    "definitions": {
+      "nonEmptyString": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "light": {
+          "type": "adafruit_lpd8806",
+          "num_leds": 10,
+          "simulate_mode": false,
+          "spidev": "/dev/spidev0.0"
+        },
+        "ci_server": {
+          "type": "jenkins",
+          "url": "http://localhost:8080",
+          "pollrate_s": 10
+        },
+        "jobs": [
+          {
+            "name": "Job 1",
+            "branch": "main"
+          },
+          {
+            "name": "Job 2",
+            "branch": "dev"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"jenkins\",\"url\":\"http://localhost:8080abc\",\"pollrate_s\":10} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'jenkins', 'url': 'http://localhost:8080abc', 'pollrate_s': 10} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['ci_server']:\n    {'oneOf': [{'type': 'object',\n                'properties': {'type': {'enum': ['jenkins']},\n                               'url': {'type': 'string',\n                                       'pattern': '^https?://[0-9a-zA-Z-_.]+:?[0-9]+$'},\n                               'pollrate_s': {'type': 'integer',\n                                              'minimum': 1}},\n                'required': ['type', 'url', 'pollrate_s'],\n                'additionalProperties': False},\n               {'type': 'object',\n                'properties': {'type': {'enum': ['circleci', 'buildkite']},\n                               'api_token': {'type': 'string'},\n                               'username': {'type': 'string'},\n                               'pollrate_s': {'type': 'integer',\n                                              'minimum': 1}},\n  .. (1183 more)",
+      "data": {
+        "light": {
+          "type": "adafruit_lpd8806",
+          "num_leds": 10,
+          "simulate_mode": false,
+          "spidev": "/dev/spidev0.0"
+        },
+        "ci_server": {
+          "type": "jenkins",
+          "url": "http://localhost:8080abc",
+          "pollrate_s": 10
+        },
+        "jobs": [
+          {
+            "name": "Job 1",
+            "branch": "main"
+          },
+          {
+            "name": "Job 2",
+            "branch": "dev"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"jenkins\",\"url\":\"http://localhost:8080\",\"pollrate_s\":10,\"api_token\":\"token\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'jenkins', 'url': 'http://localhost:8080', 'pollrate_s': 10, 'api_token': 'token'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['ci_server']:\n    {'oneOf': [{'type': 'object',\n                'properties': {'type': {'enum': ['jenkins']},\n                               'url': {'type': 'string',\n                                       'pattern': '^https?://[0-9a-zA-Z-_.]+:?[0-9]+$'},\n                               'pollrate_s': {'type': 'integer',\n                                              'minimum': 1}},\n                'required': ['type', 'url', 'pollrate_s'],\n                'additionalProperties': False},\n               {'type': 'object',\n                'properties': {'type': {'enum': ['circleci', 'buildkite']},\n                               'api_token': {'type': 'string'},\n                               'username': {'type': 'string'},\n                               'pollrate_s': {'type': 'integer',\n                                             .. (1236 more)",
+      "data": {
+        "light": {
+          "type": "adafruit_lpd8806",
+          "num_leds": 10,
+          "simulate_mode": false,
+          "spidev": "/dev/spidev0.0"
+        },
+        "ci_server": {
+          "type": "jenkins",
+          "url": "http://localhost:8080",
+          "pollrate_s": 10,
+          "api_token": "token"
+        },
+        "jobs": [
+          {
+            "name": "Job 1",
+            "branch": "main"
+          },
+          {
+            "name": "Job 2",
+            "branch": "dev"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"adafruit_lpd8806\",\"num_leds\":0,\"simulate_mode\":false,\"spidev\":\"/dev/spidev0.0\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'adafruit_lpd8806', 'num_leds': 0, 'simulate_mode': False, 'spidev': '/dev/spidev0.0'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['light']:\n    {'oneOf': [{'type': 'object',\n                'properties': {'type': {'enum': ['adafruit_lpd8806',\n                                                 'epistar_lpd8806']},\n                               'num_leds': {'type': 'integer',\n                                            'minimum': 1},\n                               'simulate_mode': {'type': 'boolean'},\n                               'spidev': {'type': 'string'}},\n                'required': ['type', 'num_leds'],\n                'additionalProperties': False},\n               {'type': 'object',\n                'properties': {'type': {'enum': ['console']},\n                               'num_leds': {'type': 'integer',\n                                            'minimum': 1}},\n                'required': ['type', 'num_leds'],\n                'additionalPro.. (156 more)",
+      "data": {
+        "light": {
+          "type": "adafruit_lpd8806",
+          "num_leds": 0,
+          "simulate_mode": false,
+          "spidev": "/dev/spidev0.0"
+        },
+        "ci_server": {
+          "type": "jenkins",
+          "url": "http://localhost:8080",
+          "pollrate_s": 0
+        },
+        "jobs": [
+          {
+            "name": "Job 1",
+            "branch": "main"
+          },
+          {
+            "name": "Job 2",
+            "branch": "dev"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"bamboo\",\"url\":\"http://localhost:8080\",\"pollrate_s\":10,\"username\":\"\",\"password\":\"password\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'bamboo', 'url': 'http://localhost:8080', 'pollrate_s': 10, 'username': '', 'password': 'password'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['ci_server']:\n    {'oneOf': [{'type': 'object',\n                'properties': {'type': {'enum': ['jenkins']},\n                               'url': {'type': 'string',\n                                       'pattern': '^https?://[0-9a-zA-Z-_.]+:?[0-9]+$'},\n                               'pollrate_s': {'type': 'integer',\n                                              'minimum': 1}},\n                'required': ['type', 'url', 'pollrate_s'],\n                'additionalProperties': False},\n               {'type': 'object',\n                'properties': {'type': {'enum': ['circleci', 'buildkite']},\n                               'api_token': {'type': 'string'},\n                               'username': {'type': 'string'},\n                               'pollrate_s': {'type': 'integer',\n                            .. (1275 more)",
+      "data": {
+        "light": {
+          "type": "adafruit_lpd8806",
+          "num_leds": 10,
+          "simulate_mode": false,
+          "spidev": "/dev/spidev0.0"
+        },
+        "ci_server": {
+          "type": "bamboo",
+          "url": "http://localhost:8080",
+          "pollrate_s": 10,
+          "username": "",
+          "password": "password"
+        },
+        "jobs": [
+          {
+            "name": "Job 1",
+            "branch": "main"
+          },
+          {
+            "name": "Job 2",
+            "branch": "dev"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"adafruit_lpd8806\",\"num_leds\":0,\"simulate_mode\":false,\"spidev\":\"/dev/spidev0.0\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'adafruit_lpd8806', 'num_leds': 0, 'simulate_mode': False, 'spidev': '/dev/spidev0.0'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['light']:\n    {'oneOf': [{'type': 'object',\n                'properties': {'type': {'enum': ['adafruit_lpd8806',\n                                                 'epistar_lpd8806']},\n                               'num_leds': {'type': 'integer',\n                                            'minimum': 1},\n                               'simulate_mode': {'type': 'boolean'},\n                               'spidev': {'type': 'string'}},\n                'required': ['type', 'num_leds'],\n                'additionalProperties': False},\n               {'type': 'object',\n                'properties': {'type': {'enum': ['console']},\n                               'num_leds': {'type': 'integer',\n                                            'minimum': 1}},\n                'required': ['type', 'num_leds'],\n                'additionalPro.. (156 more)",
+      "data": {
+        "light": {
+          "type": "adafruit_lpd8806",
+          "num_leds": 0,
+          "simulate_mode": false,
+          "spidev": "/dev/spidev0.0"
+        },
+        "ci_server": {
+          "type": "jenkins",
+          "url": "http://localhost",
+          "pollrate_s": 0
+        },
+        "jobs": [
+          {
+            "name": "Job 1",
+            "branch": "main"
+          },
+          {
+            "name": "Job 2",
+            "branch": "dev"
+          },
+          {
+            "name": "Job 1",
+            "branch": "dev"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "description": "sample Github_trivial/o65459.json",
+  "meta": {
+    "full_size": 909,
+    "stripped_size": 397,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "oneOf": [
+      {
+        "type": [
+          "string",
+          "null"
+        ],
+        "minLength": 2
+      },
+      {
+        "name": "Permission",
+        "description": "A permission issued by a government or regulatory body to an entity to do something. This may be fine grained,e.g. to sell liquor, to accept customer deposits, or broader, e.g to operate as a bank, a restaurant. It may also be permission to do something physical, such as explore for oil in a given area, or mine for iron ore",
+        "type": "object",
+        "properties": {
+          "activity_name": {
+            "type": "string"
+          },
+          "activity_id": {
+            "type": "string"
+          },
+          "permission_type": {
+            "enum": [
+              "operating",
+              "exploration",
+              "exploitation"
+            ],
+            "description": "types of permission, such as 'operating', 'exploration', 'exploitation'"
+          },
+          "restrictions": {
+            "type": "array",
+            "description": "conditions or restrictions on the permissions",
+            "items": {
+              "type": "string"
+            }
+          },
+          "other_attributes": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "activity_name"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "activity_name": "Oil Exploration",
+        "activity_id": "OE-1234",
+        "permission_type": "exploration",
+        "restrictions": [
+          "Must not harm the environment",
+          "Must not disturb local wildlife"
+        ],
+        "other_attributes": {
+          "issue_date": "2022-01-01",
+          "expiration_date": "2025-01-01"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "activity_name": "Oil Exploration",
+        "activity_id": "OE-12345",
+        "permission_type": "exploration",
+        "restrictions": [
+          "Must follow environmental regulations",
+          "Must obtain local community consent"
+        ],
+        "other_attributes": {
+          "issue_date": "2022-01-01",
+          "expiry_date": "2025-12-31"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"activity_name\":\"Oil Exploration\",\"activity_id\":\"OE-12345\",\"permission_type\":\"exploration\",\"restrictions\":[\"Must follow environmental regulations\",\"Must obtain local community consent\",12345],\"other_attributes\":{\"issue_date\":\"2022-01-01\",\"expiry_date\":\"2025-12-31\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['restrictions']['items']:\n    {'type': 'string'}\n\nOn instance['restrictions'][2]:\n    12345",
+      "data": {
+        "activity_name": "Oil Exploration",
+        "activity_id": "OE-12345",
+        "permission_type": "exploration",
+        "restrictions": [
+          "Must follow environmental regulations",
+          "Must obtain local community consent",
+          12345
+        ],
+        "other_attributes": {
+          "issue_date": "2022-01-01",
+          "expiry_date": "2025-12-31"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1406 @@
+{
+  "description": "sample JsonSchemaStore/machine.schema.json",
+  "meta": {
+    "full_size": 4056,
+    "stripped_size": 3933,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "allOf",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+      "actionObject": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "definition": "The action type"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "type"
+        ]
+      },
+      "baseStateNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "atomic",
+              "compound",
+              "parallel",
+              "final",
+              "history"
+            ]
+          },
+          "order": {
+            "$ref": "#/definitions/order"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the state node, in Markdown"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "type"
+        ]
+      },
+      "compoundStateNode": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/baseStateNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "compound"
+              },
+              "entry": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/actionObject"
+                }
+              },
+              "exit": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/actionObject"
+                }
+              },
+              "initial": {
+                "type": "string"
+              },
+              "invoke": {
+                "$ref": "#/definitions/invokeArray"
+              },
+              "on": {
+                "$ref": "#/definitions/transitionsObject"
+              },
+              "states": {
+                "$ref": "#/definitions/statesObject"
+              }
+            },
+            "required": [
+              "states"
+            ]
+          }
+        ]
+      },
+      "parallelStateNode": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/baseStateNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "parallel"
+              },
+              "entry": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/actionObject"
+                }
+              },
+              "exit": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/actionObject"
+                }
+              },
+              "invoke": {
+                "$ref": "#/definitions/invokeArray"
+              },
+              "on": {
+                "$ref": "#/definitions/transitionsObject"
+              },
+              "states": {
+                "$ref": "#/definitions/statesObject"
+              }
+            },
+            "required": [
+              "states"
+            ]
+          }
+        ]
+      },
+      "atomicStateNode": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/baseStateNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "atomic"
+              },
+              "entry": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/actionObject"
+                }
+              },
+              "exit": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/actionObject"
+                }
+              },
+              "invoke": {
+                "$ref": "#/definitions/invokeArray"
+              },
+              "on": {
+                "$ref": "#/definitions/transitionsObject"
+              }
+            },
+            "required": [
+              "on"
+            ]
+          }
+        ]
+      },
+      "historyStateNode": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/baseStateNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "history"
+              },
+              "history": {
+                "type": "string",
+                "enum": [
+                  "shallow",
+                  "deep"
+                ]
+              }
+            },
+            "required": [
+              "history"
+            ]
+          }
+        ]
+      },
+      "finalStateNode": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/baseStateNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "final"
+              },
+              "data": {
+                "type": "object"
+              }
+            }
+          }
+        ]
+      },
+      "statesObject": {
+        "type": "object",
+        "patternProperties": {
+          "^.*$": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/atomicStateNode"
+              },
+              {
+                "$ref": "#/definitions/compoundStateNode"
+              },
+              {
+                "$ref": "#/definitions/parallelStateNode"
+              },
+              {
+                "$ref": "#/definitions/historyStateNode"
+              },
+              {
+                "$ref": "#/definitions/finalStateNode"
+              }
+            ]
+          }
+        }
+      },
+      "transitionsObject": {
+        "type": "object",
+        "patternProperties": {
+          "^.*$": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/transitionObject"
+            }
+          }
+        }
+      },
+      "transitionObject": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/actionObject"
+            }
+          },
+          "cond": {
+            "type": "object"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "actions",
+          "eventType",
+          "source",
+          "target"
+        ]
+      },
+      "invokeObject": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "src": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            }
+          },
+          "autoForward": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "src"
+        ],
+        "additionalProperties": false
+      },
+      "invokeArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/invokeObject"
+        }
+      },
+      "functionObject": {
+        "type": "object",
+        "properties": {
+          "$function": {
+            "type": "string"
+          }
+        }
+      },
+      "order": {
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "id": {
+        "title": "ID",
+        "type": "string"
+      },
+      "initial": {
+        "type": "string"
+      },
+      "key": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "compound",
+          "parallel"
+        ]
+      },
+      "context": {
+        "type": "object"
+      },
+      "states": {
+        "$ref": "#/definitions/statesObject"
+      },
+      "on": {
+        "$ref": "#/definitions/transitionsObject"
+      },
+      "transitions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/transitionObject"
+        }
+      },
+      "entry": {
+        "type": "array"
+      },
+      "exit": {
+        "type": "array"
+      },
+      "order": {
+        "$ref": "#/definitions/order"
+      },
+      "invoke": {
+        "$ref": "#/definitions/invokeArray"
+      },
+      "version": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "key",
+      "type",
+      "states"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example",
+        "initial": "initialState",
+        "key": "exampleKey",
+        "type": "compound",
+        "context": {},
+        "states": {
+          "initialState": {
+            "id": "initialState",
+            "key": "initialState",
+            "type": "atomic",
+            "entry": [
+              {
+                "type": "log",
+                "message": "Entering initial state"
+              }
+            ],
+            "exit": [
+              {
+                "type": "log",
+                "message": "Exiting initial state"
+              }
+            ],
+            "invoke": [
+              {
+                "type": "http",
+                "id": "initialStateInvoke",
+                "src": {
+                  "type": "http",
+                  "uri": "https://example.com/initial-state"
+                },
+                "autoForward": true
+              }
+            ],
+            "on": {
+              "event1": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "message": "Received event1"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event1",
+                  "source": "initialState",
+                  "target": [
+                    "nextState"
+                  ]
+                }
+              ]
+            }
+          },
+          "nextState": {
+            "id": "nextState",
+            "key": "nextState",
+            "type": "compound",
+            "states": {
+              "subState1": {
+                "id": "subState1",
+                "key": "subState1",
+                "type": "atomic",
+                "entry": [
+                  {
+                    "type": "log",
+                    "message": "Entering sub state 1"
+                  }
+                ],
+                "exit": [
+                  {
+                    "type": "log",
+                    "message": "Exiting sub state 1"
+                  }
+                ],
+                "invoke": [
+                  {
+                    "type": "http",
+                    "id": "subState1Invoke",
+                    "src": {
+                      "type": "http",
+                      "uri": "https://example.com/sub-state-1"
+                    },
+                    "autoForward": true
+                  }
+                ],
+                "on": {
+                  "event2": [
+                    {
+                      "actions": [
+                        {
+                          "type": "log",
+                          "message": "Received event2"
+                        }
+                      ],
+                      "cond": {},
+                      "eventType": "event2",
+                      "source": "subState1",
+                      "target": [
+                        "finalState"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "initial": "subState1",
+            "on": {
+              "event3": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "message": "Received event3"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event3",
+                  "source": "nextState",
+                  "target": [
+                    "finalState"
+                  ]
+                }
+              ]
+            }
+          },
+          "finalState": {
+            "id": "finalState",
+            "key": "finalState",
+            "type": "final",
+            "data": {
+              "message": "Final state reached"
+            }
+          }
+        },
+        "on": {
+          "event4": [
+            {
+              "actions": [
+                {
+                  "type": "log",
+                  "message": "Received event4"
+                }
+              ],
+              "cond": {},
+              "eventType": "event4",
+              "source": "example",
+              "target": [
+                "finalState"
+              ]
+            }
+          ]
+        },
+        "transitions": [
+          {
+            "actions": [
+              {
+                "type": "log",
+                "message": "Transitioning to final state"
+              }
+            ],
+            "cond": {},
+            "eventType": "event5",
+            "source": "example",
+            "target": [
+              "finalState"
+            ]
+          }
+        ],
+        "entry": [
+          {
+            "type": "log",
+            "message": "Entering example state machine"
+          }
+        ],
+        "exit": [
+          {
+            "type": "log",
+            "message": "Exiting example state machine"
+          }
+        ],
+        "invoke": [
+          {
+            "type": "http",
+            "id": "exampleInvoke",
+            "src": {
+              "type": "http",
+              "uri": "https://example.com/example"
+            },
+            "autoForward": true
+          }
+        ],
+        "version": "1.0"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example-state-machine",
+        "initial": "initial-state",
+        "key": "example-key",
+        "type": "compound",
+        "context": {},
+        "states": {
+          "initial-state": {
+            "id": "initial-state",
+            "key": "initial-state",
+            "type": "atomic",
+            "entry": [
+              {
+                "type": "log",
+                "data": "Entering initial state"
+              }
+            ],
+            "exit": [
+              {
+                "type": "log",
+                "data": "Exiting initial state"
+              }
+            ],
+            "invoke": [
+              {
+                "type": "http",
+                "id": "initial-state-invoke",
+                "src": {
+                  "type": "http",
+                  "uri": "https://example.com/initial-state"
+                },
+                "autoForward": true
+              }
+            ],
+            "on": {
+              "event1": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "data": "Received event1"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event1",
+                  "source": "initial-state",
+                  "target": [
+                    "next-state"
+                  ]
+                }
+              ]
+            }
+          },
+          "next-state": {
+            "id": "next-state",
+            "key": "next-state",
+            "type": "compound",
+            "states": {
+              "sub-state1": {
+                "id": "sub-state1",
+                "key": "sub-state1",
+                "type": "atomic",
+                "entry": [
+                  {
+                    "type": "log",
+                    "data": "Entering sub-state1"
+                  }
+                ],
+                "exit": [
+                  {
+                    "type": "log",
+                    "data": "Exiting sub-state1"
+                  }
+                ],
+                "invoke": [
+                  {
+                    "type": "http",
+                    "id": "sub-state1-invoke",
+                    "src": {
+                      "type": "http",
+                      "uri": "https://example.com/sub-state1"
+                    },
+                    "autoForward": true
+                  }
+                ],
+                "on": {
+                  "event2": [
+                    {
+                      "actions": [
+                        {
+                          "type": "log",
+                          "data": "Received event2"
+                        }
+                      ],
+                      "cond": {},
+                      "eventType": "event2",
+                      "source": "sub-state1",
+                      "target": [
+                        "final-state"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "initial": "sub-state1",
+            "on": {
+              "event3": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "data": "Received event3"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event3",
+                  "source": "next-state",
+                  "target": [
+                    "final-state"
+                  ]
+                }
+              ]
+            }
+          },
+          "final-state": {
+            "id": "final-state",
+            "key": "final-state",
+            "type": "final",
+            "data": {}
+          }
+        },
+        "on": {
+          "event4": [
+            {
+              "actions": [
+                {
+                  "type": "log",
+                  "data": "Received event4"
+                }
+              ],
+              "cond": {},
+              "eventType": "event4",
+              "source": "example-state-machine",
+              "target": [
+                "final-state"
+              ]
+            }
+          ]
+        },
+        "transitions": [
+          {
+            "actions": [
+              {
+                "type": "log",
+                "data": "Transitioning to final state"
+              }
+            ],
+            "cond": {},
+            "eventType": "event5",
+            "source": "example-state-machine",
+            "target": [
+              "final-state"
+            ]
+          }
+        ],
+        "entry": [
+          {
+            "type": "log",
+            "data": "Entering state machine"
+          }
+        ],
+        "exit": [
+          {
+            "type": "log",
+            "data": "Exiting state machine"
+          }
+        ],
+        "invoke": [
+          {
+            "type": "http",
+            "id": "state-machine-invoke",
+            "src": {
+              "type": "http",
+              "uri": "https://example.com/state-machine"
+            },
+            "autoForward": true
+          }
+        ],
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"next-state\",\"key\":\"next-state\",\"type\":\"compound\",\"states\":{\"sub-state1\":{\"id\":\"sub-state1\",\"key\":\"sub-state1\",\"type\":\"compound\",\"entry\":[{\"type\":\"log\",\"data\":\"Entering sub-state1\"}],\"exit\":[{\"type\":\"log\",\"data\":\"Exiting sub-state1\"}],\"invoke\":[{\"type\":\"http\",\"id\":\"sub-state1-invoke\",\"src\":{\"type\":\"http\",\"uri\":\"https://example.com/sub-state1\"},\"autoForward\":true}],\"on\":{\"event2\":[{\"actions\":[{\"type\":\"log\",\"data\":\"Received event2\"}],\"cond\":{},\"eventType\":\"event2\",\"source\":\"sub-state1\",\"target\":[\"final-state\"]}]}}},\"initial\":\"sub-state1\",\"on\":{\"event3\":[{\"actions\":[{\"type\":\"log\",\"data\":\"Received event3\"}],\"cond\":{},\"eventType\":\"event3\",\"source\":\"next-state\",\"target\":[\"final-state\"]}]}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'id': 'next-state', 'key': 'next-state', 'type': 'compound', 'states': {'sub-state1': {'id': 'sub-state1', 'key': 'sub-state1', 'type': 'compound', 'entry': [{'type': 'log', 'data': 'Entering sub-state1'}], 'exit': [{'type': 'log', 'data': 'Exiting sub-state1'}], 'invoke': [{'type': 'http', 'id': 'sub-state1-invoke', 'src': {'type': 'http', 'uri': 'https://example.com/sub-state1'}, 'autoForward': True}], 'on': {'event2': [{'actions': [{'type': 'log', 'data': 'Received event2'}], 'cond': {}, 'eventType': 'event2', 'source': 'sub-state1', 'target': ['final-state']}]}}}, 'initial': 'sub-state1', 'on': {'event3': [{'actions': [{'type': 'log', 'data': 'Received event3'}], 'cond': {}, 'eventType': 'event3', 'source': 'next-state', 'target': ['final-state']}]}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['states']['patternProperties']['^.*$']:\n    {'oneOf': [{'$ref': '#/definitions/atomicStateNode'},\n               {'$ref': '#/definitions/compoundStateNode'},\n     .. (1923 more)",
+      "data": {
+        "id": "example-state-machine",
+        "initial": "initial-state",
+        "key": "example-key",
+        "type": "compound",
+        "context": {},
+        "states": {
+          "initial-state": {
+            "id": "initial-state",
+            "key": "initial-state",
+            "type": "atomic",
+            "entry": [
+              {
+                "type": "log",
+                "data": "Entering initial state"
+              }
+            ],
+            "exit": [
+              {
+                "type": "log",
+                "data": "Exiting initial state"
+              }
+            ],
+            "invoke": [
+              {
+                "type": "http",
+                "id": "initial-state-invoke",
+                "src": {
+                  "type": "http",
+                  "uri": "https://example.com/initial-state"
+                },
+                "autoForward": true
+              }
+            ],
+            "on": {
+              "event1": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "data": "Received event1"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event1",
+                  "source": "initial-state",
+                  "target": [
+                    "next-state"
+                  ]
+                }
+              ]
+            }
+          },
+          "next-state": {
+            "id": "next-state",
+            "key": "next-state",
+            "type": "compound",
+            "states": {
+              "sub-state1": {
+                "id": "sub-state1",
+                "key": "sub-state1",
+                "type": "compound",
+                "entry": [
+                  {
+                    "type": "log",
+                    "data": "Entering sub-state1"
+                  }
+                ],
+                "exit": [
+                  {
+                    "type": "log",
+                    "data": "Exiting sub-state1"
+                  }
+                ],
+                "invoke": [
+                  {
+                    "type": "http",
+                    "id": "sub-state1-invoke",
+                    "src": {
+                      "type": "http",
+                      "uri": "https://example.com/sub-state1"
+                    },
+                    "autoForward": true
+                  }
+                ],
+                "on": {
+                  "event2": [
+                    {
+                      "actions": [
+                        {
+                          "type": "log",
+                          "data": "Received event2"
+                        }
+                      ],
+                      "cond": {},
+                      "eventType": "event2",
+                      "source": "sub-state1",
+                      "target": [
+                        "final-state"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "initial": "sub-state1",
+            "on": {
+              "event3": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "data": "Received event3"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event3",
+                  "source": "next-state",
+                  "target": [
+                    "final-state"
+                  ]
+                }
+              ]
+            }
+          },
+          "final-state": {
+            "id": "final-state",
+            "key": "final-state",
+            "type": "final",
+            "data": {}
+          }
+        },
+        "on": {
+          "event4": [
+            {
+              "actions": [
+                {
+                  "type": "log",
+                  "data": "Received event4"
+                }
+              ],
+              "cond": {},
+              "eventType": "event4",
+              "source": "example-state-machine",
+              "target": [
+                "final-state"
+              ]
+            }
+          ]
+        },
+        "transitions": [
+          {
+            "actions": [
+              {
+                "type": "log",
+                "data": "Transitioning to final state"
+              }
+            ],
+            "cond": {},
+            "eventType": "event5",
+            "source": "example-state-machine",
+            "target": [
+              "final-state"
+            ]
+          }
+        ],
+        "entry": [
+          {
+            "type": "log",
+            "data": "Entering state machine"
+          }
+        ],
+        "exit": [
+          {
+            "type": "log",
+            "data": "Exiting state machine"
+          }
+        ],
+        "invoke": [
+          {
+            "type": "http",
+            "id": "state-machine-invoke",
+            "src": {
+              "type": "http",
+              "uri": "https://example.com/state-machine"
+            },
+            "autoForward": true
+          }
+        ],
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"invalid-state\",\"key\":\"invalid-state\",\"type\":\"invalid-type\",\"invalid-property\":\"invalid-value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'id': 'invalid-state', 'key': 'invalid-state', 'type': 'invalid-type', 'invalid-property': 'invalid-value'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['states']['patternProperties']['^.*$']:\n    {'oneOf': [{'$ref': '#/definitions/atomicStateNode'},\n               {'$ref': '#/definitions/compoundStateNode'},\n               {'$ref': '#/definitions/parallelStateNode'},\n               {'$ref': '#/definitions/historyStateNode'},\n               {'$ref': '#/definitions/finalStateNode'}]}\n\nOn instance['states']['invalid-state']:\n    {'id': 'invalid-state',\n     'key': 'invalid-state',\n     'type': 'invalid-type',\n     'invalid-property': 'invalid-value'}",
+      "data": {
+        "id": "example-state-machine",
+        "initial": "initial-state",
+        "key": "example-key",
+        "type": "compound",
+        "context": {},
+        "states": {
+          "invalid-state": {
+            "id": "invalid-state",
+            "key": "invalid-state",
+            "type": "invalid-type",
+            "invalid-property": "invalid-value"
+          }
+        },
+        "on": {
+          "event4": [
+            {
+              "actions": [
+                {
+                  "type": "log",
+                  "data": "Received event4"
+                }
+              ],
+              "cond": {},
+              "eventType": "event4",
+              "source": "example-state-machine",
+              "target": [
+                "final-state"
+              ]
+            }
+          ]
+        },
+        "transitions": [
+          {
+            "actions": [
+              {
+                "type": "log",
+                "data": "Transitioning to final state"
+              }
+            ],
+            "cond": {},
+            "eventType": "event5",
+            "source": "example-state-machine",
+            "target": [
+              "final-state"
+            ]
+          }
+        ],
+        "entry": [
+          {
+            "type": "log",
+            "data": "Entering state machine"
+          }
+        ],
+        "exit": [
+          {
+            "type": "log",
+            "data": "Exiting state machine"
+          }
+        ],
+        "invoke": [
+          {
+            "type": "http",
+            "id": "state-machine-invoke",
+            "src": {
+              "type": "http",
+              "uri": "https://example.com/state-machine"
+            },
+            "autoForward": true
+          }
+        ],
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"invalid-state\",\"key\":\"invalid-state\",\"type\":\"invalid-type\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'id': 'invalid-state', 'key': 'invalid-state', 'type': 'invalid-type'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['states']['patternProperties']['^.*$']:\n    {'oneOf': [{'$ref': '#/definitions/atomicStateNode'},\n               {'$ref': '#/definitions/compoundStateNode'},\n               {'$ref': '#/definitions/parallelStateNode'},\n               {'$ref': '#/definitions/historyStateNode'},\n               {'$ref': '#/definitions/finalStateNode'}]}\n\nOn instance['states']['invalid-state']:\n    {'id': 'invalid-state', 'key': 'invalid-state', 'type': 'invalid-type'}",
+      "data": {
+        "id": "example-state-machine",
+        "initial": "initial-state",
+        "key": "example-key",
+        "type": "compound",
+        "context": {},
+        "states": {
+          "invalid-state": {
+            "id": "invalid-state",
+            "key": "invalid-state",
+            "type": "invalid-type"
+          }
+        },
+        "on": {
+          "event4": [
+            {
+              "actions": [
+                {
+                  "type": "log",
+                  "data": "Received event4"
+                }
+              ],
+              "cond": {},
+              "eventType": "event4",
+              "source": "example-state-machine",
+              "target": [
+                "final-state"
+              ]
+            }
+          ]
+        },
+        "transitions": [
+          {
+            "actions": [
+              {
+                "type": "log",
+                "data": "Transitioning to final state"
+              }
+            ],
+            "cond": {},
+            "eventType": "event5",
+            "source": "example-state-machine",
+            "target": [
+              "final-state"
+            ]
+          }
+        ],
+        "entry": [
+          {
+            "type": "log",
+            "data": "Entering state machine"
+          }
+        ],
+        "exit": [
+          {
+            "type": "log",
+            "data": "Exiting state machine"
+          }
+        ],
+        "invoke": [
+          {
+            "type": "http",
+            "id": "state-machine-invoke",
+            "src": {
+              "type": "http",
+              "uri": "https://example.com/state-machine"
+            },
+            "autoForward": true
+          }
+        ],
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"invalid-state\",\"key\":\"invalid-state\",\"type\":\"compound\",\"entry\":[{\"type\":\"log\",\"data\":\"Entering invalid state\"}],\"exit\":[{\"type\":\"log\",\"data\":\"Exiting invalid state\"}],\"invoke\":[{\"type\":\"http\",\"id\":\"invalid-state-invoke\",\"src\":{\"type\":\"http\",\"uri\":\"https://example.com/invalid-state\"},\"autoForward\":true}],\"on\":{\"event4\":[{\"actions\":[{\"type\":\"log\",\"data\":\"Received event4\"}],\"cond\":{},\"eventType\":\"event4\",\"source\":\"invalid-state\",\"target\":[\"final-state\"]}]}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'id': 'invalid-state', 'key': 'invalid-state', 'type': 'compound', 'entry': [{'type': 'log', 'data': 'Entering invalid state'}], 'exit': [{'type': 'log', 'data': 'Exiting invalid state'}], 'invoke': [{'type': 'http', 'id': 'invalid-state-invoke', 'src': {'type': 'http', 'uri': 'https://example.com/invalid-state'}, 'autoForward': True}], 'on': {'event4': [{'actions': [{'type': 'log', 'data': 'Received event4'}], 'cond': {}, 'eventType': 'event4', 'source': 'invalid-state', 'target': ['final-state']}]}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['states']['patternProperties']['^.*$']:\n    {'oneOf': [{'$ref': '#/definitions/atomicStateNode'},\n               {'$ref': '#/definitions/compoundStateNode'},\n               {'$ref': '#/definitions/parallelStateNode'},\n               {'$ref': '#/definitions/historyStateNode'},\n               {'$ref': '#/definitions/finalStateNode'}]}\n\nOn instance['states']['invalid-state']:\n    {'id': 'invalid-state',\n     'key': 'inva.. (705 more)",
+      "data": {
+        "id": "example-state-machine",
+        "initial": "initial-state",
+        "key": "example-key",
+        "type": "compound",
+        "context": {},
+        "states": {
+          "initial-state": {
+            "id": "initial-state",
+            "key": "initial-state",
+            "type": "atomic",
+            "entry": [
+              {
+                "type": "log",
+                "data": "Entering initial state"
+              }
+            ],
+            "exit": [
+              {
+                "type": "log",
+                "data": "Exiting initial state"
+              }
+            ],
+            "invoke": [
+              {
+                "type": "http",
+                "id": "initial-state-invoke",
+                "src": {
+                  "type": "http",
+                  "uri": "https://example.com/initial-state"
+                },
+                "autoForward": true
+              }
+            ],
+            "on": {
+              "event1": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "data": "Received event1"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event1",
+                  "source": "initial-state",
+                  "target": [
+                    "next-state"
+                  ]
+                }
+              ]
+            }
+          },
+          "next-state": {
+            "id": "next-state",
+            "key": "next-state",
+            "type": "compound",
+            "states": {
+              "sub-state1": {
+                "id": "sub-state1",
+                "key": "sub-state1",
+                "type": "atomic",
+                "entry": [
+                  {
+                    "type": "log",
+                    "data": "Entering sub-state1"
+                  }
+                ],
+                "exit": [
+                  {
+                    "type": "log",
+                    "data": "Exiting sub-state1"
+                  }
+                ],
+                "invoke": [
+                  {
+                    "type": "http",
+                    "id": "sub-state1-invoke",
+                    "src": {
+                      "type": "http",
+                      "uri": "https://example.com/sub-state1"
+                    },
+                    "autoForward": true
+                  }
+                ],
+                "on": {
+                  "event2": [
+                    {
+                      "actions": [
+                        {
+                          "type": "log",
+                          "data": "Received event2"
+                        }
+                      ],
+                      "cond": {},
+                      "eventType": "event2",
+                      "source": "sub-state1",
+                      "target": [
+                        "final-state"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "initial": "sub-state1",
+            "on": {
+              "event3": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "data": "Received event3"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event3",
+                  "source": "next-state",
+                  "target": [
+                    "final-state"
+                  ]
+                }
+              ]
+            }
+          },
+          "final-state": {
+            "id": "final-state",
+            "key": "final-state",
+            "type": "final",
+            "data": {}
+          },
+          "invalid-state": {
+            "id": "invalid-state",
+            "key": "invalid-state",
+            "type": "compound",
+            "entry": [
+              {
+                "type": "log",
+                "data": "Entering invalid state"
+              }
+            ],
+            "exit": [
+              {
+                "type": "log",
+                "data": "Exiting invalid state"
+              }
+            ],
+            "invoke": [
+              {
+                "type": "http",
+                "id": "invalid-state-invoke",
+                "src": {
+                  "type": "http",
+                  "uri": "https://example.com/invalid-state"
+                },
+                "autoForward": true
+              }
+            ],
+            "on": {
+              "event4": [
+                {
+                  "actions": [
+                    {
+                      "type": "log",
+                      "data": "Received event4"
+                    }
+                  ],
+                  "cond": {},
+                  "eventType": "event4",
+                  "source": "invalid-state",
+                  "target": [
+                    "final-state"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "on": {
+          "event4": [
+            {
+              "actions": [
+                {
+                  "type": "log",
+                  "data": "Received event4"
+                }
+              ],
+              "cond": {},
+              "eventType": "event4",
+              "source": "example-state-machine",
+              "target": [
+                "final-state"
+              ]
+            }
+          ]
+        },
+        "transitions": [
+          {
+            "actions": [
+              {
+                "type": "log",
+                "data": "Transitioning to final state"
+              }
+            ],
+            "cond": {},
+            "eventType": "event5",
+            "source": "example-state-machine",
+            "target": [
+              "final-state"
+            ]
+          }
+        ],
+        "entry": [
+          {
+            "type": "log",
+            "data": "Entering state machine"
+          }
+        ],
+        "exit": [
+          {
+            "type": "log",
+            "data": "Exiting state machine"
+          }
+        ],
+        "invoke": [
+          {
+            "type": "http",
+            "id": "state-machine-invoke",
+            "src": {
+              "type": "http",
+              "uri": "https://example.com/state-machine"
+            },
+            "autoForward": true
+          }
+        ],
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

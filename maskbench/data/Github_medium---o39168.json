@@ -1,0 +1,211 @@
+{
+  "description": "sample Github_medium/o39168.json",
+  "meta": {
+    "full_size": 850,
+    "stripped_size": 850,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@siblingKeys",
+      "allOf",
+      "enum",
+      "not",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "allOf": [
+      {
+        "$ref": "#/definitions/base"
+      },
+      {
+        "$ref": "#/definitions/with-id"
+      },
+      {
+        "oneOf": [
+          {
+            "not": {
+              "$ref": "#/definitions/car-type"
+            }
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/definitions/car-type"
+              },
+              {
+                "$ref": "#/definitions/car-properties"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "definitions": {
+      "base": {
+        "type": "object",
+        "required": [
+          "type",
+          "properties"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "object"
+          }
+        }
+      },
+      "with-id": {
+        "properties": {
+          "properties": {
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "car-type": {
+        "properties": {
+          "type": {
+            "enum": [
+              "car"
+            ]
+          }
+        }
+      },
+      "car-properties": {
+        "properties": {
+          "properties": {
+            "properties": {
+              "manufacturer": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "fuelType": {
+                "type": "string",
+                "enum": [
+                  "diesel",
+                  "gasoline",
+                  "biodiesel",
+                  "kerosene",
+                  "electric"
+                ]
+              },
+              "constructionYear": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "VIN": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "car",
+        "properties": {
+          "id": "12345",
+          "manufacturer": "Toyota",
+          "model": "Camry",
+          "fuelType": "gasoline",
+          "constructionYear": 2015,
+          "VIN": "JTHKD5BH5A5034567"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "car",
+        "properties": {
+          "id": "12345",
+          "manufacturer": "Toyota",
+          "model": "Corolla",
+          "fuelType": "gasoline",
+          "constructionYear": 2015,
+          "VIN": "JTEBU5JR3H5051234"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"car\",\"properties\":{\"id\":\"12345\",\"manufacturer\":\"Toyota\",\"model\":\"Corolla\",\"fuelType\":\"gasoline\",\"constructionYear\":-1,\"VIN\":\"JTEBU5JR3H5051234\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema[1]['allOf'][1]['properties']['properties']['properties']['constructionYear']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['properties']['constructionYear']:\n    -1",
+      "data": {
+        "type": "car",
+        "properties": {
+          "id": "12345",
+          "manufacturer": "Toyota",
+          "model": "Corolla",
+          "fuelType": "gasoline",
+          "constructionYear": -1,
+          "VIN": "JTEBU5JR3H5051234"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"car\",\"properties\":{\"id\":\"12345\",\"manufacturer\":\"Toyota\",\"model\":\"Corolla\",\"fuelType\":\"gasoline\",\"constructionYear\":-1,\"VIN\":\"JTEBU5JR3H5051234\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema[1]['allOf'][1]['properties']['properties']['properties']['constructionYear']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['properties']['constructionYear']:\n    -1",
+      "data": {
+        "type": "car",
+        "properties": {
+          "id": "12345",
+          "manufacturer": "Toyota",
+          "model": "Corolla",
+          "fuelType": "gasoline",
+          "constructionYear": -1,
+          "VIN": "JTEBU5JR3H5051234"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"car\",\"properties\":{\"id\":\"12345\",\"manufacturer\":\"Toyota\",\"model\":\"Corolla\",\"fuelType\":\"biofuels\",\"constructionYear\":2015,\"VIN\":\"JTEBU5JR3H5051234\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'biofuels' is not one of ['diesel', 'gasoline', 'biodiesel', 'kerosene', 'electric']\n\nFailed validating 'enum' in schema[1]['allOf'][1]['properties']['properties']['properties']['fuelType']:\n    {'type': 'string',\n     'enum': ['diesel', 'gasoline', 'biodiesel', 'kerosene', 'electric']}\n\nOn instance['properties']['fuelType']:\n    'biofuels'",
+      "data": {
+        "type": "car",
+        "properties": {
+          "id": "12345",
+          "manufacturer": "Toyota",
+          "model": "Corolla",
+          "fuelType": "biofuels",
+          "constructionYear": 2015,
+          "VIN": "JTEBU5JR3H5051234"
+        }
+      }
+    }
+  ]
+}

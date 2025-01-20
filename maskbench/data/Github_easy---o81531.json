@@ -1,0 +1,133 @@
+{
+  "description": "sample Github_easy/o81531.json",
+  "meta": {
+    "full_size": 436,
+    "stripped_size": 436,
+    "features": [
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "email": {
+        "pattern": "^[\\w|-|.]+@[\\w]+\\.[A-Za-z]{2,4}$",
+        "type": "string"
+      },
+      "firstName": {
+        "type": "string"
+      },
+      "lastName": {
+        "type": "string"
+      },
+      "postedSlides": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "enum": [
+              "yes",
+              "Yes",
+              "no",
+              "No"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "rating": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "email",
+      "firstName",
+      "lastName",
+      "postedSlides",
+      "rating"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "email": "john.doe@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "postedSlides": "yes",
+        "rating": 4.5
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['postedSlides']:\n    {'anyOf': [{'type': 'boolean'},\n               {'enum': ['yes', 'Yes', 'no', 'No'], 'type': 'string'}]}\n\nOn instance['postedSlides']:\n    123",
+      "data": {
+        "email": "john.doe@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "postedSlides": 123,
+        "rating": 4.5
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"john.doe@example\" does not match \"^[\\w|-|.]+@[\\w]+\\.[A-Za-z]{2,4}$\"",
+      "python_error": "'john.doe@example' does not match '^[\\\\w|-|.]+@[\\\\w]+\\\\.[A-Za-z]{2,4}$'\n\nFailed validating 'pattern' in schema['properties']['email']:\n    {'pattern': '^[\\\\w|-|.]+@[\\\\w]+\\\\.[A-Za-z]{2,4}$', 'type': 'string'}\n\nOn instance['email']:\n    'john.doe@example'",
+      "data": {
+        "email": "john.doe@example",
+        "firstName": "John",
+        "lastName": "Doe",
+        "postedSlides": "yes",
+        "rating": 4.5
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid_email\" does not match \"^[\\w|-|.]+@[\\w]+\\.[A-Za-z]{2,4}$\"",
+      "python_error": "'invalid_email' does not match '^[\\\\w|-|.]+@[\\\\w]+\\\\.[A-Za-z]{2,4}$'\n\nFailed validating 'pattern' in schema['properties']['email']:\n    {'pattern': '^[\\\\w|-|.]+@[\\\\w]+\\\\.[A-Za-z]{2,4}$', 'type': 'string'}\n\nOn instance['email']:\n    'invalid_email'",
+      "data": {
+        "email": "invalid_email",
+        "firstName": "John",
+        "lastName": "Doe",
+        "postedSlides": "yes",
+        "rating": 4.5
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid\" does not match \"^[\\w|-|.]+@[\\w]+\\.[A-Za-z]{2,4}$\"",
+      "python_error": "Additional properties are not allowed ('additionalField' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'properties': {'email': {'pattern': '^[\\\\w|-|.]+@[\\\\w]+\\\\.[A-Za-z]{2,4}$',\n                              'type': 'string'},\n                    'firstName': {'type': 'string'},\n                    'lastName': {'type': 'string'},\n                    'postedSlides': {'anyOf': [{'type': 'boolean'},\n                                               {'enum': ['yes',\n                                                         'Yes',\n                                                         'no',\n                                                         'No'],\n                                                'type': 'string'}]},\n                    'rating': {'type': 'number'}},\n     'required': ['email',\n                  'firstName',\n                  'lastName',\n                  'postedSlides',\n    .. (222 more)",
+      "data": {
+        "email": "invalid",
+        "firstName": "John",
+        "lastName": "Doe",
+        "postedSlides": "yes",
+        "rating": 4.5,
+        "additionalField": "some value"
+      }
+    }
+  ]
+}

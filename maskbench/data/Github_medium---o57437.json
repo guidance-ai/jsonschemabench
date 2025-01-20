@@ -1,0 +1,421 @@
+{
+  "description": "sample Github_medium/o57437.json",
+  "meta": {
+    "full_size": 1437,
+    "stripped_size": 852,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:date-time",
+      "format:email",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://localhost/schemas/records/record-v1.0.0.json",
+    "additionalProperties": false,
+    "title": "My site v1.0.0",
+    "type": "object",
+    "properties": {
+      "title": {
+        "description": "Record title.",
+        "type": "string"
+      },
+      "id": {
+        "description": "Invenio record identifier (integer).",
+        "type": "number"
+      },
+      "keywords": {
+        "description": "Free text keywords.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "publication_date": {
+        "description": "When the record is published",
+        "type": "string",
+        "format": "date-time"
+      },
+      "contributors": {
+        "description": "Contributors in order of importance.",
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ids": {
+              "description": "List of IDs related with the person.",
+              "type": "array",
+              "_uniqueItems": true,
+              "items": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "name": {
+              "description": "Full name of person or organisation. Personal name format: family, given.",
+              "type": "string"
+            },
+            "affiliations": {
+              "description": "Affiliation(s) for the purpose of this specific record.",
+              "type": "array",
+              "_uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "email": {
+              "type": "string",
+              "description": "Contact email for the purpose of this specific record.",
+              "format": "email"
+            },
+            "role": {
+              "description": "",
+              "type": "string",
+              "enum": [
+                "ContactPerson",
+                "Researcher",
+                "Other"
+              ]
+            }
+          },
+          "required": [
+            "name"
+          ]
+        }
+      }
+    },
+    "required": [
+      "id",
+      "contributors",
+      "title"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "2022-01-01T12:00:00Z",
+        "contributors": [
+          {
+            "name": "John Doe",
+            "role": "Researcher"
+          },
+          {
+            "name": "Jane Smith",
+            "role": "ContactPerson"
+          },
+          {
+            "name": "Bob Johnson",
+            "role": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid Date\" is not a \"date-time\"",
+      "python_error": "'Invalid Date' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['publication_date']:\n    {'description': 'When the record is published',\n     'type': 'string',\n     'format': 'date-time'}\n\nOn instance['publication_date']:\n    'Invalid Date'",
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "Invalid Date",
+        "contributors": [
+          {
+            "name": "John Doe",
+            "email": "Invalid Email",
+            "role": "Researcher"
+          },
+          {
+            "name": "Jane Smith",
+            "role": "ContactPerson"
+          },
+          {
+            "name": "Bob Johnson",
+            "role": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['contributors']:\n    {'description': 'Contributors in order of importance.',\n     'minItems': 1,\n     'type': 'array',\n     'items': {'type': 'object',\n               'additionalProperties': False,\n               'properties': {'ids': {'description': 'List of IDs related '\n                                                     'with the person.',\n                                      'type': 'array',\n                                      '_uniqueItems': True,\n                                      'items': {'additionalProperties': False,\n                                                'type': 'object',\n                                                'properties': {'source': {'type': 'string'},\n                                                               'value': {'type': 'string'}}}},\n                              'name': {'description': 'Full name of person '\n                                                      'or organisation. '\n .. (1702 more)",
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "2022-01-01T12:00:00Z",
+        "contributors": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"InvalidRole\" is not one of [\"ContactPerson\",\"Researcher\",\"Other\"]",
+      "python_error": "'InvalidRole' is not one of ['ContactPerson', 'Researcher', 'Other']\n\nFailed validating 'enum' in schema['properties']['contributors']['items']['properties']['role']:\n    {'description': '',\n     'type': 'string',\n     'enum': ['ContactPerson', 'Researcher', 'Other']}\n\nOn instance['contributors'][1]['role']:\n    'InvalidRole'",
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "2022-01-01T12:00:00Z",
+        "contributors": [
+          {
+            "name": "John Doe",
+            "role": "Researcher"
+          },
+          {
+            "name": "Jane Smith",
+            "role": "InvalidRole"
+          },
+          {
+            "name": "Bob Johnson",
+            "role": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-01-01 12:00:00\" is not a \"date-time\"",
+      "python_error": "'2022-01-01 12:00:00' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['publication_date']:\n    {'description': 'When the record is published',\n     'type': 'string',\n     'format': 'date-time'}\n\nOn instance['publication_date']:\n    '2022-01-01 12:00:00'",
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "2022-01-01 12:00:00",
+        "contributors": [
+          {
+            "name": "John Doe",
+            "role": "Researcher"
+          },
+          {
+            "name": "Jane Smith",
+            "role": "ContactPerson"
+          },
+          {
+            "name": "Bob Johnson",
+            "role": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"2022-01-01T12:00:00\" is not a \"date-time\"",
+      "python_error": "'2022-01-01T12:00:00' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['publication_date']:\n    {'description': 'When the record is published',\n     'type': 'string',\n     'format': 'date-time'}\n\nOn instance['publication_date']:\n    '2022-01-01T12:00:00'",
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "2022-01-01T12:00:00",
+        "contributors": [
+          {
+            "name": "John Doe",
+            "role": "Researcher"
+          },
+          {
+            "name": "Jane Smith",
+            "role": "ContactPerson"
+          },
+          {
+            "name": "Bob Johnson",
+            "role": "InvalidRole"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "2022-01-01T12:00:00Z",
+        "contributors": [
+          {
+            "ids": [
+              {
+                "source": "ORCID",
+                "value": "0000-0002-1825-0097"
+              }
+            ],
+            "name": "John Doe",
+            "affiliations": [
+              "University of Example"
+            ],
+            "email": "john.doe@example.com",
+            "role": "Researcher"
+          },
+          {
+            "ids": [
+              {
+                "source": "ORCID",
+                "value": "0000-0001-2345-6789"
+              }
+            ],
+            "name": "Jane Smith",
+            "affiliations": [
+              "University of Example"
+            ],
+            "email": "jane.smith@example.com",
+            "role": "ContactPerson"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid date string\" is not a \"date-time\"",
+      "python_error": "'Invalid date string' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['publication_date']:\n    {'description': 'When the record is published',\n     'type': 'string',\n     'format': 'date-time'}\n\nOn instance['publication_date']:\n    'Invalid date string'",
+      "data": {
+        "title": "Example Record",
+        "id": 1,
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "Invalid date string",
+        "contributors": [
+          {
+            "ids": [
+              {
+                "source": "ORCID",
+                "value": "0000-0002-1825-0097"
+              }
+            ],
+            "name": "John Doe",
+            "affiliations": [
+              "University of Example"
+            ],
+            "email": "Not an email",
+            "role": "Researcher"
+          },
+          {
+            "name": "Jane Smith",
+            "ids": [
+              {
+                "source": "ORCID",
+                "value": "0000-0001-2345-6789"
+              }
+            ],
+            "affiliations": [
+              "University of Example"
+            ],
+            "email": "jane.smith@example.com",
+            "role": "Not a valid role"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"1\" is not of type \"number\"",
+      "python_error": "'1' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['id']:\n    {'description': 'Invenio record identifier (integer).',\n     'type': 'number'}\n\nOn instance['id']:\n    '1'",
+      "data": {
+        "title": "Example Record",
+        "id": "1",
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "publication_date": "2022-01-01T12:00:00Z",
+        "contributors": [
+          {
+            "name": "John Doe",
+            "ids": [
+              {
+                "source": "ORCID",
+                "value": "0000-0002-1825-0097",
+                "extraProperty": "value"
+              },
+              {
+                "source": "ORCID",
+                "value": "0000-0002-1825-0097"
+              }
+            ],
+            "affiliations": [
+              "University of Example"
+            ],
+            "email": "john.doe@example.com",
+            "role": "Researcher"
+          },
+          {
+            "name": "Jane Smith",
+            "ids": [
+              {
+                "source": "ORCID",
+                "value": "0000-0001-2345-6789"
+              }
+            ],
+            "affiliations": [
+              "University of Example",
+              "University of Example"
+            ],
+            "email": "jane.smith@example.com",
+            "role": "ContactPerson"
+          }
+        ]
+      }
+    }
+  ]
+}

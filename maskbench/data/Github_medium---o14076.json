@@ -1,0 +1,229 @@
+{
+  "description": "sample Github_medium/o14076.json",
+  "meta": {
+    "full_size": 1981,
+    "stripped_size": 652,
+    "features": [
+      "@minmaxLength",
+      "enum",
+      "format",
+      "format:grid",
+      "format:table",
+      "items"
+    ],
+    "raw_features": [
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "Control network modes",
+    "properties": {
+      "configuration": {
+        "_id": "configuration",
+        "description": "",
+        "format": "table",
+        "properties": {
+          "hostname": {
+            "_format": "simpletext",
+            "_id": "hostname",
+            "default": "raspberrypi",
+            "description": "The hostname of this server, usually your boatname",
+            "minLength": 4,
+            "options": {
+              "input_width": "200px"
+            },
+            "title": "Hostname",
+            "type": "string"
+          },
+          "mode": {
+            "_id": "mode",
+            "default": "HOME",
+            "description": "Hotspot starts a private wifi hotspot, Home tries to connect to an existing wifi network.",
+            "enum": [
+              "HOME",
+              "HOTSPOT"
+            ],
+            "minLength": 1,
+            "title": "Network Mode",
+            "type": "string"
+          },
+          "password": {
+            "_id": "password",
+            "default": "raspberrypi",
+            "description": "The password for the hotspot",
+            "minLength": 8,
+            "options": {
+              "input_width": "200px"
+            },
+            "title": "Hotspot Password",
+            "type": "string"
+          },
+          "roam": {
+            "_id": "roam",
+            "description": "Define hotspots to connect with",
+            "options": {
+              "remove_empty_properties": true
+            },
+            "properties": {
+              "networks": {
+                "_id": "networks",
+                "description": "Auto-connect to these networks when in range. <br/>SSID: The hotspot name, eg myHomeWifi,<br/>Passphrase: the access passphrase",
+                "format": "table",
+                "items": {
+                  "_id": "1",
+                  "description": "The wifi network to auto-connect",
+                  "format": "grid",
+                  "properties": {
+                    "password": {
+                      "_id": "password",
+                      "minLength": 1,
+                      "options": {
+                        "input_width": "200px"
+                      },
+                      "title": "WPA2 Passphrase",
+                      "type": "string"
+                    },
+                    "ssid": {
+                      "_format": "simpletext",
+                      "_id": "ssid",
+                      "minLength": 1,
+                      "options": {
+                        "input_width": "200px"
+                      },
+                      "title": "SSID",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ssid",
+                    "password"
+                  ],
+                  "title": "Hotspot",
+                  "type": "object"
+                },
+                "required": [
+                  "networks"
+                ],
+                "title": "Networks",
+                "type": "array",
+                "_uniqueItems": true
+              }
+            },
+            "title": "Roam",
+            "type": "object"
+          },
+          "ssid": {
+            "_format": "simpletext",
+            "_id": "ssid",
+            "default": "freeboard",
+            "description": "The hotspot name",
+            "minLength": 4,
+            "options": {
+              "input_width": "200px"
+            },
+            "title": "Hotspot Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "hostname",
+          "ssid",
+          "password",
+          "roam"
+        ],
+        "title": "Configuration",
+        "type": "object"
+      }
+    },
+    "required": [
+      "configuration"
+    ],
+    "title": "Network Configuration",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "configuration": {
+          "hostname": "myboat",
+          "mode": "HOME",
+          "password": "mysecretpassword",
+          "roam": {
+            "networks": [
+              {
+                "password": "myhomepassword",
+                "ssid": "myHomeWifi"
+              },
+              {
+                "password": "myworkpassword",
+                "ssid": "myWorkWifi"
+              }
+            ]
+          },
+          "ssid": "myhotspot"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"abc\" is shorter than 4 characters",
+      "python_error": "'abc' is too short\n\nFailed validating 'minLength' in schema['properties']['configuration']['properties']['hostname']:\n    {'_format': 'simpletext',\n     '_id': 'hostname',\n     'default': 'raspberrypi',\n     'description': 'The hostname of this server, usually your boatname',\n     'minLength': 4,\n     'options': {'input_width': '200px'},\n     'title': 'Hostname',\n     'type': 'string'}\n\nOn instance['configuration']['hostname']:\n    'abc'",
+      "data": {
+        "configuration": {
+          "hostname": "abc",
+          "mode": "HOME",
+          "password": "mysecretpassword",
+          "roam": {
+            "networks": [
+              {
+                "password": "myhomepassword",
+                "ssid": "myHomeWifi"
+              },
+              {
+                "password": "myworkpassword",
+                "ssid": "myWorkWifi"
+              }
+            ]
+          },
+          "ssid": "myhotspot"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 4 characters",
+      "python_error": "'myh' is too short\n\nFailed validating 'minLength' in schema['properties']['configuration']['properties']['ssid']:\n    {'_format': 'simpletext',\n     '_id': 'ssid',\n     'default': 'freeboard',\n     'description': 'The hotspot name',\n     'minLength': 4,\n     'options': {'input_width': '200px'},\n     'title': 'Hotspot Name',\n     'type': 'string'}\n\nOn instance['configuration']['ssid']:\n    'myh'",
+      "data": {
+        "configuration": {
+          "hostname": "a",
+          "mode": "HOME",
+          "password": "mysecretpassword",
+          "roam": {
+            "networks": [
+              {
+                "password": "myhomepassword",
+                "ssid": "myHomeWifi"
+              },
+              {
+                "password": "myworkpassword",
+                "ssid": "myWorkWifi"
+              }
+            ]
+          },
+          "ssid": "myh"
+        }
+      }
+    }
+  ]
+}

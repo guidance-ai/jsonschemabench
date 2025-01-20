@@ -1,0 +1,115 @@
+{
+  "description": "sample JsonSchemaStore/resjson.json",
+  "meta": {
+    "full_size": 433,
+    "stripped_size": 373,
+    "features": [
+      "$ref",
+      "@minmaxProperties",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "minProperties",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": {
+      "minProperties": 1,
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/resource"
+        }
+      ]
+    },
+    "definitions": {
+      "resource": {
+        "type": "object",
+        "additionalProperties": {
+          "minProperties": 1,
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/resource"
+            }
+          ]
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/resjson.json",
+    "title": "JSON schema for Windows resource files (.resjson)",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "key1": "value1",
+        "key2": {
+          "nestedKey1": "nestedValue1",
+          "nestedKey2": {
+            "deeplyNestedKey1": "deeplyNestedValue1"
+          }
+        },
+        "key3": "value3"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minProperties keyword",
+      "valid": false,
+      "rust_error": "{\"nestedKey1\":\"nestedValue1\",\"nestedKey2\":{}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{} should be non-empty\n\nFailed validating 'minProperties' in schema[1]['additionalProperties']:\n    {'minProperties': 1,\n     'anyOf': [{'type': 'string'}, {'$ref': '#/definitions/resource'}]}\n\nOn instance['nestedKey2']:\n    {}",
+      "data": {
+        "key1": "value1",
+        "key2": {
+          "nestedKey1": "nestedValue1",
+          "nestedKey2": {}
+        },
+        "key3": "value3"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{} has less than 1 property",
+      "python_error": "{} should be non-empty\n\nFailed validating 'minProperties' in schema['additionalProperties']:\n    {'minProperties': 1,\n     'anyOf': [{'type': 'string'}, {'$ref': '#/definitions/resource'}]}\n\nOn instance['key4']:\n    {}",
+      "data": {
+        "key1": "value1",
+        "key2": {
+          "nestedKey1": "nestedValue1"
+        },
+        "key3": "value3",
+        "key4": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"nestedKey1\":\"nestedValue1\",\"nestedKey2\":{}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{} should be non-empty\n\nFailed validating 'minProperties' in schema[1]['additionalProperties']:\n    {'minProperties': 1,\n     'anyOf': [{'type': 'string'}, {'$ref': '#/definitions/resource'}]}\n\nOn instance['nestedKey2']:\n    {}",
+      "data": {
+        "key1": "value1",
+        "key2": {
+          "nestedKey1": "nestedValue1",
+          "nestedKey2": {}
+        },
+        "key3": "value3"
+      }
+    }
+  ]
+}

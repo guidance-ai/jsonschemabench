@@ -1,0 +1,804 @@
+{
+  "description": "sample Github_hard/o62368.json",
+  "meta": {
+    "full_size": 5003,
+    "stripped_size": 1750,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "id",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "http://api.datos.gob.mx/v1/schemas/dataset.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for the definition of datasets handled by the BUDA platform",
+    "definitions": {
+      "hotspot": {
+        "type": "object",
+        "title": "Hotspot",
+        "description": "Location used by the agent to receive data packets for processing",
+        "required": [
+          "type",
+          "location"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Type of endpoint to use, may be any of the supported methods",
+            "default": "tcp",
+            "enum": [
+              "tcp",
+              "unix"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "description": "Final location used for receiving data, i.e.; port number, socket path, etc...",
+            "default": ""
+          }
+        }
+      },
+      "storage": {
+        "type": "object",
+        "title": "Storage",
+        "description": "Provides all the information required to store the data processed in a desired location",
+        "required": [
+          "collection",
+          "index",
+          "batch"
+        ],
+        "properties": {
+          "collection": {
+            "type": "string",
+            "title": "Collection",
+            "description": "Collection (or table) used to group inside the database the data packets received"
+          },
+          "index": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Index",
+            "description": "Data index(es) used for the data collection"
+          },
+          "batch": {
+            "type": "integer",
+            "minimum": 1,
+            "title": "Batch",
+            "description": "Batch size to use for data storage",
+            "default": 1
+          }
+        }
+      },
+      "metadata": {
+        "type": "object",
+        "title": "Metadata",
+        "description": "Structured information that describes, explains, locates, or otherwise makes it easier to retrieve, use, or manage the dataset",
+        "required": [
+          "title",
+          "description",
+          "keyword",
+          "language",
+          "license",
+          "organization",
+          "contactName",
+          "contactEmail",
+          "accessLevel"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Human-readable name of the asset. Should include sufficient detail to facilitate search and discovery"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Human-readable description (e.g., an abstract) with sufficient detail to enable a user to quickly understand whether the asset is of interest"
+          },
+          "keyword": {
+            "type": "array",
+            "minItems": 1,
+            "_uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 15
+            },
+            "title": "Keyword(s)",
+            "description": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users"
+          },
+          "language": {
+            "type": "array",
+            "minItems": 1,
+            "_uniqueItems": true,
+            "items": {
+              "type": "string"
+            },
+            "title": "Language(s)",
+            "description": "Language(s) (RFC 5646) in which the data is available",
+            "default": [
+              "es-MX"
+            ]
+          },
+          "license": {
+            "type": "string",
+            "_format": "uri",
+            "title": "License",
+            "description": "The license with which the dataset has been published"
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "description": "The plaintext name of the entity publishing this dataset"
+          },
+          "contactName": {
+            "type": "string",
+            "title": "Contact Name",
+            "description": "Name of the person listed as primary contact regarding the data"
+          },
+          "contactEmail": {
+            "type": "string",
+            "_format": "email",
+            "title": "Contact Email",
+            "description": "Email listed as primary contact method regarding the data"
+          },
+          "accessLevel": {
+            "type": "string",
+            "title": "Access Level",
+            "description": "Specify how to distribute the data",
+            "default": "public",
+            "enum": [
+              "public",
+              "non-public"
+            ]
+          },
+          "identifier": {
+            "type": "string",
+            "title": "Identifier",
+            "description": "A unique identifier for the dataset, storage collection will be used by default if no value is provided"
+          },
+          "describedBy": {
+            "type": "string",
+            "title": "Described By",
+            "description": "URL to the data dictionary for the dataset"
+          },
+          "issued": {
+            "type": "string",
+            "title": "Issued Date",
+            "description": "Date the dataset was issued"
+          },
+          "modified": {
+            "type": "string",
+            "title": "Last Modification Date",
+            "description": "Date the dataset was last modified"
+          }
+        }
+      }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "version",
+      "metadata",
+      "data"
+    ],
+    "properties": {
+      "version": {
+        "type": "string",
+        "title": "Version",
+        "description": "Schema version used for the zone declaration",
+        "default": "0.1"
+      },
+      "metadata": {
+        "$ref": "#/definitions/metadata"
+      },
+      "data": {
+        "type": "object",
+        "title": "Zone Processing Details",
+        "description": "Configuration parameters used for storage and processing of the data",
+        "additionalProperties": false,
+        "required": [
+          "format",
+          "compression",
+          "update",
+          "storage",
+          "hotspot"
+        ],
+        "properties": {
+          "hotspot": {
+            "$ref": "#/definitions/hotspot"
+          },
+          "storage": {
+            "$ref": "#/definitions/storage"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "description": "Expected data format, a valid agent must be installed for the data type"
+          },
+          "update": {
+            "type": "string",
+            "title": "Update",
+            "description": "Update strategy to use for the dataset",
+            "default": "merge",
+            "enum": [
+              "merge",
+              "replace"
+            ]
+          },
+          "compression": {
+            "type": "string",
+            "title": "Compression",
+            "description": "Data compression method, if any",
+            "default": "none",
+            "enum": [
+              "none",
+              "gzip"
+            ]
+          },
+          "options": {
+            "type": "object",
+            "title": "Agent Options",
+            "description": "Additional configuration parameters passed to the agent to handle the zone; check agent documentation for specific details",
+            "default": {}
+          }
+        }
+      },
+      "extras": {
+        "type": "object",
+        "title": "Extras",
+        "description": "Optional non-standard additional details",
+        "default": {}
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "example",
+            "dataset",
+            "test"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"ex\" is shorter than 3 characters",
+      "python_error": "'ex' is too short\n\nFailed validating 'minLength' in schema['properties']['metadata']['properties']['keyword']['items']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 15}\n\nOn instance['metadata']['keyword'][0]:\n    'ex'",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "ex"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['metadata']['properties']['language']:\n    {'type': 'array',\n     'minItems': 1,\n     '_uniqueItems': True,\n     'items': {'type': 'string'},\n     'title': 'Language(s)',\n     'description': 'Language(s) (RFC 5646) in which the data is available',\n     'default': ['es-MX']}\n\nOn instance['metadata']['language']:\n    []",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [],
+          "language": [],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ex\" is shorter than 3 characters",
+      "python_error": "'ex' is too short\n\nFailed validating 'minLength' in schema['properties']['metadata']['properties']['keyword']['items']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 15}\n\nOn instance['metadata']['keyword'][0]:\n    'ex'",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "ex"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "udp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['metadata']['properties']['keyword']:\n    {'type': 'array',\n     'minItems': 1,\n     '_uniqueItems': True,\n     'items': {'type': 'string', 'minLength': 3, 'maxLength': 15},\n     'title': 'Keyword(s)',\n     'description': 'Tags (or keywords) help users discover your dataset; '\n                    'please include terms that would be used by technical '\n                    'and non-technical users'}\n\nOn instance['metadata']['keyword']:\n    []",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "\"ex\" is shorter than 3 characters",
+      "python_error": "'ex' is too short\n\nFailed validating 'minLength' in schema['properties']['metadata']['properties']['keyword']['items']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 15}\n\nOn instance['metadata']['keyword'][0]:\n    'ex'",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "ex"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ex\" is shorter than 3 characters",
+      "python_error": "'ex' is too short\n\nFailed validating 'minLength' in schema['properties']['metadata']['properties']['keyword']['items']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 15}\n\nOn instance['metadata']['keyword'][0]:\n    'ex'",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "ex",
+            "dataset",
+            "test"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "example",
+            "dataset",
+            "test"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "format": "json",
+          "update": "merge",
+          "compression": "none",
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['metadata']['properties']['keyword']['items']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 15}\n\nOn instance['metadata']['keyword'][0]:\n    'a'",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "a"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "format": "json",
+          "compression": "none",
+          "update": "merge",
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['metadata']['properties']['keyword']:\n    {'type': 'array',\n     'minItems': 1,\n     '_uniqueItems': True,\n     'items': {'type': 'string', 'minLength': 3, 'maxLength': 15},\n     'title': 'Keyword(s)',\n     'description': 'Tags (or keywords) help users discover your dataset; '\n                    'please include terms that would be used by technical '\n                    'and non-technical users'}\n\nOn instance['metadata']['keyword']:\n    []",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "format": "json",
+          "compression": "none",
+          "update": "merge",
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['metadata']['properties']['keyword']['items']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 15}\n\nOn instance['metadata']['keyword'][0]:\n    'a'",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "a",
+            "dataset",
+            "test"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "format": "json",
+          "compression": "none",
+          "update": "merge",
+          "storage": {
+            "collection": "example-collection",
+            "index": "example-index",
+            "batch": 10
+          },
+          "hotspot": {
+            "type": "tcp",
+            "location": "8080"
+          },
+          "options": {}
+        },
+        "extras": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ex\" is shorter than 3 characters",
+      "python_error": "'ex' is too short\n\nFailed validating 'minLength' in schema['properties']['metadata']['properties']['keyword']['items']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 15}\n\nOn instance['metadata']['keyword'][0]:\n    'ex'",
+      "data": {
+        "version": "0.1",
+        "metadata": {
+          "title": "Example Dataset",
+          "description": "This is an example dataset for testing purposes",
+          "keyword": [
+            "ex"
+          ],
+          "language": [
+            "es-MX"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "organization": "Example Organization",
+          "contactName": "John Doe",
+          "contactEmail": "john.doe@example.com",
+          "accessLevel": "public",
+          "identifier": "example-dataset",
+          "describedBy": "https://example.com/data-dictionary",
+          "issued": "2022-01-01",
+          "modified": "2022-01-01"
+        },
+        "data": {
+          "format": "json",
+          "compression": "none",
+          "update": "merge",
+          "storage": {
+            "collection": "example-collection",
+            "index": "",
+            "batch": 0
+          },
+          "hotspot": {
+            "type": "udp",
+            "location": "8080"
+          },
+          "options": {}
+        },
+        "extras": {}
+      }
+    }
+  ]
+}

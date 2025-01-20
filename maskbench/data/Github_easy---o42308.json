@@ -1,0 +1,174 @@
+{
+  "description": "sample Github_easy/o42308.json",
+  "meta": {
+    "full_size": 531,
+    "stripped_size": 470,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "anyOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "org.eclipse.persistence.testing.jaxb.xmlvalue.Root",
+    "type": "object",
+    "properties": {
+      "root": {
+        "type": "object",
+        "properties": {
+          "thing": {
+            "$ref": "#/definitions/BytesHolderWithXmlId"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "definitions": {
+      "BytesHolderWithXmlId": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "Include": {
+                    "type": "object",
+                    "properties": {
+                      "href": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "Id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "root": {
+          "thing": {
+            "value": "some string value",
+            "Id": "some-id-123"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['root']['properties']['thing']['properties']['value']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'object',\n                'properties': {'Include': {'type': 'object',\n                                           'properties': {'href': {'type': 'string'}}}}}]}\n\nOn instance['root']['thing']['value']:\n    123",
+      "data": {
+        "root": {
+          "thing": {
+            "value": 123,
+            "Id": "some-id-123"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['root']['properties']['thing']:\n    {'type': 'object',\n     'properties': {'value': {'anyOf': [{'type': 'string'},\n                                        {'type': 'object',\n                                         'properties': {'Include': {'type': 'object',\n                                                                    'properties': {'href': {'type': 'string'}}}}}]},\n                    'Id': {'type': 'string'}},\n     'additionalProperties': False}\n\nOn instance['root']['thing']:\n    {'value': 'some string value',\n     'Id': 'some-id-123',\n     'extraProperty': 'extra value'}",
+      "data": {
+        "root": {
+          "thing": {
+            "value": "some string value",
+            "Id": "some-id-123",
+            "extraProperty": "extra value"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"Include\":{\"href\":123}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['Include']['properties']['href']:\n    {'type': 'string'}\n\nOn instance['Include']['href']:\n    123",
+      "data": {
+        "root": {
+          "thing": {
+            "value": {
+              "Include": {
+                "href": 123
+              }
+            },
+            "Id": "some-id-123"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "root": {
+          "thing": {
+            "value": "example string",
+            "Id": "example-id"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"Include\":{\"href\":123}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['Include']['properties']['href']:\n    {'type': 'string'}\n\nOn instance['Include']['href']:\n    123",
+      "data": {
+        "root": {
+          "thing": {
+            "value": {
+              "Include": {
+                "href": 123
+              }
+            },
+            "Id": "example-id"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['root']['properties']['thing']:\n    {'type': 'object',\n     'properties': {'value': {'anyOf': [{'type': 'string'},\n                                        {'type': 'object',\n                                         'properties': {'Include': {'type': 'object',\n                                                                    'properties': {'href': {'type': 'string'}}}}}]},\n                    'Id': {'type': 'string'}},\n     'additionalProperties': False}\n\nOn instance['root']['thing']:\n    {'value': None, 'Id': 'example-id', 'extraProperty': 'extraValue'}",
+      "data": {
+        "root": {
+          "thing": {
+            "value": null,
+            "Id": "example-id",
+            "extraProperty": "extraValue"
+          }
+        }
+      }
+    }
+  ]
+}

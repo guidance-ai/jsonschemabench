@@ -1,0 +1,313 @@
+{
+  "description": "sample Github_medium/o72586.json",
+  "meta": {
+    "full_size": 614,
+    "stripped_size": 596,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "format",
+      "format:uri",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "categories": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "furtherReading": {
+        "additionalProperties": {
+          "format": "uri",
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "id": {
+        "pattern": "^[a-z0-9-]+$",
+        "type": "string"
+      },
+      "keywords": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "related": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "tags": {
+        "items": {
+          "enum": [
+            "inaccurate",
+            "incomplete",
+            "proprietary",
+            "not-a-number"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "title": {
+        "type": "string"
+      },
+      "visible": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "id",
+      "title",
+      "visible"
+    ],
+    "title": "Article",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example-article",
+        "title": "Example Article",
+        "visible": true,
+        "categories": [
+          "category1",
+          "category2"
+        ],
+        "furtherReading": {
+          "reading1": "https://example.com/reading1",
+          "reading2": "https://example.com/reading2"
+        },
+        "keywords": [
+          "keyword1",
+          "keyword2"
+        ],
+        "related": [
+          "related-article1",
+          "related-article2"
+        ],
+        "tags": [
+          "incomplete",
+          "proprietary"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example-article",
+        "title": "Example Article",
+        "visible": true,
+        "categories": [
+          "Example Category",
+          "Another Category"
+        ],
+        "keywords": [
+          "example",
+          "article",
+          "example article"
+        ],
+        "related": [
+          "related-article-1",
+          "related-article-2"
+        ],
+        "tags": [
+          "inaccurate",
+          "incomplete"
+        ],
+        "furtherReading": {
+          "wikipedia": "https://en.wikipedia.org/wiki/Example",
+          "official-site": "https://www.example.com"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Example Article\" does not match \"^[a-z0-9-]+$\"",
+      "python_error": "'Example Article' does not match '^[a-z0-9-]+$'\n\nFailed validating 'pattern' in schema['properties']['id']:\n    {'pattern': '^[a-z0-9-]+$', 'type': 'string'}\n\nOn instance['id']:\n    'Example Article'",
+      "data": {
+        "id": "Example Article",
+        "title": "Example Article",
+        "visible": true,
+        "categories": [
+          "Example Category",
+          "Another Category"
+        ],
+        "keywords": [
+          "example",
+          "article",
+          "example article"
+        ],
+        "related": [
+          "related-article-1",
+          "related-article-2"
+        ],
+        "tags": [
+          "inaccurate",
+          "incomplete"
+        ],
+        "furtherReading": {
+          "wikipedia": "https://en.wikipedia.org/wiki/Example",
+          "official-site": "https://www.example.com"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a URI\" is not a \"uri\"",
+      "python_error": "'not a URI' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['furtherReading']['additionalProperties']:\n    {'format': 'uri', 'type': 'string'}\n\nOn instance['furtherReading']['wikipedia']:\n    'not a URI'",
+      "data": {
+        "id": "example-article",
+        "title": "Example Article",
+        "visible": true,
+        "categories": [
+          "Example Category",
+          "Another Category"
+        ],
+        "keywords": [
+          "example",
+          "article",
+          "example article"
+        ],
+        "related": [
+          "related-article-1",
+          "related-article-2"
+        ],
+        "tags": [
+          "inaccurate",
+          "incomplete"
+        ],
+        "furtherReading": {
+          "wikipedia": "not a URI",
+          "official-site": "https://www.example.com"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('unknown-property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('unknown-property' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'properties': {'categories': {'items': {'type': 'string'},\n                                   'type': 'array'},\n                    'furtherReading': {'additionalProperties': {'format': 'uri',\n                                                                'type': 'string'},\n                                       'type': 'object'},\n                    'id': {'pattern': '^[a-z0-9-]+$', 'type': 'string'},\n                    'keywords': {'items': {'minLength': 1,\n                                           'type': 'string'},\n                                 'type': 'array'},\n                    'related': {'items': {'minLength': 1, 'type': 'string'},\n                                'type': 'array'},\n                    'tags': {'items': {'enum': ['inaccurate',\n                                                'incomplete',\n                          .. (1005 more)",
+      "data": {
+        "id": "example-article",
+        "title": "Example Article",
+        "visible": true,
+        "categories": [
+          "Example Category",
+          "Another Category"
+        ],
+        "keywords": [
+          "example",
+          "article",
+          "example article"
+        ],
+        "related": [
+          "related-article-1",
+          "related-article-2"
+        ],
+        "tags": [
+          "inaccurate",
+          "incomplete"
+        ],
+        "furtherReading": {
+          "wikipedia": "https://en.wikipedia.org/wiki/Example",
+          "official-site": "https://www.example.com",
+          "unknown-key": "https://www.example.com/unknown"
+        },
+        "unknown-property": "https://www.example.com/unknown"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['keywords']['items']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['keywords'][0]:\n    ''",
+      "data": {
+        "id": "example-article",
+        "title": "Example Article",
+        "visible": true,
+        "categories": [
+          "Example Category",
+          "Another Category"
+        ],
+        "keywords": [
+          "",
+          "article",
+          "example article"
+        ],
+        "related": [
+          "related-article-1",
+          "related-article-2"
+        ],
+        "tags": [
+          "inaccurate",
+          "incomplete"
+        ],
+        "furtherReading": {
+          "wikipedia": "https://en.wikipedia.org/wiki/Example",
+          "official-site": "https://www.example.com"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('invalidProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'properties': {'categories': {'items': {'type': 'string'},\n                                   'type': 'array'},\n                    'furtherReading': {'additionalProperties': {'format': 'uri',\n                                                                'type': 'string'},\n                                       'type': 'object'},\n                    'id': {'pattern': '^[a-z0-9-]+$', 'type': 'string'},\n                    'keywords': {'items': {'minLength': 1,\n                                           'type': 'string'},\n                                 'type': 'array'},\n                    'related': {'items': {'minLength': 1, 'type': 'string'},\n                                'type': 'array'},\n                    'tags': {'items': {'enum': ['inaccurate',\n                                                'incomplete',\n                           .. (851 more)",
+      "data": {
+        "id": "example-article",
+        "title": 123,
+        "visible": "true",
+        "categories": [
+          "Example Category",
+          123
+        ],
+        "keywords": [
+          "example",
+          "article",
+          ""
+        ],
+        "related": [
+          "related-article-1",
+          "related-article-2"
+        ],
+        "tags": [
+          "inaccurate",
+          "custom-tag"
+        ],
+        "furtherReading": {
+          "wikipedia": "invalid-uri",
+          "official-site": "https://www.example.com"
+        },
+        "invalidProperty": "should not be present"
+      }
+    }
+  ]
+}

@@ -1,0 +1,258 @@
+{
+  "description": "sample Github_medium/o68603.json",
+  "meta": {
+    "full_size": 833,
+    "stripped_size": 702,
+    "features": [
+      "@minmaxLength",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "User set",
+    "type": "array",
+    "items": {
+      "title": "User",
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "enum": [
+            "v1beta1",
+            "v1.0",
+            "v1"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "User",
+            "user"
+          ],
+          "readOnly": true
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 30
+            },
+            "createdOn": {
+              "type": "string",
+              "readOnly": true
+            },
+            "modifiedOn": {
+              "type": "string",
+              "readOnly": true
+            },
+            "ref": {
+              "type": "string",
+              "readOnly": true,
+              "minLength": 3,
+              "maxLength": 24
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "spec": {
+          "type": "object",
+          "properties": {
+            "credentials": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "readOnly": true,
+                  "minLength": 3,
+                  "maxLength": 30
+                },
+                "secret": {
+                  "type": "string",
+                  "writeOnly": true
+                }
+              },
+              "required": [
+                "username",
+                "secret"
+              ]
+            }
+          },
+          "required": [
+            "credentials"
+          ]
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "spec",
+        "metadata"
+      ]
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": [
+        {
+          "apiVersion": "v1",
+          "kind": "User",
+          "metadata": {
+            "name": "JohnDoe",
+            "createdOn": "2022-01-01T12:00:00Z",
+            "modifiedOn": "2022-01-01T12:00:00Z",
+            "ref": "1234567890"
+          },
+          "spec": {
+            "credentials": {
+              "username": "johndoe",
+              "secret": "password123"
+            }
+          }
+        },
+        {
+          "apiVersion": "v1beta1",
+          "kind": "user",
+          "metadata": {
+            "name": "JaneDoe",
+            "createdOn": "2022-01-02T12:00:00Z",
+            "modifiedOn": "2022-01-02T12:00:00Z",
+            "ref": "2345678901"
+          },
+          "spec": {
+            "credentials": {
+              "username": "janedoe",
+              "secret": "password456"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"User\",\"metadata\":{\"name\":\"J\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"1234567890\"},\"spec\":{\"credentials\":{\"username\":\"johndoe\",\"secret\":\"password123\"}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'User', 'metadata': {'name': 'J', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': '1234567890'}, 'spec': {'credentials': {'username': 'johndoe', 'secret': 'password123'}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'User set',\n     'type': 'array',\n     'items': {'title': 'User',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['User', 'user'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                                                   'minLength': 3,\n                .. (2356 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "User",
+        "metadata": {
+          "name": "J",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "1234567890"
+        },
+        "spec": {
+          "credentials": {
+            "username": "johndoe",
+            "secret": "password123"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"User\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"123456789012345678901\"},\"spec\":{\"credentials\":{\"username\":\"a\",\"secret\":\"password123\"}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'User', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': '123456789012345678901'}, 'spec': {'credentials': {'username': 'a', 'secret': 'password123'}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'User set',\n     'type': 'array',\n     'items': {'title': 'User',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['User', 'user'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                                                   'minLength': 3,\n           .. (2336 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "User",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "123456789012345678901"
+        },
+        "spec": {
+          "credentials": {
+            "username": "a",
+            "secret": "password123"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"User\",\"metadata\":{\"name\":\"ab\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"1234567890\"},\"spec\":{\"credentials\":{\"username\":\"johndoe\",\"secret\":\"password123\"}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'User', 'metadata': {'name': 'ab', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': '1234567890'}, 'spec': {'credentials': {'username': 'johndoe', 'secret': 'password123'}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'User set',\n     'type': 'array',\n     'items': {'title': 'User',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['User', 'user'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                                                   'minLength': 3,\n               .. (2358 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "User",
+        "metadata": {
+          "name": "ab",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "1234567890"
+        },
+        "spec": {
+          "credentials": {
+            "username": "johndoe",
+            "secret": "password123"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"User\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"1234567890\"},\"spec\":{\"credentials\":{\"username\":\"a\",\"secret\":\"password123\"}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'User', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': '1234567890'}, 'spec': {'credentials': {'username': 'a', 'secret': 'password123'}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'User set',\n     'type': 'array',\n     'items': {'title': 'User',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['User', 'user'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                                                   'minLength': 3,\n                      .. (2314 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "User",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "1234567890"
+        },
+        "spec": {
+          "credentials": {
+            "username": "a",
+            "secret": "password123"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"User\",\"metadata\":{\"name\":\"ab\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"1234567890\"},\"spec\":{\"credentials\":{\"username\":\"a\",\"secret\":\"password123\"}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'User', 'metadata': {'name': 'ab', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': '1234567890'}, 'spec': {'credentials': {'username': 'a', 'secret': 'password123'}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'User set',\n     'type': 'array',\n     'items': {'title': 'User',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['User', 'user'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                                                   'minLength': 3,\n                     .. (2316 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "User",
+        "metadata": {
+          "name": "ab",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "1234567890"
+        },
+        "spec": {
+          "credentials": {
+            "username": "a",
+            "secret": "password123"
+          }
+        }
+      }
+    }
+  ]
+}

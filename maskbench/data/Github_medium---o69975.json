@@ -1,0 +1,309 @@
+{
+  "description": "sample Github_medium/o69975.json",
+  "meta": {
+    "full_size": 1472,
+    "stripped_size": 496,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "PatronType",
+    "description": "JSON schema for patron_types.",
+    "additionalProperties": false,
+    "propertiesOrder": [
+      "name",
+      "description",
+      "subscription_amount"
+    ],
+    "required": [
+      "$schema",
+      "pid",
+      "name",
+      "organisation"
+    ],
+    "properties": {
+      "$schema": {
+        "title": "Schema",
+        "description": "Schema to validate patron_types records against.",
+        "type": "string",
+        "minLength": 9,
+        "default": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json"
+      },
+      "pid": {
+        "title": "Patron type ID",
+        "type": "string",
+        "minLength": 1
+      },
+      "name": {
+        "title": "Name",
+        "description": "The name of the patron type",
+        "type": "string",
+        "minLength": 2,
+        "form": {
+          "focus": true,
+          "validation": {
+            "validators": {
+              "valueAlreadyExists": {
+                "term": "patron_type_name"
+              }
+            },
+            "messages": {
+              "alreadyTakenMessage": "The patron type name is already taken."
+            }
+          }
+        }
+      },
+      "description": {
+        "title": "Description",
+        "description": "The description of the patron type.",
+        "type": "string"
+      },
+      "organisation": {
+        "title": "Organisation",
+        "type": "object",
+        "properties": {
+          "$ref": {
+            "title": "Organisation URI",
+            "type": "string",
+            "pattern": "^https://ils.rero.ch/api/organisations/.*?$"
+          }
+        }
+      },
+      "subscription_amount": {
+        "title": "Amount",
+        "description": "Yearly amount due by patrons linked to this patron type.",
+        "type": "number",
+        "default": 0,
+        "minimum": 0,
+        "form": {
+          "wrappers": [
+            "toggle-switch",
+            "form-field"
+          ],
+          "templateOptions": {
+            "toggle-switch": {
+              "label": "Yearly subscription",
+              "description": "Activation of subscription fees for patrons linked to this type."
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron_type_1",
+        "name": "Student",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation_1"
+        },
+        "subscription_amount": 50.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['pid']:\n    {'title': 'Patron type ID', 'type': 'string', 'minLength': 1}\n\nOn instance['pid']:\n    ''",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "",
+        "name": "S",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation_1"
+        },
+        "subscription_amount": 50.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"http://example.com/organisation_1\" does not match \"^https://ils.rero.ch/api/organisations/.*?$\"",
+      "python_error": "'http://example.com/organisation_1' does not match '^https://ils.rero.ch/api/organisations/.*?$'\n\nFailed validating 'pattern' in schema['properties']['organisation']['properties']['$ref']:\n    {'title': 'Organisation URI',\n     'type': 'string',\n     'pattern': '^https://ils.rero.ch/api/organisations/.*?$'}\n\nOn instance['organisation']['$ref']:\n    'http://example.com/organisation_1'",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron_type_1",
+        "name": "Student",
+        "organisation": {
+          "$ref": "http://example.com/organisation_1"
+        },
+        "subscription_amount": 50.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-10.0 is less than the minimum of 0",
+      "python_error": "-10.0 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['subscription_amount']:\n    {'title': 'Amount',\n     'description': 'Yearly amount due by patrons linked to this patron '\n                    'type.',\n     'type': 'number',\n     'default': 0,\n     'minimum': 0,\n     'form': {'wrappers': ['toggle-switch', 'form-field'],\n              'templateOptions': {'toggle-switch': {'label': 'Yearly '\n                                                             'subscription',\n                                                    'description': 'Activation '\n                                                                   'of '\n                                                                   'subscription '\n                                                                   'fees '\n                                                                   'for '\n                                                                   'patrons '\n                                                    .. (298 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron_type_1",
+        "name": "Student",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation_1"
+        },
+        "subscription_amount": -10.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"S\" is shorter than 2 characters",
+      "python_error": "'S' is too short\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'title': 'Name',\n     'description': 'The name of the patron type',\n     'type': 'string',\n     'minLength': 2,\n     'form': {'focus': True,\n              'validation': {'validators': {'valueAlreadyExists': {'term': 'patron_type_name'}},\n                             'messages': {'alreadyTakenMessage': 'The '\n                                                                 'patron '\n                                                                 'type '\n                                                                 'name is '\n                                                                 'already '\n                                                                 'taken.'}}}}\n\nOn instance['name']:\n    'S'",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron_type_1",
+        "name": "S",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation_1"
+        },
+        "subscription_amount": 50.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"https://example.com/organisation_1\" does not match \"^https://ils.rero.ch/api/organisations/.*?$\"",
+      "python_error": "'https://example.com/organisation_1' does not match '^https://ils.rero.ch/api/organisations/.*?$'\n\nFailed validating 'pattern' in schema['properties']['organisation']['properties']['$ref']:\n    {'title': 'Organisation URI',\n     'type': 'string',\n     'pattern': '^https://ils.rero.ch/api/organisations/.*?$'}\n\nOn instance['organisation']['$ref']:\n    'https://example.com/organisation_1'",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron_type_1",
+        "name": "Student",
+        "organisation": {
+          "$ref": "https://example.com/organisation_1"
+        },
+        "subscription_amount": 50.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "-1.0 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['subscription_amount']:\n    {'title': 'Amount',\n     'description': 'Yearly amount due by patrons linked to this patron '\n                    'type.',\n     'type': 'number',\n     'default': 0,\n     'minimum': 0,\n     'form': {'wrappers': ['toggle-switch', 'form-field'],\n              'templateOptions': {'toggle-switch': {'label': 'Yearly '\n                                                             'subscription',\n                                                    'description': 'Activation '\n                                                                   'of '\n                                                                   'subscription '\n                                                                   'fees '\n                                                                   'for '\n                                                                   'patrons '\n                                                     .. (296 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron_type_1",
+        "name": "Student",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation_1"
+        },
+        "subscription_amount": -1.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "-10.0 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['subscription_amount']:\n    {'title': 'Amount',\n     'description': 'Yearly amount due by patrons linked to this patron '\n                    'type.',\n     'type': 'number',\n     'default': 0,\n     'minimum': 0,\n     'form': {'wrappers': ['toggle-switch', 'form-field'],\n              'templateOptions': {'toggle-switch': {'label': 'Yearly '\n                                                             'subscription',\n                                                    'description': 'Activation '\n                                                                   'of '\n                                                                   'subscription '\n                                                                   'fees '\n                                                                   'for '\n                                                                   'patrons '\n                                                    .. (298 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "",
+        "name": "S",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation_1"
+        },
+        "subscription_amount": -10.0
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron-type-1",
+        "name": "Student",
+        "description": "Patron type for students",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation-1"
+        },
+        "subscription_amount": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['subscription_amount']:\n    {'title': 'Amount',\n     'description': 'Yearly amount due by patrons linked to this patron '\n                    'type.',\n     'type': 'number',\n     'default': 0,\n     'minimum': 0,\n     'form': {'wrappers': ['toggle-switch', 'form-field'],\n              'templateOptions': {'toggle-switch': {'label': 'Yearly '\n                                                             'subscription',\n                                                    'description': 'Activation '\n                                                                   'of '\n                                                                   'subscription '\n                                                                   'fees '\n                                                                   'for '\n                                                                   'patrons '\n                                                       .. (292 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron-type-1",
+        "name": "Student",
+        "description": "Patron type for students",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation-1"
+        },
+        "subscription_amount": -1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"https://example.com/organisations/organisation-1\" does not match \"^https://ils.rero.ch/api/organisations/.*?$\"",
+      "python_error": "'https://example.com/organisations/organisation-1' does not match '^https://ils.rero.ch/api/organisations/.*?$'\n\nFailed validating 'pattern' in schema['properties']['organisation']['properties']['$ref']:\n    {'title': 'Organisation URI',\n     'type': 'string',\n     'pattern': '^https://ils.rero.ch/api/organisations/.*?$'}\n\nOn instance['organisation']['$ref']:\n    'https://example.com/organisations/organisation-1'",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "patron-type-1",
+        "name": "Student",
+        "description": "Patron type for students",
+        "organisation": {
+          "$ref": "https://example.com/organisations/organisation-1"
+        },
+        "subscription_amount": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['pid']:\n    {'title': 'Patron type ID', 'type': 'string', 'minLength': 1}\n\nOn instance['pid']:\n    ''",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "",
+        "name": "S",
+        "description": "Patron type for students",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisations/organisation-1"
+        },
+        "subscription_amount": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['subscription_amount']:\n    {'title': 'Amount',\n     'description': 'Yearly amount due by patrons linked to this patron '\n                    'type.',\n     'type': 'number',\n     'default': 0,\n     'minimum': 0,\n     'form': {'wrappers': ['toggle-switch', 'form-field'],\n              'templateOptions': {'toggle-switch': {'label': 'Yearly '\n                                                             'subscription',\n                                                    'description': 'Activation '\n                                                                   'of '\n                                                                   'subscription '\n                                                                   'fees '\n                                                                   'for '\n                                                                   'patrons '\n                                                       .. (292 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/patron_types/patron_type-v0.0.1.json",
+        "pid": "",
+        "name": "S",
+        "description": "Patron type for students",
+        "organisation": {
+          "$ref": "https://ils.rero.ch/api/organisation-1"
+        },
+        "subscription_amount": -1
+      }
+    }
+  ]
+}

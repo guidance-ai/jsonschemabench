@@ -1,0 +1,592 @@
+{
+  "description": "sample Github_medium/o83393.json",
+  "meta": {
+    "full_size": 1110,
+    "stripped_size": 1024,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "maximum",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "label": {
+        "type": "string"
+      },
+      "version": {
+        "type": "integer",
+        "default": 1
+      },
+      "sections": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/sectionConstraint"
+        }
+      }
+    },
+    "required": [
+      "name",
+      "label",
+      "version",
+      "sections"
+    ],
+    "definitions": {
+      "blockName": {
+        "type": "string",
+        "pattern": "^[a-z]+(?:-+[a-z]+)*-v\\d+$"
+      },
+      "blockGroup": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "sectionConstraint": {
+        "description": "Schema for documenting and validating section constraints",
+        "type": "object",
+        "properties": {
+          "allowedBlocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/blockName"
+            },
+            "minItems": 1
+          },
+          "deprecatedBlocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/blockName"
+            },
+            "minItems": 1
+          },
+          "defaultBlocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/blockName"
+            }
+          },
+          "allowedBlockGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/blockGroup"
+            }
+          },
+          "min": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "max": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "size": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "optional": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "block-name-v1",
+              "another-block-v2"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 10,
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['sections']['items']['properties']['allowedBlocks']:\n    {'type': 'array',\n     'items': {'$ref': '#/definitions/blockName'},\n     'minItems': 1}\n\nOn instance['sections'][0]['allowedBlocks']:\n    []",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 10,
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"InvalidBlock\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "'InvalidBlock' does not match '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'\n\nFailed validating 'pattern' in schema['properties']['sections']['items']['properties']['allowedBlocks']['items']:\n    {'type': 'string', 'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'}\n\nOn instance['sections'][0]['allowedBlocks'][0]:\n    'InvalidBlock'",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "InvalidBlock",
+              "another-block-v2"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 10,
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Invalid-Block-Name\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "-1 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sections']['items']['properties']['allowedBlocks']['items']:\n    {'type': 'string', 'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'}\n\nOn instance['sections'][0]['allowedBlocks'][1]:\n    -1",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "Invalid-Block-Name",
+              -1
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 10,
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"InvalidBlockName\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "-1 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sections']['items']['properties']['allowedBlocks']['items']:\n    {'type': 'string', 'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'}\n\nOn instance['sections'][0]['allowedBlocks'][1]:\n    -1",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "InvalidBlockName",
+              -1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1001 is greater than the maximum of 1000",
+      "python_error": "1001 is greater than the maximum of 1000\n\nFailed validating 'maximum' in schema['properties']['sections']['items']['properties']['size']:\n    {'type': 'number', 'minimum': 1, 'maximum': 1000}\n\nOn instance['sections'][1]['size']:\n    1001",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "block-name-v1",
+              "another-block-v2"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 1001,
+            "Size is greater than the maximum allowed value of 1000": "optional",
+            "Missing colon after 'optional'": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Invalid-Block-Name\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "-1 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sections']['items']['properties']['allowedBlocks']['items']:\n    {'type': 'string', 'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'}\n\nOn instance['sections'][0]['allowedBlocks'][1]:\n    -1",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "Invalid-Block-Name",
+              -1,
+              "another-block-v2"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 10,
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "1001 is greater than the maximum of 1000",
+      "python_error": "1001 is greater than the maximum of 1000\n\nFailed validating 'maximum' in schema['properties']['sections']['items']['properties']['min']:\n    {'type': 'number', 'minimum': 1, 'maximum': 1000}\n\nOn instance['sections'][0]['min']:\n    1001",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "block-name-v1",
+              "another-block-v2"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1001,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 10,
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"Invalid-Block\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "'Invalid-Block' does not match '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'\n\nFailed validating 'pattern' in schema['properties']['sections']['items']['properties']['allowedBlocks']['items']:\n    {'type': 'string', 'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'}\n\nOn instance['sections'][0]['allowedBlocks'][0]:\n    'Invalid-Block'",
+      "data": {
+        "name": "example",
+        "label": "Example",
+        "version": 1,
+        "sections": [
+          {
+            "allowedBlocks": [
+              "Invalid-Block",
+              "another-block-v2"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v1",
+              "another-deprecated-block-v2"
+            ],
+            "defaultBlocks": [
+              "default-block-v1",
+              "another-default-block-v2"
+            ],
+            "allowedBlockGroups": [
+              "block-group-1",
+              "another-block-group-2"
+            ],
+            "min": 1,
+            "max": 10,
+            "size": 5,
+            "optional": false
+          },
+          {
+            "allowedBlocks": [
+              "block-name-v3",
+              "another-block-v4"
+            ],
+            "deprecatedBlocks": [
+              "deprecated-block-v3",
+              "another-deprecated-block-v4"
+            ],
+            "defaultBlocks": [
+              "default-block-v3",
+              "another-default-block-v4"
+            ],
+            "allowedBlockGroups": [
+              "block-group-3",
+              "another-block-group-4"
+            ],
+            "min": 2,
+            "max": 20,
+            "size": 10,
+            "optional": true
+          }
+        ]
+      }
+    }
+  ]
+}

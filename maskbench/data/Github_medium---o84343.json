@@ -1,0 +1,471 @@
+{
+  "description": "sample Github_medium/o84343.json",
+  "meta": {
+    "full_size": 1835,
+    "stripped_size": 675,
+    "features": [
+      "@minmaxLength",
+      "enum",
+      "format",
+      "format:email",
+      "pattern"
+    ],
+    "raw_features": [
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "Entity returned after successfully authenticating.",
+    "properties": {
+      "expires": {
+        "description": "Expiration time of the token.",
+        "type": "string"
+      },
+      "token": {
+        "description": "A *JSON Web Token* that is valid for 15 minutes.",
+        "type": "string"
+      },
+      "user": {
+        "description": "The user profile of the authenticated user.",
+        "properties": {
+          "_id": {
+            "description": "Unique identifier for a user.",
+            "pattern": "^[a-z0-9_-]{7,}$",
+            "readOnly": true,
+            "type": "string"
+          },
+          "_plan": {
+            "description": "The user's current subscription plan.",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "Timestamp when the user was created.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "description": "The email address of the user",
+            "format": "email",
+            "type": "string",
+            "unique": true
+          },
+          "gravatar_id": {
+            "description": "Gravatar ID, see [documentation](https://en.gravatar.com/site/implement/).",
+            "pattern": "^[a-f0-9]{32}$",
+            "readOnly": true,
+            "type": "string"
+          },
+          "is_active": {
+            "description": "Whether the user is able to login. Set to `false` to ban a user.",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Display name, initially set to user name.",
+            "maxLength": 30,
+            "minLength": 3,
+            "type": "string"
+          },
+          "permissions": {
+            "description": "Set of permissions for that user, see [permission](/api/permissions).",
+            "readOnly": true,
+            "type": "object"
+          },
+          "provider": {
+            "description": "How the user is authenticated. For local accounts this is set to `local`, otherwise to the name of the OAuth2 provider.",
+            "enum": [
+              "local",
+              "github"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "roles": {
+            "description": "List of roles the user belongs to.",
+            "enum": [
+              "root",
+              "admin",
+              "contributor",
+              "member"
+            ],
+            "type": "array"
+          },
+          "username": {
+            "description": "Username used when locally logging in.",
+            "maxLength": 30,
+            "minLength": 3,
+            "type": "string",
+            "unique": true
+          }
+        },
+        "title": "User Profile",
+        "type": "object"
+      }
+    },
+    "required": [
+      "username",
+      "password"
+    ],
+    "title": "Authentication Response",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "1234567890",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "john.doe@example.com",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "John Doe",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles ": [
+            "admin",
+            "contributor"
+          ],
+          "username ": "johndoe"
+        },
+        "username": "johndoe",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"ab\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['user']['properties']['username']:\n    {'description': 'Username used when locally logging in.',\n     'maxLength': 30,\n     'minLength': 3,\n     'type': 'string',\n     'unique': True}\n\nOn instance['user']['username']:\n    'a'",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "1234567890",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "john.doe@example.com",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "ab",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "admin",
+            "contributor"
+          ],
+          "username": "a"
+        },
+        "username": "johndoe",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid_email\" is not a \"email\"",
+      "python_error": "['admin', 'contributor'] is not one of ['root', 'admin', 'contributor', 'member']\n\nFailed validating 'enum' in schema['properties']['user']['properties']['roles']:\n    {'description': 'List of roles the user belongs to.',\n     'enum': ['root', 'admin', 'contributor', 'member'],\n     'type': 'array'}\n\nOn instance['user']['roles']:\n    ['admin', 'contributor']",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "1234567890",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "invalid_email",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "John Doe",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "admin",
+            "contributor"
+          ],
+          "username": "johndoe"
+        },
+        "username": "johndoe",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "[\"admin\",\"contributor\"] is not one of [\"root\",\"admin\",\"contributor\",\"member\"]",
+      "python_error": "['admin', 'contributor'] is not one of ['root', 'admin', 'contributor', 'member']\n\nFailed validating 'enum' in schema['properties']['user']['properties']['roles']:\n    {'description': 'List of roles the user belongs to.',\n     'enum': ['root', 'admin', 'contributor', 'member'],\n     'type': 'array'}\n\nOn instance['user']['roles']:\n    ['admin', 'contributor']",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "1234567",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "john.doe@example.com",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "John Doe",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "admin",
+            "contributor"
+          ],
+          "username": "johndoe"
+        },
+        "username": "johndoe",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123\" does not match \"^[a-z0-9_-]{7,}$\"",
+      "python_error": "['admin', 'contributor'] is not one of ['root', 'admin', 'contributor', 'member']\n\nFailed validating 'enum' in schema['properties']['user']['properties']['roles']:\n    {'description': 'List of roles the user belongs to.',\n     'enum': ['root', 'admin', 'contributor', 'member'],\n     'type': 'array'}\n\nOn instance['user']['roles']:\n    ['admin', 'contributor']",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "123",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "john.doe@example.com",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "John Doe",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "admin",
+            "contributor"
+          ],
+          "username": "johndoe"
+        },
+        "username": "johndoe",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"123\" does not match \"^[a-z0-9_-]{7,}$\"",
+      "python_error": "'j' is too short\n\nFailed validating 'minLength' in schema['properties']['user']['properties']['username']:\n    {'description': 'Username used when locally logging in.',\n     'maxLength': 30,\n     'minLength': 3,\n     'type': 'string',\n     'unique': True}\n\nOn instance['user']['username']:\n    'j'",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "123",
+          "_id should have at least 7 characters according to the schema pattern ": "^[a-z0-9_-]{7,}$",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "johndoe@example",
+          "email should be a valid email address according to the schema format ": "email",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d5",
+          "gravatar_id should have exactly 32 hexadecimal characters according to the schema pattern ": "^[a-f0-9]{32}$",
+          "is_active": true,
+          "name": "J",
+          "name should have at least 3 characters according to the schema minLength ": 3,
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "google",
+          "provider should be either 'local' or 'github' according to the schema enum ": [
+            "local",
+            "github"
+          ],
+          "roles": [
+            "admin",
+            "contributor",
+            "owner",
+            "roles should be one of 'root', 'admin', 'contributor', 'member' according to the schema enum "
+          ],
+          "username": "j",
+          "username should have at least 3 characters according to the schema minLength ": 3
+        },
+        "username": "johndoe",
+        "password": "pass",
+        "password is not required according to the schema required ": [
+          "username",
+          "password"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123\" does not match \"^[a-z0-9_-]{7,}$\"",
+      "python_error": "['admin', 'contributor'] is not one of ['root', 'admin', 'contributor', 'member']\n\nFailed validating 'enum' in schema['properties']['user']['properties']['roles']:\n    {'description': 'List of roles the user belongs to.',\n     'enum': ['root', 'admin', 'contributor', 'member'],\n     'type': 'array'}\n\nOn instance['user']['roles']:\n    ['admin', 'contributor']",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "123",
+          "_id should be at least 7 characters long according to the pattern in the schema, so this will be invalid": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "john.doe@example.com",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "John Doe",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "admin",
+            "contributor"
+          ],
+          "username": "johndoe"
+        },
+        "username": "johndoe",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['user']['properties']['username']:\n    {'description': 'Username used when locally logging in.',\n     'maxLength': 30,\n     'minLength': 3,\n     'type': 'string',\n     'unique': True}\n\nOn instance['user']['username']:\n    'a'",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "1234567890",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "john.doe@example.com",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "a",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "admin",
+            "contributor"
+          ],
+          "username": "a"
+        },
+        "username": "a",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"abc\" does not match \"^[a-z0-9_-]{7,}$\"",
+      "python_error": "['admin', 'contributor'] is not one of ['root', 'admin', 'contributor', 'member']\n\nFailed validating 'enum' in schema['properties']['user']['properties']['roles']:\n    {'description': 'List of roles the user belongs to.',\n     'enum': ['root', 'admin', 'contributor', 'member'],\n     'type': 'array'}\n\nOn instance['user']['roles']:\n    ['admin', 'contributor']",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "abc",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "john.doe@example.com",
+          "gravatar_id": "205e460b479e2e5b48aec07710c08d50",
+          "is_active": true,
+          "name": "John Doe",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "admin",
+            "contributor"
+          ],
+          "username": "johndoe"
+        },
+        "username": "johndoe",
+        "password": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"12\" does not match \"^[a-z0-9_-]{7,}$\"",
+      "python_error": "'ab' is too short\n\nFailed validating 'minLength' in schema['properties']['user']['properties']['username']:\n    {'description': 'Username used when locally logging in.',\n     'maxLength': 30,\n     'minLength': 3,\n     'type': 'string',\n     'unique': True}\n\nOn instance['user']['username']:\n    'ab'",
+      "data": {
+        "expires": "2024-12-06T14:30:00.000Z",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaGFuIjoiMjMwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "user": {
+          "_id": "12",
+          "_id should be at least 7 characters long according to the schema's pattern property, so this is invalid. It is also not a valid MongoDB id which has 12 or 24 hex characters. However, we are testing for schema validation only here._id": "12",
+          "_plan": "premium",
+          "created_at": "2022-01-01T12:00:00.000Z",
+          "email": "johndoe@example",
+          "email should be a valid email address according to the schema's format property, so this is invalid. A basic email format should include an '@' followed by a '.'._email": "johndoe@example",
+          "gravatar_id": "1234567890abcdefg",
+          "gravatar_id should be 32 hexadecimal digits according to the schema's pattern property, so this is invalid._gravatar_id": "1234567890abcdefg",
+          "is_active": true,
+          "name": "ab",
+          "name should be at least 3 characters long according to the schema's minLength property, so this is invalid._name": "ab",
+          "permissions": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "provider": "local",
+          "roles": [
+            "owner",
+            "roles should be one of the values in the enum property according to the schema, so this is invalid._roles"
+          ],
+          "username": "ab",
+          "username should be at least 3 characters long according to the schema's minLength property, so this is invalid._username": "ab"
+        },
+        "username": "ab",
+        "username should be at least 3 characters long according to the schema's minLength property, so this is invalid._username": "ab",
+        "password": "pass",
+        "password was required to be included in the schema but was removed from instance to test for required property validation against schema._password": "pass"
+      }
+    }
+  ]
+}

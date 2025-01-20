@@ -1,0 +1,269 @@
+{
+  "description": "sample JsonSchemaStore/plagiarize.json",
+  "meta": {
+    "full_size": 1114,
+    "stripped_size": 518,
+    "features": [
+      "additionalProperties",
+      "additionalProperties:object"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "plagiarize.yaml configuration schema",
+    "id": "https://json.schemastore.org/plagiarize",
+    "properties": {
+      "repo": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "description": "Configuration for strings, files, and file paths to replace in target file",
+        "properties": {
+          "url": {
+            "description": "Git url of project to plagiarize",
+            "type": "string"
+          },
+          "checkout": {
+            "description": "Branch, tag, or commit to checkout from project to be plagiarized",
+            "type": "string"
+          }
+        }
+      },
+      "strings": {
+        "type": "object",
+        "description": "Strings to find in target project and be replaced with plagiarized project's values",
+        "additionalProperties": {
+          "type": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        },
+        "required": [
+          "project"
+        ],
+        "properties": {
+          "project": {
+            "type": "string"
+          }
+        }
+      },
+      "vars": {
+        "type": "object",
+        "description": "Variables available to be used for finding and replacing by variable name. For example `$var_name: hello` would replace string '$var_name' with 'hello' in target project",
+        "additionalProperties": {
+          "type": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        }
+      }
+    },
+    "required": [
+      "repo",
+      "strings"
+    ],
+    "title": "Plagiarize configuration",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "repo": {
+          "url": "https://github.com/user/project.git",
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "description": "This is a sample project.",
+          "version": 1,
+          "is_active": true
+        },
+        "vars": {
+          "var_name": "hello",
+          "var_age": 30,
+          "var_is_admin": false
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"key\":\"value\"} is not of types \"boolean\", \"integer\", \"string\"",
+      "python_error": "{'key': 'value'} is not of type 'string', 'integer', 'boolean'\n\nFailed validating 'type' in schema['properties']['vars']['additionalProperties']:\n    {'type': ['string', 'integer', 'boolean']}\n\nOn instance['vars']['invalid_property']:\n    {'key': 'value'}",
+      "data": {
+        "repo": {
+          "url": "https://github.com/user/project.git",
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "description": "This is a sample project.",
+          "version": 1,
+          "is_active": true,
+          "invalid_property": {
+            "key": "value"
+          }
+        },
+        "vars": {
+          "var_name": "hello",
+          "var_age": 30,
+          "var_is_admin": false,
+          "invalid_property": {
+            "key": "value"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of types \"boolean\", \"integer\", \"string\"",
+      "python_error": "None is not of type 'string', 'integer', 'boolean'\n\nFailed validating 'type' in schema['properties']['vars']['additionalProperties']:\n    {'type': ['string', 'integer', 'boolean']}\n\nOn instance['vars']['invalid_key']:\n    None",
+      "data": {
+        "repo": {
+          "url": "https://github.com/user/project.git",
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "description": "This is a sample project.",
+          "version": 1,
+          "is_active": true,
+          "invalid_key": null
+        },
+        "vars": {
+          "var_name": "hello",
+          "var_age": 30,
+          "var_is_admin": false,
+          "invalid_key": null
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"url\" is a required property",
+      "python_error": "'url' is a required property\n\nFailed validating 'required' in schema['properties']['repo']:\n    {'required': ['url'],\n     'type': 'object',\n     'description': 'Configuration for strings, files, and file paths to '\n                    'replace in target file',\n     'properties': {'url': {'description': 'Git url of project to '\n                                           'plagiarize',\n                            'type': 'string'},\n                    'checkout': {'description': 'Branch, tag, or commit to '\n                                                'checkout from project to '\n                                                'be plagiarized',\n                                 'type': 'string'}}}\n\nOn instance['repo']:\n    {'checkout': 'main'}",
+      "data": {
+        "repo": {
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "description": "This is a sample project.",
+          "version": 1,
+          "is_active": true
+        },
+        "vars": {
+          "var_name": "hello",
+          "var_age": 30,
+          "var_is_admin": false
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['repo']['properties']['url']:\n    {'description': 'Git url of project to plagiarize', 'type': 'string'}\n\nOn instance['repo']['url']:\n    12345",
+      "data": {
+        "repo": {
+          "url": 12345,
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "description": "This is a sample project.",
+          "version": 1,
+          "is_active": true
+        },
+        "vars": {
+          "var_name": "hello",
+          "var_age": 30,
+          "var_is_admin": false
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "repo": {
+          "url": "https://github.com/user/project.git",
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "author": "John Doe",
+          "version": 1
+        },
+        "vars": {
+          "var_name": "hello",
+          "var_age": 30,
+          "var_admin": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of types \"boolean\", \"integer\", \"string\"",
+      "python_error": "None is not of type 'string', 'integer', 'boolean'\n\nFailed validating 'type' in schema['properties']['vars']['additionalProperties']:\n    {'type': ['string', 'integer', 'boolean']}\n\nOn instance['vars']['var_name']:\n    None",
+      "data": {
+        "repo": {
+          "url": "https://github.com/user/project.git",
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "author": "John Doe",
+          "version": true
+        },
+        "vars": {
+          "var_name": null,
+          "var_age": 30,
+          "var_admin": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "None is not of type 'string', 'integer', 'boolean'\n\nFailed validating 'type' in schema['properties']['strings']['additionalProperties']:\n    {'type': ['string', 'integer', 'boolean']}\n\nOn instance['strings']['version']:\n    None",
+      "data": {
+        "repo": {
+          "url": 123,
+          "checkout": "main"
+        },
+        "strings": {
+          "project": "My Project",
+          "author": "John Doe",
+          "version": null
+        },
+        "vars": {
+          "var_name": "hello",
+          "var_age": 30,
+          "var_admin": true
+        }
+      }
+    }
+  ]
+}

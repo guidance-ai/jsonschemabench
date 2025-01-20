@@ -1,0 +1,175 @@
+{
+  "description": "sample Github_trivial/o9827.json",
+  "meta": {
+    "full_size": 1150,
+    "stripped_size": 976,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "oneOf": [
+      {
+        "title": "Device Connected",
+        "description": "Schema for marking a device as connected",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "connected"
+            ]
+          },
+          "connectedAt": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "$date": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "$date"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "title": "Device Disconnected",
+        "description": "Schema for marking a device as disconnected",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "disconnected"
+            ]
+          },
+          "connectedAt": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "$date": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "$date"
+                ]
+              }
+            ]
+          },
+          "disconnectedAt": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "$date": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "$date"
+                ]
+              }
+            ]
+          },
+          "disconnectReason": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "messagesFromClient": {
+            "type": "number"
+          },
+          "messagesToClient": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "connected",
+        "connectedAt": {
+          "$date": "2022-01-01T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "connected",
+        "connectedAt": {
+          "$date": "2022-01-01T12:00:00.000Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"status\":\"connected\",\"connectedAt\":{\"$date\":\"2022-01-01T12:00:00.000Z\"},\"disconnectReason\":\"a\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'connected' is not one of ['disconnected']\n\nFailed validating 'enum' in schema[1]['properties']['status']:\n    {'type': 'string', 'enum': ['disconnected']}\n\nOn instance['status']:\n    'connected'",
+      "data": {
+        "status": "connected",
+        "connectedAt": {
+          "$date": "2022-01-01T12:00:00.000Z"
+        },
+        "disconnectReason": "a"
+      }
+    }
+  ]
+}

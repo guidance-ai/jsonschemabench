@@ -1,0 +1,121 @@
+{
+  "description": "sample JsonSchemaStore/vsls.json",
+  "meta": {
+    "full_size": 802,
+    "stripped_size": 306,
+    "features": [
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://json.schemastore.org/vsls.json",
+    "properties": {
+      "excludeFiles": {
+        "description": "An array of globs which indicate the files that should be completely unavailable to guests when you share (e.g. secrets).",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "gitignore": {
+        "description": "Indicates how .gitignore files should be treated with respects to excluding/hiding files from guests.",
+        "type": "string",
+        "default": "hide",
+        "enum": [
+          "none",
+          "hide",
+          "exclude"
+        ]
+      },
+      "hideFiles": {
+        "description": "An array of globs which indicate the files that should be hidden from guest's file trees, but still accessible (e.g. when following the host).",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "title": "JSON schema for Visual Studio Live Share config files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "excludeFiles": [
+          "**/secrets.json",
+          "**/api_keys.txt"
+        ],
+        "gitignore": "hide",
+        "hideFiles": [
+          "**/node_modules",
+          "**/build"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['excludeFiles']['items']:\n    {'type': 'string'}\n\nOn instance['excludeFiles'][2]:\n    123",
+      "data": {
+        "excludeFiles": [
+          "**/secrets.json",
+          "**/api_keys.txt",
+          123
+        ],
+        "gitignore": "hide",
+        "hideFiles": [
+          "**/node_modules",
+          "**/build"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "excludeFiles": [
+          "**/secrets.json",
+          "**/api_keys.txt"
+        ],
+        "gitignore": "hide",
+        "hideFiles": [
+          "**/node_modules/**",
+          "**/build/**"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "'invalid' is not one of ['none', 'hide', 'exclude']\n\nFailed validating 'enum' in schema['properties']['gitignore']:\n    {'description': 'Indicates how .gitignore files should be treated with '\n                    'respects to excluding/hiding files from guests.',\n     'type': 'string',\n     'default': 'hide',\n     'enum': ['none', 'hide', 'exclude']}\n\nOn instance['gitignore']:\n    'invalid'",
+      "data": {
+        "excludeFiles": [
+          "**/secrets.json",
+          "**/api_keys.txt",
+          123
+        ],
+        "gitignore": "invalid",
+        "hideFiles": [
+          "**/node_modules/**",
+          "**/build/**",
+          null
+        ]
+      }
+    }
+  ]
+}

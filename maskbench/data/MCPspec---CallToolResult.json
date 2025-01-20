@@ -1,0 +1,444 @@
+{
+  "description": "sample MCPspec/CallToolResult.json",
+  "meta": {
+    "full_size": 5060,
+    "stripped_size": 1920,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "const",
+      "enum",
+      "format",
+      "format:byte",
+      "format:uri",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CallToolResult",
+    "definitions": {
+      "CallToolResult": {
+        "description": "The server's response to a tool call.\n\nAny errors that originate from the tool SHOULD be reported inside the result\nobject, with `isError` set to true, _not_ as an MCP protocol-level error\nresponse. Otherwise, the LLM would not be able to see that an error occurred\nand self-correct.\n\nHowever, any errors in _finding_ the tool, an error indicating that the\nserver does not support tool calls, or any other exceptional conditions,\nshould be reported as an MCP error response.",
+        "properties": {
+          "_meta": {
+            "additionalProperties": {},
+            "description": "This result property is reserved by the protocol to allow clients and servers to attach additional metadata to their responses.",
+            "type": "object"
+          },
+          "content": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TextContent"
+                },
+                {
+                  "$ref": "#/definitions/ImageContent"
+                },
+                {
+                  "$ref": "#/definitions/EmbeddedResource"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "isError": {
+            "description": "Whether the tool call ended in an error.\n\nIf not set, this is assumed to be false (the call was successful).",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      },
+      "TextContent": {
+        "description": "Text provided to or from an LLM.",
+        "properties": {
+          "annotations": {
+            "properties": {
+              "audience": {
+                "description": "Describes who the intended customer of this object or data is.\n\nIt can include multiple entries to indicate content useful for multiple audiences (e.g., `[\"user\", \"assistant\"]`).",
+                "items": {
+                  "$ref": "#/definitions/Role"
+                },
+                "type": "array"
+              },
+              "priority": {
+                "description": "Describes how important this data is for operating the server.\n\nA value of 1 means \"most important,\" and indicates that the data is\neffectively required, while 0 means \"least important,\" and indicates that\nthe data is entirely optional.",
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "text": {
+            "description": "The text content of the message.",
+            "type": "string"
+          },
+          "type": {
+            "const": "text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ],
+        "type": "object"
+      },
+      "Role": {
+        "description": "The sender or recipient of messages and data in a conversation.",
+        "enum": [
+          "assistant",
+          "user"
+        ],
+        "type": "string"
+      },
+      "ImageContent": {
+        "description": "An image provided to or from an LLM.",
+        "properties": {
+          "annotations": {
+            "properties": {
+              "audience": {
+                "description": "Describes who the intended customer of this object or data is.\n\nIt can include multiple entries to indicate content useful for multiple audiences (e.g., `[\"user\", \"assistant\"]`).",
+                "items": {
+                  "$ref": "#/definitions/Role"
+                },
+                "type": "array"
+              },
+              "priority": {
+                "description": "Describes how important this data is for operating the server.\n\nA value of 1 means \"most important,\" and indicates that the data is\neffectively required, while 0 means \"least important,\" and indicates that\nthe data is entirely optional.",
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "data": {
+            "description": "The base64-encoded image data.",
+            "format": "byte",
+            "type": "string"
+          },
+          "mimeType": {
+            "description": "The MIME type of the image. Different providers may support different image types.",
+            "type": "string"
+          },
+          "type": {
+            "const": "image",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "mimeType",
+          "type"
+        ],
+        "type": "object"
+      },
+      "EmbeddedResource": {
+        "description": "The contents of a resource, embedded into a prompt or tool call result.\n\nIt is up to the client how best to render embedded resources for the benefit\nof the LLM and/or the user.",
+        "properties": {
+          "annotations": {
+            "properties": {
+              "audience": {
+                "description": "Describes who the intended customer of this object or data is.\n\nIt can include multiple entries to indicate content useful for multiple audiences (e.g., `[\"user\", \"assistant\"]`).",
+                "items": {
+                  "$ref": "#/definitions/Role"
+                },
+                "type": "array"
+              },
+              "priority": {
+                "description": "Describes how important this data is for operating the server.\n\nA value of 1 means \"most important,\" and indicates that the data is\neffectively required, while 0 means \"least important,\" and indicates that\nthe data is entirely optional.",
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/TextResourceContents"
+              },
+              {
+                "$ref": "#/definitions/BlobResourceContents"
+              }
+            ]
+          },
+          "type": {
+            "const": "resource",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resource",
+          "type"
+        ],
+        "type": "object"
+      },
+      "TextResourceContents": {
+        "properties": {
+          "mimeType": {
+            "description": "The MIME type of this resource, if known.",
+            "type": "string"
+          },
+          "text": {
+            "description": "The text of the item. This must only be set if the item can actually be represented as text (not binary data).",
+            "type": "string"
+          },
+          "uri": {
+            "description": "The URI of this resource.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "uri"
+        ],
+        "type": "object"
+      },
+      "BlobResourceContents": {
+        "properties": {
+          "blob": {
+            "description": "A base64-encoded string representing the binary data of the item.",
+            "format": "byte",
+            "type": "string"
+          },
+          "mimeType": {
+            "description": "The MIME type of this resource, if known.",
+            "type": "string"
+          },
+          "uri": {
+            "description": "The URI of this resource.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "blob",
+          "uri"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "content": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0.5
+            },
+            "text": "Hello, world!",
+            "type": "text"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "user"
+              ],
+              "priority": 1
+            },
+            "data": "/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=",
+            "mimeType": "image/jpeg",
+            "type": "image"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0
+            },
+            "resource": {
+              "blob": "/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=",
+              "mimeType": "image/png",
+              "uri": "https://example.com/image.png"
+            },
+            "type": "resource"
+          }
+        ],
+        "_meta": {
+          "additionalProperty": "value"
+        },
+        "isError": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "{\"annotations\":{\"audience\":[\"assistant\"],\"priority\":0},\"resource\":{\"blob\":\"/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=\",\"mimeType\":\"image/png\",\"uri\":\"Invalid URI\"},\"type\":\"resource\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'blob': '/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=', 'mimeType': 'image/png', 'uri': 'Invalid URI'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[2]['properties']['resource']:\n    {'anyOf': [{'$ref': '#/definitions/TextResourceContents'},\n               {'$ref': '#/definitions/BlobResourceContents'}]}\n\nOn instance['resource']:\n    {'blob': '/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=',\n     'mimeType': 'image/png',\n     'uri': 'Invalid URI'}",
+      "data": {
+        "content": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0.5
+            },
+            "text": "Hello, world!",
+            "type": "text"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "user"
+              ],
+              "priority": 1
+            },
+            "data": "Invalid base64 string",
+            "mimeType": "image/jpeg",
+            "type": "image"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0
+            },
+            "resource": {
+              "blob": "/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=",
+              "mimeType": "image/png",
+              "uri": "Invalid URI"
+            },
+            "type": "resource"
+          }
+        ],
+        "_meta": {
+          "additionalProperty": "value"
+        },
+        "isError": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"annotations\":{\"audience\":[\"user\"],\"priority\":1},\"data\":\"/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=\",\"mimeType\":\"image/jpeg\",\"type\":\"text\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'annotations': {'audience': ['user'], 'priority': 1}, 'data': '/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=', 'mimeType': 'image/jpeg', 'type': 'text'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/TextContent'},\n               {'$ref': '#/definitions/ImageContent'},\n               {'$ref': '#/definitions/EmbeddedResource'}]}\n\nOn instance['content'][1]:\n    {'annotations': {'audience': ['user'], 'priority': 1},\n     'data': '/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=',\n     'mimeType': 'image/jpeg',\n     'type': 'text'}",
+      "data": {
+        "content": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0.5
+            },
+            "text": "Hello, world!",
+            "type": "text"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "user"
+              ],
+              "priority": 1
+            },
+            "data": "/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=",
+            "mimeType": "image/jpeg",
+            "type": "text"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0
+            },
+            "resource": {
+              "blob": "/9j/4AAQSkJRgABAQEASABIAAD/.../9k=",
+              "mimeType": "image/png",
+              "uri": "https://example.com/image.png"
+            },
+            "type": "resource"
+          }
+        ],
+        "_meta": {
+          "additionalProperty": "value"
+        },
+        "isError": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"annotations\":{\"audience\":[\"assistant\"],\"priority\":1.5},\"text\":\"Hello, world!\",\"type\":\"text\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'annotations': {'audience': ['assistant'], 'priority': 1.5}, 'text': 'Hello, world!', 'type': 'text'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/TextContent'},\n               {'$ref': '#/definitions/ImageContent'},\n               {'$ref': '#/definitions/EmbeddedResource'}]}\n\nOn instance['content'][0]:\n    {'annotations': {'audience': ['assistant'], 'priority': 1.5},\n     'text': 'Hello, world!',\n     'type': 'text'}",
+      "data": {
+        "content": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 1.5
+            },
+            "text": "Hello, world!",
+            "type": "text"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "user"
+              ],
+              "priority": 1
+            },
+            "data": "/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=",
+            "mimeType": "image/jpeg",
+            "type": "image"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0
+            },
+            "resource": {
+              "blob": "/9j/4AAQSkZJRgABAQEASABIAAD/.../9k=",
+              "mimeType": "image/png",
+              "uri": "https://example.com/image.png"
+            },
+            "type": "resource"
+          }
+        ],
+        "_meta": {
+          "additionalProperty": "value"
+        },
+        "isError": false
+      }
+    }
+  ]
+}

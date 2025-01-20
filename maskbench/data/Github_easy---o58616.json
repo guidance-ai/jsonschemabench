@@ -1,0 +1,161 @@
+{
+  "description": "sample Github_easy/o58616.json",
+  "meta": {
+    "full_size": 653,
+    "stripped_size": 628,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "allOf"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://example.com/restapi/FootballPlayer.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "FootballPlayer",
+    "type": "object",
+    "definitions": {
+      "person": {
+        "type": "object",
+        "required": [
+          "first_name",
+          "last_name"
+        ],
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          }
+        }
+      },
+      "football_team": {
+        "type": "object",
+        "required": [
+          "name",
+          "league"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "league": {
+            "type": "string"
+          },
+          "year_founded": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/person"
+      },
+      {
+        "type": "object",
+        "required": [
+          "current_club"
+        ],
+        "properties": {
+          "current_club": {
+            "$ref": "#/definitions/football_team"
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "first_name": "Lionel",
+        "last_name": "Messi",
+        "age": 35,
+        "current_club": {
+          "name": "Paris Saint-Germain",
+          "league": "Ligue 1",
+          "year_founded": 1970
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"last_name\" is a required property",
+      "python_error": "'last_name' is a required property\n\nFailed validating 'required' in schema['allOf'][0]:\n    {'type': 'object',\n     'required': ['first_name', 'last_name'],\n     'properties': {'first_name': {'type': 'string'},\n                    'last_name': {'type': 'string'},\n                    'age': {'type': 'integer'}}}\n\nOn instance:\n    {'first_name': 'Lionel',\n     'age': 35,\n     'current_club': {'name': 'Paris Saint-Germain',\n                      'league': 'Ligue 1',\n                      'year_founded': 1970}}",
+      "data": {
+        "first_name": "Lionel",
+        "age": 35,
+        "current_club": {
+          "name": "Paris Saint-Germain",
+          "league": "Ligue 1",
+          "year_founded": 1970
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"league\" is a required property",
+      "python_error": "'league' is a required property\n\nFailed validating 'required' in schema['allOf'][1]['properties']['current_club']:\n    {'type': 'object',\n     'required': ['name', 'league'],\n     'properties': {'name': {'type': 'string'},\n                    'league': {'type': 'string'},\n                    'year_founded': {'type': 'integer'}}}\n\nOn instance['current_club']:\n    {'name': 'Paris Saint-Germain', 'year_founded': 1970}",
+      "data": {
+        "first_name": "Lionel",
+        "last_name": "Messi",
+        "age": 35,
+        "current_club": {
+          "name": "Paris Saint-Germain",
+          "year_founded": 1970
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"35\" is not of type \"integer\"",
+      "python_error": "'35' is not of type 'integer'\n\nFailed validating 'type' in schema['allOf'][0]['properties']['age']:\n    {'type': 'integer'}\n\nOn instance['age']:\n    '35'",
+      "data": {
+        "first_name": "Lionel",
+        "last_name": "Messi",
+        "age": "35",
+        "current_club": {
+          "name": "Paris Saint-Germain",
+          "league": "Ligue 1",
+          "year_founded": "1970"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['allOf'][1]['properties']['current_club']['properties']['name']:\n    {'type': 'string'}\n\nOn instance['current_club']['name']:\n    12345",
+      "data": {
+        "first_name": "Lionel",
+        "last_name": "Messi",
+        "age": 35,
+        "current_club": {
+          "name": 12345,
+          "league": "Ligue 1",
+          "year_founded": 1970
+        }
+      }
+    }
+  ]
+}

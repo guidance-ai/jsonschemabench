@@ -1,0 +1,361 @@
+{
+  "description": "sample Github_medium/o45310.json",
+  "meta": {
+    "full_size": 702,
+    "stripped_size": 643,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "JSON schema for VSCode coding tracker token file",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "SimpleToken": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "remark": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "type": "object",
+    "required": [
+      "adminToken"
+    ],
+    "properties": {
+      "adminToken": {
+        "type": [
+          "array"
+        ],
+        "minItems": 1,
+        "items": {
+          "$ref": "#/definitions/SimpleToken"
+        }
+      },
+      "viewReportToken": {
+        "type": [
+          "array",
+          "string"
+        ],
+        "items": {
+          "$ref": "#/definitions/SimpleToken"
+        }
+      },
+      "uploadToken": {
+        "type": [
+          "array"
+        ],
+        "items": {
+          "type": "object",
+          "required": [
+            "token"
+          ],
+          "properties": {
+            "remark": {
+              "type": "string"
+            },
+            "token": {
+              "type": "string"
+            },
+            "computerId": {
+              "type": [
+                "string",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "adminToken": [
+          {
+            "token": "admin-token-1",
+            "remark ": "Admin token for user 1"
+          },
+          {
+            "token": "admin-token-2",
+            "remark ": "Admin token for user 2"
+          }
+        ],
+        "viewReportToken": [
+          {
+            "token": "view-report-token-1",
+            "remark ": "View report token for user 1"
+          },
+          {
+            "token": "view-report-token-2",
+            "remark ": "View report token for user 2"
+          }
+        ],
+        "uploadToken": [
+          {
+            "token": "upload-token-1",
+            "remark ": "Upload token for user 1",
+            "computerId ": "computer-1"
+          },
+          {
+            "token": "upload-token-2",
+            "remark ": "Upload token for user 2",
+            "computerId ": [
+              "computer-2",
+              "computer-3"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['adminToken']:\n    {'type': ['array'],\n     'minItems': 1,\n     'items': {'$ref': '#/definitions/SimpleToken'}}\n\nOn instance['adminToken']:\n    []",
+      "data": {
+        "adminToken": [],
+        "viewReportToken": [
+          {
+            "token": "view-report-token-1",
+            "remark ": "View report token for user 1"
+          },
+          {
+            "token": "view-report-token-2",
+            "remark ": "View report token for user 2"
+          }
+        ],
+        "uploadToken": [
+          {
+            "token": "upload-token-1",
+            "remark ": "Upload token for user 1",
+            "computerId ": "computer-1"
+          },
+          {
+            "token": "upload-token-2",
+            "remark ": "Upload token for user 2",
+            "computerId ": [
+              "computer-2",
+              "computer-3"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"token\" is a required property",
+      "python_error": "'token' is a required property\n\nFailed validating 'required' in schema['properties']['adminToken']['items']:\n    {'type': 'object',\n     'required': ['token'],\n     'properties': {'remark': {'type': 'string'},\n                    'token': {'type': 'string'}}}\n\nOn instance['adminToken'][1]:\n    {'remark ': 'Admin token for user 2'}",
+      "data": {
+        "adminToken": [
+          {
+            "token": "admin-token-1",
+            "remark ": "Admin token for user 1"
+          },
+          {
+            "remark ": "Admin token for user 2"
+          }
+        ],
+        "viewReportToken": [
+          {
+            "token": "view-report-token-1",
+            "remark ": "View report token for user 1"
+          },
+          {
+            "token": "view-report-token-2",
+            "remark ": "View report token for user 2"
+          }
+        ],
+        "uploadToken": [
+          {
+            "token": "upload-token-1",
+            "remark ": "Upload token for user 1",
+            "computerId ": "computer-1"
+          },
+          {
+            "token": "upload-token-2",
+            "remark ": "Upload token for user 2",
+            "computerId ": [
+              "computer-2",
+              123
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"array\", \"string\"",
+      "python_error": "123 is not of type 'array', 'string'\n\nFailed validating 'type' in schema['properties']['viewReportToken']:\n    {'type': ['array', 'string'],\n     'items': {'$ref': '#/definitions/SimpleToken'}}\n\nOn instance['viewReportToken']:\n    123",
+      "data": {
+        "adminToken": [
+          {
+            "token": "admin-token-1",
+            "remark ": "Admin token for user 1"
+          },
+          {
+            "token": "admin-token-2",
+            "remark ": "Admin token for user 2"
+          }
+        ],
+        "viewReportToken": 123,
+        "uploadToken": [
+          {
+            "token": "upload-token-1",
+            "remark ": "Upload token for user 1",
+            "computerId ": "computer-1"
+          },
+          {
+            "token": "upload-token-2",
+            "remark ": "Upload token for user 2",
+            "computerId ": [
+              "computer-2",
+              "computer-3"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "adminToken": [
+          {
+            "remark": "Admin token for user 1",
+            "token": "admin-token-1"
+          },
+          {
+            "remark": "Admin token for user 2",
+            "token": "admin-token-2"
+          }
+        ],
+        "viewReportToken": [
+          {
+            "remark": "View report token for user 1",
+            "token": "view-report-token-1"
+          },
+          {
+            "remark": "View report token for user 2",
+            "token": "view-report-token-2"
+          }
+        ],
+        "uploadToken": [
+          {
+            "remark": "Upload token for user 1",
+            "token": "upload-token-1",
+            "computerId": "computer-1"
+          },
+          {
+            "remark": "Upload token for user 2",
+            "token": "upload-token-2",
+            "computerId": [
+              "computer-2",
+              "computer-3"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['adminToken']:\n    {'type': ['array'],\n     'minItems': 1,\n     'items': {'$ref': '#/definitions/SimpleToken'}}\n\nOn instance['adminToken']:\n    []",
+      "data": {
+        "adminToken": [],
+        "viewReportToken": [
+          {
+            "token": "view-report-token-1",
+            "remark": "View report token for user 1"
+          },
+          {
+            "token": "view-report-token-2",
+            "remark": "View report token for user 2"
+          }
+        ],
+        "uploadToken": [
+          {
+            "token": "upload-token-1",
+            "remark": "Upload token for user 1",
+            "computerId": "computer-1"
+          },
+          {
+            "token": "upload-token-2",
+            "remark": "Upload token for user 2",
+            "computerId": [
+              "computer-2",
+              "computer-3"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"token\" is a required property",
+      "python_error": "'token' is a required property\n\nFailed validating 'required' in schema['properties']['uploadToken']['items']:\n    {'type': 'object',\n     'required': ['token'],\n     'properties': {'remark': {'type': 'string'},\n                    'token': {'type': 'string'},\n                    'computerId': {'type': ['string', 'array'],\n                                   'items': {'type': 'string'}}}}\n\nOn instance['uploadToken'][1]:\n    {'remark': 'Upload token for user 2'}",
+      "data": {
+        "adminToken": [
+          {
+            "remark": "Admin token for user 1",
+            "token": "admin-token-1"
+          },
+          {
+            "remark": "Admin token for user 2"
+          }
+        ],
+        "viewReportToken": [
+          {
+            "token": "view-report-token-1",
+            "remark": "View report token for user 1"
+          },
+          {
+            "token": "view-report-token-2",
+            "remark": "View report token for user 2"
+          }
+        ],
+        "uploadToken": [
+          {
+            "token": "upload-token-1",
+            "remark": "Upload token for user 1",
+            "computerId": "computer-1"
+          },
+          {
+            "remark": "Upload token for user 2"
+          }
+        ]
+      }
+    }
+  ]
+}

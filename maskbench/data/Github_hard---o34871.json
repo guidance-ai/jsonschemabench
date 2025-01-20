@@ -1,0 +1,1001 @@
+{
+  "description": "sample Github_hard/o34871.json",
+  "meta": {
+    "full_size": 5841,
+    "stripped_size": 3541,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "additionalItems",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "format",
+      "format:uri",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "anyOf:trivial",
+      "definitions",
+      "maxItems",
+      "maximum",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "definitions": {
+      "asset": {
+        "additionalProperties": false,
+        "description": "Assets reflecting files in primary storage.",
+        "properties": {
+          "clip": {
+            "$ref": "#/definitions/segment",
+            "description": "Portion of source file to extract as this asset. Note that segment is relative to clip start."
+          },
+          "file": {
+            "description": "Relative path to file under '/nyu/stage/$directory'.",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "options": {
+            "description": "Additional transcode options to pass to ffmpeg.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/offset",
+                "description": "Start point only (end point inferred from length)."
+              },
+              {
+                "$ref": "#/definitions/segment"
+              },
+              {
+                "description": "Automatically postioned immediately following previous positioned asset.",
+                "enum": [
+                  "auto"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "release": {
+            "$ref": "#/definitions/release"
+          },
+          "replace": {
+            "description": "Original file staging path or asset id to replace.",
+            "type": [
+              "string",
+              "integer"
+            ]
+          }
+        },
+        "title": "file",
+        "type": "object"
+      },
+      "citation": {
+        "additionalProperties": false,
+        "description": "Publications/products corresponding to study volumes.",
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "head": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "title": "URL or DOI",
+            "type": "string"
+          },
+          "year": {
+            "maximum": 2900,
+            "minimum": 1900,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "head"
+        ],
+        "type": "object"
+      },
+      "container": {
+        "additionalProperties": false,
+        "description": "Organizational unit within volume containing related files (with common annotations), often corresponding to an individual data session (single visit/acquisition/participant/group/day).",
+        "properties": {
+          "assets": {
+            "description": "Attachment point of assets, which, in the case of timeseries data, should match asset.duration.",
+            "items": {
+              "$ref": "#/definitions/asset"
+            },
+            "type": "array"
+          },
+          "date": {
+            "$ref": "#/definitions/date"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "records": {
+            "description": "Attachment of records to slots.",
+            "items": {
+              "$ref": "#/definitions/record"
+            },
+            "type": "array"
+          },
+          "release": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/release"
+              }
+            ],
+            "default": null,
+            "description": "Sharing/release permissions granted by participants on (portions of) contained data."
+          },
+          "top": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "session or materials",
+        "type": "object"
+      },
+      "date": {
+        "pattern": "^[12][0-9]{3}-[01][0-9]-[0-3][0-9]$",
+        "type": "string"
+      },
+      "link": {
+        "additionalProperties": false,
+        "description": "Link to externals resources/references.",
+        "properties": {
+          "head": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "title": "URL or DOI",
+            "type": "string"
+          }
+        },
+        "required": [
+          "head",
+          "url"
+        ],
+        "type": "object"
+      },
+      "numeric": {
+        "pattern": "^[0-9]*(\\.[0-9]*)?$",
+        "type": "string"
+      },
+      "offset": {
+        "description": "Point in time in milliseconds or MM:SS.sss, used as endpoint for segment.  Null represents indeterminate value, usually representing +-Infinity as an endpoint.",
+        "pattern": "^[-+]?([0-9]+:){0,2}[0-9]+(\\.[0-9]*)?$",
+        "type": [
+          "number",
+          "string",
+          "null"
+        ]
+      },
+      "position": {
+        "default": [
+          null,
+          null
+        ]
+      },
+      "record": {
+        "additionalProperties": false,
+        "description": "Sets of metadata measurements organized into or applying to a single cohesive unit. These are assumed to be unique within a volume, such that two identical records are considered the same object.",
+        "properties": {
+          "ID": {
+            "type": "string"
+          },
+          "birth weight": {
+            "$ref": "#/definitions/numeric"
+          },
+          "birthdate": {
+            "$ref": "#/definitions/date"
+          },
+          "category": {
+            "description": "Types of records that are relevant for data organization.",
+            "enum": [
+              "participant",
+              "pilot",
+              "exclusion",
+              "condition",
+              "group",
+              "task",
+              "context"
+            ]
+          },
+          "country": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "disability": {
+            "type": "string"
+          },
+          "ethnicity": {
+            "enum": [
+              "Not Hispanic or Latino",
+              "Hispanic or Latino"
+            ],
+            "type": "string"
+          },
+          "gender": {
+            "enum": [
+              "Female",
+              "Male"
+            ],
+            "type": "string"
+          },
+          "gestational age": {
+            "$ref": "#/definitions/numeric"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "info": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/definitions/segment"
+            },
+            "type": "array"
+          },
+          "pregnancy term": {
+            "enum": [
+              "Full term",
+              "Preterm"
+            ],
+            "type": "string"
+          },
+          "race": {
+            "enum": [
+              "American Indian or Alaska Native",
+              "Asian",
+              "Native Hawaiian or Other Pacific Islander",
+              "Black or African American",
+              "White",
+              "More than one",
+              "Unknown or not reported"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "Did not meet inclusion criteria",
+              "Procedural/experimenter error",
+              "Withdrew/fussy/tired",
+              "Outlier"
+            ],
+            "type": "string"
+          },
+          "setting": {
+            "enum": [
+              "Lab",
+              "Home",
+              "Classroom",
+              "Outdoor",
+              "Clinic"
+            ],
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "AL",
+              "AK",
+              "AZ",
+              "AR",
+              "CA",
+              "CO",
+              "CT",
+              "DE",
+              "DC",
+              "FL",
+              "GA",
+              "HI",
+              "ID",
+              "IL",
+              "IN",
+              "IA",
+              "KS",
+              "KY",
+              "LA",
+              "ME",
+              "MT",
+              "NE",
+              "NV",
+              "NH",
+              "NJ",
+              "NM",
+              "NY",
+              "NC",
+              "ND",
+              "OH",
+              "OK",
+              "OR",
+              "MD",
+              "MA",
+              "MI",
+              "MN",
+              "MS",
+              "MO",
+              "PA",
+              "RI",
+              "SC",
+              "SD",
+              "TN",
+              "TX",
+              "UT",
+              "VT",
+              "VA",
+              "WA",
+              "WV",
+              "WI",
+              "WY"
+            ],
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "category"
+        ],
+        "type": "object"
+      },
+      "release": {
+        "description": "Levels at which participants or researchers may choose to share data.",
+        "enum": [
+          null,
+          "PRIVATE",
+          "SHARED",
+          "EXCERPTS",
+          "PUBLIC"
+        ],
+        "title": "sharing release level"
+      },
+      "segment": {
+        "additionalItems": false,
+        "default": [
+          null,
+          null
+        ],
+        "description": "Explicit range of time (within a container): an empty segment, a singleton point in time, or a start and end point.",
+        "items": {
+          "$ref": "#/definitions/offset"
+        },
+        "maxItems": 2,
+        "type": "array"
+      }
+    },
+    "description": "Basic organizational unit for data.",
+    "properties": {
+      "containers": {
+        "description": "The first container is required and must have 'top' set.",
+        "items": {
+          "$ref": "#/definitions/container"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "directory": {
+        "default": "",
+        "description": "Staging directory (normally within /nyu/stage) within which to find all asset files.",
+        "title": "Asset base directory",
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "containers"
+    ],
+    "title": "Databrary Volume",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "containers": [
+          {
+            "assets": [
+              {
+                "clip": [
+                  "00:00:00",
+                  "00:01:00"
+                ],
+                "file": "path/to/file1.mp4",
+                "id": 1,
+                "name": "Asset 1",
+                "position": "auto",
+                "release": "SHARED"
+              },
+              {
+                "clip": [
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "file": "path/to/file2.mp4",
+                "id": 2,
+                "name": "Asset 2",
+                "position": "auto",
+                "release": "SHARED"
+              }
+            ],
+            "date": "2022-01-01",
+            "key": "session-1",
+            "name": "Session 1",
+            "records": [
+              {
+                "birthdate": "1990-01-01",
+                "category": "participant",
+                "ethnicity": "Not Hispanic or Latino",
+                "gender": "Male",
+                "key": "participant-1",
+                "name": "John Doe",
+                "positions": [
+                  [
+                    "00:00:00",
+                    "00:01:00"
+                  ]
+                ],
+                "race": "White"
+              }
+            ],
+            "top": true
+          }
+        ],
+        "directory": "/nyu/stage/example-volume",
+        "name": "Example Volume"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "containers": [
+          {
+            "assets": [
+              {
+                "clip": [
+                  "00:00:00",
+                  "00:01:00"
+                ],
+                "file": "asset1.mp4",
+                "id": 1,
+                "name": "Asset 1",
+                "position": "auto",
+                "release": "SHARED"
+              },
+              {
+                "clip": [
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "file": "asset2.mp4",
+                "id": 2,
+                "name": "Asset 2",
+                "position": "auto",
+                "release": "SHARED"
+              }
+            ],
+            "date": "2022-01-01",
+            "key": "session-1",
+            "name": "Session 1",
+            "records": [
+              {
+                "birthdate": "1990-01-01",
+                "category": "participant",
+                "country": "USA",
+                "ethnicity": "Not Hispanic or Latino",
+                "gender": "Male",
+                "key": "participant-1",
+                "language": "English",
+                "name": "John Doe",
+                "race": "White",
+                "state": "NY"
+              },
+              {
+                "category": "task",
+                "description": "This is task 1",
+                "key": "task-1",
+                "name": "Task 1"
+              }
+            ],
+            "top": true
+          }
+        ],
+        "directory": "/nyu/stage/example-volume",
+        "name": "Example Volume"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Invalid date, does not match YYYY-MM-DD pattern\" does not match \"^[12][0-9]{3}-[01][0-9]-[0-3][0-9]$\"",
+      "python_error": "'records' is not of type 'object'\n\nFailed validating 'type' in schema['properties']['containers']['items']:\n    {'additionalProperties': False,\n     'description': 'Organizational unit within volume containing related '\n                    'files (with common annotations), often corresponding '\n                    'to an individual data session (single '\n                    'visit/acquisition/participant/group/day).',\n     'properties': {'assets': {'description': 'Attachment point of assets, '\n                                              'which, in the case of '\n                                              'timeseries data, should '\n                                              'match asset.duration.',\n                               'items': {'$ref': '#/definitions/asset'},\n                               'type': 'array'},\n                    'date': {'$ref': '#/definitions/date'},\n                    'id': {'type': 'integer'},\n                    'key': {'type': 'string'},\n                    'name': {'type.. (882 more)",
+      "data": {
+        "name": "Example Volume",
+        "containers": [
+          {
+            "key": "session-1",
+            "name": "Session 1",
+            "top": true,
+            "date": "Invalid date, does not match YYYY-MM-DD pattern"
+          },
+          "records"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('year' was unexpected)",
+      "python_error": "Additional properties are not allowed ('year' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['containers']['items']['properties']['records']['items']:\n    {'additionalProperties': False,\n     'description': 'Sets of metadata measurements organized into or '\n                    'applying to a single cohesive unit. These are assumed '\n                    'to be unique within a volume, such that two identical '\n                    'records are considered the same object.',\n     'properties': {'ID': {'type': 'string'},\n                    'birth weight': {'$ref': '#/definitions/numeric'},\n                    'birthdate': {'$ref': '#/definitions/date'},\n                    'category': {'description': 'Types of records that are '\n                                                'relevant for data '\n                                                'organization.',\n                                 'enum': ['participant',\n                                          'pilot',\n             .. (5234 more)",
+      "data": {
+        "name": "Example Volume",
+        "containers": [
+          {
+            "key": "session-1",
+            "name": "Session 1",
+            "top": true,
+            "date": "2022-01-01",
+            "records": [
+              {
+                "key": "participant-1",
+                "category": "participant",
+                "name": "John Doe",
+                "birthdate": "1990-01-01",
+                "gender": "Male",
+                "ethnicity": "Not Hispanic or Latino",
+                "race": "White",
+                "country": "USA",
+                "state": "NY",
+                "language": "English",
+                "year": 3000
+              },
+              {
+                "key": "task-1",
+                "category": "task",
+                "name": "Task 1",
+                "description": "This is task 1"
+              }
+            ],
+            "assets": [
+              {
+                "clip": [
+                  "00:00:00",
+                  "00:01:00"
+                ],
+                "file": "asset1.mp4",
+                "id": 1,
+                "name": "Asset 1",
+                "position": "auto",
+                "release": "SHARED"
+              },
+              {
+                "clip": [
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "file": "asset2.mp4",
+                "id": 2,
+                "name": "Asset 2",
+                "position": "auto",
+                "release": "SHARED"
+              }
+            ]
+          }
+        ],
+        "directory": "/nyu/stage/example-volume"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalItems keyword",
+      "valid": false,
+      "rust_error": "[\"00:00:00\",\"00:01:00\",\"00:02:00\"] has more than 2 items",
+      "python_error": "['00:00:00', '00:01:00', '00:02:00'] is too long\n\nFailed validating 'maxItems' in schema['properties']['containers']['items']['properties']['assets']['items']['properties']['clip']:\n    {'additionalItems': False,\n     'default': [None, None],\n     'description': 'Explicit range of time (within a container): an empty '\n                    'segment, a singleton point in time, or a start and '\n                    'end point.',\n     'items': {'$ref': '#/definitions/offset'},\n     'maxItems': 2,\n     'type': 'array'}\n\nOn instance['containers'][0]['assets'][0]['clip']:\n    ['00:00:00', '00:01:00', '00:02:00']",
+      "data": {
+        "name": "Example Volume",
+        "containers": [
+          {
+            "key": "session-1",
+            "name": "Session 1",
+            "top": true,
+            "date": "2022-01-01",
+            "records": [
+              {
+                "key": "participant-1",
+                "category": "participant",
+                "name": "John Doe",
+                "birthdate": "1990-01-01",
+                "gender": "Male",
+                "ethnicity": "Not Hispanic or Latino",
+                "race": "White",
+                "country": "USA",
+                "state": "NY",
+                "language": "English"
+              },
+              {
+                "key": "task-1",
+                "category": "task",
+                "name": "Task 1",
+                "description": "This is task 1"
+              }
+            ],
+            "assets": [
+              {
+                "id": 1,
+                "name": "Asset 1",
+                "file": "asset1.mp4",
+                "clip": [
+                  "00:00:00",
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "position": "auto",
+                "release": "SHARED"
+              },
+              {
+                "id": 2,
+                "name": "Asset 2",
+                "file": "asset2.mp4",
+                "clip": [
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "position": "auto",
+                "release": "SHARED"
+              }
+            ]
+          }
+        ],
+        "directory": "/nyu/stage/example-volume"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[\"00:02:00\",\"00:03:00\",\"00:04:00\",\"00:05:00\"] has more than 2 items",
+      "python_error": "['00:02:00', '00:03:00', '00:04:00', '00:05:00'] is too long\n\nFailed validating 'maxItems' in schema['properties']['containers']['items']['properties']['assets']['items']['properties']['clip']:\n    {'additionalItems': False,\n     'default': [None, None],\n     'description': 'Explicit range of time (within a container): an empty '\n                    'segment, a singleton point in time, or a start and '\n                    'end point.',\n     'items': {'$ref': '#/definitions/offset'},\n     'maxItems': 2,\n     'type': 'array'}\n\nOn instance['containers'][0]['assets'][2]['clip']:\n    ['00:02:00', '00:03:00', '00:04:00', '00:05:00']",
+      "data": {
+        "name": "Example Volume",
+        "containers": [
+          {
+            "key": "session-1",
+            "name": "Session 1",
+            "top": true,
+            "date": "2022-01-01",
+            "records": [
+              {
+                "key": "participant-1",
+                "category": "participant",
+                "name": "John Doe",
+                "birthdate": "1990-01-01",
+                "gender": "Male",
+                "ethnicity": "Not Hispanic or Latino",
+                "race": "White",
+                "country": "USA",
+                "state": "NY",
+                "language": "English"
+              },
+              {
+                "key": "task-1",
+                "category": "task",
+                "name": "Task 1",
+                "description": "This is task 1"
+              }
+            ],
+            "assets": [
+              {
+                "clip": [
+                  "00:00:00",
+                  "00:01:00"
+                ],
+                "file": "asset1.mp4",
+                "id": 1,
+                "name": "Asset 1",
+                "position": "auto",
+                "release": "SHARED"
+              },
+              {
+                "clip": [
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "file": "asset2.mp4",
+                "id": 2,
+                "name": "Asset 2",
+                "position": "auto",
+                "release": "SHARED"
+              },
+              {
+                "id": 3,
+                "name": "Asset 3",
+                "file": "asset3.mp4",
+                "clip": [
+                  "00:02:00",
+                  "00:03:00",
+                  "00:04:00",
+                  "00:05:00"
+                ],
+                "position": "auto",
+                "release": "SHARED"
+              }
+            ]
+          }
+        ],
+        "directory": "/nyu/stage/example-volume"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('links' was unexpected)",
+      "python_error": "Additional properties are not allowed ('links' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'definitions': {'asset': {'additionalProperties': False,\n                               'description': 'Assets reflecting files in '\n                                              'primary storage.',\n                               'properties': {'clip': {'$ref': '#/definitions/segment',\n                                                       'description': 'Portion '\n                                                                      'of '\n                                                                      'source '\n                                                                      'file '\n                                                                      'to '\n                                                                      'extract '\n                                                                      'as '\n                                .. (27688 more)",
+      "data": {
+        "name": "Example Volume",
+        "containers": [
+          {
+            "assets": [
+              {
+                "clip": [
+                  "00:00:00",
+                  "00:01:00"
+                ],
+                "file": "asset1.mp4",
+                "id": 1,
+                "name": "Asset 1",
+                "position": "auto",
+                "release": "SHARED"
+              },
+              {
+                "clip": [
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "file": "asset2.mp4",
+                "id": 2,
+                "name": "Asset 2",
+                "position": "auto",
+                "release": "SHARED"
+              }
+            ],
+            "date": "2022-01-01",
+            "key": "session-1",
+            "name": "Session 1",
+            "records": [
+              {
+                "birthdate": "1990-01-01",
+                "category": "participant",
+                "country": "USA",
+                "ethnicity": "Not Hispanic or Latino",
+                "gender": "Male",
+                "key": "participant-1",
+                "language": "English",
+                "name": "John Doe",
+                "race": "White",
+                "state": "NY"
+              },
+              {
+                "category": "task",
+                "description": "This is task 1",
+                "key": "task-1",
+                "name": "Task 1"
+              }
+            ],
+            "top": true
+          }
+        ],
+        "directory": "/nyu/stage/example-volume",
+        "links": [
+          {
+            "head": "Invalid Link",
+            "url": "not a valid url"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"invalid-value\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalid-value' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['containers']['items']['properties']['assets']['items']['properties']['position']:\n    {'anyOf': [{'$ref': '#/definitions/offset',\n                'description': 'Start point only (end point inferred from '\n                               'length).'},\n               {'$ref': '#/definitions/segment'},\n               {'description': 'Automatically postioned immediately '\n                               'following previous positioned asset.',\n                'enum': ['auto'],\n                'type': 'string'}]}\n\nOn instance['containers'][0]['assets'][0]['position']:\n    'invalid-value'",
+      "data": {
+        "name": "Example Volume",
+        "containers": [
+          {
+            "key": "session-1",
+            "name": "Session 1",
+            "top": true,
+            "date": "2022-01-01",
+            "records": [
+              {
+                "key": "participant-1",
+                "category": "participant",
+                "name": "John Doe",
+                "birthdate": "1990-01-01",
+                "gender": "Male",
+                "ethnicity": "Not Hispanic or Latino",
+                "race": "White",
+                "country": "USA",
+                "state": "NY",
+                "language": "English"
+              },
+              {
+                "key": "task-1",
+                "category": "task",
+                "name": "Task 1",
+                "description": "This is task 1"
+              }
+            ],
+            "assets": [
+              {
+                "id": 1,
+                "name": "Asset 1",
+                "file": "asset1.mp4",
+                "clip": [
+                  "00:00:00",
+                  "00:01:00"
+                ],
+                "position": "invalid-value",
+                "release": "SHARED"
+              },
+              {
+                "id": 2,
+                "name": "Asset 2",
+                "file": "asset2.mp4",
+                "clip": [
+                  "00:01:00",
+                  "00:02:00"
+                ],
+                "position": "auto",
+                "release": "SHARED"
+              }
+            ]
+          }
+        ],
+        "directory": "/nyu/stage/example-volume"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"20222-01-01\" does not match \"^[12][0-9]{3}-[01][0-9]-[0-3][0-9]$\"",
+      "python_error": "Additional properties are not allowed ('assets' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'definitions': {'asset': {'additionalProperties': False,\n                               'description': 'Assets reflecting files in '\n                                              'primary storage.',\n                               'properties': {'clip': {'$ref': '#/definitions/segment',\n                                                       'description': 'Portion '\n                                                                      'of '\n                                                                      'source '\n                                                                      'file '\n                                                                      'to '\n                                                                      'extract '\n                                                                      'as '\n                               .. (27697 more)",
+      "data": {
+        "name": "Example Volume",
+        "containers": [
+          {
+            "key": "session-1",
+            "name": "Session 1",
+            "top": true,
+            "date": "20222-01-01",
+            "<--- Modified: invalid date format, should be 4 digits for the year": "records",
+            "assets": [
+              {
+                "id": 1,
+                "name": "Asset 1",
+                "file": "asset1.mp4",
+                "clip": [
+                  "00:00:00",
+                  "00:01:00"
+                ],
+                "position": "auto",
+                "release": "EXTRA-PRIVATE",
+                "extra_property": "extra value",
+                "additionalProperties": false,
+                "enum": [
+                  "PRIVATE",
+                  "SHARED",
+                  "EXCERPTS",
+                  "PUBLIC"
+                ],
+                "replace": 5.5,
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              }
+            ]
+          },
+          "directory",
+          "type"
+        ],
+        "assets": [
+          {
+            "id": 1,
+            "name": "Asset 1",
+            "file": "asset1.mp4",
+            "clip": [
+              "00:00:00",
+              "00:01:00"
+            ],
+            "position": "auto",
+            "release": "EXTRA-PRIVATE",
+            "enum": [
+              "PRIVATE",
+              "SHARED",
+              "EXCERPTS",
+              "PUBLIC"
+            ]
+          },
+          {
+            "id": 2,
+            "name": "Asset 2",
+            "file": "asset2.mp4",
+            "clip": [
+              "00:01:00",
+              "00:02:00"
+            ],
+            "position": "auto",
+            "release": "SHARED",
+            "replace": 5.5,
+            "type": [
+              "string",
+              "integer"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

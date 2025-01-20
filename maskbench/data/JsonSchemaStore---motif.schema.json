@@ -1,0 +1,345 @@
+{
+  "description": "sample JsonSchemaStore/motif.schema.json",
+  "meta": {
+    "full_size": 2708,
+    "stripped_size": 467,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "Motif Config",
+    "markdownDescription": "This is your project's main configuration file. It is a JSON file, and includes information such as `head` data and template mappings. It can be accessed via the project settings (<kbd>Ctrl+,</kbd> (PC) / <kbd>Cmd+,</kbd> (Mac)) → _General_ → _Open motif.json_. Alternatively, you can find it at the top level of your project source tree.",
+    "properties": {
+      "title": {
+        "type": "string",
+        "markdownDescription": "If set, this title will be used for your pages whenever your pages don't specify a `title` entry in the [metadata](https://motif.land/docs/basics/metadata)."
+      },
+      "titleTemplate": {
+        "type": "string",
+        "markdownDescription": "A title template for your pages. The `%s` part will be replaced with your page's title."
+      },
+      "baseCanonicalUrl": {
+        "type": "string",
+        "markdownDescription": "The base of a canonical URL link tag."
+      },
+      "gaMeasurementId": {
+        "type": "string",
+        "pattern": "^(G|UA|YT|MO)-[a-zA-Z0-9-]+$",
+        "markdownDescription": "Google Analytics tracking IDs, as explained in the [Google Analytics](https://motif.land/docs/guides/google-analytics) guide, to set up analytics tracking for your public pages."
+      },
+      "gaTrackingId": {
+        "$ref": "#/properties/gaMeasurementId"
+      },
+      "templates": {
+        "type": "object",
+        "markdownDescription": "This is a mapping between your pages, and the templates that should be used. It is automatically generated if you set a template via the page's document bar, but you can also edit it manually, for instance to set up automatic mapping rules that we describe below.\nThe template value (e.g. `home` or `blog-index`) must correspond to the name of the file in the `templates` folder.\nMappings are determined using a [glob syntax](https://en.wikipedia.org/wiki/Glob_(programming)), where:\n- `*` means all files in a given folder. E.g. `blog/*` means any files in the `blog` folder (but not in any of its subfolders)\n- `**/*` means all files in a given folder and subfolders of any depth. E.g. `blog/**/*` includes all files in the `blog` folder and its subfolders.\n**Note**: The most specific rule takes precendence.",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "head": {
+        "type": "array",
+        "markdownDescription": "This is a list of tags to inject in the `<head>` section of all your pages. This is where you load fonts, set Open Graph metadata, or load a custom stylesheet. Any HTML tags can be used.",
+        "items": {
+          "type": "string"
+        }
+      },
+      "sitemap": {
+        "type": "object",
+        "properties": {
+          "excludePaths": {
+            "type": "array",
+            "markdownDescription": "If you wish to exclude the paths of some public pages from the sitemap, you can do so by adding a `sitemap.excludePaths` entry and specify a list of paths, either explicitly, or using the glob pattern mentioned above.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "title": "My Project",
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "G-123456789",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post"
+        },
+        "head": [
+          "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap'>",
+          "<meta property='og:title' content='My Project'>",
+          "<meta property='og:description' content='This is my project'>",
+          "<meta property='og:image' content='https://example.com/image.jpg'>"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['templates']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['templates']['invalid-key']:\n    123",
+      "data": {
+        "title": "My Project",
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "G-123456789",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post",
+          "invalid-key": 123
+        },
+        "head": [
+          "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap'>",
+          "<meta property='og:title' content='My Project'>",
+          "<meta property='og:description' content='This is my project'>",
+          "<meta property='og:image' content='https://example.com/image.jpg'>"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Invalid-123456789\" does not match \"^(G|UA|YT|MO)-[a-zA-Z0-9-]+$\"",
+      "python_error": "'Invalid-123456789' does not match '^(G|UA|YT|MO)-[a-zA-Z0-9-]+$'\n\nFailed validating 'pattern' in schema['properties']['gaMeasurementId']:\n    {'type': 'string',\n     'pattern': '^(G|UA|YT|MO)-[a-zA-Z0-9-]+$',\n     'markdownDescription': 'Google Analytics tracking IDs, as explained '\n                            'in the [Google '\n                            'Analytics](https://motif.land/docs/guides/google-analytics) '\n                            'guide, to set up analytics tracking for your '\n                            'public pages.'}\n\nOn instance['gaMeasurementId']:\n    'Invalid-123456789'",
+      "data": {
+        "title": "My Project",
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "Invalid-123456789",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post"
+        },
+        "head": [
+          "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap'>",
+          "<meta property='og:title' content='My Project'>",
+          "<meta property='og:description' content='This is my project'>",
+          "<meta property='og:image' content='https://example.com/image.jpg'>"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['title']:\n    {'type': 'string',\n     'markdownDescription': 'If set, this title will be used for your '\n                            \"pages whenever your pages don't specify a \"\n                            '`title` entry in the '\n                            '[metadata](https://motif.land/docs/basics/metadata).'}\n\nOn instance['title']:\n    123",
+      "data": {
+        "title": 123,
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "G-123456789",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post"
+        },
+        "head": [
+          "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap'>",
+          "<meta property='og:title' content='My Project'>",
+          "<meta property='og:description' content='This is my project'>",
+          "<meta property='og:image' content='https://example.com/image.jpg'>"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Invalid-Id\" does not match \"^(G|UA|YT|MO)-[a-zA-Z0-9-]+$\"",
+      "python_error": "'Invalid-Id' does not match '^(G|UA|YT|MO)-[a-zA-Z0-9-]+$'\n\nFailed validating 'pattern' in schema['properties']['gaMeasurementId']:\n    {'type': 'string',\n     'pattern': '^(G|UA|YT|MO)-[a-zA-Z0-9-]+$',\n     'markdownDescription': 'Google Analytics tracking IDs, as explained '\n                            'in the [Google '\n                            'Analytics](https://motif.land/docs/guides/google-analytics) '\n                            'guide, to set up analytics tracking for your '\n                            'public pages.'}\n\nOn instance['gaMeasurementId']:\n    'Invalid-Id'",
+      "data": {
+        "title": "My Project",
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "Invalid-Id",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post"
+        },
+        "head": [
+          "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap'>",
+          "<meta property='og:title' content='My Project'>",
+          "<meta property='og:description' content='This is my project'>",
+          "<meta property='og:image' content='https://example.com/image.jpg'>"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['templates']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['templates']['index']:\n    123",
+      "data": {
+        "title": "My Project",
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "G-123456789",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": 123,
+          "Invalid template value, should be a string": "blog/*",
+          "Invalid key, should be a string": "Invalid key, should be a string"
+        },
+        "head": [
+          "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap'>",
+          "<meta property='og:title' content='My Project'>",
+          "<meta property='og:description' content='This is my project'>",
+          "<meta property='og:image' content='https://example.com/image.jpg'>",
+          123,
+          "Invalid head value, should be a string"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*",
+            123,
+            "Invalid excludePaths value, should be a string"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "title": "My Project",
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "G-123456789",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post"
+        },
+        "head": [
+          "<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>",
+          "<meta property='og:title' content='My Project'>",
+          "<link rel='stylesheet' href='/styles.css'>"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Invalid-123\" does not match \"^(G|UA|YT|MO)-[a-zA-Z0-9-]+$\"",
+      "python_error": "'Invalid-123' does not match '^(G|UA|YT|MO)-[a-zA-Z0-9-]+$'\n\nFailed validating 'pattern' in schema['properties']['gaMeasurementId']:\n    {'type': 'string',\n     'pattern': '^(G|UA|YT|MO)-[a-zA-Z0-9-]+$',\n     'markdownDescription': 'Google Analytics tracking IDs, as explained '\n                            'in the [Google '\n                            'Analytics](https://motif.land/docs/guides/google-analytics) '\n                            'guide, to set up analytics tracking for your '\n                            'public pages.'}\n\nOn instance['gaMeasurementId']:\n    'Invalid-123'",
+      "data": {
+        "title": "My Project",
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "Invalid-123",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post"
+        },
+        "head": [
+          "<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>",
+          "<meta property='og:title' content='My Project'>",
+          "<link rel='stylesheet' href='/styles.css'>"
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['title']:\n    {'type': 'string',\n     'markdownDescription': 'If set, this title will be used for your '\n                            \"pages whenever your pages don't specify a \"\n                            '`title` entry in the '\n                            '[metadata](https://motif.land/docs/basics/metadata).'}\n\nOn instance['title']:\n    123",
+      "data": {
+        "title": 123,
+        "titleTemplate": "%s | My Project",
+        "baseCanonicalUrl": "https://example.com",
+        "gaMeasurementId": "G-123456789",
+        "gaTrackingId": "UA-123456789-1",
+        "templates": {
+          "index": "home",
+          "blog/*": "blog-index",
+          "blog/**/*": "blog-post"
+        },
+        "head": [
+          "<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>",
+          "<meta property='og:title' content='My Project'>",
+          "<link rel='stylesheet' href='/styles.css'>",
+          123
+        ],
+        "sitemap": {
+          "excludePaths": [
+            "/private-page",
+            "/private-folder/*",
+            123
+          ]
+        }
+      }
+    }
+  ]
+}

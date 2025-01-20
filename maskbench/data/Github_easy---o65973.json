@@ -1,0 +1,156 @@
+{
+  "description": "sample Github_easy/o65973.json",
+  "meta": {
+    "full_size": 515,
+    "stripped_size": 446,
+    "features": [
+      "@minmaxLength",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Payout Item",
+    "description": "PayPal payout item json schema",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "recipient_type": {
+          "type": "string",
+          "enum": [
+            "EMAIL",
+            "PHONE",
+            "PAYPAL_ID"
+          ]
+        },
+        "amount": {
+          "type": "object",
+          "properties": {
+            "currency": {
+              "type": "string",
+              "maxLength": 3
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "currency",
+            "value"
+          ]
+        },
+        "note": {
+          "type": "string"
+        },
+        "receiver": {
+          "type": "string"
+        },
+        "sender_item_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "receiver"
+      ]
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": [
+        {
+          "recipient_type": "EMAIL",
+          "amount": {
+            "currency": "USD",
+            "value": "10.00"
+          },
+          "note": "Test payout item",
+          "receiver": "test@example.com",
+          "sender_item_id": "1234567890"
+        },
+        {
+          "recipient_type": "PHONE",
+          "amount": {
+            "currency": "EUR",
+            "value": "20.00"
+          },
+          "note": "Another test payout item",
+          "receiver": "+1234567890",
+          "sender_item_id": "0987654321"
+        },
+        {
+          "recipient_type": "PAYPAL_ID",
+          "amount": {
+            "currency": "GBP",
+            "value": "30.00"
+          },
+          "note": "Third test payout item",
+          "receiver": "PP-1234567890",
+          "sender_item_id": "1111111111"
+        }
+      ]
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"recipient_type\":\"EMAIL\",\"amount\":{\"currency\":\"USD\",\"value\":\"10.00\"},\"note\":\"Test payout item\",\"receiver\":\"test@example.com\",\"sender_item_id\":\"1234567890\"} is not of type \"array\"",
+      "python_error": "{'recipient_type': 'EMAIL', 'amount': {'currency': 'USD', 'value': '10.00'}, 'note': 'Test payout item', 'receiver': 'test@example.com', 'sender_item_id': '1234567890'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Payout Item',\n     'description': 'PayPal payout item json schema',\n     'type': 'array',\n     'items': {'type': 'object',\n               'properties': {'recipient_type': {'type': 'string',\n                                                 'enum': ['EMAIL',\n                                                          'PHONE',\n                                                          'PAYPAL_ID']},\n                              'amount': {'type': 'object',\n                                         'properties': {'currency': {'type': 'string',\n                                                                     'maxLength': 3},\n                                                        'value': {'type': 'string'}},\n      .. (518 more)",
+      "data": {
+        "recipient_type": "EMAIL",
+        "amount": {
+          "currency": "USD",
+          "value": "10.00"
+        },
+        "note": "Test payout item",
+        "receiver": "test@example.com",
+        "sender_item_id": "1234567890"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"recipient_type\":\"EMAIL\",\"amount\":{\"currency\":\"USDUSD\",\"value\":\"10.00\"},\"note\":\"Test payout item\",\"receiver\":\"test@example.com\",\"sender_item_id\":\"1234567890\"} is not of type \"array\"",
+      "python_error": "{'recipient_type': 'EMAIL', 'amount': {'currency': 'USDUSD', 'value': '10.00'}, 'note': 'Test payout item', 'receiver': 'test@example.com', 'sender_item_id': '1234567890'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Payout Item',\n     'description': 'PayPal payout item json schema',\n     'type': 'array',\n     'items': {'type': 'object',\n               'properties': {'recipient_type': {'type': 'string',\n                                                 'enum': ['EMAIL',\n                                                          'PHONE',\n                                                          'PAYPAL_ID']},\n                              'amount': {'type': 'object',\n                                         'properties': {'currency': {'type': 'string',\n                                                                     'maxLength': 3},\n                                                        'value': {'type': 'string'}},\n   .. (524 more)",
+      "data": {
+        "recipient_type": "EMAIL",
+        "amount": {
+          "currency": "USDUSD",
+          "value": "10.00"
+        },
+        "note": "Test payout item",
+        "receiver": "test@example.com",
+        "sender_item_id": "1234567890"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"recipient_type\":\"INVALID\",\"amount\":{\"currency\":\"USD\",\"value\":\"10.00\"},\"note\":\"Test payout item\",\"receiver\":\"test@example.com\",\"sender_item_id\":\"1234567890\"} is not of type \"array\"",
+      "python_error": "{'recipient_type': 'INVALID', 'amount': {'currency': 'USD', 'value': '10.00'}, 'note': 'Test payout item', 'receiver': 'test@example.com', 'sender_item_id': '1234567890'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Payout Item',\n     'description': 'PayPal payout item json schema',\n     'type': 'array',\n     'items': {'type': 'object',\n               'properties': {'recipient_type': {'type': 'string',\n                                                 'enum': ['EMAIL',\n                                                          'PHONE',\n                                                          'PAYPAL_ID']},\n                              'amount': {'type': 'object',\n                                         'properties': {'currency': {'type': 'string',\n                                                                     'maxLength': 3},\n                                                        'value': {'type': 'string'}},\n    .. (522 more)",
+      "data": {
+        "recipient_type": "INVALID",
+        "amount": {
+          "currency": "USD",
+          "value": "10.00"
+        },
+        "note": "Test payout item",
+        "receiver": "test@example.com",
+        "sender_item_id": "1234567890"
+      }
+    }
+  ]
+}

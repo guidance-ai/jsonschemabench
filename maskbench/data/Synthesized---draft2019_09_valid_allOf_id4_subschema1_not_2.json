@@ -1,0 +1,88 @@
+{
+  "description": "sample Synthesized/draft2019_09_valid_allOf_id4_subschema1_not_2.json",
+  "meta": {
+    "full_size": 190,
+    "stripped_size": 190,
+    "features": [
+      "allOf",
+      "enum",
+      "not"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "allOf": [
+      {
+        "enum": [
+          {
+            "bar": "quux",
+            "foo": "baz"
+          }
+        ]
+      },
+      {
+        "not": {
+          "allOf": [
+            {
+              "properties": {
+                "bar": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "bar"
+              ]
+            },
+            {
+              "properties": {
+                "foo": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "foo"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "bar": "quux",
+        "foo": "baz"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"bar\":\"quux\",\"foo\":\"baz\",\"extra\":\"field\"} is not one of [{\"bar\":\"quux\",\"foo\":\"baz\"}]",
+      "python_error": "{'bar': 'quux', 'foo': 'baz', 'extra': 'field'} is not one of [{'bar': 'quux', 'foo': 'baz'}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 'quux', 'foo': 'baz'}]}\n\nOn instance:\n    {'bar': 'quux', 'foo': 'baz', 'extra': 'field'}",
+      "data": {
+        "bar": "quux",
+        "foo": "baz",
+        "extra": "field"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"bar\":\"quux\",\"foo\":123} is not one of [{\"bar\":\"quux\",\"foo\":\"baz\"}]",
+      "python_error": "{'bar': 'quux', 'foo': 123} is not one of [{'bar': 'quux', 'foo': 'baz'}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 'quux', 'foo': 'baz'}]}\n\nOn instance:\n    {'bar': 'quux', 'foo': 123}",
+      "data": {
+        "bar": "quux",
+        "foo": 123
+      }
+    }
+  ]
+}

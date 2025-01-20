@@ -1,0 +1,420 @@
+{
+  "description": "sample JsonSchemaStore/debugsettings.json",
+  "meta": {
+    "full_size": 1519,
+    "stripped_size": 859,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "format",
+      "format:uri",
+      "items",
+      "not"
+    ],
+    "raw_features": [
+      "$schema",
+      "allOf:trivial",
+      "definitions",
+      "id",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "profile": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/definitions/content"
+          }
+        ],
+        "anyOf": [
+          {
+            "properties": {
+              "executablePath": {
+                "type": "string",
+                "description": "An absolute path to the to the executable.",
+                "default": "",
+                "minLength": 1
+              }
+            },
+            "not": {
+              "required": [
+                "commandName"
+              ]
+            }
+          },
+          {
+            "properties": {
+              "commandName": {
+                "type": "string",
+                "description": "The name of the command to call.",
+                "default": "",
+                "minLength": 1
+              }
+            },
+            "not": {
+              "required": [
+                "executablePath"
+              ]
+            }
+          }
+        ]
+      },
+      "content": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the debug profile",
+            "minLength": 1
+          },
+          "commandLineArgs": {
+            "type": "string",
+            "description": "The arguments to pass to the command.",
+            "default": ""
+          },
+          "workingDirectory": {
+            "type": "string",
+            "description": "Sets the working directory of the command."
+          },
+          "launchBrowser": {
+            "type": "boolean",
+            "description": "Set to true if the browser should be launched.",
+            "default": false
+          },
+          "launchUrl": {
+            "type": "string",
+            "description": "The relative URL to launch in the browser.",
+            "format": "uri"
+          },
+          "environmentVariables": {
+            "type": "object",
+            "description": "Set the environment variables as key/value pairs.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "sdkVersion": {
+            "type": "string",
+            "description": "Sets the version of the SDK."
+          }
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/debugsettings.json",
+    "properties": {
+      "profiles": {
+        "type": "array",
+        "description": "A list of debug profiles",
+        "items": {
+          "$ref": "#/definitions/profile"
+        }
+      }
+    },
+    "title": "JSON schema for the ASP.NET DebugSettings.json files.",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "profiles": [
+          {
+            "name": "Profile 1",
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 2",
+            "commandName": "command",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "profiles": [
+          {
+            "name": "Profile 1",
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 2",
+            "commandName": "command-name",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['profiles']['items']['allOf'][0]['properties']['environmentVariables']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['profiles'][0]['environmentVariables']['VARIABLE2']:\n    123",
+      "data": {
+        "profiles": [
+          {
+            "name": "Profile 1",
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": 123,
+              "<--- Changed to invalid type": "unknownprop"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 2",
+            "commandName": "command-name",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2",
+              "unknownprop": "value3"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"name\" is a required property",
+      "python_error": "'name' is a required property\n\nFailed validating 'required' in schema['properties']['profiles']['items']:\n    {'type': 'object',\n     'required': ['name'],\n     'allOf': [{'$ref': '#/definitions/content'}],\n     'anyOf': [{'properties': {'executablePath': {'type': 'string',\n                                                  'description': 'An '\n                                                                 'absolute '\n                                                                 'path to '\n                                                                 'the to '\n                                                                 'the '\n                                                                 'executable.',\n                                                  'default': '',\n                                                  'minLength': 1}},\n                'not': {'required': ['commandName']}},\n               {'properties': {'commandName': {'type': 'string',\n                                             .. (725 more)",
+      "data": {
+        "profiles": [
+          {
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 2",
+            "commandName": "command-name",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid url\" is not a \"uri\"",
+      "python_error": "'invalid url' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['profiles']['items']['allOf'][0]['properties']['launchUrl']:\n    {'type': 'string',\n     'description': 'The relative URL to launch in the browser.',\n     'format': 'uri'}\n\nOn instance['profiles'][0]['launchUrl']:\n    'invalid url'",
+      "data": {
+        "profiles": [
+          {
+            "name": "Profile 1",
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "invalid url",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 2",
+            "commandName": "command-name",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[1]['properties']['commandName']:\n    {'type': 'string',\n     'description': 'The name of the command to call.',\n     'default': '',\n     'minLength': 1}\n\nOn instance['commandName']:\n    ''",
+      "data": {
+        "profiles": [
+          {
+            "name": "",
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 2",
+            "commandName": "",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"Profile 1\",\"executablePath\":\"/path/to/executable\",\"commandName\":\"command-name\",\"commandLineArgs\":\"--arg1 --arg2\",\"workingDirectory\":\"/path/to/working/directory\",\"launchBrowser\":true,\"launchUrl\":\"ftp://foo.bar/absoulte/url/only\",\"environmentVariables\":{\"VARIABLE1\":\"value1\",\"VARIABLE2\":\"value2\"},\"sdkVersion\":\"1.0.0\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'name': 'Profile 1', 'executablePath': '/path/to/executable', 'commandName': 'command-name', 'commandLineArgs': '--arg1 --arg2', 'workingDirectory': '/path/to/working/directory', 'launchBrowser': True, 'launchUrl': 'ftp://foo.bar/absoulte/url/only', 'environmentVariables': {'VARIABLE1': 'value1', 'VARIABLE2': 'value2'}, 'sdkVersion': '1.0.0'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['profiles']['items']:\n    {'type': 'object',\n     'required': ['name'],\n     'allOf': [{'$ref': '#/definitions/content'}],\n     'anyOf': [{'properties': {'executablePath': {'type': 'string',\n                                                  'description': 'An '\n                                                                 'absolute '\n                                                                 'path to '\n                                                                 'the to '\n                                                                 'the '\n                     .. (1144 more)",
+      "data": {
+        "profiles": [
+          {
+            "name": "Profile 1",
+            "executablePath": "/path/to/executable",
+            "commandName": "command-name",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[1]['properties']['commandName']:\n    {'type': 'string',\n     'description': 'The name of the command to call.',\n     'default': '',\n     'minLength': 1}\n\nOn instance['commandName']:\n    ''",
+      "data": {
+        "profiles": [
+          {
+            "name": "",
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 2",
+            "commandName": "command-name",
+            "executablePath": "/path/to/executable",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          },
+          {
+            "name": "Profile 3",
+            "commandName": "",
+            "commandLineArgs": "--arg1 --arg2",
+            "workingDirectory": "/path/to/working/directory",
+            "launchBrowser": true,
+            "launchUrl": "ftp://foo.bar/absoulte/url/only",
+            "environmentVariables": {
+              "VARIABLE1": "value1",
+              "VARIABLE2": "value2"
+            },
+            "sdkVersion": "1.0.0"
+          }
+        ]
+      }
+    }
+  ]
+}

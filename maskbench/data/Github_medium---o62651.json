@@ -1,0 +1,356 @@
+{
+  "description": "sample Github_medium/o62651.json",
+  "meta": {
+    "full_size": 1465,
+    "stripped_size": 1406,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "id",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "http://n7space.com/asn1-lib-module-schema.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "ASN.1 Types Library Module Metadata schema",
+    "definitions": {
+      "nonEmptyString": {
+        "type": "string",
+        "minLength": 1
+      },
+      "fileList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      },
+      "externalReference": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "$ref": "#/definitions/nonEmptyString"
+          },
+          "submodule": {
+            "$ref": "#/definitions/nonEmptyString"
+          },
+          "element": {
+            "$ref": "#/definitions/nonEmptyString"
+          }
+        },
+        "required": [
+          "submodule",
+          "element"
+        ],
+        "additionalProperties": false
+      },
+      "referenceList": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/nonEmptyString"
+            },
+            {
+              "$ref": "#/definitions/externalReference"
+            }
+          ]
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "name": {
+        "$ref": "#/definitions/nonEmptyString"
+      },
+      "description": {
+        "type": "string"
+      },
+      "submodules": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/definitions/nonEmptyString"
+            },
+            "description": {
+              "type": "string"
+            },
+            "elements": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "$ref": "#/definitions/nonEmptyString"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "asn1Files": {
+                    "$ref": "#/definitions/fileList"
+                  },
+                  "additionalFiles": {
+                    "$ref": "#/definitions/fileList"
+                  },
+                  "conflicts": {
+                    "$ref": "#/definitions/referenceList"
+                  },
+                  "requires": {
+                    "$ref": "#/definitions/referenceList"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "asn1-lib-module",
+        "description": "ASN.1 Types Library Module",
+        "submodules": [
+          {
+            "name": "asn1-types",
+            "description": "ASN.1 types submodule",
+            "elements": [
+              {
+                "name": "asn1-type-1",
+                "description": "ASN.1 type 1",
+                "asn1Files": [
+                  "asn1-type-1.asn1"
+                ],
+                "additionalFiles": [
+                  "asn1-type-1-additional.txt"
+                ],
+                "conflicts": [
+                  "asn1-type-2",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-3"
+                  }
+                ],
+                "requires": [
+                  "asn1-type-4",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-5"
+                  }
+                ]
+              },
+              {
+                "name": "asn1-type-2",
+                "description": "ASN.1 type 2",
+                "asn1Files": [
+                  "asn1-type-2.asn1"
+                ],
+                "additionalFiles": [
+                  "asn1-type-2-additional.txt"
+                ],
+                "conflicts": [],
+                "requires": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"module\":\"asn1-lib-module\",\"submodule\":\"asn1-types\",\"element\":\"asn1-type-3\",\"extra\":\"value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema[1]:\n    {'type': 'object',\n     'properties': {'module': {'$ref': '#/definitions/nonEmptyString'},\n                    'submodule': {'$ref': '#/definitions/nonEmptyString'},\n                    'element': {'$ref': '#/definitions/nonEmptyString'}},\n     'required': ['submodule', 'element'],\n     'additionalProperties': False}\n\nOn instance:\n    {'module': 'asn1-lib-module',\n     'submodule': 'asn1-types',\n     'element': 'asn1-type-3',\n     'extra': 'value'}",
+      "data": {
+        "name": "asn1-lib-module",
+        "description": "ASN.1 Types Library Module",
+        "submodules": [
+          {
+            "name": "asn1-types",
+            "description": "ASN.1 types submodule",
+            "elements": [
+              {
+                "name": "asn1-type-1",
+                "description": "ASN.1 type 1",
+                "asn1Files": [
+                  "asn1-type-1.asn1"
+                ],
+                "additionalFiles": [
+                  "asn1-type-1-additional.txt"
+                ],
+                "conflicts": [
+                  "asn1-type-2",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-3"
+                  },
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-3",
+                    "extra": "value"
+                  }
+                ],
+                "requires": [
+                  "asn1-type-4",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-5"
+                  }
+                ]
+              },
+              {
+                "name": "asn1-type-2",
+                "description": "ASN.1 type 2",
+                "asn1Files": [
+                  "asn1-type-2.asn1"
+                ],
+                "additionalFiles": [
+                  "asn1-type-2-additional.txt"
+                ],
+                "conflicts": [],
+                "requires": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "ASN.1 Types Library Module",
+        "submodules": [
+          {
+            "name": "asn1-types",
+            "description": "ASN.1 types submodule",
+            "elements": [
+              {
+                "name": "asn1-type-1",
+                "description": "ASN.1 type 1",
+                "asn1Files": [
+                  "asn1-type-1.asn1"
+                ],
+                "additionalFiles": [
+                  "asn1-type-1-additional.txt"
+                ],
+                "conflicts": [
+                  "asn1-type-2",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-3"
+                  }
+                ],
+                "requires": [
+                  "asn1-type-4",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-5"
+                  }
+                ]
+              },
+              {
+                "name": "asn1-type-2",
+                "description": "ASN.1 type 2",
+                "asn1Files": [
+                  "asn1-type-2.asn1"
+                ],
+                "additionalFiles": [
+                  "asn1-type-2-additional.txt"
+                ],
+                "conflicts": [],
+                "requires": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "ASN.1 Types Library Module",
+        "submodules": [
+          {
+            "name": "asn1-types",
+            "description": "ASN.1 types submodule",
+            "elements": [
+              {
+                "name": "asn1-type-1",
+                "description": "ASN.1 type 1",
+                "asn1Files": [
+                  "asn1-type-1.asn1"
+                ],
+                "additionalFiles": [
+                  "asn1-type-1-additional.txt"
+                ],
+                "conflicts": [
+                  "asn1-type-2",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-3",
+                    "extra": "field"
+                  }
+                ],
+                "requires": [
+                  "asn1-type-4",
+                  {
+                    "module": "asn1-lib-module",
+                    "submodule": "asn1-types",
+                    "element": "asn1-type-5"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

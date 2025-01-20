@@ -1,0 +1,158 @@
+{
+  "description": "sample Github_medium/o16736.json",
+  "meta": {
+    "full_size": 779,
+    "stripped_size": 651,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxLength",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "Category Definition Schema",
+    "properties": {
+      "name": {
+        "$ref": "#/definitions/name"
+      },
+      "imageUrl": {
+        "$ref": "#/definitions/link"
+      },
+      "description": {
+        "$ref": "#/definitions/description"
+      },
+      "presentation": {
+        "id": "#presentation",
+        "type": "integer",
+        "title": "product ordering, 1000=featured",
+        "minimum": 0
+      }
+    },
+    "required": [
+      "name",
+      "description",
+      "imageUrl"
+    ],
+    "definitions": {
+      "name": {
+        "id": "#/definitions/name",
+        "type": "string",
+        "title": "",
+        "minLength": 2
+      },
+      "link": {
+        "id": "#/definitions/link",
+        "type": "string",
+        "_format": "uri",
+        "title": "",
+        "pattern": "^(http|https)://[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?$"
+      },
+      "description": {
+        "id": "#/definitions/description",
+        "type": "string",
+        "title": "",
+        "minLength": 0
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "Example Category",
+        "imageUrl": "https://example.com/image.jpg",
+        "description": "This is an example category.",
+        "presentation": 1000
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"A\" is shorter than 2 characters",
+      "python_error": "'A' is too short\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'id': '#/definitions/name',\n     'type': 'string',\n     'title': '',\n     'minLength': 2}\n\nOn instance['name']:\n    'A'",
+      "data": {
+        "name": "A",
+        "imageUrl": "https://example.com/image.jpg",
+        "description": "This is an example category.",
+        "presentation": 1000
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"ftp://example.com/image.jpg\" does not match \"^(http|https)://[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?$\"",
+      "python_error": "'ftp://example.com/image.jpg' does not match '^(http|https)://[\\\\w\\\\-_]+(\\\\.[\\\\w\\\\-_]+)+([\\\\w\\\\-\\\\.,@?^=%&amp;:/~\\\\+#]*[\\\\w\\\\-\\\\@?^=%&amp;/~\\\\+#])?$'\n\nFailed validating 'pattern' in schema['properties']['imageUrl']:\n    {'id': '#/definitions/link',\n     'type': 'string',\n     '_format': 'uri',\n     'title': '',\n     'pattern': '^(http|https)://[\\\\w\\\\-_]+(\\\\.[\\\\w\\\\-_]+)+([\\\\w\\\\-\\\\.,@?^=%&amp;:/~\\\\+#]*[\\\\w\\\\-\\\\@?^=%&amp;/~\\\\+#])?$'}\n\nOn instance['imageUrl']:\n    'ftp://example.com/image.jpg'",
+      "data": {
+        "name": "Example Category",
+        "imageUrl": "ftp://example.com/image.jpg",
+        "description": "This is an example category.",
+        "presentation": 1000
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['presentation']:\n    {'id': '#presentation',\n     'type': 'integer',\n     'title': 'product ordering, 1000=featured',\n     'minimum': 0}\n\nOn instance['presentation']:\n    -1",
+      "data": {
+        "name": "Example Category",
+        "imageUrl": "https://example.com/image.jpg",
+        "description": "This is an example category.",
+        "presentation": -1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"E\" is shorter than 2 characters",
+      "python_error": "'E' is too short\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'id': '#/definitions/name',\n     'type': 'string',\n     'title': '',\n     'minLength': 2}\n\nOn instance['name']:\n    'E'",
+      "data": {
+        "name": "E",
+        "imageUrl": "https://example.com/image.jpg",
+        "description": "This is an example category.",
+        "presentation": 1000
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"htt://example.com/image.jpg\" does not match \"^(http|https)://[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?$\"",
+      "python_error": "'htt://example.com/image.jpg' does not match '^(http|https)://[\\\\w\\\\-_]+(\\\\.[\\\\w\\\\-_]+)+([\\\\w\\\\-\\\\.,@?^=%&amp;:/~\\\\+#]*[\\\\w\\\\-\\\\@?^=%&amp;/~\\\\+#])?$'\n\nFailed validating 'pattern' in schema['properties']['imageUrl']:\n    {'id': '#/definitions/link',\n     'type': 'string',\n     '_format': 'uri',\n     'title': '',\n     'pattern': '^(http|https)://[\\\\w\\\\-_]+(\\\\.[\\\\w\\\\-_]+)+([\\\\w\\\\-\\\\.,@?^=%&amp;:/~\\\\+#]*[\\\\w\\\\-\\\\@?^=%&amp;/~\\\\+#])?$'}\n\nOn instance['imageUrl']:\n    'htt://example.com/image.jpg'",
+      "data": {
+        "name": "Example Category",
+        "imageUrl": "htt://example.com/image.jpg",
+        "description": "This is an example category.",
+        "presentation": 1000
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 2 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'id': '#/definitions/name',\n     'type': 'string',\n     'title': '',\n     'minLength': 2}\n\nOn instance['name']:\n    'a'",
+      "data": {
+        "name": "a",
+        "imageUrl": "https://example.com/image.jpg",
+        "description": "This is an example category.",
+        "presentation": 1000
+      }
+    }
+  ]
+}

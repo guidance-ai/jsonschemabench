@@ -1,0 +1,212 @@
+{
+  "description": "sample Github_medium/o90702.json",
+  "meta": {
+    "full_size": 1643,
+    "stripped_size": 494,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "grafana": {
+        "description": "grafana service configuration properties",
+        "properties": {
+          "admin_password": {
+            "default": "admin",
+            "description": "Admin password.",
+            "type": "string"
+          },
+          "cpus": {
+            "default": 0.3,
+            "description": "CPU shares to allocate to each service instance.",
+            "minimum": 0.3,
+            "type": "number"
+          },
+          "mem": {
+            "default": 512.0,
+            "description": "Memory to allocate to each service instance.",
+            "minimum": 512.0,
+            "type": "number"
+          },
+          "plugins": {
+            "default": "",
+            "description": "Comma separated Grafana plugins which will be installed via `grafana-cli plugins install grafana-example-app,grafana-clock-panel`. See https://grafana.com/plugins",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem"
+        ],
+        "type": "object"
+      },
+      "networking": {
+        "description": "Grafana networking configuration properties",
+        "properties": {
+          "external_access": {
+            "description": "Enable access from outside the cluster through Marathon-LB.\nNOTE: this connection is unencrypted.",
+            "properties": {
+              "enable": {
+                "default": true,
+                "description": "Enable or disable creating a VIP for external access through a public node running Marathon-LB.",
+                "type": "boolean"
+              },
+              "external_access_port": {
+                "default": 13000,
+                "description": "For external access, port number to be used for clear communication in the external Marathon-LB load balancer",
+                "type": "number"
+              },
+              "virtual_host": {
+                "default": "grafana.example.org",
+                "description": "For external access, Virtual Host URL to be used in the external load balancer.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "service": {
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "name": {
+            "default": "grafana",
+            "description": "Name of this service instance.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "grafana": {
+          "admin_password": "mysecretpassword",
+          "cpus": 0.5,
+          "mem": 1024.0,
+          "plugins": "grafana-example-app,grafana-clock-panel"
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 13000,
+            "virtual_host": "grafana.example.org"
+          }
+        },
+        "service": {
+          "name": "my-grafana-service"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "0.2 is less than the minimum of 0.3\n\nFailed validating 'minimum' in schema['properties']['grafana']['properties']['cpus']:\n    {'default': 0.3,\n     'description': 'CPU shares to allocate to each service instance.',\n     'minimum': 0.3,\n     'type': 'number'}\n\nOn instance['grafana']['cpus']:\n    0.2",
+      "data": {
+        "grafana": {
+          "admin_password": "mysecretpassword",
+          "cpus": 0.2,
+          "mem": 1024.0,
+          "plugins": "grafana-example-app,grafana-clock-panel"
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 13000,
+            "virtual_host": "grafana.example.org"
+          }
+        },
+        "service": {
+          "name": "my-grafana-service"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "grafana": {
+          "admin_password": "mysecretpassword",
+          "cpus": 0.5,
+          "mem": 1024.0,
+          "plugins": "grafana-example-app,grafana-clock-panel"
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 13001,
+            "virtual_host": "grafana.mydomain.org"
+          }
+        },
+        "service": {
+          "name": "mygrafana"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.2999999999999999 is less than the minimum of 0.3",
+      "python_error": "511.9 is less than the minimum of 512.0\n\nFailed validating 'minimum' in schema['properties']['grafana']['properties']['mem']:\n    {'default': 512.0,\n     'description': 'Memory to allocate to each service instance.',\n     'minimum': 512.0,\n     'type': 'number'}\n\nOn instance['grafana']['mem']:\n    511.9",
+      "data": {
+        "grafana": {
+          "admin_password": "mysecretpassword",
+          "cpus": 0.2999999999999999,
+          "mem": 511.9,
+          "plugins": "grafana-example-app,grafana-clock-panel"
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 13001,
+            "virtual_host": "grafana.mydomain.org"
+          }
+        },
+        "service": {
+          "name": "mygrafana"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "'mem' is a required property\n\nFailed validating 'required' in schema['properties']['grafana']:\n    {'description': 'grafana service configuration properties',\n     'properties': {'admin_password': {'default': 'admin',\n                                       'description': 'Admin password.',\n                                       'type': 'string'},\n                    'cpus': {'default': 0.3,\n                             'description': 'CPU shares to allocate to '\n                                            'each service instance.',\n                             'minimum': 0.3,\n                             'type': 'number'},\n                    'mem': {'default': 512.0,\n                            'description': 'Memory to allocate to each '\n                                           'service instance.',\n                            'minimum': 512.0,\n                            'type': 'number'},\n                    'plugins': {'default': '',\n                                'description': 'Comma separated Grafana.. (747 more)",
+      "data": {
+        "grafana": {
+          "admin_password": "mysecretpassword",
+          "cpus": 0.2,
+          "Mem allocation less than minimum 0.3": "mem",
+          "plugins": "grafana-example-app,grafana-clock-panel"
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 13001,
+            "virtual_host": "grafana.mydomain.org"
+          }
+        },
+        "service": {
+          "name": "mygrafana"
+        }
+      }
+    }
+  ]
+}

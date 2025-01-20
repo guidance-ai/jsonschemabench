@@ -1,0 +1,276 @@
+{
+  "description": "sample Github_medium/o36073.json",
+  "meta": {
+    "full_size": 1077,
+    "stripped_size": 584,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "minimum",
+      "properties",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://github.com/dguo/pawblock/blob/master/storage-schema.json",
+    "description": "Schema for PawBlock's browser storage state",
+    "type": "object",
+    "properties": {
+      "on": {
+        "description": "Whether or not the rules should be applied",
+        "type": "boolean"
+      },
+      "rules": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "_uniqueItems": true
+      },
+      "storageVersion": {
+        "description": "To make schema changes easier in the future",
+        "type": "string"
+      },
+      "allowedTabId": {
+        "description": "The tab that should not enforce a block",
+        "type": "integer"
+      },
+      "blockType": {
+        "description": "The strictness of the block page",
+        "type": "string",
+        "enum": [
+          "hard",
+          "soft"
+        ]
+      },
+      "softBlockDelay": {
+        "description": "The number of seconds that the user must wait before continuing",
+        "type": "integer",
+        "minimum": 0
+      },
+      "reenableMinutes": {
+        "description": "Number of minutes to wait before automatically turning PawBlock back on after turning it off",
+        "type": [
+          "integer",
+          "null"
+        ],
+        "minimum": 1
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/path/to/block"
+          },
+          {
+            "domain": "anotherexample.com",
+            "path": "/another/path/to/block"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": 30,
+        "reenableMinutes": 60
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"sixty\" is not of types \"integer\", \"null\"",
+      "python_error": "'sixty' is not of type 'integer', 'null'\n\nFailed validating 'type' in schema['properties']['reenableMinutes']:\n    {'description': 'Number of minutes to wait before automatically '\n                    'turning PawBlock back on after turning it off',\n     'type': ['integer', 'null'],\n     'minimum': 1}\n\nOn instance['reenableMinutes']:\n    'sixty'",
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/path/to/block"
+          },
+          {
+            "domain": "anotherexample.com",
+            "path": "/another/path/to/block"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": 30,
+        "reenableMinutes": "sixty"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['softBlockDelay']:\n    {'description': 'The number of seconds that the user must wait before '\n                    'continuing',\n     'type': 'integer',\n     'minimum': 0}\n\nOn instance['softBlockDelay']:\n    -1",
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/path/to/block"
+          },
+          {
+            "domain": "anotherexample.com",
+            "path": "/another/path/to/block"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": -1,
+        "reenableMinutes": 0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['reenableMinutes']:\n    {'description': 'Number of minutes to wait before automatically '\n                    'turning PawBlock back on after turning it off',\n     'type': ['integer', 'null'],\n     'minimum': 1}\n\nOn instance['reenableMinutes']:\n    0",
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/path/to/block"
+          },
+          {
+            "domain": "anotherexample.com",
+            "path": "/another/path/to/block"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": 30,
+        "reenableMinutes": 0
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/"
+          },
+          {
+            "domain": "facebook.com",
+            "path": "/login"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": 30,
+        "reenableMinutes": 60
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-5 is less than the minimum of 0",
+      "python_error": "-5 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['softBlockDelay']:\n    {'description': 'The number of seconds that the user must wait before '\n                    'continuing',\n     'type': 'integer',\n     'minimum': 0}\n\nOn instance['softBlockDelay']:\n    -5",
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/"
+          },
+          {
+            "domain": "facebook.com",
+            "path": "/login"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": -5,
+        "reenableMinutes": 60
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"sixty\" is not of types \"integer\", \"null\"",
+      "python_error": "'sixty' is not of type 'integer', 'null'\n\nFailed validating 'type' in schema['properties']['reenableMinutes']:\n    {'description': 'Number of minutes to wait before automatically '\n                    'turning PawBlock back on after turning it off',\n     'type': ['integer', 'null'],\n     'minimum': 1}\n\nOn instance['reenableMinutes']:\n    'sixty'",
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/"
+          },
+          {
+            "domain": "facebook.com",
+            "path": "/login"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": 30,
+        "reenableMinutes": "sixty"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['reenableMinutes']:\n    {'description': 'Number of minutes to wait before automatically '\n                    'turning PawBlock back on after turning it off',\n     'type': ['integer', 'null'],\n     'minimum': 1}\n\nOn instance['reenableMinutes']:\n    0",
+      "data": {
+        "on": true,
+        "rules": [
+          {
+            "domain": "example.com",
+            "path": "/"
+          },
+          {
+            "domain": "example.com",
+            "path": "/"
+          }
+        ],
+        "storageVersion": "1.0",
+        "allowedTabId": 12345,
+        "blockType": "hard",
+        "softBlockDelay": 30,
+        "reenableMinutes": 0
+      }
+    }
+  ]
+}

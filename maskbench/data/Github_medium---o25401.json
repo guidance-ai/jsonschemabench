@@ -1,0 +1,160 @@
+{
+  "description": "sample Github_medium/o25401.json",
+  "meta": {
+    "full_size": 3300,
+    "stripped_size": 797,
+    "features": [
+      "@minmaxLength",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://localhost:4000/json-schema/customer.json#",
+    "title": "ACRSI Data Submission",
+    "description": "",
+    "type": "object",
+    "required": [
+      "fileCustomerIdentifier"
+    ],
+    "properties": {
+      "@type": {
+        "title": "Metadata Context",
+        "description": "IRI for the JSON-LD data type. This should be ag:Farm",
+        "enum": [
+          "ag:Customer"
+        ]
+      },
+      "fileCustomerIdentifier": {
+        "title": "File Customer Identifier",
+        "description": "An internal identifier uniquely identifying a customer within a specific file. Each unique customer within a given file will have a unique File Customer Identifier. File Customer Identifier values are not unique across files.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2
+      },
+      "interagencyCustomerIdentifier": {
+        "title": "Interagency Customer Identifier",
+        "description": "A system generated, unique internal identifier used between agencies to identify a USDA customer (individual or business). <br/>Currently SCIMS Core Customer Identifier is the source value. This will change if a different customer unique identifier is adopted.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2
+      },
+      "taxIdentification": {
+        "title": "Tax Identification",
+        "description": "The identification assigned to a specific individual, business or other entity and is used to authenticate the individual/entity for matters of taxation and other federal government business.<br/>Tax Identification may be a Social Security or Employer Identification number.<br/>Federal Tax Identification is not necessarily unique for all United States Department of Agriculture (USDA) customers unless it is combined with a Tax Identification Type Code.",
+        "type": "string",
+        "minLength": 9,
+        "maxLength": 9
+      },
+      "taxIdentificationTypeCode": {
+        "title": "Tax Identification Type Code",
+        "description": "Code identifying the type of identification assigned to a specific individual, business or other entity and is used to authenticate the individual/entity for matters of taxation and other government business.<br/>For ACRSI Pilot the Following RMA values will be used:<br/>1 - Social Security Number (SSN)<br/>2 - Employer Id Number (EIN)",
+        "enum": [
+          "1",
+          "2"
+        ],
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1
+      },
+      "businessName": {
+        "title": "Business Name",
+        "description": "The name of a non-individual which transacts business with a USDA office. This can be a business, group, partnership, family-owned farm or ranch, etc. to which the servicing office provides assistance.  In the case of a family farm or ranch operation, the business name can be the same as the individual's name.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "middleName": {
+        "title": "Middle Name",
+        "description": "The middle (or second, or alternate) name in the full (multi-part) name of an individual or entity.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 20
+      },
+      "lastName": {
+        "title": "Last Name",
+        "description": "Last name in the full name (multi-part) of an individual (person) or entity.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 25
+      },
+      "nameSuffix": {
+        "title": "Name Suffix",
+        "description": "A free-form optional suffix used in an individual's name.   The following list comprises the suggested domain.  However, the user should be able to type in entries not found in this list.<br/>DOMAIN:    Jr, Sr, I, II, III, MD",
+        "enum": [
+          "Jr",
+          "Sr",
+          "I",
+          "II",
+          "III",
+          "Md"
+        ],
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "@type": "ag:Customer",
+        "fileCustomerIdentifier": "12",
+        "interagencyCustomerIdentifier": "12",
+        "taxIdentification": "123456789",
+        "taxIdentificationTypeCode": "1",
+        "businessName": "John Doe Farm",
+        "middleName": "Lee",
+        "lastName": "Doe",
+        "nameSuffix": "Jr"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['fileCustomerIdentifier']:\n    {'title': 'File Customer Identifier',\n     'description': 'An internal identifier uniquely identifying a '\n                    'customer within a specific file. Each unique customer '\n                    'within a given file will have a unique File Customer '\n                    'Identifier. File Customer Identifier values are not '\n                    'unique across files.',\n     'type': 'string',\n     'minLength': 1,\n     'maxLength': 2}\n\nOn instance['fileCustomerIdentifier']:\n    ''",
+      "data": {
+        "@type": "ag:Customer",
+        "fileCustomerIdentifier": "",
+        "interagencyCustomerIdentifier": "12",
+        "taxIdentification": "123456789",
+        "taxIdentificationTypeCode": "1",
+        "businessName": "John Doe Farm",
+        "middleName": "Lee",
+        "lastName": "Doe",
+        "nameSuffix": "Jr"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"123\" is longer than 2 characters",
+      "python_error": "'123' is too long\n\nFailed validating 'maxLength' in schema['properties']['interagencyCustomerIdentifier']:\n    {'title': 'Interagency Customer Identifier',\n     'description': 'A system generated, unique internal identifier used '\n                    'between agencies to identify a USDA customer '\n                    '(individual or business). <br/>Currently SCIMS Core '\n                    'Customer Identifier is the source value. This will '\n                    'change if a different customer unique identifier is '\n                    'adopted.',\n     'type': 'string',\n     'minLength': 1,\n     'maxLength': 2}\n\nOn instance['interagencyCustomerIdentifier']:\n    '123'",
+      "data": {
+        "@type": "ag:Customer",
+        "fileCustomerIdentifier": "123",
+        "interagencyCustomerIdentifier": "123",
+        "taxIdentification": "123456789",
+        "taxIdentificationTypeCode": "1",
+        "businessName": "John Doe Farm",
+        "middleName": "Lee",
+        "lastName": "Doe",
+        "nameSuffix": "Jr"
+      }
+    }
+  ]
+}

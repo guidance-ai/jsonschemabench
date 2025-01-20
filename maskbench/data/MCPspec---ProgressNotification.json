@@ -1,0 +1,101 @@
+{
+  "description": "sample MCPspec/ProgressNotification.json",
+  "meta": {
+    "full_size": 1077,
+    "stripped_size": 498,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "const"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ProgressNotification",
+    "definitions": {
+      "ProgressNotification": {
+        "description": "An out-of-band notification used to inform the receiver of a progress update for a long-running request.",
+        "properties": {
+          "method": {
+            "const": "notifications/progress",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "progress": {
+                "description": "The progress thus far. This should increase every time progress is made, even if the total is unknown.",
+                "type": "number"
+              },
+              "progressToken": {
+                "$ref": "#/definitions/ProgressToken",
+                "description": "The progress token which was given in the initial request, used to associate this notification with the request that is proceeding."
+              },
+              "total": {
+                "description": "Total number of items to process (or total progress required), if known.",
+                "type": "number"
+              }
+            },
+            "required": [
+              "progress",
+              "progressToken"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "ProgressToken": {
+        "description": "A progress token, used to associate progress notifications with the original request.",
+        "type": [
+          "string",
+          "integer"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "notifications/progress",
+        "params": {
+          "progress": 50,
+          "progressToken": "initial-request-token",
+          "total": 100
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"number\"",
+      "python_error": "None is not of type 'number'\n\nFailed validating 'type' in schema['properties']['params']['properties']['total']:\n    {'description': 'Total number of items to process (or total progress '\n                    'required), if known.',\n     'type': 'number'}\n\nOn instance['params']['total']:\n    None",
+      "data": {
+        "method": "notifications/progress",
+        "params": {
+          "progress": 50,
+          "progressToken": "initial-request-token",
+          "total": null
+        },
+        "additionalField": "this is an invalid field"
+      }
+    }
+  ]
+}

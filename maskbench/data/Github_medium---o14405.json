@@ -1,0 +1,224 @@
+{
+  "description": "sample Github_medium/o14405.json",
+  "meta": {
+    "full_size": 1399,
+    "stripped_size": 1379,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "id": "http://snowflakepowe.red/stone/schema/platform",
+    "properties": {
+      "BiosFiles": {
+        "additionalProperties": false,
+        "id": "http://snowflakepowe.red/stone/schema/platform/BiosFiles",
+        "patternProperties": {
+          "(^.+\\..+)|(^[a-zA-Z0-9_-]+)": {
+            "items": {
+              "pattern": "^[a-f0-9]{32}$",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FileTypes": {
+        "id": "http://snowflakepowe.red/stone/schema/platform/FileTypes",
+        "minItems": 1,
+        "patternProperties": {
+          "^BIOS$": {
+            "pattern": "^application\\/vnd\\.stone-romfile\\..+-sys",
+            "type": "string"
+          },
+          "^RSRC$": {
+            "pattern": "^application\\/vnd\\.stone-romfile\\..+-resource",
+            "type": "string"
+          },
+          "^\\.": {
+            "pattern": "^application\\/vnd\\.stone-romfile\\..+",
+            "type": "string"
+          }
+        },
+        "required": [
+          "RSRC"
+        ],
+        "type": "object",
+        "_uniqueItems": true
+      },
+      "FriendlyName": {
+        "id": "http://snowflakepowe.red/stone/schema/platform/FriendlyName",
+        "type": "string"
+      },
+      "MaximumInputs": {
+        "id": "http://snowflakepowe.red/stone/schema/platform/MaximumInputs",
+        "type": "integer"
+      },
+      "Metadata": {
+        "additionalProperties": false,
+        "id": "http://snowflakepowe.red/stone/schema/platform/Metadata",
+        "patternProperties": {
+          "^platform_": {
+            "type": "string"
+          }
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "PlatformID": {
+        "id": "http://snowflakepowe.red/stone/schema/platform/PlatformID",
+        "type": "string"
+      }
+    },
+    "required": [
+      "PlatformID",
+      "Metadata",
+      "MaximumInputs",
+      "FriendlyName",
+      "FileTypes"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "PlatformID": "example-platform-id",
+        "Metadata": {
+          "platform_name": "Example Platform",
+          "platform_version": "1.0"
+        },
+        "MaximumInputs": 4,
+        "FriendlyName": "Example Platform",
+        "FileTypes": {
+          "RSRC": "application/vnd.stone-romfile.example-resource",
+          "BIOS": "application/vnd.stone-romfile.example-sys"
+        },
+        "BiosFiles": {
+          "example-bios-file": [
+            "0123456789abcdef0123456789abcdef",
+            "fedcba9876543210fedcba9876543210"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "PlatformID": "example-platform-id",
+        "Metadata": {
+          "platform_name": "Example Platform",
+          "platform_version": "1.0.0"
+        },
+        "MaximumInputs": 2,
+        "FriendlyName": "Example Platform",
+        "FileTypes": {
+          "RSRC": "application/vnd.stone-romfile.example-resource",
+          "BIOS": "application/vnd.stone-romfile.example-sys"
+        },
+        "BiosFiles": {
+          "example-bios-file": [
+            "0123456789abcdef0123456789abcdef"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"InvalidHash\" does not match \"^[a-f0-9]{32}$\"",
+      "python_error": "'InvalidHash' does not match '^[a-f0-9]{32}$'\n\nFailed validating 'pattern' in schema['properties']['BiosFiles']['patternProperties']['(^.+\\\\..+)|(^[a-zA-Z0-9_-]+)']['items']:\n    {'pattern': '^[a-f0-9]{32}$', 'type': 'string'}\n\nOn instance['BiosFiles']['example-bios-file'][0]:\n    'InvalidHash'",
+      "data": {
+        "PlatformID": "example-platform-id",
+        "Metadata": {
+          "platform_name": "Example Platform",
+          "platform_version": "1.0.0"
+        },
+        "MaximumInputs": 2,
+        "FriendlyName": "Example Platform",
+        "FileTypes": {
+          "RSRC": "application/vnd.stone-romfile.example-resource",
+          "BIOS": "application/vnd.stone-romfile.example-sys",
+          "INVALID": "application/vnd.stone-romfile.example-sys"
+        },
+        "BiosFiles": {
+          "example-bios-file": [
+            "InvalidHash"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "\"invalidbiosfile\" does not match \"^[a-f0-9]{32}$\"",
+      "python_error": "'invalidbiosfile' does not match '^[a-f0-9]{32}$'\n\nFailed validating 'pattern' in schema['properties']['BiosFiles']['patternProperties']['(^.+\\\\..+)|(^[a-zA-Z0-9_-]+)']['items']:\n    {'pattern': '^[a-f0-9]{32}$', 'type': 'string'}\n\nOn instance['BiosFiles']['example-bios-file'][1]:\n    'invalidbiosfile'",
+      "data": {
+        "PlatformID": "example-platform-id",
+        "Metadata": {
+          "platform_name": "Example Platform",
+          "platform_version": "1.0.0"
+        },
+        "MaximumInputs": 2,
+        "FriendlyName": "Example Platform",
+        "FileTypes": {
+          "RSRC": "application/vnd.stone-romfile.example-resource",
+          "BIOS": "application/vnd.stone-romfile.example-sys",
+          "InvalidFileType": "application/vnd.stone-romfile.example-resource"
+        },
+        "BiosFiles": {
+          "example-bios-file": [
+            "0123456789abcdef0123456789abcdef",
+            "invalidbiosfile"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"/application/vnd.stone-romfile.example-sys\" does not match \"^application\\/vnd\\.stone-romfile\\..+-sys\"",
+      "python_error": "'/application/vnd.stone-romfile.example-sys' does not match '^application\\\\/vnd\\\\.stone-romfile\\\\..+-sys'\n\nFailed validating 'pattern' in schema['properties']['FileTypes']['patternProperties']['^BIOS$']:\n    {'pattern': '^application\\\\/vnd\\\\.stone-romfile\\\\..+-sys',\n     'type': 'string'}\n\nOn instance['FileTypes']['BIOS']:\n    '/application/vnd.stone-romfile.example-sys'",
+      "data": {
+        "PlatformID": "example-platform-id",
+        "Metadata": {
+          "platform_name": "Example Platform",
+          "platform_version": "1.0.0"
+        },
+        "MaximumInputs": 2,
+        "FriendlyName": "Example Platform",
+        "FileTypes": {
+          "RSRC": "application/vnd.stone-romfile.example-resource",
+          "BIOS": "/application/vnd.stone-romfile.example-sys"
+        },
+        "BiosFiles": {
+          "example-bios-file": [
+            "0123456789abcdef0123456789abcde"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "description": "sample Github_medium/o70373.json",
+  "meta": {
+    "full_size": 1299,
+    "stripped_size": 1299,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "IDType": {
+        "pattern": "^\\d{10}$",
+        "type": "string"
+      },
+      "ISO8601-Date": {
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+      },
+      "ISO8601-Timestamp": {
+        "pattern": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?(([+-]\\d{2}(:\\d{2})?)|Z)",
+        "type": "string"
+      },
+      "LISAManagerReferenceNumberType": {
+        "pattern": "^Z\\d{6}$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "LISAManagerReferenceNumber": {
+        "$ref": "#/definitions/LISAManagerReferenceNumberType"
+      },
+      "accountID": {
+        "type": "string"
+      },
+      "closeDate": {
+        "$ref": "#/definitions/ISO8601-Date"
+      },
+      "deathNotification": {
+        "additionalProperties": false,
+        "properties": {
+          "DoD": {
+            "$ref": "#/definitions/ISO8601-Date"
+          },
+          "notifiedDate": {
+            "$ref": "#/definitions/ISO8601-Timestamp"
+          }
+        },
+        "required": [
+          "notifiedDate",
+          "DoD"
+        ],
+        "type": "object"
+      },
+      "healthStatus": {
+        "enum": [
+          "default",
+          "dead",
+          "terminally-ill"
+        ],
+        "type": "string"
+      },
+      "investorID": {
+        "$ref": "#/definitions/IDType"
+      },
+      "openDate": {
+        "$ref": "#/definitions/ISO8601-Date"
+      },
+      "status": {
+        "enum": [
+          "open",
+          "closed",
+          "transferred-out"
+        ],
+        "type": "string"
+      },
+      "terminalIllnessNotification": {
+        "properties": {
+          "notifiedDate": {
+            "$ref": "#/definitions/ISO8601-Timestamp"
+          }
+        },
+        "required": [
+          "notifiedDate"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "accountID",
+      "LISAManagerReferenceNumber",
+      "investorID",
+      "status",
+      "openDate"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "LISAManagerReferenceNumber": "Z123456",
+        "accountID": "1234567890",
+        "investorID": "1234567890",
+        "openDate": "2022-01-01",
+        "status": "open",
+        "terminalIllnessNotification": {
+          "notifiedDate": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Z12345\" does not match \"^Z\\d{6}$\"",
+      "python_error": "'Z12345' does not match '^Z\\\\d{6}$'\n\nFailed validating 'pattern' in schema['properties']['LISAManagerReferenceNumber']:\n    {'pattern': '^Z\\\\d{6}$', 'type': 'string'}\n\nOn instance['LISAManagerReferenceNumber']:\n    'Z12345'",
+      "data": {
+        "LISAManagerReferenceNumber": "Z12345",
+        "accountID": "1234567890",
+        "investorID": "1234567890",
+        "openDate": "2022-01-01",
+        "status": "open",
+        "terminalIllnessNotification": {
+          "notifiedDate": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Z1234567\" does not match \"^Z\\d{6}$\"",
+      "python_error": "'Z1234567' does not match '^Z\\\\d{6}$'\n\nFailed validating 'pattern' in schema['properties']['LISAManagerReferenceNumber']:\n    {'pattern': '^Z\\\\d{6}$', 'type': 'string'}\n\nOn instance['LISAManagerReferenceNumber']:\n    'Z1234567'",
+      "data": {
+        "LISAManagerReferenceNumber": "Z1234567",
+        "accountID": "1234567890",
+        "investorID": "1234567890",
+        "openDate": "2022-01-01",
+        "status": "open",
+        "terminalIllnessNotification": {
+          "notifiedDate": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"123456789\" does not match \"^\\d{10}$\"",
+      "python_error": "'123456789' does not match '^\\\\d{10}$'\n\nFailed validating 'pattern' in schema['properties']['investorID']:\n    {'pattern': '^\\\\d{10}$', 'type': 'string'}\n\nOn instance['investorID']:\n    '123456789'",
+      "data": {
+        "LISAManagerReferenceNumber": "Z123456",
+        "accountID": "1234567890",
+        "investorID": "123456789",
+        "openDate": "2022-01-01",
+        "status": "open",
+        "terminalIllnessNotification": {
+          "notifiedDate": "2022-01-01T12:00:00Z"
+        }
+      }
+    }
+  ]
+}

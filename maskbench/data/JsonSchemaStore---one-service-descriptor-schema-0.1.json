@@ -1,0 +1,282 @@
+{
+  "description": "sample JsonSchemaStore/one-service-descriptor-schema-0.1.json",
+  "meta": {
+    "full_size": 1319,
+    "stripped_size": 1204,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/one-service-descriptor-schema-0.1.json",
+    "$ref": "#/definitions/ServiceDescriptor",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "ServiceDescriptor": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "requires": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Require"
+            }
+          },
+          "events": {
+            "$ref": "#/definitions/Events"
+          }
+        },
+        "required": [
+          "description",
+          "requires",
+          "events"
+        ],
+        "title": "ServiceDescriptor"
+      },
+      "Events": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "produces": {
+            "$ref": "#/definitions/Consumes"
+          },
+          "consumes": {
+            "$ref": "#/definitions/Produces"
+          }
+        },
+        "required": [
+          "consumes",
+          "produces"
+        ],
+        "title": "Events"
+      },
+      "Consumes": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Consumes"
+      },
+      "Produces": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Produces"
+      },
+      "Require": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "uses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Use"
+            }
+          }
+        },
+        "required": [
+          "service",
+          "uses",
+          "version"
+        ],
+        "title": "Require"
+      },
+      "Use": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "api": {
+            "type": "string",
+            "enum": [
+              "internal",
+              "external",
+              "integration"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "REST",
+              "library"
+            ]
+          }
+        },
+        "required": [
+          "api",
+          "type"
+        ],
+        "title": "Use"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "description": "Example Service Descriptor",
+        "requires": [
+          {
+            "service": "example-service",
+            "version": "1.0.0",
+            "uses": [
+              {
+                "api": "internal",
+                "type": "REST"
+              },
+              {
+                "api": "external",
+                "type": "library"
+              }
+            ]
+          },
+          {
+            "service": "another-service",
+            "version": "2.0.0",
+            "uses": [
+              {
+                "api": "integration",
+                "type": "REST"
+              }
+            ]
+          }
+        ],
+        "events": {
+          "produces": [
+            "event-1",
+            "event-2"
+          ],
+          "consumes": [
+            "event-3",
+            "event-4"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-api\" is not one of [\"internal\",\"external\",\"integration\"]",
+      "python_error": "'invalid-api' is not one of ['internal', 'external', 'integration']\n\nFailed validating 'enum' in schema['properties']['requires']['items']['properties']['uses']['items']['properties']['api']:\n    {'type': 'string', 'enum': ['internal', 'external', 'integration']}\n\nOn instance['requires'][1]['uses'][1]['api']:\n    'invalid-api'",
+      "data": {
+        "description": "Example Service Descriptor",
+        "requires": [
+          {
+            "service": "example-service",
+            "version": "1.0.0",
+            "uses": [
+              {
+                "api": "internal",
+                "type": "REST"
+              },
+              {
+                "api": "external",
+                "type": "library"
+              }
+            ]
+          },
+          {
+            "service": "another-service",
+            "version": "2.0.0",
+            "uses": [
+              {
+                "api": "integration",
+                "type": "REST"
+              },
+              {
+                "api": "invalid-api",
+                "type": "REST"
+              }
+            ]
+          }
+        ],
+        "events": {
+          "produces": [
+            "event-1",
+            "event-2"
+          ],
+          "consumes": [
+            "event-3",
+            "event-4"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-api\" is not one of [\"internal\",\"external\",\"integration\"]",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['events']['properties']['consumes']['items']:\n    {'type': 'string'}\n\nOn instance['events']['consumes'][1]:\n    123",
+      "data": {
+        "description": "Example Service Descriptor",
+        "requires": [
+          {
+            "service": "example-service",
+            "version": "1.0.0",
+            "uses": [
+              {
+                "api": "internal",
+                "type": "REST"
+              },
+              {
+                "api": "external",
+                "type": "library"
+              }
+            ]
+          },
+          {
+            "service": "another-service",
+            "version": "2.0.0",
+            "uses": [
+              {
+                "api": "integration",
+                "type": "REST"
+              },
+              {
+                "api": "invalid-api",
+                "Invalid API type": "REST"
+              }
+            ]
+          }
+        ],
+        "events": {
+          "produces": [
+            "event-1",
+            "event-2"
+          ],
+          "consumes": [
+            "event-3",
+            123,
+            "Invalid type for consumes"
+          ]
+        }
+      }
+    }
+  ]
+}

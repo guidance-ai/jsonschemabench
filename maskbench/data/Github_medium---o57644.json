@@ -1,0 +1,261 @@
+{
+  "description": "sample Github_medium/o57644.json",
+  "meta": {
+    "full_size": 924,
+    "stripped_size": 888,
+    "features": [
+      "$ref",
+      "@minmaxProperties",
+      "additionalProperties",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minProperties",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "O3D3xx Logic Layer format",
+    "definitions": {
+      "block": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "object"
+          }
+        }
+      },
+      "connector": {
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string"
+          },
+          "srcEP": {
+            "type": "number"
+          },
+          "dst": {
+            "type": "string"
+          },
+          "dstEP": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "src",
+          "srcEP",
+          "dst",
+          "dstEP"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "blocks": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": false,
+        "patternProperties": {
+          "^B[0-9]+$": {
+            "$ref": "#/definitions/block"
+          }
+        }
+      },
+      "connectors": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": false,
+        "patternProperties": {
+          "^C[0-9]+$": {
+            "$ref": "#/definitions/connector"
+          }
+        }
+      },
+      "IOMap": {
+        "type": "object",
+        "patternProperties": {
+          "^(OUT1|OUT2|OUT3|IO1|IO2)$": {
+            "type": "string",
+            "pattern": "^(NONE|ERRPIN|RFT|AQUFIN|EVAFIN|USEROUT|ANALOG|PCIC|USERIN)$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "blocks"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "blocks": {
+          "B1": {
+            "type": "AND",
+            "properties": {
+              "invert": false
+            }
+          },
+          "B2": {
+            "type": "OR",
+            "properties": {
+              "invert": true
+            }
+          }
+        },
+        "connectors": {
+          "C1": {
+            "src": "B1",
+            "srcEP": 1,
+            "dst": "B2",
+            "dstEP": 0
+          },
+          "C2": {
+            "src": "B2",
+            "srcEP": 1,
+            "dst": "OUT1",
+            "dstEP": 0
+          }
+        },
+        "IOMap": {
+          "OUT1": "USEROUT",
+          "OUT2": "NONE",
+          "IO1": "USERIN",
+          "IO2": "NONE"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "blocks": {
+          "B1": {
+            "type": "AND",
+            "properties": {
+              "invert": false
+            }
+          },
+          "B2": {
+            "type": "OR",
+            "properties": {
+              "invert": true
+            }
+          }
+        },
+        "connectors": {
+          "C1": {
+            "src": "B1",
+            "srcEP": 0,
+            "dst": "B2",
+            "dstEP": 0
+          },
+          "C2": {
+            "src": "B2",
+            "srcEP": 0,
+            "dst": "OUT1",
+            "dstEP": 0
+          }
+        },
+        "IOMap": {
+          "OUT1": "USEROUT",
+          "OUT2": "NONE",
+          "IO1": "USERIN",
+          "IO2": "NONE"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('InvalidBlock' was unexpected)",
+      "python_error": "'InvalidBlock' does not match any of the regexes: '^B[0-9]+$'\n\nFailed validating 'additionalProperties' in schema['properties']['blocks']:\n    {'type': 'object',\n     'minProperties': 1,\n     'additionalProperties': False,\n     'patternProperties': {'^B[0-9]+$': {'$ref': '#/definitions/block'}}}\n\nOn instance['blocks']:\n    {'B1': {'type': 'AND', 'properties': {'invert': False}},\n     'B2': {'type': 'OR', 'properties': {'invert': True}},\n     'InvalidBlock': {'type': 'AND', 'properties': {'invert': False}}}",
+      "data": {
+        "blocks": {
+          "B1": {
+            "type": "AND",
+            "properties": {
+              "invert": false
+            }
+          },
+          "B2": {
+            "type": "OR",
+            "properties": {
+              "invert": true
+            }
+          },
+          "InvalidBlock": {
+            "type": "AND",
+            "properties": {
+              "invert": false
+            }
+          }
+        },
+        "connectors": {
+          "C1": {
+            "src": "B1",
+            "srcEP": 0,
+            "dst": "B2",
+            "dstEP": 0
+          },
+          "C2": {
+            "src": "B2",
+            "srcEP": 0,
+            "dst": "OUT1",
+            "dstEP": 0
+          }
+        },
+        "IOMap": {
+          "OUT1": "USEROUT",
+          "OUT2": "NONE",
+          "IO1": "USERIN",
+          "IO2": "NONE"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"object\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['IOMap']['patternProperties']['^(OUT1|OUT2|OUT3|IO1|IO2)$']:\n    {'type': 'string',\n     'pattern': '^(NONE|ERRPIN|RFT|AQUFIN|EVAFIN|USEROUT|ANALOG|PCIC|USERIN)$'}\n\nOn instance['IOMap']['OUT1']:\n    123",
+      "data": {
+        "blocks": {
+          "B1": {
+            "type": "AND",
+            "properties": null
+          }
+        },
+        "connectors": {
+          "C1": {
+            "src": "B1",
+            "srcEP": 0,
+            "dst": "B2",
+            "dstEP": 0
+          }
+        },
+        "IOMap": {
+          "OUT1": 123,
+          "OUT2": "NONE",
+          "IO1": "USERIN",
+          "IO2": "NONE"
+        },
+        "invalidKey": "test"
+      }
+    }
+  ]
+}

@@ -1,0 +1,666 @@
+{
+  "description": "sample Github_medium/o6214.json",
+  "meta": {
+    "full_size": 1087,
+    "stripped_size": 1087,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 32767
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "triggers": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "config": {
+              "type": "object"
+            },
+            "meta": {
+              "type": "object"
+            },
+            "outputIds": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "type"
+          ]
+        }
+      },
+      "nodes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "config": {
+              "type": "object"
+            },
+            "meta": {
+              "type": "object"
+            },
+            "outputIds": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type"
+          ]
+        }
+      },
+      "globals": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+            },
+            "json": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "json"
+          ]
+        }
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "name"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "Example Workflow",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "key": "example-trigger",
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node-1",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-2"
+              ]
+            ]
+          },
+          {
+            "id": "node-2",
+            "type": "logger",
+            "config": {},
+            "meta": {},
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global",
+            "json": "{\"key\":\"value\"}"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "key": "example-trigger",
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node-1",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-2"
+              ]
+            ]
+          },
+          {
+            "id": "node-2",
+            "type": "logger",
+            "config": {},
+            "meta": {},
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global",
+            "json": ""
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"example-global!\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'example-global!' does not match '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'pattern' in schema['properties']['globals']['items']['properties']['key']:\n    {'type': 'string', 'pattern': '^[0-9a-zA-Z_-]{1,255}$'}\n\nOn instance['globals'][0]['key']:\n    'example-global!'",
+      "data": {
+        "name": "Example Workflow",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "key": "example-trigger",
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node-1",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-2"
+              ]
+            ]
+          },
+          {
+            "id": "node-2",
+            "type": "logger",
+            "config": {},
+            "meta": {},
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global!",
+            "json": "{\"key\":\"value\"}"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['globals']['items']['properties']['json']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['globals'][0]['json']:\n    ''",
+      "data": {
+        "name": "Example Workflow",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "key": "example-trigger",
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node-1",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-2"
+              ]
+            ]
+          },
+          {
+            "id": "node-2",
+            "type": "logger",
+            "config": {},
+            "meta": {},
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global",
+            "json": ""
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "key": "example-trigger",
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node-1",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "path": "/example"
+            },
+            "meta": {},
+            "outputIds": [
+              [
+                "node-2"
+              ]
+            ]
+          },
+          {
+            "id": "node-2",
+            "type": "logger",
+            "config": {},
+            "meta": {},
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global",
+            "json": "{\"key\":\"value\"}"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example Workflow",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Trigger on HTTP request"
+            },
+            "outputIds": [
+              [
+                "node1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node1",
+            "type": "function",
+            "config": {
+              "code": "console.log('Hello World!');"
+            },
+            "meta": {
+              "description": "Example function node"
+            },
+            "outputIds": [
+              [
+                "node2"
+              ]
+            ]
+          },
+          {
+            "id": "node2",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Example HTTP node"
+            },
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global",
+            "json": "{\"key\":\"value\"}"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"example global\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'example global' does not match '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'pattern' in schema['properties']['globals']['items']['properties']['key']:\n    {'type': 'string', 'pattern': '^[0-9a-zA-Z_-]{1,255}$'}\n\nOn instance['globals'][0]['key']:\n    'example global'",
+      "data": {
+        "name": "Example Workflow",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Trigger on HTTP request"
+            },
+            "outputIds": [
+              [
+                "node1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node1",
+            "type": "function",
+            "config": {
+              "code": "console.log('Hello World!');"
+            },
+            "meta": {
+              "description": "Example function node"
+            },
+            "outputIds": [
+              [
+                "node2"
+              ]
+            ]
+          },
+          {
+            "id": "node2",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Example HTTP node"
+            },
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example global",
+            "json": "{"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Trigger on HTTP request"
+            },
+            "outputIds": [
+              [
+                "node1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node1",
+            "type": "function",
+            "config": {
+              "code": "console.log('Hello World!');"
+            },
+            "meta": {
+              "description": "Example function node"
+            },
+            "outputIds": [
+              [
+                "node2"
+              ]
+            ]
+          },
+          {
+            "id": "node2",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Example HTTP node"
+            },
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global",
+            "json": ""
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "This is an example workflow.",
+        "enabled": true,
+        "triggers": [
+          {
+            "type": "http",
+            "config": {
+              "method": "GET",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Trigger on HTTP request"
+            },
+            "outputIds": [
+              [
+                "node1"
+              ]
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "node1",
+            "type": "function",
+            "config": {
+              "code": "console.log('Hello World!');"
+            },
+            "meta": {
+              "description": "Example function node"
+            },
+            "outputIds": [
+              [
+                "node2"
+              ]
+            ]
+          },
+          {
+            "id": "node2",
+            "type": "http",
+            "config": {
+              "method": "POST",
+              "url": "https://example.com/api/endpoint"
+            },
+            "meta": {
+              "description": "Example HTTP node"
+            },
+            "outputIds": []
+          }
+        ],
+        "globals": [
+          {
+            "key": "example-global!",
+            "json": "{\"key\":\"value\"}"
+          }
+        ]
+      }
+    }
+  ]
+}

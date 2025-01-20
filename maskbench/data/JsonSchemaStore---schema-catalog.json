@@ -1,0 +1,313 @@
+{
+  "description": "sample JsonSchemaStore/schema-catalog.json",
+  "meta": {
+    "full_size": 1278,
+    "stripped_size": 764,
+    "features": [
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "format",
+      "format:uri",
+      "items",
+      "pattern",
+      "uniqueItems"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "id": "https://json.schemastore.org/schema-catalog.json",
+    "properties": {
+      "schemas": {
+        "type": "array",
+        "description": "A list of JSON schema references.",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "url",
+            "description"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "fileMatch": {
+              "description": "A Minimatch glob expression for matching up file names with a schema.",
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "url": {
+              "description": "An absolute URL to the schema location",
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            },
+            "name": {
+              "description": "The name of the schema",
+              "type": "string"
+            },
+            "description": {
+              "description": "A description of the schema",
+              "type": "string"
+            },
+            "versions": {
+              "type": "object",
+              "description": "A set of specific version to schema mappings",
+              "additionalProperties": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://"
+              }
+            }
+          }
+        }
+      },
+      "version": {
+        "description": "The schema version of the catalog",
+        "type": "number"
+      },
+      "$schema": {
+        "description": "Link to https://json.schemastore.org/schema-catalog.json",
+        "type": "string",
+        "enum": [
+          "https://json.schemastore.org/schema-catalog.json"
+        ]
+      }
+    },
+    "required": [
+      "schemas",
+      "version",
+      "$schema"
+    ],
+    "title": "JSON schema for SchemaStore.org catalog files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json.schemastore.org/schema-catalog.json",
+        "version": 1,
+        "schemas": [
+          {
+            "name": "Example Schema",
+            "url": "https://example.com/schema.json",
+            "description": "This is an example schema",
+            "fileMatch": [
+              "*.example.json"
+            ],
+            "versions": {
+              "1.0": "https://example.com/schema/v1.0.json",
+              "2.0": "https://example.com/schema/v2.0.json"
+            }
+          },
+          {
+            "name": "Another Schema",
+            "url": "https://another.example.com/schema.json",
+            "description": "This is another example schema",
+            "fileMatch": [
+              "*.another.example.json"
+            ],
+            "versions": {
+              "1.0": "https://another.example.com/schema/v1.0.json",
+              "2.0": "https://another.example.com/schema/v2.0.json"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json.schemastore.org/schema-catalog.json",
+        "version": 1,
+        "schemas": [
+          {
+            "name": "Example Schema",
+            "url": "https://example.com/schema.json",
+            "description": "This is an example schema",
+            "fileMatch": [
+              "*.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://example.com/schema/v1.0.0.json",
+              "2.0.0": "https://example.com/schema/v2.0.0.json"
+            }
+          },
+          {
+            "name": "Another Schema",
+            "url": "https://another.example.com/schema.json",
+            "description": "This is another example schema",
+            "fileMatch": [
+              "*.another.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://another.example.com/schema/v1.0.0.json"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"http://example.com/schema.json\" does not match \"^https://\"",
+      "python_error": "'http://example.com/schema.json' does not match '^https://'\n\nFailed validating 'pattern' in schema['properties']['schemas']['items']['properties']['url']:\n    {'description': 'An absolute URL to the schema location',\n     'type': 'string',\n     'format': 'uri',\n     'pattern': '^https://'}\n\nOn instance['schemas'][0]['url']:\n    'http://example.com/schema.json'",
+      "data": {
+        "$schema": "https://json.schemastore.org/schema-catalog.json",
+        "version": 1,
+        "schemas": [
+          {
+            "name": "Example Schema",
+            "url": "http://example.com/schema.json",
+            "description": "This is an example schema",
+            "fileMatch": [
+              "*.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://example.com/schema/v1.0.0.json",
+              "2.0.0": "https://example.com/schema/v2.0.0.json"
+            }
+          },
+          {
+            "name": "Another Schema",
+            "url": "https://another.example.com/schema.json",
+            "description": "This is another example schema",
+            "fileMatch": [
+              "*.another.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://another.example.com/schema/v1.0.0.json"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"htp://example.com/schema.json\" does not match \"^https://\"",
+      "python_error": "'htp://example.com/schema.json' does not match '^https://'\n\nFailed validating 'pattern' in schema['properties']['schemas']['items']['properties']['url']:\n    {'description': 'An absolute URL to the schema location',\n     'type': 'string',\n     'format': 'uri',\n     'pattern': '^https://'}\n\nOn instance['schemas'][0]['url']:\n    'htp://example.com/schema.json'",
+      "data": {
+        "$schema": "https://json.schemastore.org/schema-catalog.json",
+        "version": 1,
+        "schemas": [
+          {
+            "name": "Example Schema",
+            "url": "htp://example.com/schema.json",
+            "description": "This is an example schema",
+            "fileMatch": [
+              "*.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://example.com/schema/v1.0.0.json",
+              "2.0.0": "https://example.com/schema/v2.0.0.json"
+            }
+          },
+          {
+            "name": "Another Schema",
+            "url": "https://another.example.com/schema.json",
+            "description": "This is another example schema",
+            "fileMatch": [
+              "*.another.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://another.example.com/schema/v1.0.0.json"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['schemas']['items']:\n    {'type': 'object',\n     'required': ['name', 'url', 'description'],\n     'additionalProperties': False,\n     'properties': {'fileMatch': {'description': 'A Minimatch glob '\n                                                 'expression for matching '\n                                                 'up file names with a '\n                                                 'schema.',\n                                  'uniqueItems': True,\n                                  'type': 'array',\n                                  'items': {'type': 'string'}},\n                    'url': {'description': 'An absolute URL to the schema '\n                                           'location',\n                            'type': 'string',\n                            'format': 'uri',\n                            'pattern': '^https://'},\n                    'name': {'desc.. (1078 more)",
+      "data": {
+        "$schema": "https://json.schemastore.org/schema-catalog.json",
+        "version": 1,
+        "schemas": [
+          {
+            "name": "Example Schema",
+            "url": "https://example.com/schema.json",
+            "description": "This is an example schema",
+            "fileMatch": [
+              "*.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://example.com/schema/v1.0.0.json",
+              "2.0.0": "https://example.com/schema/v2.0.0.json"
+            },
+            "extra_property": "extra_value"
+          },
+          {
+            "name": "Another Schema",
+            "url": "https://another.example.com/schema.json",
+            "description": "This is another example schema",
+            "fileMatch": [
+              "*.another.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://another.example.com/schema/v1.0.0.json"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on uniqueItems keyword",
+      "valid": false,
+      "rust_error": "[\"*.example.json\",\"*.example.json\",\"versions\"] has non-unique elements",
+      "python_error": "['*.another.example.json', '*.another.example.json'] has non-unique elements\n\nFailed validating 'uniqueItems' in schema['properties']['schemas']['items']['properties']['fileMatch']:\n    {'description': 'A Minimatch glob expression for matching up file '\n                    'names with a schema.',\n     'uniqueItems': True,\n     'type': 'array',\n     'items': {'type': 'string'}}\n\nOn instance['schemas'][1]['fileMatch']:\n    ['*.another.example.json', '*.another.example.json']",
+      "data": {
+        "$schema": "https://json.schemastore.org/schema-catalog.json",
+        "version": 1,
+        "schemas": [
+          {
+            "name": "Example Schema",
+            "url": "https://example.com/schema.json",
+            "description": "This is an example schema",
+            "fileMatch": [
+              "*.example.json",
+              "*.example.json",
+              "versions"
+            ],
+            "versions": {
+              "1.0.0": "https://example.com/schema/v1.0.0.json",
+              "2.0.0": "https://example.com/schema/v2.0.0.json"
+            }
+          },
+          {
+            "name": "Another Schema",
+            "url": "https://another.example.com/schema.json",
+            "description": "This is another example schema",
+            "fileMatch": [
+              "*.another.example.json",
+              "*.another.example.json"
+            ],
+            "versions": {
+              "1.0.0": "https://another.example.com/schema/v1.0.0.json"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

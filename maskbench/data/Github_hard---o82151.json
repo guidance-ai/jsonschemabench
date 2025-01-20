@@ -1,0 +1,960 @@
+{
+  "description": "sample Github_hard/o82151.json",
+  "meta": {
+    "full_size": 7439,
+    "stripped_size": 4276,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "id",
+      "maxLength",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "Schema for Evaluated Job Config",
+    "id": "#job-config-evaluated-v1",
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "hooks": {
+        "$ref": "#/definitions/hooks"
+      },
+      "deployers": {
+        "patternProperties": {
+          ".*": {
+            "$ref": "#/definitions/deployer"
+          }
+        }
+      },
+      "security": {
+        "type": "object",
+        "$ref": "#/definitions/security"
+      },
+      "notifications": {
+        "$ref": "#/definitions/notifications"
+      },
+      "scm": {
+        "type": "object"
+      },
+      "environment": {
+        "type": "object",
+        "$ref": "#/definitions/environment",
+        "description": "Defines top level environment (key, value) support"
+      },
+      "schedule": {
+        "type": "string",
+        "description": "Run this deployment as scheduled job."
+      }
+    },
+    "required": [
+      "enabled"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+      "encrypted-type": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "encrypted": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      },
+      "hooks": {
+        "type": "object",
+        "properties": {
+          "ci": {
+            "$ref": "#/definitions/hook-list"
+          },
+          "builder": {
+            "$ref": "#/definitions/hook-list"
+          },
+          "scm-push": {
+            "$ref": "#/definitions/hook-list"
+          },
+          "scm-create": {
+            "$ref": "#/definitions/hook-list"
+          }
+        },
+        "additionalProperties": false
+      },
+      "hook-list": {
+        "type": "object",
+        "patternProperties": {
+          ".*": {
+            "$ref": "#/definitions/hook-type"
+          }
+        }
+      },
+      "hook-type": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "deployer": {
+        "type": "object",
+        "properties": {
+          "proxy": {
+            "$ref": "#/definitions/proxy"
+          },
+          "endpoints": {
+            "type": "object"
+          },
+          "templates": {
+            "type": "object"
+          },
+          "deployment": {
+            "description": "Deployment configuration.",
+            "$ref": "#/definitions/deployment"
+          },
+          "url": {
+            "description": "URL for the deployer",
+            "type": "string"
+          },
+          "enabled": {
+            "description": "Is deployer enabled?",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "deployment": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "type": {
+            "enum": [
+              "blue-green",
+              "red-green",
+              "a/b",
+              "custom"
+            ]
+          },
+          "nodes": {
+            "type": "number",
+            "maximum": 12,
+            "minimum": 1
+          },
+          "check": {
+            "$ref": "#/definitions/deployment-check"
+          },
+          "stop": {
+            "type": "object",
+            "$ref": "#/definitions/deployment-stop"
+          }
+        },
+        "additionalProperties": false
+      },
+      "deployment-check": {
+        "properties": {
+          "min-nodes": {
+            "type": "number",
+            "description": "Minimum number of nodes for deployment. (Used for deployment check)",
+            "minimum": 1
+          },
+          "port": {
+            "type": "number",
+            "description": "Application internal Port to be used for discover check (Value of 0 disable discover check)",
+            "minimum": 0
+          },
+          "path": {
+            "type": "string",
+            "description": "Optional path to be used for performing deployment check. If null, empty or un-specified, only discover check is performed.",
+            "default": ""
+          },
+          "timeout": {
+            "type": "string",
+            "description": "Deployment check timeout represented in terms of seconds or minutes. e.g: 20s for timeout of 20 seconds",
+            "default": "5s"
+          },
+          "attempts": {
+            "type": "number",
+            "description": "Maximum number of attempts for deployment check before marking deployment as failed.",
+            "default": "10"
+          }
+        },
+        "additionalProperties": false
+      },
+      "deployment-stop": {
+        "properties": {
+          "timeout": {
+            "type": "string",
+            "description": "Deployment stop timeout represented in terms of seconds or minutes. e.g: 30s for timeout of 30 seconds. The application will be sent SIGTERM signal and will have this time for its cleanup.",
+            "default": "30s"
+          },
+          "check-retries": {
+            "type": "number",
+            "description": "Maximum no. of retries to be attempted to check if deployment is stopped.",
+            "default": "10"
+          }
+        },
+        "additionalProperties": false
+      },
+      "proxy": {
+        "type": "object",
+        "properties": {
+          "hosts": {
+            "description": "Hosts associated with the proxy",
+            "patternProperties": {
+              ".*": {
+                "$ref": "#/definitions/host"
+              }
+            }
+          },
+          "upstreams": {
+            "description": "Backends associated with the proxy",
+            "patternProperties": {
+              ".*": {
+                "$ref": "#/definitions/upstream"
+              }
+            }
+          },
+          "listeners": {
+            "description": "TCP Listeners associated with proxy (for tcp based proxy)",
+            "patternProperties": {
+              ".*": {
+                "$ref": "#/definitions/listener"
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "host": {
+        "description": "Proxy Host definition",
+        "type": "object",
+        "properties": {
+          "hostname": {
+            "description": "Hostname(s) to be registered with proxy. If multiple hosts need to be specified, separate them using comma or space",
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9\\-.\\s,]*[a-zA-Z0-9\\s\\-,]$"
+          },
+          "locations": {
+            "description": "Locations for given proxy host.",
+            "patternProperties": {
+              ".*": {
+                "$ref": "#/definitions/location"
+              }
+            }
+          },
+          "enabled": {
+            "description": "Is host enabled?",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "location": {
+        "description": "Proxy location definition for a given proxy path",
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "Path to be used for proxy",
+            "type": "string"
+          },
+          "port": {
+            "description": "Internal container port for proxy.",
+            "type": "number"
+          },
+          "enabled": {
+            "description": "Is location enabled?",
+            "type": "boolean"
+          },
+          "denied-acls": {
+            "type": "array",
+            "description": "List of Denied proxy ACLs",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed-acls": {
+            "type": "array",
+            "description": "List of Allowed proxy ACLs",
+            "items": {
+              "type": "string"
+            }
+          },
+          "force-ssl": {
+            "description": "If SSL needs to be forced at the given path",
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "upstream": {
+        "description": "Proxy Upstream (Backend) definition",
+        "type": "object",
+        "properties": {
+          "health": {
+            "$ref": "#/definitions/health"
+          },
+          "mode": {
+            "description": "Proxy mode (http or tcp)",
+            "enum": [
+              "http",
+              "tcp"
+            ],
+            "default": "http"
+          }
+        },
+        "additionalProperties": false
+      },
+      "health": {
+        "description": "Health check definition for proxy upstream",
+        "type": "object",
+        "properties": {
+          "timeout": {
+            "type": "string",
+            "description": "Health check timeout represented in terms of seconds or minutes. e.g: 20s for timeout of 20 seconds"
+          },
+          "uri": {
+            "type": "string",
+            "description": "Path to be used for health check. If empty or not specified, tcp based check is used."
+          },
+          "interval": {
+            "type": "string",
+            "description": "Interval to be used for health check. e.g.: 30s to run health check every 30 seconds."
+          }
+        },
+        "additionalProperties": false
+      },
+      "listener": {
+        "description": "Proxy TCP Listener definition",
+        "type": "object"
+      },
+      "security": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string"
+          }
+        }
+      },
+      "notifications": {
+        "patternProperties": {
+          "hipchat": {
+            "$ref": "#/definitions/notification-hipchat"
+          },
+          "github": {
+            "$ref": "#/definitions/notification-github"
+          },
+          ".*": {
+            "$ref": "#/definitions/notification"
+          }
+        }
+      },
+      "notification": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Used for enabling/disabling notification"
+          },
+          "level": {
+            "description": "Min level for the message to activate this notifier",
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      },
+      "notification-hipchat": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Used for enabling/disabling notification"
+          },
+          "url": {
+            "type": "string",
+            "description": "Hipchat v2 api url"
+          },
+          "colors": {
+            "type": "object",
+            "description": "Color mapping"
+          },
+          "room": {
+            "type": "string",
+            "description": "Room to be used for notification"
+          },
+          "token": {
+            "description": "Hipchat API v2 token (personal/ room) for notification",
+            "type": "object",
+            "$ref": "#/definitions/encrypted-type"
+          },
+          "level": {
+            "description": "Min level for the message to activate this notifier",
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "notification-github": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Used for enabling/disabling notification"
+          },
+          "url": {
+            "type": "string",
+            "description": "Github API url base"
+          },
+          "token": {
+            "description": "Github Oauth token",
+            "type": "object",
+            "$ref": "#/definitions/encrypted-type"
+          },
+          "level": {
+            "description": "Min level for the message to activate this notifier",
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      },
+      "environment": {
+        "patternProperties": {
+          ".*": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 4096
+              },
+              {
+                "$ref": "#/definitions/encrypted-type"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "enabled": true,
+        "hooks": {
+          "ci": {
+            "hook1": {
+              "enabled": true
+            }
+          },
+          "builder": {
+            "hook2": {
+              "enabled": true
+            }
+          },
+          "scm-push": {
+            "hook3": {
+              "enabled": true
+            }
+          },
+          "scm-create": {
+            "hook4": {
+              "enabled": true
+            }
+          }
+        },
+        "deployers": {
+          "deployer1": {
+            "proxy": {
+              "hosts": {
+                "host1": {
+                  "hostname": "example.com",
+                  "locations": {
+                    "/path1": {
+                      "path": "/path1",
+                      "port": 80,
+                      "enabled": true,
+                      "denied-acls": [],
+                      "allowed-acls": [],
+                      "force-ssl": false
+                    }
+                  },
+                  "enabled": true
+                }
+              },
+              "upstreams": {
+                "upstream1": {
+                  "health": {
+                    "timeout": "20s",
+                    "uri": "/health",
+                    "interval": "30s"
+                  },
+                  "mode": "http"
+                }
+              },
+              "listeners": {}
+            },
+            "endpoints": {},
+            "templates": {},
+            "deployment": {
+              "name": "deployment1",
+              "version": "1.0",
+              "type": "blue-green",
+              "nodes": 2,
+              "check": {
+                "min-nodes": 1,
+                "port": 80,
+                "path": "/health",
+                "timeout": "5s",
+                "attempts": 10
+              },
+              "stop": {
+                "timeout": "30s",
+                "check-retries": 10
+              }
+            },
+            "url": "http://example.com",
+            "enabled": true
+          }
+        },
+        "security": {
+          "profile": "profile1"
+        },
+        "notifications": {
+          "hipchat": {
+            "enabled": true,
+            "url": "https://api.hipchat.com/v2/",
+            "colors": {
+              "success": "green",
+              "failure": "red"
+            },
+            "room": "room1",
+            "token": {
+              "value": "token1",
+              "encrypted": true
+            },
+            "level": 1
+          },
+          "github": {
+            "enabled": true,
+            "url": "https://api.github.com/",
+            "token": {
+              "value": "token2",
+              "encrypted": true
+            },
+            "level": 1
+          }
+        },
+        "scm": {},
+        "environment": {
+          "VARIABLE1": "value1",
+          "VARIABLE2": {
+            "value": "value2",
+            "encrypted": true
+          }
+        },
+        "schedule": "0 0 * * *"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "enabled": true,
+        "hooks": {
+          "ci": {
+            "hook1": {
+              "enabled": true
+            }
+          },
+          "builder": {
+            "hook2": {
+              "enabled": false
+            }
+          },
+          "scm-push": {
+            "hook3": {
+              "enabled": true
+            }
+          },
+          "scm-create": {
+            "hook4": {
+              "enabled": false
+            }
+          }
+        },
+        "deployers": {
+          "deployer1": {
+            "proxy": {
+              "hosts": {
+                "host1": {
+                  "hostname": "example.com",
+                  "locations": {
+                    "/path1": {
+                      "path": "/path1",
+                      "port": 8080,
+                      "enabled": true,
+                      "denied-acls": [],
+                      "allowed-acls": [],
+                      "force-ssl": false
+                    }
+                  },
+                  "enabled": true
+                }
+              },
+              "upstreams": {
+                "upstream1": {
+                  "health": {
+                    "timeout": "20s",
+                    "uri": "/health",
+                    "interval": "30s"
+                  },
+                  "mode": "http"
+                }
+              },
+              "listeners": {}
+            },
+            "endpoints": {},
+            "templates": {},
+            "deployment": {
+              "name": "deployment1",
+              "version": "1.0",
+              "type": "blue-green",
+              "nodes": 2,
+              "check": {
+                "min-nodes": 1,
+                "port": 8080,
+                "path": "/health",
+                "timeout": "5s",
+                "attempts": 10
+              },
+              "stop": {
+                "timeout": "30s",
+                "check-retries": 10
+              }
+            },
+            "url": "http://example.com",
+            "enabled": true
+          }
+        },
+        "security": {
+          "profile": "default"
+        },
+        "notifications": {
+          "hipchat": {
+            "enabled": true,
+            "url": "https://api.hipchat.com/v2",
+            "colors": {
+              "success": "green",
+              "failure": "red"
+            },
+            "room": "room1",
+            "token": {
+              "value": "token1",
+              "encrypted": true
+            },
+            "level": 1
+          },
+          "github": {
+            "enabled": true,
+            "url": "https://api.github.com",
+            "token": {
+              "value": "token2",
+              "encrypted": true
+            },
+            "level": 1
+          }
+        },
+        "scm": {},
+        "environment": {
+          "VARIABLE1": "value1",
+          "VARIABLE2": {
+            "value": "value2",
+            "encrypted": true
+          }
+        },
+        "schedule": "0 0 * * *"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "13 is greater than the maximum of 12",
+      "python_error": "Additional properties are not allowed ('Minimum of 12, so 13 is a valid number, however, we should also test with numbers less than the minimum', 'minimum' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['deployers']['patternProperties']['.*']['properties']['deployment']:\n    {'properties': {'name': {'type': 'string', 'maxLength': 512},\n                    'version': {'type': 'string', 'maxLength': 100},\n                    'type': {'enum': ['blue-green',\n                                      'red-green',\n                                      'a/b',\n                                      'custom']},\n                    'nodes': {'type': 'number',\n                              'maximum': 12,\n                              'minimum': 1},\n                    'check': {'$ref': '#/definitions/deployment-check'},\n                    'stop': {'type': 'object',\n                             '$ref': '#/definitions/deployment-stop'}},\n     'additionalProperties': False}\n\nOn instance['dep.. (577 more)",
+      "data": {
+        "enabled": true,
+        "hooks": {
+          "ci": {
+            "hook1": {
+              "enabled": true
+            }
+          },
+          "builder": {
+            "hook2": {
+              "enabled": false
+            }
+          },
+          "scm-push": {
+            "hook3": {
+              "enabled": true
+            }
+          },
+          "scm-create": {
+            "hook4": {
+              "enabled": false
+            }
+          }
+        },
+        "deployers": {
+          "deployer1": {
+            "proxy": {
+              "hosts": {
+                "host1": {
+                  "hostname": "example.com",
+                  "locations": {
+                    "/path1": {
+                      "path": "/path1",
+                      "port": 8080,
+                      "enabled": true,
+                      "denied-acls": [],
+                      "allowed-acls": [],
+                      "force-ssl": false
+                    }
+                  },
+                  "enabled": true
+                }
+              },
+              "upstreams": {
+                "upstream1": {
+                  "health": {
+                    "timeout": "20s",
+                    "uri": "/health",
+                    "interval": "30s"
+                  },
+                  "mode": "http"
+                }
+              },
+              "listeners": {}
+            },
+            "endpoints": {},
+            "templates": {},
+            "deployment": {
+              "name": "deployment1",
+              "version": "1.0",
+              "type": "blue-green",
+              "nodes": 13,
+              "Minimum of 12, so 13 is a valid number, however, we should also test with numbers less than the minimum": "nodes",
+              "minimum": 1,
+              "check": {
+                "min-nodes": 0,
+                "minimum of 1, so this is invalid": "min-nodes",
+                "minimum": 1,
+                "port": 8080,
+                "path": "/health",
+                "timeout": "5s",
+                "attempts": 10
+              },
+              "stop": {
+                "timeout": "30s",
+                "check-retries": 10
+              }
+            },
+            "url": "http://example.com",
+            "enabled": true
+          }
+        },
+        "security": {
+          "profile": "default"
+        },
+        "notifications": {
+          "hipchat": {
+            "enabled": true,
+            "url": "https://api.hipchat.com/v2",
+            "colors": {
+              "success": "green",
+              "failure": "red"
+            },
+            "room": "room1",
+            "token": {
+              "value": "token1",
+              "encrypted": true
+            },
+            "level": 1
+          },
+          "github": {
+            "enabled": true,
+            "url": "https://api.github.com",
+            "token": {
+              "value": "token2",
+              "encrypted": true
+            },
+            "level": 1
+          }
+        },
+        "scm": {},
+        "environment": {
+          "VARIABLE1": "value1",
+          "VARIABLE2": {
+            "value": "value2",
+            "encrypted": true
+          }
+        },
+        "schedule": "0 0 * * *"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('invalid-key' was unexpected)",
+      "python_error": "Additional properties are not allowed ('invalid-key' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['deployers']['patternProperties']['.*']['properties']['proxy']['properties']['hosts']['patternProperties']['.*']:\n    {'description': 'Proxy Host definition',\n     'type': 'object',\n     'properties': {'hostname': {'description': 'Hostname(s) to be '\n                                                'registered with proxy. If '\n                                                'multiple hosts need to be '\n                                                'specified, separate them '\n                                                'using comma or space',\n                                 'type': 'string',\n                                 'pattern': '^[a-zA-Z0-9\\\\-.\\\\s,]*[a-zA-Z0-9\\\\s\\\\-,]$'},\n                    'locations': {'description': 'Locations for given '\n                                                 'proxy host.',\n                                  'patternProperties': {'.*'.. (635 more)",
+      "data": {
+        "enabled": true,
+        "hooks": {
+          "ci": {
+            "hook1": {
+              "enabled": true
+            }
+          },
+          "builder": {
+            "hook2": {
+              "enabled": false
+            }
+          },
+          "scm-push": {
+            "hook3": {
+              "enabled": true
+            }
+          },
+          "scm-create": {
+            "hook4": {
+              "enabled": false
+            }
+          }
+        },
+        "deployers": {
+          "deployer1": {
+            "proxy": {
+              "hosts": {
+                "host1": {
+                  "hostname": "example.com",
+                  "locations": {
+                    "/path1": {
+                      "path": "/path1",
+                      "port": 8080,
+                      "enabled": true,
+                      "denied-acls": [],
+                      "allowed-acls": [],
+                      "force-ssl": false
+                    }
+                  },
+                  "enabled": true,
+                  "invalid-key": "value"
+                }
+              },
+              "upstreams": {
+                "upstream1": {
+                  "health": {
+                    "timeout": "20s",
+                    "uri": "/health",
+                    "interval": "30s"
+                  },
+                  "mode": "http"
+                }
+              },
+              "listeners": {}
+            },
+            "endpoints": {},
+            "templates": {},
+            "deployment": {
+              "name": "deployment1",
+              "version": "1.0",
+              "type": "blue-green",
+              "nodes": 2,
+              "check": {
+                "min-nodes": 1,
+                "port": 8080,
+                "path": "/health",
+                "timeout": "5s",
+                "attempts": 10
+              },
+              "stop": {
+                "timeout": "30s",
+                "check-retries": 10
+              }
+            },
+            "url": "http://example.com",
+            "enabled": true
+          }
+        },
+        "security": {
+          "profile": "default"
+        },
+        "notifications": {
+          "hipchat": {
+            "enabled": true,
+            "url": "https://api.hipchat.com/v2",
+            "colors": {
+              "success": "green",
+              "failure": "red"
+            },
+            "room": "room1",
+            "token": {
+              "value": "token1",
+              "encrypted": true
+            },
+            "level": 1
+          },
+          "github": {
+            "enabled": true,
+            "url": "https://api.github.com",
+            "token": {
+              "value": "token2",
+              "encrypted": true
+            },
+            "level": 1
+          }
+        },
+        "scm": {},
+        "environment": {
+          "VARIABLE1": "value1",
+          "VARIABLE2": {
+            "value": "value2",
+            "encrypted": true
+          }
+        },
+        "schedule": "0 0 * * *"
+      }
+    }
+  ]
+}

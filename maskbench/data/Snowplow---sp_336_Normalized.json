@@ -1,0 +1,342 @@
+{
+  "description": "sample Snowplow/sp_336_Normalized.json",
+  "meta": {
+    "full_size": 1838,
+    "stripped_size": 1126,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for storage loader errors with unknown data, e.g. invalid enriched event",
+    "properties": {
+      "failure": {
+        "description": "Errors that happened when not recognizing the event as an enriched event, provided by Analytics SDK",
+        "oneOf": [
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "NotTSV"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          {
+            "properties": {
+              "fieldCount": {
+                "maximum": 1024,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "type": {
+                "enum": [
+                  "FieldNumberMismatch"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "fieldCount"
+            ]
+          },
+          {
+            "properties": {
+              "errors": {
+                "items": {
+                  "oneOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "key": {
+                          "maxLength": 32,
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": [
+                            "InvalidValue"
+                          ]
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "key",
+                        "value",
+                        "message"
+                      ]
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": [
+                            "UnhandledRowDecodingError"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "message"
+                      ]
+                    }
+                  ]
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "type": {
+                "enum": [
+                  "RowDecodingError"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "errors"
+            ]
+          }
+        ],
+        "type": "object"
+      },
+      "payload": {
+        "description": "Data blob which was not recognized as an enriched event by the storage loader",
+        "type": "string"
+      },
+      "processor": {
+        "additionalProperties": false,
+        "description": "Information about the piece of software responsible for the creation of enrichment failures",
+        "properties": {
+          "artifact": {
+            "description": "Artifact responsible for the creation of enrichment failures",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of the artifact responsible for the creation of enrichment failures",
+            "maxLength": 32,
+            "pattern": "^(\\d+\\.\\d+\\.\\d+.*)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact",
+          "version"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "payload",
+      "failure",
+      "processor"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "loader_parsing_error",
+      "vendor": "com.snowplowanalytics.snowplow.badrows",
+      "version": "2-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "payload": "Invalid enriched event data",
+        "failure": {
+          "type": "RowDecodingError",
+          "errors": [
+            {
+              "type": "InvalidValue",
+              "key": "event_id",
+              "value": "123",
+              "message": "Invalid event ID"
+            },
+            {
+              "type": "UnhandledRowDecodingError",
+              "message": "Failed to decode row"
+            }
+          ]
+        },
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"abc\" does not match \"^(\\d+\\.\\d+\\.\\d+.*)$\"",
+      "python_error": "'abc' does not match '^(\\\\d+\\\\.\\\\d+\\\\.\\\\d+.*)$'\n\nFailed validating 'pattern' in schema['properties']['processor']['properties']['version']:\n    {'description': 'Version of the artifact responsible for the creation '\n                    'of enrichment failures',\n     'maxLength': 32,\n     'pattern': '^(\\\\d+\\\\.\\\\d+\\\\.\\\\d+.*)$',\n     'type': 'string'}\n\nOn instance['processor']['version']:\n    'abc'",
+      "data": {
+        "payload": "Invalid enriched event data",
+        "failure": {
+          "type": "RowDecodingError",
+          "errors": [
+            {
+              "type": "InvalidValue",
+              "key": "event_id",
+              "value": "123",
+              "message": "Invalid event ID"
+            },
+            {
+              "type": "UnhandledRowDecodingError",
+              "message": "Failed to decode row"
+            }
+          ]
+        },
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "abc"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"RowDecodingError\",\"errors\":[{\"type\":\"InvalidValue\",\"key\":\"event_id\",\"value\":\"123\",\"message\":\"Invalid event ID\",\"extra\":\"This is an extra property\"},{\"type\":\"UnhandledRowDecodingError\",\"message\":\"Failed to decode row\"}],\"fieldCount\":10} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'InvalidValue' is not one of ['UnhandledRowDecodingError']\n\nFailed validating 'enum' in schema[1]['properties']['type']:\n    {'enum': ['UnhandledRowDecodingError']}\n\nOn instance['type']:\n    'InvalidValue'",
+      "data": {
+        "payload": "Invalid enriched event data",
+        "failure": {
+          "type": "RowDecodingError",
+          "errors": [
+            {
+              "type": "InvalidValue",
+              "key": "event_id",
+              "value": "123",
+              "message": "Invalid event ID",
+              "extra": "This is an extra property"
+            },
+            {
+              "type": "UnhandledRowDecodingError",
+              "message": "Failed to decode row"
+            }
+          ],
+          "fieldCount": 10
+        },
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"RowDecodingError\",\"errors\":[{\"type\":\"InvalidValue\",\"key\":\"event_id\",\"value\":\"123\",\"message\":\"Invalid event ID\"},{\"type\":\"UnhandledRowDecodingError\",\"message\":\"Failed to decode row\"},{\"type\":\"InvalidValue\",\"key\":\"very_long_key_that_exceeds_32_characters\",\"value\":\"123\",\"message\":\"Invalid event ID\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'very_long_key_that_exceeds_32_characters' is too long\n\nFailed validating 'maxLength' in schema[0]['properties']['key']:\n    {'maxLength': 32, 'type': 'string'}\n\nOn instance['key']:\n    'very_long_key_that_exceeds_32_characters'",
+      "data": {
+        "payload": "Invalid enriched event data",
+        "failure": {
+          "type": "RowDecodingError",
+          "errors": [
+            {
+              "type": "InvalidValue",
+              "key": "event_id",
+              "value": "123",
+              "message": "Invalid event ID"
+            },
+            {
+              "type": "UnhandledRowDecodingError",
+              "message": "Failed to decode row"
+            },
+            {
+              "type": "InvalidValue",
+              "key": "very_long_key_that_exceeds_32_characters",
+              "value": "123",
+              "message": "Invalid event ID"
+            }
+          ]
+        },
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"RowDecodingError\",\"errors\":[]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema[2]['properties']['errors']:\n    {'items': {'oneOf': [{'additionalProperties': False,\n                          'properties': {'key': {'maxLength': 32,\n                                                 'type': 'string'},\n                                         'message': {'type': 'string'},\n                                         'type': {'enum': ['InvalidValue']},\n                                         'value': {'type': 'string'}},\n                          'required': ['type', 'key', 'value', 'message']},\n                         {'additionalProperties': False,\n                          'properties': {'message': {'type': 'string'},\n                                         'type': {'enum': ['UnhandledRowDecodingError']}},\n                          'required': ['type', 'message']}]},\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['errors']:\n    []",
+      "data": {
+        "payload": "Invalid enriched event data",
+        "failure": {
+          "type": "RowDecodingError",
+          "errors": []
+        },
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"RowDecodingError\",\"errors\":[{\"type\":\"InvalidValue\",\"key\":\"thiskeyiswaytoolongandwillnotvalidateasitislongerthan32characters\",\"value\":\"123\",\"message\":\"Invalid event ID\"},{\"type\":\"UnhandledRowDecodingError\",\"message\":\"Failed to decode row\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for storage loader errors with unknown data, '\n                    'e.g. invalid enriched event',\n     'properties': {'failure': {'description': 'Errors that happened when '\n                                               'not recognizing the event '\n                                               'as an enriched event, '\n                                               'provided by Analytics SDK',\n                                'oneOf': [{'properties': {'type': {'enum': ['NotTSV']}},\n                                           'required': ['type']},\n                                          {'properties': {'fieldCount': {'maximum': 1024,\n                                                                         'minimum': 0,\n                                                                         'type': 'integer'},\n                     .. (6351 more)",
+      "data": {
+        "payload": "Invalid enriched event data",
+        "failure": {
+          "type": "RowDecodingError",
+          "errors": [
+            {
+              "type": "InvalidValue",
+              "key": "thiskeyiswaytoolongandwillnotvalidateasitislongerthan32characters",
+              "value": "123",
+              "message": "Invalid event ID"
+            },
+            {
+              "type": "UnhandledRowDecodingError",
+              "message": "Failed to decode row"
+            }
+          ]
+        },
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3.4.5.6.7"
+        },
+        "extra": "thispropertyshouldnotexist"
+      }
+    }
+  ]
+}

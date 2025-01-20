@@ -1,0 +1,589 @@
+{
+  "description": "sample Github_medium/o26257.json",
+  "meta": {
+    "full_size": 1606,
+    "stripped_size": 834,
+    "features": [
+      "@minmaxInteger",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://raw.githubusercontent.com/bh107/benchpress/master/benchpress/suite_schema.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Benchpress Suite Schema",
+    "description": "Benchpress Suite file that contains the commands to execute and their results",
+    "type": "object",
+    "properties": {
+      "creation_date_utc": {
+        "description": "The creation time of the suite file in UTC",
+        "type": "string"
+      },
+      "cmd_list": {
+        "description": "List of the commands that makes up this benchmark suite",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "cmd": {
+              "description": "A command to execute",
+              "type": "string"
+            },
+            "env": {
+              "description": "The environment variables to define",
+              "type": "object"
+            },
+            "label": {
+              "description": "The label of the command",
+              "type": "string"
+            },
+            "jobs": {
+              "description": "List of scheduled commands",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "description": "The status of the scheduled command",
+                    "type": "string",
+                    "pattern": "finished|failed|pending"
+                  },
+                  "nruns": {
+                    "description": "The number of times to executed the scheduled command",
+                    "type": "number",
+                    "minimum": 1
+                  },
+                  "warmup": {
+                    "description": "Include a warm up run before the recorded runs",
+                    "type": "boolean"
+                  },
+                  "results": {
+                    "description": "List of recorded results",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "success": {
+                          "description": "Did the run succeed",
+                          "type": "boolean"
+                        },
+                        "stderr": {
+                          "description": "The standard error output",
+                          "type": "string"
+                        },
+                        "stdout": {
+                          "description": "The standard output",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "success"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "nruns"
+                ]
+              }
+            }
+          },
+          "required": [
+            "cmd",
+            "env",
+            "label"
+          ]
+        }
+      }
+    },
+    "required": [
+      "creation_date_utc",
+      "cmd_list"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "creation_date_utc": "2022-01-01T00:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "echo Hello World!",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 3,
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "ls -l",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "List Files",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 1,
+                "warmup": false,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "total 0\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file1\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file2\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid_status\" does not match \"finished|failed|pending\"",
+      "python_error": "'invalid_status' does not match 'finished|failed|pending'\n\nFailed validating 'pattern' in schema['properties']['cmd_list']['items']['properties']['jobs']['items']['properties']['status']:\n    {'description': 'The status of the scheduled command',\n     'type': 'string',\n     'pattern': 'finished|failed|pending'}\n\nOn instance['cmd_list'][0]['jobs'][0]['status']:\n    'invalid_status'",
+      "data": {
+        "creation_date_utc": "2022-01-01T00:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "echo Hello World!",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "invalid_status",
+                "nruns": 3,
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "ls -l",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "List Files",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 1,
+                "warmup": false,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "total 0\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file1\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file2\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['cmd_list']['items']['properties']['jobs']['items']['properties']['nruns']:\n    {'description': 'The number of times to executed the scheduled command',\n     'type': 'number',\n     'minimum': 1}\n\nOn instance['cmd_list'][0]['jobs'][0]['nruns']:\n    0",
+      "data": {
+        "creation_date_utc": "2022-01-01T00:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "echo Hello World!",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 0,
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "ls -l",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "List Files",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 1,
+                "warmup": false,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "total 0\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file1\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file2\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"unknown\" does not match \"finished|failed|pending\"",
+      "python_error": "'nruns' is a required property\n\nFailed validating 'required' in schema['properties']['cmd_list']['items']['properties']['jobs']['items']:\n    {'type': 'object',\n     'properties': {'status': {'description': 'The status of the scheduled '\n                                              'command',\n                               'type': 'string',\n                               'pattern': 'finished|failed|pending'},\n                    'nruns': {'description': 'The number of times to '\n                                             'executed the scheduled '\n                                             'command',\n                              'type': 'number',\n                              'minimum': 1},\n                    'warmup': {'description': 'Include a warm up run '\n                                              'before the recorded runs',\n                               'type': 'boolean'},\n                    'results': {'description': 'List of recorded results',\n                                'type': 'array',.. (1956 more)",
+      "data": {
+        "creation_date_utc": "2022-01-01T00:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "echo Hello World!",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "unknown",
+                "Invalid status, should be 'finished', 'failed', or 'pending'": "nruns",
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "ls -l",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "List Files",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 0,
+                "Invalid number of runs, should be at least 1": "warmup",
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "total 0\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file1\n-rw-r--r-- 1 user user 0 Jan  1 00:00 file2\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "creation_date_utc": "2022-01-01T12:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "echo Hello World!",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 3,
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "ls -l",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "List Files",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 1,
+                "warmup": false,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "total 0\n-rw-r--r-- 1 user user 0 Jan  1 12:00 file.txt\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['cmd_list']['items']['properties']['jobs']['items']['properties']['nruns']:\n    {'description': 'The number of times to executed the scheduled command',\n     'type': 'number',\n     'minimum': 1}\n\nOn instance['cmd_list'][0]['jobs'][0]['nruns']:\n    0",
+      "data": {
+        "creation_date_utc": "2022-01-01T12:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "echo Hello World!",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 0,
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "ls -l",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "List Files",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 1,
+                "warmup": false,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "total 0\n-rw-r--r-- 1 user user 0 Jan  1 12:00 file.txt\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid_status\" does not match \"finished|failed|pending\"",
+      "python_error": "'invalid_status' does not match 'finished|failed|pending'\n\nFailed validating 'pattern' in schema['properties']['cmd_list']['items']['properties']['jobs']['items']['properties']['status']:\n    {'description': 'The status of the scheduled command',\n     'type': 'string',\n     'pattern': 'finished|failed|pending'}\n\nOn instance['cmd_list'][0]['jobs'][0]['status']:\n    'invalid_status'",
+      "data": {
+        "creation_date_utc": "2022-01-01T12:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "echo Hello World!",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "invalid_status",
+                "nruns": 3,
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"unknown\" does not match \"finished|failed|pending\"",
+      "python_error": "'unknown' does not match 'finished|failed|pending'\n\nFailed validating 'pattern' in schema['properties']['cmd_list']['items']['properties']['jobs']['items']['properties']['status']:\n    {'description': 'The status of the scheduled command',\n     'type': 'string',\n     'pattern': 'finished|failed|pending'}\n\nOn instance['cmd_list'][0]['jobs'][0]['status']:\n    'unknown'",
+      "data": {
+        "creation_date_utc": "2022-01-01T12:00:00Z",
+        "cmd_list": [
+          {
+            "cmd": "",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "Hello World",
+            "jobs": [
+              {
+                "status": "unknown",
+                "nruns": 0,
+                "warmup": true,
+                "results": [
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  },
+                  {
+                    "success": true,
+                    "stderr": "",
+                    "stdout": "Hello World!\n"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "ls -l",
+            "env": {
+              "VARIABLE": "value"
+            },
+            "label": "List Files",
+            "jobs": [
+              {
+                "status": "finished",
+                "nruns": 1,
+                "warmup": false,
+                "results": [
+                  {
+                    "stderr": "",
+                    "stdout": "total 0\n-rw-r--r-- 1 user user 0 Jan  1 12:00 file.txt\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "description": "sample MCPspec/ListResourcesResult.json",
+  "meta": {
+    "full_size": 2170,
+    "stripped_size": 760,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "format",
+      "format:uri",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ListResourcesResult",
+    "definitions": {
+      "ListResourcesResult": {
+        "description": "The server's response to a resources/list request from the client.",
+        "properties": {
+          "_meta": {
+            "additionalProperties": {},
+            "description": "This result property is reserved by the protocol to allow clients and servers to attach additional metadata to their responses.",
+            "type": "object"
+          },
+          "nextCursor": {
+            "description": "An opaque token representing the pagination position after the last returned result.\nIf present, there may be more results available.",
+            "type": "string"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/definitions/Resource"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "resources"
+        ],
+        "type": "object"
+      },
+      "Resource": {
+        "description": "A known resource that the server is capable of reading.",
+        "properties": {
+          "annotations": {
+            "properties": {
+              "audience": {
+                "description": "Describes who the intended customer of this object or data is.\n\nIt can include multiple entries to indicate content useful for multiple audiences (e.g., `[\"user\", \"assistant\"]`).",
+                "items": {
+                  "$ref": "#/definitions/Role"
+                },
+                "type": "array"
+              },
+              "priority": {
+                "description": "Describes how important this data is for operating the server.\n\nA value of 1 means \"most important,\" and indicates that the data is\neffectively required, while 0 means \"least important,\" and indicates that\nthe data is entirely optional.",
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "description": {
+            "description": "A description of what this resource represents.\n\nThis can be used by clients to improve the LLM's understanding of available resources. It can be thought of like a \"hint\" to the model.",
+            "type": "string"
+          },
+          "mimeType": {
+            "description": "The MIME type of this resource, if known.",
+            "type": "string"
+          },
+          "name": {
+            "description": "A human-readable name for this resource.\n\nThis can be used by clients to populate UI elements.",
+            "type": "string"
+          },
+          "uri": {
+            "description": "The URI of this resource.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "uri"
+        ],
+        "type": "object"
+      },
+      "Role": {
+        "description": "The sender or recipient of messages and data in a conversation.",
+        "enum": [
+          "assistant",
+          "user"
+        ],
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_meta": {
+          "additionalProperty": "additionalValue"
+        },
+        "resources": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant",
+                "user"
+              ],
+              "priority": 1
+            },
+            "description": "A resource description",
+            "mimeType": "text/plain",
+            "name": "Example Resource",
+            "uri": "https://example.com/resource"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0.5
+            },
+            "description": "Another resource description",
+            "mimeType": "application/json",
+            "name": "Another Example Resource",
+            "uri": "https://example.com/another-resource"
+          }
+        ],
+        "nextCursor": "opaque-pagination-token"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a uri\" is not a \"uri\"",
+      "python_error": "'not a uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['resources']['items']['properties']['uri']:\n    {'description': 'The URI of this resource.',\n     'format': 'uri',\n     'type': 'string'}\n\nOn instance['resources'][0]['uri']:\n    'not a uri'",
+      "data": {
+        "_meta": {
+          "additionalProperty": "additionalValue"
+        },
+        "resources": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant",
+                "user"
+              ],
+              "priority": 1
+            },
+            "description": "A resource description",
+            "mimeType": "text/plain",
+            "name": "Example Resource",
+            "uri": "not a uri"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 0.5
+            },
+            "description": "Another resource description",
+            "mimeType": "application/json",
+            "name": "Another Example Resource",
+            "uri": "https://example.com/another-resource"
+          }
+        ],
+        "nextCursor": "opaque-pagination-token"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"unknown\" is not one of [\"assistant\",\"user\"]",
+      "python_error": "2 is greater than the maximum of 1\n\nFailed validating 'maximum' in schema['properties']['resources']['items']['properties']['annotations']['properties']['priority']:\n    {'description': 'Describes how important this data is for operating '\n                    'the server.\\n'\n                    '\\n'\n                    'A value of 1 means \"most important,\" and indicates '\n                    'that the data is\\n'\n                    'effectively required, while 0 means \"least '\n                    'important,\" and indicates that\\n'\n                    'the data is entirely optional.',\n     'maximum': 1,\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['resources'][1]['annotations']['priority']:\n    2",
+      "data": {
+        "_meta": {
+          "additionalProperty": "additionalValue"
+        },
+        "resources": [
+          {
+            "annotations": {
+              "audience": [
+                "assistant",
+                "user",
+                "unknown"
+              ],
+              "priority": 1
+            },
+            "description": "A resource description",
+            "mimeType": "text/plain",
+            "name": "Example Resource",
+            "uri": "https://example.com/resource"
+          },
+          {
+            "annotations": {
+              "audience": [
+                "assistant"
+              ],
+              "priority": 2
+            },
+            "description": "Another resource description",
+            "mimeType": "application/json",
+            "name": "Another Example Resource",
+            "uri": "https://example.com/another-resource"
+          }
+        ],
+        "nextCursor": "opaque-pagination-token"
+      }
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "description": "sample JsonSchemaStore/minecraft-tag.json",
+  "meta": {
+    "full_size": 929,
+    "stripped_size": 559,
+    "features": [
+      "anyOf",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$comment": "https://minecraft.fandom.com/wiki/Data_Pack",
+    "$id": "https://json.schemastore.org/minecraft-tag.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "A tag's for a Minecraft data pack config schema",
+    "properties": {
+      "replace": {
+        "type": "boolean",
+        "default": false
+      },
+      "values": {
+        "description": "Values",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-z0-9_.-]+:[a-z0-9_.-]+"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^#[a-z0-9_.-]+:[a-z0-9_.-]+"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "anyOf": [
+                    {
+                      "description": "An identifier for the current data pack",
+                      "type": "string",
+                      "pattern": "^[a-z0-9_.-]+:[a-z0-9_.-]+"
+                    },
+                    {
+                      "description": "An identifier for the current data pack",
+                      "type": "string",
+                      "pattern": "^#[a-z0-9_.-]+:[a-z0-9_.-]+"
+                    }
+                  ]
+                },
+                "required": {
+                  "description": "Whether it's required for the current data pack",
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "required": [
+      "values"
+    ],
+    "title": "Minecraft Data Pack Tag",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "replace": true,
+        "values": [
+          "minecraft:stone",
+          "#minecraft:wooden_slabs",
+          {
+            "id": "minecraft:gold_ore",
+            "required": true
+          },
+          {
+            "id": "#minecraft:ores",
+            "required": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"Invalid ID\",\"required\":false} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'Invalid ID' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[1]['properties']['id']:\n    {'anyOf': [{'description': 'An identifier for the current data pack',\n                'type': 'string',\n                'pattern': '^[a-z0-9_.-]+:[a-z0-9_.-]+'},\n               {'description': 'An identifier for the current data pack',\n                'type': 'string',\n                'pattern': '^#[a-z0-9_.-]+:[a-z0-9_.-]+'}]}\n\nOn instance['id']:\n    'Invalid ID'",
+      "data": {
+        "replace": true,
+        "values": [
+          "minecraft:stone",
+          "#minecraft:wooden_slabs",
+          {
+            "id": "minecraft:gold_ore",
+            "required": true
+          },
+          {
+            "id": "#minecraft:ores",
+            "required": false
+          },
+          {
+            "id": "Invalid ID",
+            "required": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"Invalid ID\",\"pattern\":\"^[a-z0-9_.-]+:[a-z0-9_.-]+$\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'Invalid ID' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[1]['properties']['id']:\n    {'anyOf': [{'description': 'An identifier for the current data pack',\n                'type': 'string',\n                'pattern': '^[a-z0-9_.-]+:[a-z0-9_.-]+'},\n               {'description': 'An identifier for the current data pack',\n                'type': 'string',\n                'pattern': '^#[a-z0-9_.-]+:[a-z0-9_.-]+'}]}\n\nOn instance['id']:\n    'Invalid ID'",
+      "data": {
+        "replace": true,
+        "values": [
+          "minecraft:stone",
+          "#minecraft:wooden_slabs",
+          {
+            "id": "minecraft:gold_ore",
+            "required": true
+          },
+          {
+            "id": "#minecraft:ores",
+            "required": false
+          },
+          {
+            "id": "Invalid ID",
+            "pattern": "^[a-z0-9_.-]+:[a-z0-9_.-]+$"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"#minecraft:ores\",\"required\":\"false\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'false' is not of type 'boolean'\n\nFailed validating 'type' in schema[1]['properties']['required']:\n    {'description': \"Whether it's required for the current data pack\",\n     'type': 'boolean'}\n\nOn instance['required']:\n    'false'",
+      "data": {
+        "replace": true,
+        "values": [
+          "minecraft:stone",
+          "#minecraft:wooden_slabs",
+          {
+            "id": "minecraft:gold_ore",
+            "required": true
+          },
+          {
+            "id": "#minecraft:ores",
+            "required": "false"
+          }
+        ]
+      }
+    }
+  ]
+}

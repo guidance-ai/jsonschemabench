@@ -1,0 +1,302 @@
+{
+  "description": "sample Github_medium/o83276.json",
+  "meta": {
+    "full_size": 1505,
+    "stripped_size": 1353,
+    "features": [
+      "$ref",
+      "@minmaxProperties",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minProperties",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "GetDWDescriptors",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "totalCount": {
+        "type": "integer"
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Datum"
+        }
+      }
+    },
+    "required": [
+      "data",
+      "totalCount"
+    ],
+    "definitions": {
+      "Datum": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "realms": {
+            "$ref": "#/definitions/Realms"
+          }
+        },
+        "required": [
+          "realms"
+        ],
+        "title": "Datum"
+      },
+      "Realms": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "$ref": "#/definitions/realm"
+        },
+        "title": "Realms",
+        "minProperties": 1
+      },
+      "realm": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "metrics": {
+            "$ref": "#/definitions/metrics"
+          },
+          "dimensions": {
+            "$ref": "#/definitions/dimensions"
+          },
+          "text": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "dimensions",
+          "metrics",
+          "text"
+        ],
+        "title": "realm"
+      },
+      "dimensions": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "$ref": "#/definitions/dimension"
+        },
+        "minProperties": 1,
+        "title": "Dimensions"
+      },
+      "metrics": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "$ref": "#/definitions/metric"
+        },
+        "minProperties": 1,
+        "title": "metrics"
+      },
+      "dimension": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "info": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "info",
+          "text"
+        ],
+        "title": "dimension"
+      },
+      "metric": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "info": {
+            "type": "string"
+          },
+          "std_err": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "info",
+          "std_err",
+          "text"
+        ],
+        "title": "metric"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "totalCount": 1,
+        "data": [
+          {
+            "realms": {
+              "realm1": {
+                "metrics": {
+                  "metric1": {
+                    "text": "Metric 1",
+                    "info": "This is metric 1",
+                    "std_err": true
+                  }
+                },
+                "dimensions": {
+                  "dimension1": {
+                    "text": "Dimension 1",
+                    "info": "This is dimension 1"
+                  }
+                },
+                "text": "Realm 1",
+                "category": "Category 1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "totalCount": 1,
+        "data": [
+          {
+            "realms": {
+              "realm1": {
+                "metrics": {
+                  "metric1": {
+                    "text": "Metric 1",
+                    "info": "Information about metric 1",
+                    "std_err": true
+                  }
+                },
+                "dimensions": {
+                  "dimension1": {
+                    "text": "Dimension 1",
+                    "info": "Information about dimension 1"
+                  }
+                },
+                "text": "Realm 1",
+                "category": "Category 1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minProperties keyword",
+      "valid": false,
+      "rust_error": "{} has less than 1 property",
+      "python_error": "{} should be non-empty\n\nFailed validating 'minProperties' in schema['properties']['data']['items']['properties']['realms']['additionalProperties']['properties']['metrics']:\n    {'type': 'object',\n     'additionalProperties': {'type': 'object',\n                              '$ref': '#/definitions/metric'},\n     'minProperties': 1,\n     'title': 'metrics'}\n\nOn instance['data'][0]['realms']['realm1']['metrics']:\n    {}",
+      "data": {
+        "totalCount": 1,
+        "data": [
+          {
+            "realms": {
+              "realm1": {
+                "metrics": {},
+                "dimensions": {
+                  "dimension1": {
+                    "text": "Dimension 1",
+                    "info": "Information about dimension 1"
+                  }
+                },
+                "text": "Realm 1",
+                "category": "Category 1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('foo' was unexpected)",
+      "python_error": "Additional properties are not allowed ('foo' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['data']['items']['properties']['realms']['additionalProperties']:\n    {'type': 'object',\n     'additionalProperties': False,\n     'properties': {'metrics': {'$ref': '#/definitions/metrics'},\n                    'dimensions': {'$ref': '#/definitions/dimensions'},\n                    'text': {'type': 'string'},\n                    'category': {'type': 'string'}},\n     'required': ['category', 'dimensions', 'metrics', 'text'],\n     'title': 'realm'}\n\nOn instance['data'][0]['realms']['realm1']:\n    {'metrics': {'metric1': {'text': 'Metric 1',\n                             'info': 'Information about metric 1',\n                             'std_err': True}},\n     'dimensions': {'dimension1': {'text': 'Dimension 1',\n                                   'info': 'Information about dimension '\n                                           '1'}},\n     'text': 'Realm 1',\n     'category': 'Category 1',\n     'foo': 'bar'}",
+      "data": {
+        "totalCount": 1,
+        "data": [
+          {
+            "realms": {
+              "realm1": {
+                "metrics": {
+                  "metric1": {
+                    "text": "Metric 1",
+                    "info": "Information about metric 1",
+                    "std_err": true
+                  }
+                },
+                "dimensions": {
+                  "dimension1": {
+                    "text": "Dimension 1",
+                    "info": "Information about dimension 1"
+                  }
+                },
+                "text": "Realm 1",
+                "category": "Category 1",
+                "foo": "bar"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{} has less than 1 property",
+      "python_error": "{} should be non-empty\n\nFailed validating 'minProperties' in schema['properties']['data']['items']['properties']['realms']['additionalProperties']['properties']['metrics']:\n    {'type': 'object',\n     'additionalProperties': {'type': 'object',\n                              '$ref': '#/definitions/metric'},\n     'minProperties': 1,\n     'title': 'metrics'}\n\nOn instance['data'][0]['realms']['realm1']['metrics']:\n    {}",
+      "data": {
+        "totalCount": 1,
+        "data": [
+          {
+            "realms": {
+              "realm1": {
+                "metrics": {},
+                "dimensions": {
+                  "dimension1": {
+                    "text": "Dimension 1",
+                    "info": "Information about dimension 1"
+                  }
+                },
+                "text": "Realm 1",
+                "category": "Category 1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

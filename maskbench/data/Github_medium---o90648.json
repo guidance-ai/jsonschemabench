@@ -1,0 +1,251 @@
+{
+  "description": "sample Github_medium/o90648.json",
+  "meta": {
+    "full_size": 2062,
+    "stripped_size": 580,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "ceph": {
+        "description": "ceph service configuration properties",
+        "properties": {
+          "cpus": {
+            "default": 1,
+            "description": "CPU shares to allocate to each service instance.",
+            "minimum": 0.5,
+            "type": "number"
+          },
+          "mem": {
+            "default": 2048,
+            "description": "Memory to allocate to each service instance.",
+            "minimum": 1024,
+            "type": "number"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem"
+        ],
+        "type": "object"
+      },
+      "networking": {
+        "description": "Ceph networking configuration properties",
+        "properties": {
+          "ceph_api_port": {
+            "default": 5000,
+            "description": "The port where the Ceph API is listening on.",
+            "type": "number"
+          },
+          "cluster_network": {
+            "default": "0.0.0.0/0",
+            "description": "Network where the Ceph nodes are allowed to live. This is usually the host network where the DC/OS nodes live. This network is assumed to be trusted. NOTE: by default, ALL networks are allowed.",
+            "type": "string"
+          },
+          "external_access": {
+            "description": "Enable access from outside the cluster through Marathon-LB.\nNOTE: this connection is unencrypted.",
+            "properties": {
+              "enable": {
+                "default": true,
+                "description": "Enable or disable creating a VIP for external access through a public node running Marathon-LB.",
+                "type": "boolean"
+              },
+              "external_access_port": {
+                "default": 5000,
+                "description": "For external access, port number to be used for clear communication in the external Marathon-LB load balancer",
+                "type": "number"
+              },
+              "virtual_host": {
+                "default": "ceph.example.org",
+                "description": "For external access, Virtual Host URL to be used in the external load balancer.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "public_network": {
+            "default": "0.0.0.0/0",
+            "description": "Network that the Ceph services are exposed on, where the Ceph clients/consumers are allowed to connect from. This is often the same as cluster_network unless Ceph is to be exposed outside the cluster. NOTE: by default, ALL networks are allowed.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cluster_network",
+          "public_network"
+        ],
+        "type": "object"
+      },
+      "service": {
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "name": {
+            "default": "ceph",
+            "description": "Name of this service instance.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "ceph": {
+          "cpus": 2,
+          "mem": 4096
+        },
+        "networking": {
+          "ceph_api_port": 5000,
+          "cluster_network": "10.0.0.0/16",
+          "public_network": "10.0.0.0/16",
+          "external_access_port": 5000,
+          "virtual_host": "ceph.example.org",
+          "external_access_enable": {
+            "enable": true
+          }
+        },
+        "service": {
+          "name": "ceph"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "0.4 is less than the minimum of 0.5\n\nFailed validating 'minimum' in schema['properties']['ceph']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to each service instance.',\n     'minimum': 0.5,\n     'type': 'number'}\n\nOn instance['ceph']['cpus']:\n    0.4",
+      "data": {
+        "ceph": {
+          "cpus": 0.4,
+          "mem": 1024
+        },
+        "networking": {
+          "ceph_api_port": 5000,
+          "cluster_network": "10.0.0.0/16",
+          "external_access": {
+            "enable": true
+          },
+          "public_network": "10.0.0.0/16",
+          "external_access_port": 5000,
+          "virtual_host": "ceph.example.org"
+        },
+        "service": {
+          "name": "ceph"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "0.4 is less than the minimum of 0.5\n\nFailed validating 'minimum' in schema['properties']['ceph']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to each service instance.',\n     'minimum': 0.5,\n     'type': 'number'}\n\nOn instance['ceph']['cpus']:\n    0.4",
+      "data": {
+        "ceph": {
+          "cpus": 0.4,
+          "mem": 4096
+        },
+        "networking": {
+          "ceph_api_port": 5000,
+          "cluster_network": "10.0.0.0/16",
+          "external_access": {
+            "enable": true
+          },
+          "public_network": "10.0.0.0/16",
+          "external_access_port": 5000,
+          "virtual_host": "ceph.example.org"
+        },
+        "service": {
+          "name": "ceph"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "ceph": {
+          "cpus": 1,
+          "mem": 2048
+        },
+        "networking": {
+          "ceph_api_port": 5000,
+          "cluster_network": "0.0.0.0/0",
+          "external_access": {
+            "enable": true,
+            "external_access_port": 5000,
+            "virtual_host": "ceph.example.org"
+          },
+          "public_network": "0.0.0.0/0"
+        },
+        "service": {
+          "name": "ceph"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "0.4 is less than the minimum of 0.5\n\nFailed validating 'minimum' in schema['properties']['ceph']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to each service instance.',\n     'minimum': 0.5,\n     'type': 'number'}\n\nOn instance['ceph']['cpus']:\n    0.4",
+      "data": {
+        "ceph": {
+          "cpus": 0.4,
+          "mem": 2048
+        },
+        "networking": {
+          "ceph_api_port": 5000,
+          "cluster_network": "0.0.0.0/0",
+          "external_access": {
+            "enable": true,
+            "external_access_port": 5000,
+            "virtual_host": "ceph.example.org"
+          },
+          "public_network": "0.0.0.0/0"
+        },
+        "service": {
+          "name": "ceph"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "1023 is less than the minimum of 1024\n\nFailed validating 'minimum' in schema['properties']['ceph']['properties']['mem']:\n    {'default': 2048,\n     'description': 'Memory to allocate to each service instance.',\n     'minimum': 1024,\n     'type': 'number'}\n\nOn instance['ceph']['mem']:\n    1023",
+      "data": {
+        "ceph": {
+          "cpus": 0.4,
+          "mem": 1023
+        },
+        "networking": {
+          "ceph_api_port": 5000,
+          "cluster_network": "0.0.0.0/0",
+          "external_access": {
+            "enable": true,
+            "external_access_port": 5000,
+            "virtual_host": "ceph.example.org"
+          },
+          "public_network": "0.0.0.0/0"
+        },
+        "service": {
+          "name": "ceph"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "description": "sample Github_easy/o64823.json",
+  "meta": {
+    "full_size": 850,
+    "stripped_size": 354,
+    "features": [
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "title": "Revenue",
+    "description": "Describes information about revenue",
+    "type": "object",
+    "properties": {
+      "scope": {
+        "description": "scope of the revenue result",
+        "enum": [
+          "company",
+          "city",
+          "station",
+          "pump"
+        ]
+      },
+      "id": {
+        "description": "unique identifier for the scope of the revenue result",
+        "type": "string"
+      },
+      "fuel": {
+        "description": "fuel type for the revenue result",
+        "type": "array",
+        "items": {
+          "description": "fuel type included in the revenue result",
+          "enum": [
+            "any",
+            "regular",
+            "premium",
+            "diesel"
+          ]
+        }
+      },
+      "from": {
+        "description": "timestamp at beginning of interval for which revenue was collected",
+        "type": "string"
+      },
+      "to": {
+        "description": "timestamp at end of interval for which revenue was collected",
+        "type": "string"
+      },
+      "amount": {
+        "description": "revenue amount being reported",
+        "type": "number"
+      }
+    },
+    "required": [
+      "scope",
+      "id",
+      "fuel",
+      "amount"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "scope": "company",
+        "id": "12345",
+        "fuel": [
+          "regular",
+          "premium",
+          "diesel"
+        ],
+        "from": "2022-01-01T00:00:00Z",
+        "to": "2022-01-01T23:59:59Z",
+        "amount": 1000.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"region\" is not one of [\"company\",\"city\",\"station\",\"pump\"]",
+      "python_error": "'region' is not one of ['company', 'city', 'station', 'pump']\n\nFailed validating 'enum' in schema['properties']['scope']:\n    {'description': 'scope of the revenue result',\n     'enum': ['company', 'city', 'station', 'pump']}\n\nOn instance['scope']:\n    'region'",
+      "data": {
+        "scope": "region",
+        "id": "12345",
+        "fuel": [
+          "regular",
+          "premium",
+          "diesel"
+        ],
+        "from": "2022-01-01T00:00:00Z",
+        "to": "2022-01-01T23:59:59Z",
+        "amount": 1000.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid\" is not one of [\"any\",\"regular\",\"premium\",\"diesel\"]",
+      "python_error": "'invalid' is not one of ['any', 'regular', 'premium', 'diesel']\n\nFailed validating 'enum' in schema['properties']['fuel']['items']:\n    {'description': 'fuel type included in the revenue result',\n     'enum': ['any', 'regular', 'premium', 'diesel']}\n\nOn instance['fuel'][3]:\n    'invalid'",
+      "data": {
+        "scope": "company",
+        "id": "12345",
+        "fuel": [
+          "regular",
+          "premium",
+          "diesel",
+          "invalid"
+        ],
+        "from": "2022-01-01T00:00:00Z",
+        "to": "2022-01-01T23:59:59Z",
+        "amount": 1000.0
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "scope": "company",
+        "id": "12345",
+        "fuel": [
+          "regular",
+          "premium"
+        ],
+        "from": "2022-01-01T00:00:00Z",
+        "to": "2022-01-31T23:59:59Z",
+        "amount": 100000.0
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ultra\" is not one of [\"any\",\"regular\",\"premium\",\"diesel\"]",
+      "python_error": "'ultra' is not one of ['any', 'regular', 'premium', 'diesel']\n\nFailed validating 'enum' in schema['properties']['fuel']['items']:\n    {'description': 'fuel type included in the revenue result',\n     'enum': ['any', 'regular', 'premium', 'diesel']}\n\nOn instance['fuel'][1]:\n    'ultra'",
+      "data": {
+        "scope": "company",
+        "id": "12345",
+        "fuel": [
+          "regular",
+          "ultra"
+        ],
+        "from": "2022-01-01T00:00:00Z",
+        "to": "2022-01-31T23:59:59Z",
+        "amount": 100000.0
+      }
+    }
+  ]
+}

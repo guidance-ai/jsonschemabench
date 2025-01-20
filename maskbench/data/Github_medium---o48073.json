@@ -1,0 +1,561 @@
+{
+  "description": "sample Github_medium/o48073.json",
+  "meta": {
+    "full_size": 1519,
+    "stripped_size": 1519,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "projects",
+      "drivers"
+    ],
+    "properties": {
+      "projects": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z\\d\\./-]+$"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "releases": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/release_id"
+            },
+            "wiki": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "wiki"
+          ]
+        }
+      },
+      "drivers": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "project_id": {
+              "type": "string"
+            },
+            "vendor": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "maintainers": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/user"
+              }
+            },
+            "wiki": {
+              "type": "string"
+            },
+            "releases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/release_id"
+              }
+            },
+            "ci": {
+              "$ref": "#/definitions/ci"
+            }
+          },
+          "required": [
+            "project_id",
+            "vendor",
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "definitions": {
+      "user": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[^,]+$"
+          },
+          "email": {
+            "type": "string",
+            "pattern": "^[a-z\\d_\\.-]+@([a-z\\d\\.-]+\\.)+[a-z]+$"
+          },
+          "irc": {
+            "type": "string",
+            "pattern": "^[\\S]+$"
+          },
+          "launchpad_id": {
+            "type": "string",
+            "pattern": "^[\\S]+$"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "ci": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[\\S]+$"
+          },
+          "success_pattern": {
+            "type": "string"
+          },
+          "failure_pattern": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "release_id": {
+        "type": "string",
+        "pattern": "^[A-Z][a-z]+$"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "projects": [
+          {
+            "id": "project-1",
+            "name": "Project 1"
+          },
+          {
+            "id": "project-2",
+            "name": "Project 2"
+          }
+        ],
+        "drivers": [
+          {
+            "project_id": "project-1",
+            "vendor": "Vendor 1",
+            "name": "Driver 1",
+            "description": "This is driver 1",
+            "maintainers": [
+              {
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "irc": "johndoe",
+                "launchpad_id": "johndoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-1",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-1",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          },
+          {
+            "project_id": "project-2",
+            "vendor": "Vendor 2",
+            "name": "Driver 2",
+            "description": "This is driver 2",
+            "maintainers": [
+              {
+                "name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "irc": "janedoe",
+                "launchpad_id": "janedoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-2",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-2",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"project-1!\" does not match \"^[a-z\\d\\./-]+$\"",
+      "python_error": "'project-1!' does not match '^[a-z\\\\d\\\\./-]+$'\n\nFailed validating 'pattern' in schema['properties']['projects']['items']['properties']['id']:\n    {'type': 'string', 'pattern': '^[a-z\\\\d\\\\./-]+$'}\n\nOn instance['projects'][0]['id']:\n    'project-1!'",
+      "data": {
+        "projects": [
+          {
+            "id": "project-1!",
+            "name": "Project 1"
+          },
+          {
+            "id": "project-2",
+            "name": "Project 2"
+          }
+        ],
+        "drivers": [
+          {
+            "project_id": "project-1",
+            "vendor": "Vendor 1",
+            "name": "Driver 1",
+            "description": "This is driver 1",
+            "maintainers": [
+              {
+                "name": "John Doe,",
+                "email": "john.doe@example.com",
+                "irc": "johndoe",
+                "launchpad_id": "johndoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-1",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-1",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          },
+          {
+            "project_id": "project-2",
+            "vendor": "Vendor 2",
+            "name": "Driver 2",
+            "description": "This is driver 2",
+            "maintainers": [
+              {
+                "name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "irc": "janedoe",
+                "launchpad_id": "janedoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-2",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-2",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"John Doe,\" does not match \"^[^,]+$\"",
+      "python_error": "'John Doe,' does not match '^[^,]+$'\n\nFailed validating 'pattern' in schema['properties']['drivers']['items']['properties']['maintainers']['items']['properties']['name']:\n    {'type': 'string', 'pattern': '^[^,]+$'}\n\nOn instance['drivers'][0]['maintainers'][0]['name']:\n    'John Doe,'",
+      "data": {
+        "projects": [
+          {
+            "id": "project-1",
+            "name": "Project 1"
+          },
+          {
+            "id": "project-2",
+            "name": "Project 2"
+          }
+        ],
+        "drivers": [
+          {
+            "project_id": "project-1",
+            "vendor": "Vendor 1",
+            "name": "Driver 1",
+            "description": "This is driver 1",
+            "maintainers": [
+              {
+                "name": "John Doe,",
+                "email": "john.doe@example.com",
+                "irc": "johndoe",
+                "launchpad_id": "johndoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-1",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-1",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          },
+          {
+            "project_id": "project-2",
+            "vendor": "Vendor 2",
+            "name": "Driver 2",
+            "description": "This is driver 2",
+            "maintainers": [
+              {
+                "name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "irc": "janedoe",
+                "launchpad_id": "janedoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-2",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-2",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"John Doe, Jr.\" does not match \"^[^,]+$\"",
+      "python_error": "'John Doe, Jr.' does not match '^[^,]+$'\n\nFailed validating 'pattern' in schema['properties']['drivers']['items']['properties']['maintainers']['items']['properties']['name']:\n    {'type': 'string', 'pattern': '^[^,]+$'}\n\nOn instance['drivers'][0]['maintainers'][0]['name']:\n    'John Doe, Jr.'",
+      "data": {
+        "projects": [
+          {
+            "id": "project-1",
+            "name": "Project 1"
+          },
+          {
+            "id": "project-2",
+            "name": "Project 2"
+          }
+        ],
+        "drivers": [
+          {
+            "project_id": "project-1",
+            "vendor": "Vendor 1",
+            "name": "Driver 1",
+            "description": "This is driver 1",
+            "maintainers": [
+              {
+                "name": "John Doe, Jr.",
+                "email": "john.doe@example.com",
+                "irc": "johndoe",
+                "launchpad_id": "johndoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-1",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-1",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          },
+          {
+            "project_id": "project-2",
+            "vendor": "Vendor 2",
+            "name": "Driver 2",
+            "description": "This is driver 2",
+            "maintainers": [
+              {
+                "name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "irc": "janedoe",
+                "launchpad_id": "janedoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-2",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-2",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Project-1\" does not match \"^[a-z\\d\\./-]+$\"",
+      "python_error": "'Project-1' does not match '^[a-z\\\\d\\\\./-]+$'\n\nFailed validating 'pattern' in schema['properties']['projects']['items']['properties']['id']:\n    {'type': 'string', 'pattern': '^[a-z\\\\d\\\\./-]+$'}\n\nOn instance['projects'][0]['id']:\n    'Project-1'",
+      "data": {
+        "projects": [
+          {
+            "id": "Project-1",
+            "name": "Project 1"
+          },
+          {
+            "id": "project-2",
+            "name": "Project 2"
+          }
+        ],
+        "drivers": [
+          {
+            "project_id": "project-1",
+            "vendor": "Vendor 1",
+            "name": "Driver 1",
+            "description": "This is driver 1",
+            "maintainers": [
+              {
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "irc": "johndoe",
+                "launchpad_id": "johndoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-1",
+            "releases": [
+              "release-1"
+            ],
+            "ci": {
+              "id": "ci-1",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          },
+          {
+            "project_id": "project-2",
+            "vendor": "Vendor 2",
+            "name": "Driver 2",
+            "description": "This is driver 2",
+            "maintainers": [
+              {
+                "name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "irc": "janedoe",
+                "launchpad_id": "janedoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-2",
+            "releases": [
+              "Abc"
+            ],
+            "ci": {
+              "id": "ci-2",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"name\" is a required property",
+      "python_error": "'name' is a required property\n\nFailed validating 'required' in schema['properties']['drivers']['items']['properties']['maintainers']['items']:\n    {'type': 'object',\n     'properties': {'name': {'type': 'string', 'pattern': '^[^,]+$'},\n                    'email': {'type': 'string',\n                              'pattern': '^[a-z\\\\d_\\\\.-]+@([a-z\\\\d\\\\.-]+\\\\.)+[a-z]+$'},\n                    'irc': {'type': 'string', 'pattern': '^[\\\\S]+$'},\n                    'launchpad_id': {'type': 'string',\n                                     'pattern': '^[\\\\S]+$'}},\n     'required': ['name'],\n     'additionalProperties': False}\n\nOn instance['drivers'][0]['maintainers'][0]:\n    {'email': 'john.doe@example.com',\n     'irc': 'johndoe',\n     'launchpad_id': 'johndoe'}",
+      "data": {
+        "projects": [
+          {
+            "id": "project-1",
+            "name": "Project 1"
+          },
+          {
+            "id": "project-2",
+            "name": "Project 2"
+          }
+        ],
+        "drivers": [
+          {
+            "project_id": "project-1",
+            "vendor": "Vendor 1",
+            "name": "Driver 1",
+            "description": "This is driver 1",
+            "maintainers": [
+              {
+                "email": "john.doe@example.com",
+                "irc": "johndoe",
+                "launchpad_id": "johndoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-1",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-1",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          },
+          {
+            "project_id": "project-2",
+            "vendor": "Vendor 2",
+            "name": "Driver 2",
+            "description": "This is driver 2",
+            "maintainers": [
+              {
+                "name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "irc": "janedoe",
+                "launchpad_id": "janedoe"
+              }
+            ],
+            "wiki": "https://example.com/wiki/driver-2",
+            "releases": [
+              "Release"
+            ],
+            "ci": {
+              "id": "ci-2",
+              "success_pattern": "Success",
+              "failure_pattern": "Failure"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "description": "sample Github_easy/o25975.json",
+  "meta": {
+    "full_size": 421,
+    "stripped_size": 421,
+    "features": [
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "type": "object",
+    "required": [
+      "FieldWithAnonType"
+    ],
+    "properties": {
+      "FieldWithAnonType": {
+        "type": "object",
+        "required": [
+          "SubfieldA",
+          "SubfieldB",
+          "SubfieldC"
+        ],
+        "properties": {
+          "SubfieldA": {
+            "type": "number"
+          },
+          "SubfieldB": {
+            "type": [
+              "string",
+              "number"
+            ]
+          },
+          "SubfieldC": {
+            "type": "object",
+            "required": [
+              "SubsubfieldA"
+            ],
+            "properties": {
+              "SubsubfieldA": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "FieldWithAnonType": {
+          "SubfieldA": 10,
+          "SubfieldB": "Hello",
+          "SubfieldC": {
+            "SubsubfieldA": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"number\", \"string\"",
+      "python_error": "True is not of type 'string', 'number'\n\nFailed validating 'type' in schema['properties']['FieldWithAnonType']['properties']['SubfieldB']:\n    {'type': ['string', 'number']}\n\nOn instance['FieldWithAnonType']['SubfieldB']:\n    True",
+      "data": {
+        "FieldWithAnonType": {
+          "SubfieldA": 10,
+          "SubfieldB": true,
+          "SubfieldC": {
+            "SubsubfieldA": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"10\" is not of type \"number\"",
+      "python_error": "'10' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['FieldWithAnonType']['properties']['SubfieldA']:\n    {'type': 'number'}\n\nOn instance['FieldWithAnonType']['SubfieldA']:\n    '10'",
+      "data": {
+        "FieldWithAnonType": {
+          "SubfieldA": "10",
+          "SubfieldB": "Hello",
+          "SubfieldC": {
+            "SubsubfieldA": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"3\" is not of type \"number\"",
+      "python_error": "'3' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['FieldWithAnonType']['properties']['SubfieldC']['properties']['SubsubfieldA']['items']:\n    {'type': 'number'}\n\nOn instance['FieldWithAnonType']['SubfieldC']['SubsubfieldA'][2]:\n    '3'",
+      "data": {
+        "FieldWithAnonType": {
+          "SubfieldA": 10,
+          "SubfieldB": "Hello",
+          "SubfieldC": {
+            "SubsubfieldA": [
+              1,
+              2,
+              "3"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of types \"number\", \"string\"",
+      "python_error": "None is not of type 'string', 'number'\n\nFailed validating 'type' in schema['properties']['FieldWithAnonType']['properties']['SubfieldB']:\n    {'type': ['string', 'number']}\n\nOn instance['FieldWithAnonType']['SubfieldB']:\n    None",
+      "data": {
+        "FieldWithAnonType": {
+          "SubfieldA": 10,
+          "SubfieldB": null,
+          "SubfieldC": {
+            "SubsubfieldA": [
+              1,
+              2,
+              "Invalid number"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

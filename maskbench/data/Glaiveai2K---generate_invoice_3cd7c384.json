@@ -1,0 +1,169 @@
+{
+  "description": "sample Glaiveai2K/generate_invoice_3cd7c384.json",
+  "meta": {
+    "full_size": 776,
+    "stripped_size": 454,
+    "features": [
+      "format",
+      "format:email",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "customer_details": {
+        "properties": {
+          "address": {
+            "description": "The address of the customer",
+            "type": "string"
+          },
+          "email": {
+            "description": "The email address of the customer",
+            "format": "email",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the customer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ],
+        "type": "object"
+      },
+      "items_purchased": {
+        "description": "The items purchased by the customer",
+        "items": {
+          "properties": {
+            "name": {
+              "description": "The name of the item",
+              "type": "string"
+            },
+            "price": {
+              "description": "The price per unit of the item",
+              "type": "number"
+            },
+            "quantity": {
+              "description": "The quantity of the item purchased",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "name",
+            "quantity",
+            "price"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "customer_details",
+      "items_purchased"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "customer_details": {
+          "address": "123 Main St, Anytown, USA",
+          "email": "john.doe@example.com",
+          "name": "John Doe"
+        },
+        "items_purchased": [
+          {
+            "name": "Apple Watch",
+            "price": 399.99,
+            "quantity": 1
+          },
+          {
+            "name": "Samsung TV",
+            "price": 1299.99,
+            "quantity": 1
+          },
+          {
+            "name": "Nike Shoes",
+            "price": 99.99,
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not an email\" is not a \"email\"",
+      "python_error": "'not an email' is not a 'email'\n\nFailed validating 'format' in schema['properties']['customer_details']['properties']['email']:\n    {'description': 'The email address of the customer',\n     'format': 'email',\n     'type': 'string'}\n\nOn instance['customer_details']['email']:\n    'not an email'",
+      "data": {
+        "customer_details": {
+          "address": "123 Main St, Anytown, USA",
+          "email": "not an email",
+          "name": "John Doe"
+        },
+        "items_purchased": [
+          {
+            "name": "Apple Watch",
+            "price": 399.99,
+            "quantity": 1
+          },
+          {
+            "name": "Samsung TV",
+            "price": 1299.99,
+            "quantity": 1
+          },
+          {
+            "name": "Nike Shoes",
+            "price": 99.99,
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid_email\" is not a \"email\"",
+      "python_error": "'invalid_email' is not a 'email'\n\nFailed validating 'format' in schema['properties']['customer_details']['properties']['email']:\n    {'description': 'The email address of the customer',\n     'format': 'email',\n     'type': 'string'}\n\nOn instance['customer_details']['email']:\n    'invalid_email'",
+      "data": {
+        "customer_details": {
+          "address": "123 Main St, Anytown, USA",
+          "email": "invalid_email",
+          "name": "John Doe"
+        },
+        "items_purchased": [
+          {
+            "name": "Apple Watch",
+            "price": 399.99,
+            "quantity": 1
+          },
+          {
+            "name": "Samsung TV",
+            "price": 1299.99,
+            "quantity": 1
+          },
+          {
+            "name": "Nike Shoes",
+            "price": "99.99",
+            "quantity": 2
+          }
+        ]
+      }
+    }
+  ]
+}

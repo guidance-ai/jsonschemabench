@@ -1,0 +1,522 @@
+{
+  "description": "sample JsonSchemaStore/pubspec.json",
+  "meta": {
+    "full_size": 3386,
+    "stripped_size": 2117,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "format",
+      "format:uri",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/pubspec",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "version": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+\\.\\d+(?:[+-]\\S+)?$"
+      },
+      "versionConstraint": {
+        "description": "Version range of the package or SDK to use",
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Allows any version of the package. This is not recommended for performance reasons",
+            "enum": [
+              "any",
+              ""
+            ]
+          },
+          {
+            "$ref": "#/definitions/version"
+          },
+          {
+            "type": "string",
+            "examples": [
+              ">1.0.0 <2.3.0-beta",
+              ">=1.0.0-pre.1 <=3.0.0"
+            ],
+            "pattern": "^(?:(?:>=|>|<=|<)\\d+\\.\\d+\\.\\d+(?:[+-]\\S+)?\\s*)+$"
+          },
+          {
+            "type": "string",
+            "examples": [
+              "^1.0.0"
+            ],
+            "pattern": "^\\^\\d+\\.\\d+\\.\\d+(?:[+-]\\S+)?$"
+          }
+        ]
+      },
+      "dependency": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/versionConstraint",
+            "$comment": "Syntax in yaml: `foo: ^1.2.3`"
+          },
+          {
+            "description": "Default dependency, matches any version of the package",
+            "type": "null",
+            "$comment": "Syntax in yaml: `foo:` or `foo: null`"
+          },
+          {
+            "title": "SDK dependency",
+            "type": "object",
+            "properties": {
+              "sdk": {
+                "description": "The SDK which contains this package",
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/versionConstraint"
+              }
+            },
+            "required": [
+              "sdk"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "title": "Hosted dependency",
+            "type": "object",
+            "properties": {
+              "hosted": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "description": "URL of the package server hosting this package",
+                    "format": "uri"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "description": "The package server hosting this package",
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  }
+                ]
+              },
+              "version": {
+                "$ref": "#/definitions/versionConstraint"
+              }
+            },
+            "required": [
+              "hosted"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "description": "Git dependency",
+            "type": "object",
+            "properties": {
+              "git": {
+                "$comment": "Can either be a string (uri) or an object with ref etc.",
+                "oneOf": [
+                  {
+                    "description": "URI of the repository hosting this package",
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "URI of the repository hosting this package"
+                      },
+                      "path": {
+                        "type": "string",
+                        "description": "Path of this package relative to the Git repo's root"
+                      },
+                      "ref": {
+                        "type": "string",
+                        "description": "The branch, tag, or anything else Git allows to identify a commit."
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "git"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "description": "Path dependency",
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "dependencies": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/definitions/dependency"
+        }
+      }
+    },
+    "description": "Dart Pubspec file",
+    "properties": {
+      "name": {
+        "description": "The name of this package. The name is how other packages refer to yours, should you publish it.",
+        "type": "string"
+      },
+      "version": {
+        "$ref": "#/definitions/version"
+      },
+      "description": {
+        "type": "string"
+      },
+      "authors": {
+        "type": "array",
+        "deprecated": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "homepage": {
+        "type": "string",
+        "format": "uri"
+      },
+      "repository": {
+        "type": "string",
+        "format": "uri"
+      },
+      "issue_tracker": {
+        "type": "string",
+        "format": "uri"
+      },
+      "documentation": {
+        "type": "string",
+        "format": "uri"
+      },
+      "executables": {
+        "type": "object"
+      },
+      "publish_to": {
+        "type": "string"
+      },
+      "environment": {
+        "type": "object",
+        "examples": [
+          {
+            "sdk": ">=1.19.0 <3.0.0",
+            "flutter": "^0.1.2"
+          }
+        ],
+        "additionalProperties": {
+          "$ref": "#/definitions/versionConstraint"
+        }
+      },
+      "dependencies": {
+        "$ref": "#/definitions/dependencies"
+      },
+      "dev_dependencies": {
+        "$ref": "#/definitions/dependencies"
+      },
+      "dependency_overrides": {
+        "$ref": "#/definitions/dependencies"
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "title": "Pubspec",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json.schemastore.org/pubspec",
+        "name": "example_package",
+        "version": "1.0.0",
+        "description": "An example package",
+        "homepage": "https://example.com",
+        "repository": "https://github.com/example/example_package",
+        "issue_tracker": "https://github.com/example/example_package/issues",
+        "documentation": "https://example.com/docs",
+        "executables": {
+          "example": "bin/example.dart"
+        },
+        "publish_to": "none",
+        "environment": {
+          "sdk": ">=2.12.0 <3.0.0",
+          "flutter": "^2.10.0"
+        },
+        "dependencies": {
+          "flutter": "^2.10.0",
+          "path_provider": "^2.0.1",
+          "path": "^1.8.0",
+          "shared_preferences": "^2.0.6",
+          "intl": "^0.17.0",
+          "flutter_localizations": {
+            "sdk": "flutter"
+          },
+          "example_dependency": {
+            "hosted": {
+              "name": "example_dependency",
+              "url": "https://example.com/packages"
+            },
+            "version": "^1.0.0"
+          },
+          "example_git_dependency": {
+            "git": {
+              "url": "https://github.com/example/example_git_dependency.git",
+              "path": "example_git_dependency",
+              "ref": "main"
+            }
+          },
+          "example_path_dependency": {
+            "path": "../example_path_dependency"
+          }
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "build_runner": "^2.1.4",
+          "flutter_lints": "^1.0.0"
+        },
+        "dependency_overrides": {
+          "example_dependency": "^1.0.0"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "example_package",
+        "version": "1.0.0",
+        "description": "An example package",
+        "homepage": "https://example.com",
+        "repository": "https://github.com/example/example_package",
+        "issue_tracker": "https://github.com/example/example_package/issues",
+        "documentation": "https://example.com/docs",
+        "executables": {
+          "example": "bin/example.dart"
+        },
+        "publish_to": "none",
+        "environment": {
+          "sdk": ">=2.12.0 <3.0.0",
+          "flutter": "^2.10.0"
+        },
+        "dependencies": {
+          "flutter": "^2.10.0",
+          "path_provider": "^2.0.0",
+          "path_provider_android": "^2.0.0",
+          "path_provider_ios": "^2.0.0",
+          "path_provider_linux": "^2.0.0",
+          "path_provider_macos": "^2.0.0",
+          "path_provider_windows": "^2.0.0",
+          "shared_preferences": "^2.0.0",
+          "shared_preferences_android": "^2.0.0",
+          "shared_preferences_ios": "^2.0.0",
+          "shared_preferences_linux": "^2.0.0",
+          "shared_preferences_macos": "^2.0.0",
+          "shared_preferences_web": "^2.0.0",
+          "shared_preferences_windows": "^2.0.0"
+        },
+        "dev_dependencies": {
+          "flutter_test": "^0.0.0",
+          "flutter_driver": "^0.9.0",
+          "test": "^1.16.0"
+        },
+        "dependency_overrides": {
+          "path_provider": "^2.0.0",
+          "shared_preferences": "^2.0.0"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1.0\" does not match \"^\\d+\\.\\d+\\.\\d+(?:[+-]\\S+)?$\"",
+      "python_error": "'1.0' does not match '^\\\\d+\\\\.\\\\d+\\\\.\\\\d+(?:[+-]\\\\S+)?$'\n\nFailed validating 'pattern' in schema['properties']['version']:\n    {'type': 'string', 'pattern': '^\\\\d+\\\\.\\\\d+\\\\.\\\\d+(?:[+-]\\\\S+)?$'}\n\nOn instance['version']:\n    '1.0'",
+      "data": {
+        "name": "example_package",
+        "version": "1.0",
+        "description": "An example package",
+        "homepage": "https://example.com",
+        "repository": "https://github.com/example/example_package",
+        "issue_tracker": "https://github.com/example/example_package/issues",
+        "documentation": "https://example.com/docs",
+        "executables": {
+          "example": "bin/example.dart"
+        },
+        "publish_to": "none",
+        "environment": {
+          "sdk": ">=2.12.0 <3.0.0",
+          "flutter": "^2.10.0"
+        },
+        "dependencies": {
+          "flutter": "^2.10.0",
+          "path_provider": "^2.0.0",
+          "path_provider_android": "^2.0.0",
+          "path_provider_ios": "^2.0.0",
+          "path_provider_linux": "^2.0.0",
+          "path_provider_macos": "^2.0.0",
+          "path_provider_windows": "^2.0.0",
+          "shared_preferences": "^2.0.0",
+          "shared_preferences_android": "^2.0.0",
+          "shared_preferences_ios": "^2.0.0",
+          "shared_preferences_linux": "^2.0.0",
+          "shared_preferences_macos": "^2.0.0",
+          "shared_preferences_web": "^2.0.0",
+          "shared_preferences_windows": "^2.0.0"
+        },
+        "dev_dependencies": {
+          "flutter_test": "^0.0.0",
+          "flutter_driver": "^0.9.0",
+          "test": "^1.16.0"
+        },
+        "dependency_overrides": {
+          "path_provider": "^2.0.0",
+          "shared_preferences": "^2.0.0"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid_url\" is not a \"uri\"",
+      "python_error": "'invalid_url' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['homepage']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['homepage']:\n    'invalid_url'",
+      "data": {
+        "name": "example_package",
+        "version": "1.0.0",
+        "description": "An example package",
+        "homepage": "invalid_url",
+        "repository": "https://github.com/example/example_package",
+        "issue_tracker": "https://github.com/example/example_package/issues",
+        "documentation": "https://example.com/docs",
+        "executables": {
+          "example": "bin/example.dart"
+        },
+        "publish_to": "none",
+        "environment": {
+          "sdk": ">=2.12.0 <3.0.0",
+          "flutter": "^2.10.0"
+        },
+        "dependencies": {
+          "flutter": "^2.10.0",
+          "path_provider": "^2.0.0",
+          "path_provider_android": "^2.0.0",
+          "path_provider_ios": "^2.0.0",
+          "path_provider_linux": "^2.0.0",
+          "path_provider_macos": "^2.0.0",
+          "path_provider_windows": "^2.0.0",
+          "shared_preferences": "^2.0.0",
+          "shared_preferences_android": "^2.0.0",
+          "shared_preferences_ios": "^2.0.0",
+          "shared_preferences_linux": "^2.0.0",
+          "shared_preferences_macos": "^2.0.0",
+          "shared_preferences_web": "^2.0.0",
+          "shared_preferences_windows": "^2.0.0"
+        },
+        "dev_dependencies": {
+          "flutter_test": "^0.0.0",
+          "flutter_driver": "^0.9.0",
+          "test": "^1.16.0"
+        },
+        "dependency_overrides": {
+          "path_provider": "^2.0.0",
+          "shared_preferences": "^2.0.0"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "\"invalid_version\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'invalid_version' is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['environment']['additionalProperties']:\n    {'description': 'Version range of the package or SDK to use',\n     'oneOf': [{'type': 'string',\n                'description': 'Allows any version of the package. This is '\n                               'not recommended for performance reasons',\n                'enum': ['any', '']},\n               {'$ref': '#/definitions/version'},\n               {'type': 'string',\n                'examples': ['>1.0.0 <2.3.0-beta', '>=1.0.0-pre.1 <=3.0.0'],\n                'pattern': '^(?:(?:>=|>|<=|<)\\\\d+\\\\.\\\\d+\\\\.\\\\d+(?:[+-]\\\\S+)?\\\\s*)+$'},\n               {'type': 'string',\n                'examples': ['^1.0.0'],\n                'pattern': '^\\\\^\\\\d+\\\\.\\\\d+\\\\.\\\\d+(?:[+-]\\\\S+)?$'}]}\n\nOn instance['environment']['flutter']:\n    'invalid_version'",
+      "data": {
+        "name": "example_package",
+        "version": "1.0.0",
+        "description": "An example package",
+        "homepage": "https://example.com",
+        "repository": "https://github.com/example/example_package",
+        "issue_tracker": "https://github.com/example/example_package/issues",
+        "documentation": "https://example.com/docs",
+        "executables": {
+          "example": "bin/example.dart"
+        },
+        "publish_to": "none",
+        "environment": {
+          "sdk": ">=2.12.0 <3.0.0",
+          "flutter": "invalid_version"
+        },
+        "dependencies": {
+          "flutter": "^2.10.0",
+          "path_provider": "^2.0.0",
+          "path_provider_android": "^2.0.0",
+          "path_provider_ios": "^2.0.0",
+          "path_provider_linux": "^2.0.0",
+          "path_provider_macos": "^2.0.0",
+          "path_provider_windows": "^2.0.0",
+          "shared_preferences": "^2.0.0",
+          "shared_preferences_android": "^2.0.0",
+          "shared_preferences_ios": "^2.0.0",
+          "shared_preferences_linux": "^2.0.0",
+          "shared_preferences_macos": "^2.0.0",
+          "shared_preferences_web": "^2.0.0",
+          "shared_preferences_windows": "^2.0.0",
+          "git_dependency": {
+            "git": {
+              "url": "https://github.com/example/example_package",
+              "path": "path/to/package",
+              "ref": "branch_name",
+              "invalid_key": "invalid_value"
+            }
+          }
+        },
+        "dev_dependencies": {
+          "flutter_test": "^0.0.0",
+          "flutter_driver": "^0.9.0",
+          "test": "^1.16.0"
+        },
+        "dependency_overrides": {
+          "path_provider": "^2.0.0",
+          "shared_preferences": "^2.0.0"
+        }
+      }
+    }
+  ]
+}

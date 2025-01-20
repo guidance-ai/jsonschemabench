@@ -1,0 +1,242 @@
+{
+  "description": "sample Github_medium/o68694.json",
+  "meta": {
+    "full_size": 2357,
+    "stripped_size": 1060,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "additionalProperties",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "properties",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "description": "A list of mappings from Puli paths to filesystem paths or other Puli paths.",
+    "definitions": {
+      "relativePath": {
+        "description": "A filesystem path relative to the base directory of the repository.",
+        "type": "string",
+        "pattern": "^([a-zA-Z][^:]|[^/@a-zA-Z])[^/]*(/[^/]+)*$"
+      },
+      "absolutePath": {
+        "description": "An absolute filesystem path.",
+        "type": "string",
+        "pattern": "^([a-zA-Z]:)?/(([^/]+/)*[^/]+)?$"
+      },
+      "virtualDirectory": {
+        "description": "A directory in the Puli repository that does not correspond to a real filesystem directory.",
+        "type": "null"
+      },
+      "repositoryLink": {
+        "description": "A link to another resource in the Puli repository.",
+        "type": "string",
+        "pattern": "^@/(([^/]+/)*[^/]+)?$"
+      },
+      "singleReference": {
+        "description": "A reference to a single file, directory, link or virtual directory.",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/relativePath"
+          },
+          {
+            "$ref": "#/definitions/absolutePath"
+          },
+          {
+            "$ref": "#/definitions/repositoryLink"
+          },
+          {
+            "$ref": "#/definitions/virtualDirectory"
+          }
+        ]
+      },
+      "combinedReference": {
+        "description": "A list of references. The first reference has highest priority. Directory contents are merged.",
+        "type": "array",
+        "minItems": 2,
+        "_uniqueItems": true,
+        "items": {
+          "$ref": "#/definitions/singleReference"
+        }
+      }
+    },
+    "patternProperties": {
+      "^/(([^/]+/)*[^/]+)?$": {
+        "description": "A mapping from a Puli path to one or more path references.",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/singleReference"
+          },
+          {
+            "$ref": "#/definitions/combinedReference"
+          }
+        ]
+      }
+    },
+    "properties": {
+      "_order": {
+        "description": "Overrides the default resolution order. By default, mappings for longer paths (e.g. /a/b) have precedence over mapping for shorter paths (e.g. /a). This can be overridden here.",
+        "type": "object",
+        "patternProperties": {
+          "^/(([^/]+/)*[^/]+)?$": {
+            "description": "Overrides the resolution order for a mapped Puli path. The repository will check the path mappings referred to by the entries of the array in the given order.",
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "description": "Contains the path of a path mapping and the number of references to check of that path mapping.",
+              "type": "object",
+              "properties": {
+                "path": {
+                  "description": "The Puli path of a mapping in this file.",
+                  "type": "string",
+                  "pattern": "^/(([^/]+/)*[^/]+)?$"
+                },
+                "references": {
+                  "description": "The number of references of the mapping to check.",
+                  "type": "integer",
+                  "min": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "/path/to/resource": "/filesystem/path/to/resource",
+        "/path/to/another/resource": [
+          "/filesystem/path/to/another/resource",
+          "/filesystem/path/to/another/resource/alternative"
+        ],
+        "/path/to/repository/resource": "@/path/to/repository/resource",
+        "/path/to/virtual/directory": null,
+        "_order": {
+          "/path/to/resource": [
+            {
+              "path": "/path/to/resource",
+              "references": 1
+            },
+            {
+              "path": "/path/to/another/resource",
+              "references": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "/": "/var/www",
+        "/images": "/var/www/images",
+        "/images/logo": "/var/www/images/logo.png",
+        "/images/logo-alt": [
+          "/var/www/images/logo-alt.png",
+          "/var/www/images/logo-alt-2.png"
+        ],
+        "/styles": "@/styles",
+        "/styles/css": "/var/www/styles/css",
+        "/styles/css/main.css": null,
+        "_order": {
+          "/images": [
+            {
+              "path": "/images/logo-alt",
+              "references": 2
+            },
+            {
+              "path": "/images/logo",
+              "references": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[\"/var/www/images/logo-alt.png\"] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "['/var/www/images/logo-alt.png'] is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema[0]:\n    {'description': 'A reference to a single file, directory, link or '\n                    'virtual directory.',\n     'oneOf': [{'$ref': '#/definitions/relativePath'},\n               {'$ref': '#/definitions/absolutePath'},\n               {'$ref': '#/definitions/repositoryLink'},\n               {'$ref': '#/definitions/virtualDirectory'}]}\n\nOn instance:\n    ['/var/www/images/logo-alt.png']",
+      "data": {
+        "/": "/var/www",
+        "/images": "/var/www/images",
+        "/images/logo": "/var/www/images/logo.png",
+        "/images/logo-alt": [
+          "/var/www/images/logo-alt.png"
+        ],
+        "/styles": "@/styles",
+        "/styles/css": "/var/www/styles/css",
+        "/styles/css/main.css": null,
+        "_order": {
+          "/images": [
+            {
+              "path": "/images/logo-alt",
+              "references": 2
+            },
+            {
+              "path": "/images/logo",
+              "references": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"path\":\"/styles/css/main.css\",\"references\":1} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'path': '/styles/css/main.css', 'references': 1} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema[0]:\n    {'description': 'A reference to a single file, directory, link or '\n                    'virtual directory.',\n     'oneOf': [{'$ref': '#/definitions/relativePath'},\n               {'$ref': '#/definitions/absolutePath'},\n               {'$ref': '#/definitions/repositoryLink'},\n               {'$ref': '#/definitions/virtualDirectory'}]}\n\nOn instance:\n    {'path': '/styles/css/main.css', 'references': 1}",
+      "data": {
+        "/": "/var/www",
+        "/images": "/var/www/images",
+        "/images/logo": "/var/www/images/logo.png",
+        "/images/logo-alt": [
+          "/var/www/images/logo-alt.png",
+          "/var/www/images/logo-alt-2.png"
+        ],
+        "/styles": "@/styles",
+        "/styles/css": "/var/www/styles/css",
+        "/styles/css/main.css": null,
+        "/styles/css/main2.css": {
+          "path": "/styles/css/main.css",
+          "references": 1
+        },
+        "_order": {
+          "/images": [
+            {
+              "path": "/images/logo-alt",
+              "references": 2
+            },
+            {
+              "path": "/images/logo",
+              "references": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

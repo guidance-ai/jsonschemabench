@@ -1,0 +1,175 @@
+{
+  "description": "sample Github_medium/o12283.json",
+  "meta": {
+    "full_size": 1363,
+    "stripped_size": 565,
+    "features": [
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Mapping",
+    "description": "A mapping used by Glue to extract findings from a security tool report",
+    "type": "object",
+    "required": [
+      "task_name",
+      "app_name",
+      "mappings"
+    ],
+    "properties": {
+      "task_name": {
+        "type": "string",
+        "description": "The name of the task (tool) the produce those findings"
+      },
+      "app_name": {
+        "type": "string",
+        "description": "Path to the property in the report file that contains the target app name"
+      },
+      "mappings": {
+        "type": "array",
+        "description": "An array of mappings",
+        "items": {
+          "type": "object",
+          "required": [
+            "key"
+          ],
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "The key in the JSON report to an array that contains findings"
+            },
+            "properties": {
+              "type": "object",
+              "description": "The mapping between the items in the array and Glue's findings",
+              "required": [
+                "description",
+                "detail",
+                "source",
+                "severity",
+                "fingerprint"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "The path on the array item to extract the description"
+                },
+                "detail": {
+                  "type": "string",
+                  "description": "The path on the array item to extract the details"
+                },
+                "source": {
+                  "type": "string",
+                  "description": "The path on the array item to extract the source"
+                },
+                "severity": {
+                  "type": "string",
+                  "description": "The path on the array item to extract the severity"
+                },
+                "fingerprint": {
+                  "type": "string",
+                  "description": "The path on the array item to extract the fingerprint"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "task_name": "Security Scanner",
+        "app_name": "target_app_name",
+        "mappings": [
+          {
+            "key": "findings",
+            "properties": {
+              "description": "description.path",
+              "detail": "detail.path",
+              "source": "source.path",
+              "severity": "severity.path",
+              "fingerprint": "fingerprint.path"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "5 is not of type \"string\"",
+      "python_error": "5 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['mappings']['items']['properties']['properties']['properties']['severity']:\n    {'type': 'string',\n     'description': 'The path on the array item to extract the severity'}\n\nOn instance['mappings'][0]['properties']['severity']:\n    5",
+      "data": {
+        "task_name": "Security Scanner",
+        "app_name": "target_app_name",
+        "mappings": [
+          {
+            "key": "findings",
+            "properties": {
+              "description": "description.path",
+              "detail": "detail.path",
+              "source": "source.path",
+              "severity": 5,
+              "fingerprint": "fingerprint.path"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "task_name": "Security Scanner",
+        "app_name": "app_name",
+        "mappings": [
+          {
+            "key": "findings",
+            "properties": {
+              "description": "description",
+              "detail": "detail",
+              "source": "source",
+              "severity": "severity",
+              "fingerprint": "fingerprint"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['task_name']:\n    {'type': 'string',\n     'description': 'The name of the task (tool) the produce those '\n                    'findings'}\n\nOn instance['task_name']:\n    12345",
+      "data": {
+        "task_name": 12345,
+        "app_name": "app_name",
+        "mappings": [
+          {
+            "key": "findings",
+            "properties": {
+              "description": "description",
+              "detail": "detail",
+              "source": null,
+              "severity": "severity",
+              "fingerprint": "fingerprint"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

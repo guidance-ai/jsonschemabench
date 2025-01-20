@@ -1,0 +1,167 @@
+{
+  "description": "sample Github_medium/o9862.json",
+  "meta": {
+    "full_size": 609,
+    "stripped_size": 609,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "level": {
+        "type": "string",
+        "enum": [
+          "info",
+          "warning",
+          "error",
+          "critical"
+        ]
+      },
+      "state": {
+        "type": "string",
+        "enum": [
+          "new",
+          "acknowledged",
+          "resolved"
+        ]
+      },
+      "subject": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "message": {
+        "type": "string",
+        "maxLength": 32767
+      },
+      "data": {},
+      "deviceId": {
+        "type": "string",
+        "pattern": "^[A-Fa-f\\d]{24}$"
+      },
+      "eventTags": {
+        "type": "object",
+        "patternProperties": {
+          "^[0-9a-zA-Z_-]{1,255}$": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "level",
+      "subject"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "level": "error",
+        "state": "new",
+        "subject": "Device malfunction",
+        "message": "Device 123 has stopped responding.",
+        "data": {},
+        "deviceId": "1234567890abcdef12345678",
+        "eventTags": {
+          "device-type": "sensor",
+          "location": "Warehouse A"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "level": "error",
+        "state": "new",
+        "subject": "Device malfunction",
+        "message": "Device 123 has stopped responding.",
+        "data": {},
+        "deviceId": "1234567890abcdef12345678",
+        "eventTags": {
+          "device-type": "sensor",
+          "location": "New York"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!@#$%^&*()' was unexpected)",
+      "python_error": "'!@#$%^&*()' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema['properties']['eventTags']:\n    {'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': 'string',\n                                                      'minLength': 1,\n                                                      'maxLength': 255}},\n     'additionalProperties': False}\n\nOn instance['eventTags']:\n    {'device-type': 'sensor',\n     'location': 'New York',\n     '!@#$%^&*()': 'Invalid tag'}",
+      "data": {
+        "level": "error",
+        "state": "new",
+        "subject": "Device malfunction",
+        "message": "Device 123 has stopped responding.",
+        "data": {},
+        "deviceId": "1234567890abcdef12345678",
+        "eventTags": {
+          "device-type": "sensor",
+          "location": "New York",
+          "!@#$%^&*()": "Invalid tag"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1234567890abcdef123456789\" does not match \"^[A-Fa-f\\d]{24}$\"",
+      "python_error": "'1234567890abcdef123456789' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['deviceId']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['deviceId']:\n    '1234567890abcdef123456789'",
+      "data": {
+        "level": "error",
+        "state": "new",
+        "subject": "Device malfunction",
+        "message": "Device 123 has stopped responding.",
+        "data": {},
+        "deviceId": "1234567890abcdef123456789",
+        "eventTags": {
+          "device-type": "sensor",
+          "location": "New York"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['subject']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['subject']:\n    ''",
+      "data": {
+        "level": "error",
+        "state": "new",
+        "subject": "",
+        "message": "Device 123 has stopped responding.",
+        "data": {},
+        "deviceId": "1234567890abcdef12345678",
+        "eventTags": {
+          "device-type": "sensor",
+          "location": "New York"
+        }
+      }
+    }
+  ]
+}

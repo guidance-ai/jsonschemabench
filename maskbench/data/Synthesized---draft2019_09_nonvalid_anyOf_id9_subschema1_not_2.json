@@ -1,0 +1,101 @@
+{
+  "description": "sample Synthesized/draft2019_09_nonvalid_anyOf_id9_subschema1_not_2.json",
+  "meta": {
+    "full_size": 193,
+    "stripped_size": 193,
+    "features": [
+      "allOf",
+      "anyOf",
+      "enum",
+      "not"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "allOf": [
+      {
+        "enum": [
+          {
+            "bar": 2,
+            "foo": "baz"
+          }
+        ]
+      },
+      {
+        "not": {
+          "not": {
+            "anyOf": [
+              {
+                "properties": {
+                  "bar": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "bar"
+                ]
+              },
+              {
+                "properties": {
+                  "foo": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "foo"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "bar": 2,
+        "foo": "baz"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"bar\":3,\"foo\":\"baz\",\"extraKey\":1} is not one of [{\"bar\":2,\"foo\":\"baz\"}]",
+      "python_error": "{'bar': 3, 'foo': 'baz', 'extraKey': 1} is not one of [{'bar': 2, 'foo': 'baz'}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 2, 'foo': 'baz'}]}\n\nOn instance:\n    {'bar': 3, 'foo': 'baz', 'extraKey': 1}",
+      "data": {
+        "bar": 3,
+        "foo": "baz",
+        "extraKey": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"bar\":2,\"foo\":\"qux\",\"extra\":true} is not one of [{\"bar\":2,\"foo\":\"baz\"}]",
+      "python_error": "{'bar': 2, 'foo': 'qux', 'extra': True} is not one of [{'bar': 2, 'foo': 'baz'}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 2, 'foo': 'baz'}]}\n\nOn instance:\n    {'bar': 2, 'foo': 'qux', 'extra': True}",
+      "data": {
+        "bar": 2,
+        "foo": "qux",
+        "extra": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"foo\":\"baz\"} is not one of [{\"bar\":2,\"foo\":\"baz\"}]",
+      "python_error": "{'foo': 'baz'} is not one of [{'bar': 2, 'foo': 'baz'}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 2, 'foo': 'baz'}]}\n\nOn instance:\n    {'foo': 'baz'}",
+      "data": {
+        "foo": "baz"
+      }
+    }
+  ]
+}

@@ -1,0 +1,299 @@
+{
+  "description": "sample Github_medium/o66606.json",
+  "meta": {
+    "full_size": 796,
+    "stripped_size": 770,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minLength",
+      "oneOf:trivial",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "CiBuildSettings",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "build"
+    ],
+    "properties": {
+      "env": {
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "build": {
+        "minLength": 1,
+        "oneOf": [
+          {
+            "$ref": "#/definitions/Command"
+          }
+        ]
+      },
+      "prepare": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "$ref": "#/definitions/Command"
+          }
+        ]
+      },
+      "post_build": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "$ref": "#/definitions/Command"
+          }
+        ]
+      },
+      "emails": {
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "definitions": {
+      "Command": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "args": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "env": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "working_dir": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "build": {
+          "path": "make",
+          "args": [
+            "build"
+          ],
+          "env": [
+            "DEBUG=true"
+          ],
+          "working_dir": "/home/user/project"
+        },
+        "prepare": {
+          "path": "npm",
+          "args": [
+            "install"
+          ],
+          "env": [
+            "NODE_ENV=development"
+          ]
+        },
+        "post_build": {
+          "path": "make",
+          "args": [
+            "test"
+          ],
+          "env": [
+            "DEBUG=true"
+          ],
+          "working_dir": "/home/user/project"
+        },
+        "env": [
+          "CI=true"
+        ],
+        "emails": [
+          "user@example.com",
+          "dev@example.com"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "build": {
+          "path": "make",
+          "args": [
+            "build"
+          ],
+          "env": [
+            "DEBUG=true"
+          ],
+          "working_dir": "/home/user/project"
+        },
+        "prepare": {
+          "path": "npm",
+          "args": [
+            "install"
+          ],
+          "env": [
+            "NODE_ENV=development"
+          ]
+        },
+        "post_build": null,
+        "env": [
+          "CI=true"
+        ],
+        "emails": [
+          "user@example.com",
+          "dev@example.com"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not of type 'object'\n\nFailed validating 'type' in schema[0]:\n    {'type': 'object',\n     'additionalProperties': False,\n     'required': ['path'],\n     'properties': {'path': {'type': 'string', 'minLength': 1},\n                    'args': {'type': ['array', 'null'],\n                             'items': {'type': 'string'}},\n                    'env': {'type': ['array', 'null'],\n                            'items': {'type': 'string'}},\n                    'working_dir': {'type': ['null', 'string']}}}\n\nOn instance:\n    123",
+      "data": {
+        "build": 123,
+        "prepare": {
+          "path": "npm",
+          "args": [
+            "install"
+          ],
+          "env": [
+            "NODE_ENV=development"
+          ]
+        },
+        "post_build": null,
+        "env": [
+          "CI=true"
+        ],
+        "emails": [
+          "user@example.com",
+          "dev@example.com"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"path\":\"\",\"args\":[\"build\"],\"env\":[\"DEBUG=true\"],\"working_dir\":\"/home/user/project\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[0]['properties']['path']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['path']:\n    ''",
+      "data": {
+        "build": {
+          "path": "",
+          "args": [
+            "build"
+          ],
+          "env": [
+            "DEBUG=true"
+          ],
+          "working_dir": "/home/user/project"
+        },
+        "prepare": {
+          "path": "npm",
+          "args": [
+            "install"
+          ],
+          "env": [
+            "NODE_ENV=development"
+          ]
+        },
+        "post_build": null,
+        "env": [
+          "CI=true"
+        ],
+        "emails": [
+          "user@example.com",
+          "dev@example.com"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"path\":\"\",\"args\":[\"build\"],\"env\":[\"DEBUG=true\"],\"working_dir\":\"/home/user/project\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[0]['properties']['path']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['path']:\n    ''",
+      "data": {
+        "build": {
+          "path": "",
+          "args": [
+            "build"
+          ],
+          "env": [
+            "DEBUG=true"
+          ],
+          "working_dir": "/home/user/project"
+        },
+        "prepare": {
+          "path": "npm",
+          "args": [
+            "install"
+          ],
+          "env": [
+            "NODE_ENV=development"
+          ]
+        },
+        "post_build": null,
+        "env": [
+          "CI=true"
+        ],
+        "emails": [
+          "user@example.com",
+          "dev@example.com"
+        ]
+      }
+    }
+  ]
+}

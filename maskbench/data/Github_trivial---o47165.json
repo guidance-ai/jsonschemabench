@@ -1,0 +1,288 @@
+{
+  "description": "sample Github_trivial/o47165.json",
+  "meta": {
+    "full_size": 1572,
+    "stripped_size": 1526,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "additionalProperties",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "definitions",
+      "maxItems",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "MachineBoss expression schema",
+    "definitions": {
+      "expr": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "required": [
+              "expr"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "expr": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "log"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "log": {
+                "$ref": "#/definitions/expr"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "exp"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "exp": {
+                "$ref": "#/definitions/expr"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "geomsum"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "geomsum": {
+                "$ref": "#/definitions/expr"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "not"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "not": {
+                "$ref": "#/definitions/expr"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "*"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "*": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "$ref": "#/definitions/expr"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "+"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "+": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "$ref": "#/definitions/expr"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "/"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "/": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "$ref": "#/definitions/expr"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "-"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "-": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "$ref": "#/definitions/expr"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "pow"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "pow": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "$ref": "#/definitions/expr"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "$ref": "#/definitions/expr"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "pow": [
+          {
+            "exp": 2
+          },
+          {
+            "log": {
+              "geomsum": {
+                "not": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "{\"pow\":[{\"exp\":2}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[{'exp': 2}] is too short\n\nFailed validating 'minItems' in schema[12]['properties']['pow']:\n    {'type': 'array',\n     'minItems': 2,\n     'maxItems': 2,\n     'items': {'$ref': '#/definitions/expr'}}\n\nOn instance['pow']:\n    [{'exp': 2}]",
+      "data": {
+        "pow": [
+          {
+            "exp": 2
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "pow": [
+          {
+            "exp": {
+              "expr": "x"
+            }
+          },
+          2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"pow\":[{\"exp\":{\"expr\":\"x\",\"extra\":1}},2]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'expr': 'x', 'extra': 1} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[5]['properties']['exp']:\n    {'anyOf': [{'type': 'boolean'},\n               {'type': 'number'},\n               {'type': 'string'},\n               {'type': 'object',\n                'required': ['expr'],\n                'additionalProperties': False,\n                'properties': {'expr': {'type': 'string'}}},\n               {'type': 'object',\n                'required': ['log'],\n                'additionalProperties': False,\n                'properties': {'log': {'$ref': '#/definitions/expr'}}},\n               {'type': 'object',\n                'required': ['exp'],\n                'additionalProperties': False,\n                'properties': {'exp': {'$ref': '#/definitions/expr'}}},\n               {'type': 'object',\n                'required': ['geomsum'],\n                'additionalProperties': False,\n                'properties': {'geomsum': {'$ref': '#/definitions/expr'}}},\n               {'type': 'obj.. (1998 more)",
+      "data": {
+        "pow": [
+          {
+            "exp": {
+              "expr": "x",
+              "extra": 1
+            }
+          },
+          2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "{\"pow\":[{\"exp\":{\"expr\":\"x\"}}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[{'exp': {'expr': 'x'}}] is too short\n\nFailed validating 'minItems' in schema[12]['properties']['pow']:\n    {'type': 'array',\n     'minItems': 2,\n     'maxItems': 2,\n     'items': {'$ref': '#/definitions/expr'}}\n\nOn instance['pow']:\n    [{'exp': {'expr': 'x'}}]",
+      "data": {
+        "pow": [
+          {
+            "exp": {
+              "expr": "x"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"pow\":[{\"exp\":{\"expr\":true}},2,3]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "True is not of type 'string'\n\nFailed validating 'type' in schema[3]['properties']['expr']:\n    {'type': 'string'}\n\nOn instance['expr']:\n    True",
+      "data": {
+        "pow": [
+          {
+            "exp": {
+              "expr": true
+            }
+          },
+          2,
+          3
+        ]
+      }
+    }
+  ]
+}

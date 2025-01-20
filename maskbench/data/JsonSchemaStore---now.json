@@ -1,0 +1,906 @@
+{
+  "description": "sample JsonSchemaStore/now.json",
+  "meta": {
+    "full_size": 4198,
+    "stripped_size": 1469,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "maxItems",
+      "maxLength",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "alias": {
+        "type": "string",
+        "description": "domain names (optionally including subdomains) added to the account, or a string for a suffixed URL using .now.sh or a Custom Deployment Suffix"
+      },
+      "env": {
+        "type": "object",
+        "description": "environment keys and values",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    },
+    "description": "ZEIT Now project configuration file",
+    "id": "https://json.schemastore.org/now.json",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "name for the deployment",
+        "maxLength": 52
+      },
+      "version": {
+        "enum": [
+          1,
+          2
+        ],
+        "description": "the Now Platform version that the deployment should use and is known to work with",
+        "default": 2
+      },
+      "alias": {
+        "oneOf": [
+          {
+            "type": "array",
+            "maxItems": 64,
+            "items": {
+              "$ref": "#/definitions/alias"
+            }
+          },
+          {
+            "$ref": "#/definitions/alias"
+          }
+        ]
+      },
+      "scope": {
+        "type": "string",
+        "description": "an ID or slug for teams, or an email address, username, or ID for users"
+      },
+      "env": {
+        "$ref": "#/definitions/env",
+        "description": "environment variables passed to the invoked Serverless Functions"
+      },
+      "build": {
+        "type": "object",
+        "properties": {
+          "env": {
+            "$ref": "#/definitions/env",
+            "description": "environment variables passed to the Build processes"
+          }
+        }
+      },
+      "builds": {
+        "type": "array",
+        "description": "a list of build descriptions whose src references valid source files",
+        "items": {
+          "type": "object",
+          "description": "build description",
+          "required": [
+            "src",
+            "use"
+          ],
+          "properties": {
+            "src": {
+              "type": "string",
+              "description": "A glob expression or pathname. If more than one file is resolved, one build will be created per matched file. It can include `*` and `**`."
+            },
+            "use": {
+              "type": "string",
+              "description": "A npm module to be installed by the build process. It can include a semver compatible version (e.g.: `@org/proj@1`)."
+            },
+            "config": {
+              "type": "object",
+              "description": "An object including arbitrary metadata to be passed to the Builder."
+            }
+          }
+        }
+      },
+      "routes": {
+        "type": "array",
+        "description": "a list of route definitions",
+        "items": {
+          "type": "object",
+          "description": "route definition",
+          "oneOf": [
+            {
+              "required": [
+                "src"
+              ]
+            },
+            {
+              "required": [
+                "handle"
+              ]
+            }
+          ],
+          "properties": {
+            "src": {
+              "type": "string",
+              "description": "A PCRE-compatible regular expression that matches each incoming pathname (excluding querystring)."
+            },
+            "methods": {
+              "type": "array",
+              "description": "A set of HTTP method types. If no method is provided, requests with any HTTP method will be a candidate for the route.",
+              "items": {
+                "enum": [
+                  "GET",
+                  "HEAD",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "CONNECT",
+                  "OPTIONS",
+                  "TRACE",
+                  "PATCH"
+                ]
+              }
+            },
+            "dest": {
+              "type": "string",
+              "description": "A destination pathname or full URL, including querystring, with the ability to embed capture groups as $1, $2…"
+            },
+            "headers": {
+              "type": "object",
+              "description": "A set of headers to apply for responses.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "status": {
+              "type": "integer",
+              "description": "A status code to respond with. Can be used in tandem with `Location:` header to implement redirects.",
+              "minimum": 100,
+              "maximum": 599
+            },
+            "continue": {
+              "type": "boolean",
+              "description": "A boolean to change matching behavior. If true, routing will continue even when the src is matched."
+            },
+            "handle": {
+              "type": "string",
+              "enum": [
+                "filesystem"
+              ]
+            }
+          }
+        }
+      },
+      "regions": {
+        "type": "array",
+        "description": "the deployment regions of the Serverless Functions that get created as a result of the build steps",
+        "items": {
+          "description": "region identifier",
+          "type": "string"
+        }
+      },
+      "public": {
+        "type": "boolean",
+        "description": "When set to true, both the source view and logs view will be publicly accessible (when the user is authenticated with ZEIT)."
+      },
+      "github": {
+        "type": "object",
+        "description": "Git integration options",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When set to false, Now for GitHub will not deploy the given project regardless of the GitHub app being installed.",
+            "default": true
+          },
+          "autoAlias": {
+            "type": "boolean",
+            "description": "When set to false, Now for GitHub will not apply the alias upon merge.",
+            "default": true
+          },
+          "silent": {
+            "type": "boolean",
+            "description": "When set to true, Now for GitHub will stop commenting on pull requests and commits.",
+            "default": false
+          },
+          "autoJobCancelation": {
+            "type": "boolean",
+            "description": "When set to false, Now for GitHub will always build pushes in sequence without cancelling a build for the most recent commit.",
+            "default": true
+          }
+        }
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "name": "My Now Project",
+        "version": 2,
+        "alias": [
+          "mydomain.now.sh",
+          "mydomain.com"
+        ],
+        "scope": "myteam",
+        "env": {
+          "NODE_ENV": "production"
+        },
+        "build": {
+          "env": {
+            "BUILD_ENV": "production"
+          }
+        },
+        "builds": [
+          {
+            "src": "*.js",
+            "use": "@now/static-build"
+          },
+          {
+            "src": "*.css",
+            "use": "@now/static-build"
+          }
+        ],
+        "routes": [
+          {
+            "src": "/api/(.*)",
+            "dest": "/api/$1",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            }
+          },
+          {
+            "src": "/(.*)",
+            "dest": "/$1",
+            "headers": {
+              "Cache-Control": "max-age=31536000"
+            }
+          },
+          {
+            "handle": "filesystem"
+          }
+        ],
+        "regions": [
+          "iad1",
+          "bru1"
+        ],
+        "public": false,
+        "github": {
+          "enabled": true,
+          "autoAlias": true,
+          "silent": false,
+          "autoJobCancelation": true
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "my-now-deployment",
+        "version": 2,
+        "alias": [
+          "mydomain.com",
+          "my-subdomain.mydomain.com"
+        ],
+        "scope": "my-team",
+        "env": {
+          "MY_VAR": "my-value"
+        },
+        "build": {
+          "env": {
+            "MY_BUILD_VAR": "my-build-value"
+          }
+        },
+        "builds": [
+          {
+            "src": "*.js",
+            "use": "@now/static-build"
+          },
+          {
+            "src": "*.md",
+            "use": "@now/markdown"
+          }
+        ],
+        "routes": [
+          {
+            "src": "/api/(.*)",
+            "dest": "/api/$1",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            }
+          },
+          {
+            "src": "/(.*)",
+            "dest": "/index.html",
+            "status": 200
+          },
+          {
+            "handle": "filesystem"
+          }
+        ],
+        "regions": [
+          "iad1",
+          "bru1"
+        ],
+        "public": false,
+        "github": {
+          "enabled": true,
+          "autoAlias": true,
+          "silent": false,
+          "autoJobCancelation": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"a\":\"mydomain.com\",\"b\":\"my-subdomain.mydomain.com\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'a': 'mydomain.com', 'b': 'my-subdomain.mydomain.com'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['alias']:\n    {'oneOf': [{'type': 'array',\n                'maxItems': 64,\n                'items': {'$ref': '#/definitions/alias'}},\n               {'$ref': '#/definitions/alias'}]}\n\nOn instance['alias']:\n    {'a': 'mydomain.com', 'b': 'my-subdomain.mydomain.com'}",
+      "data": {
+        "name": "my-now-deployment",
+        "version": 2,
+        "alias": {
+          "a": "mydomain.com",
+          "b": "my-subdomain.mydomain.com"
+        },
+        "scope": "my-team",
+        "env": {
+          "MY_VAR": "my-value"
+        },
+        "build": {
+          "env": {
+            "MY_BUILD_VAR": "my-build-value"
+          }
+        },
+        "builds": [
+          {
+            "src": "*.js",
+            "use": "@now/static-build"
+          },
+          {
+            "src": "*.md",
+            "use": "@now/markdown"
+          }
+        ],
+        "routes": [
+          {
+            "src": "/api/(.*)",
+            "dest": "/api/$1",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            }
+          },
+          {
+            "src": "/(.*)",
+            "dest": "/index.html",
+            "status": 200
+          },
+          {
+            "handle": "filesystem"
+          }
+        ],
+        "regions": [
+          "iad1",
+          "bru1"
+        ],
+        "public": false,
+        "github": {
+          "enabled": true,
+          "autoAlias": true,
+          "silent": false,
+          "autoJobCancelation": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "600 is greater than the maximum of 599",
+      "python_error": "600 is greater than the maximum of 599\n\nFailed validating 'maximum' in schema['properties']['routes']['items']['properties']['status']:\n    {'type': 'integer',\n     'description': 'A status code to respond with. Can be used in tandem '\n                    'with `Location:` header to implement redirects.',\n     'minimum': 100,\n     'maximum': 599}\n\nOn instance['routes'][0]['status']:\n    600",
+      "data": {
+        "name": "my-now-deployment",
+        "version": 2,
+        "alias": [
+          "mydomain.com",
+          "my-subdomain.mydomain.com"
+        ],
+        "scope": "my-team",
+        "env": {
+          "MY_VAR": "my-value"
+        },
+        "build": {
+          "env": {
+            "MY_BUILD_VAR": "my-build-value"
+          }
+        },
+        "builds": [
+          {
+            "src": "*.js",
+            "use": "@now/static-build"
+          },
+          {
+            "src": "*.md",
+            "use": "@now/markdown"
+          }
+        ],
+        "routes": [
+          {
+            "src": "/api/(.*)",
+            "dest": "/api/$1",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            },
+            "status": 600
+          }
+        ],
+        "regions": [
+          "iad1",
+          "bru1"
+        ],
+        "public": false,
+        "github": {
+          "enabled": true,
+          "autoAlias": true,
+          "silent": false,
+          "autoJobCancelation": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxItems keyword",
+      "valid": false,
+      "rust_error": "[\"mydomain.com\",\"my-subdomain.mydomain.com\",\"mydomain2.com\",\"my-subdomain2.mydomain.com\",\"mydomain3.com\",\"my-subdomain3.mydomain.com\",\"mydomain4.com\",\"my-subdomain4.mydomain.com\",\"mydomain5.com\",\"my-subdomain5.mydomain.com\",\"mydomain6.com\",\"my-subdomain6.mydomain.com\",\"mydomain7.com\",\"my-subdomain7.mydomain.com\",\"mydomain8.com\",\"my-subdomain8.mydomain.com\",\"mydomain9.com\",\"my-subdomain9.mydomain.com\",\"mydomain10.com\",\"my-subdomain10.mydomain.com\",\"mydomain11.com\",\"my-subdomain11.mydomain.com\",\"mydomain12.com\",\"my-subdomain12.mydomain.com\",\"mydomain13.com\",\"my-subdomain13.mydomain.com\",\"mydomain14.com\",\"my-subdomain14.mydomain.com\",\"mydomain15.com\",\"my-subdomain15.mydomain.com\",\"mydomain16.com\",\"my-subdomain16.mydomain.com\",\"mydomain17.com\",\"my-subdomain17.mydomain.com\",\"mydomain18.com\",\"my-subdomain18.mydomain.com\",\"mydomain19.com\",\"my-subdomain19.mydomain.com\",\"mydomain20.com\",\"my-subdomain20.mydomain.com\",\"mydomain21.com\",\"my-subdomain21.mydomain.com\",\"mydomain22.com\",\"my-subdomain22.mydomain.com\",\"mydomain.. (2080 more)",
+      "python_error": "['mydomain.com', 'my-subdomain.mydomain.com', 'mydomain2.com', 'my-subdomain2.mydomain.com', 'mydomain3.com', 'my-subdomain3.mydomain.com', 'mydomain4.com', 'my-subdomain4.mydomain.com', 'mydomain5.com', 'my-subdomain5.mydomain.com', 'mydomain6.com', 'my-subdomain6.mydomain.com', 'mydomain7.com', 'my-subdomain7.mydomain.com', 'mydomain8.com', 'my-subdomain8.mydomain.com', 'mydomain9.com', 'my-subdomain9.mydomain.com', 'mydomain10.com', 'my-subdomain10.mydomain.com', 'mydomain11.com', 'my-subdomain11.mydomain.com', 'mydomain12.com', 'my-subdomain12.mydomain.com', 'mydomain13.com', 'my-subdomain13.mydomain.com', 'mydomain14.com', 'my-subdomain14.mydomain.com', 'mydomain15.com', 'my-subdomain15.mydomain.com', 'mydomain16.com', 'my-subdomain16.mydomain.com', 'mydomain17.com', 'my-subdomain17.mydomain.com', 'mydomain18.com', 'my-subdomain18.mydomain.com', 'mydomain19.com', 'my-subdomain19.mydomain.com', 'mydomain20.com', 'my-subdomain20.mydomain.com', 'mydomain21.com', 'my-subdomain21.mydomain.com', 'mydomain22.co.. (6116 more)",
+      "data": {
+        "name": "my-now-deployment",
+        "version": 2,
+        "alias": [
+          "mydomain.com",
+          "my-subdomain.mydomain.com",
+          "mydomain2.com",
+          "my-subdomain2.mydomain.com",
+          "mydomain3.com",
+          "my-subdomain3.mydomain.com",
+          "mydomain4.com",
+          "my-subdomain4.mydomain.com",
+          "mydomain5.com",
+          "my-subdomain5.mydomain.com",
+          "mydomain6.com",
+          "my-subdomain6.mydomain.com",
+          "mydomain7.com",
+          "my-subdomain7.mydomain.com",
+          "mydomain8.com",
+          "my-subdomain8.mydomain.com",
+          "mydomain9.com",
+          "my-subdomain9.mydomain.com",
+          "mydomain10.com",
+          "my-subdomain10.mydomain.com",
+          "mydomain11.com",
+          "my-subdomain11.mydomain.com",
+          "mydomain12.com",
+          "my-subdomain12.mydomain.com",
+          "mydomain13.com",
+          "my-subdomain13.mydomain.com",
+          "mydomain14.com",
+          "my-subdomain14.mydomain.com",
+          "mydomain15.com",
+          "my-subdomain15.mydomain.com",
+          "mydomain16.com",
+          "my-subdomain16.mydomain.com",
+          "mydomain17.com",
+          "my-subdomain17.mydomain.com",
+          "mydomain18.com",
+          "my-subdomain18.mydomain.com",
+          "mydomain19.com",
+          "my-subdomain19.mydomain.com",
+          "mydomain20.com",
+          "my-subdomain20.mydomain.com",
+          "mydomain21.com",
+          "my-subdomain21.mydomain.com",
+          "mydomain22.com",
+          "my-subdomain22.mydomain.com",
+          "mydomain23.com",
+          "my-subdomain23.mydomain.com",
+          "mydomain24.com",
+          "my-subdomain24.mydomain.com",
+          "mydomain25.com",
+          "my-subdomain25.mydomain.com",
+          "mydomain26.com",
+          "my-subdomain26.mydomain.com",
+          "mydomain27.com",
+          "my-subdomain27.mydomain.com",
+          "mydomain28.com",
+          "my-subdomain28.mydomain.com",
+          "mydomain29.com",
+          "my-subdomain29.mydomain.com",
+          "mydomain30.com",
+          "my-subdomain30.mydomain.com",
+          "mydomain31.com",
+          "my-subdomain31.mydomain.com",
+          "mydomain32.com",
+          "my-subdomain32.mydomain.com",
+          "mydomain33.com",
+          "my-subdomain33.mydomain.com",
+          "mydomain34.com",
+          "my-subdomain34.mydomain.com",
+          "mydomain35.com",
+          "my-subdomain35.mydomain.com",
+          "mydomain36.com",
+          "my-subdomain36.mydomain.com",
+          "mydomain37.com",
+          "my-subdomain37.mydomain.com",
+          "mydomain38.com",
+          "my-subdomain38.mydomain.com",
+          "mydomain39.com",
+          "my-subdomain39.mydomain.com",
+          "mydomain40.com",
+          "my-subdomain40.mydomain.com",
+          "mydomain41.com",
+          "my-subdomain41.mydomain.com",
+          "mydomain42.com",
+          "my-subdomain42.mydomain.com",
+          "mydomain43.com",
+          "my-subdomain43.mydomain.com",
+          "mydomain44.com",
+          "my-subdomain44.mydomain.com",
+          "mydomain45.com",
+          "my-subdomain45.mydomain.com",
+          "mydomain46.com",
+          "my-subdomain46.mydomain.com",
+          "mydomain47.com",
+          "my-subdomain47.mydomain.com",
+          "mydomain48.com",
+          "my-subdomain48.mydomain.com",
+          "mydomain49.com",
+          "my-subdomain49.mydomain.com",
+          "mydomain50.com",
+          "my-subdomain50.mydomain.com",
+          "mydomain51.com",
+          "my-subdomain51.mydomain.com",
+          "mydomain52.com",
+          "my-subdomain52.mydomain.com",
+          "mydomain53.com",
+          "my-subdomain53.mydomain.com",
+          "mydomain54.com",
+          "my-subdomain54.mydomain.com",
+          "mydomain55.com",
+          "my-subdomain55.mydomain.com",
+          "mydomain56.com",
+          "my-subdomain56.mydomain.com",
+          "mydomain57.com",
+          "my-subdomain57.mydomain.com",
+          "mydomain58.com",
+          "my-subdomain58.mydomain.com",
+          "mydomain59.com",
+          "my-subdomain59.mydomain.com",
+          "mydomain60.com",
+          "my-subdomain60.mydomain.com",
+          "mydomain61.com",
+          "my-subdomain61.mydomain.com",
+          "mydomain62.com",
+          "my-subdomain62.mydomain.com",
+          "mydomain63.com",
+          "my-subdomain63.mydomain.com",
+          "mydomain64.com",
+          "my-subdomain64.mydomain.com",
+          "mydomain65.com",
+          "my-subdomain65.mydomain.com"
+        ],
+        "scope": "my-team",
+        "env": {
+          "MY_VAR": "my-value"
+        },
+        "build": {
+          "env": {
+            "MY_BUILD_VAR": "my-build-value"
+          }
+        },
+        "builds": [
+          {
+            "src": "*.js",
+            "use": "@now/static-build"
+          },
+          {
+            "src": "*.md",
+            "use": "@now/markdown"
+          }
+        ],
+        "routes": [
+          {
+            "src": "/api/(.*)",
+            "dest": "/api/$1",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            }
+          },
+          {
+            "src": "/(.*)",
+            "dest": "/index.html",
+            "status": 200
+          },
+          {
+            "handle": "filesystem"
+          }
+        ],
+        "regions": [
+          "iad1",
+          "bru1"
+        ],
+        "public": false,
+        "github": {
+          "enabled": true,
+          "autoAlias": true,
+          "silent": false,
+          "autoJobCancelation": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['env']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['env']['MY_INVALID_VAR']:\n    123",
+      "data": {
+        "name": "my-now-deployment",
+        "version": 2,
+        "alias": [
+          "mydomain.com",
+          "my-subdomain.mydomain.com"
+        ],
+        "scope": "my-team",
+        "env": {
+          "MY_VAR": "my-value",
+          "MY_INVALID_VAR": 123
+        },
+        "build": {
+          "env": {
+            "MY_BUILD_VAR": "my-build-value",
+            "MY_INVALID_BUILD_VAR": true
+          }
+        },
+        "builds": [
+          {
+            "src": "*.js",
+            "use": "@now/static-build"
+          },
+          {
+            "src": "*.md",
+            "use": "@now/markdown",
+            "invalidProperty": "invalidValue"
+          }
+        ],
+        "routes": [
+          {
+            "src": "/api/(.*)",
+            "dest": "/api/$1",
+            "headers": {
+              "Access-Control-Allow-Origin": "*",
+              "invalidHeader": 123
+            }
+          },
+          {
+            "src": "/(.*)",
+            "dest": "/index.html",
+            "status": 200
+          },
+          {
+            "handle": "filesystem"
+          }
+        ],
+        "regions": [
+          "iad1",
+          "bru1"
+        ],
+        "public": false,
+        "github": {
+          "enabled": true,
+          "autoAlias": true,
+          "silent": false,
+          "autoJobCancelation": true,
+          "invalidProperty": "invalidValue"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[\"mydomain.com\",\"my-subdomain.mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydomain.com\",\"mydo.. (693 more)",
+      "python_error": "['mydomain.com', 'my-subdomain.mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'mydomain.com', 'm.. (3195 more)",
+      "data": {
+        "name": "my-now-deployment",
+        "version": 2,
+        "alias": [
+          "mydomain.com",
+          "my-subdomain.mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com",
+          "mydomain.com"
+        ],
+        "scope": "my-team",
+        "env": {
+          "MY_VAR": null
+        },
+        "build": {
+          "env": {
+            "MY_BUILD_VAR": null
+          }
+        },
+        "builds": [
+          {
+            "src": "*.js",
+            "use": "@now/static-build"
+          },
+          {
+            "src": "*.md",
+            "use": "@now/markdown"
+          },
+          {
+            "src": "*.txt",
+            "use": "@now/unknown-builder"
+          }
+        ],
+        "routes": [
+          {
+            "src": "/api/(.*)",
+            "dest": "/api/$1",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            }
+          },
+          {
+            "src": "/(.*)",
+            "dest": "/index.html",
+            "status": 200
+          },
+          {
+            "handle": "filesystem"
+          },
+          {
+            "src": "/(.*)",
+            "dest": "/index.html",
+            "status": 600
+          }
+        ],
+        "regions": [
+          "iad1",
+          "bru1",
+          "unknown-region"
+        ],
+        "public": false,
+        "github": {
+          "enabled": true,
+          "autoAlias": true,
+          "silent": false,
+          "autoJobCancelation": true
+        }
+      }
+    }
+  ]
+}

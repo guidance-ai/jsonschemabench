@@ -1,0 +1,300 @@
+{
+  "description": "sample Github_easy/o42223.json",
+  "meta": {
+    "full_size": 653,
+    "stripped_size": 496,
+    "features": [
+      "@minmaxItems",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minItems",
+      "oneOf:trivial",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "http://www.gaaiat.com/json-xformer#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "JSON Transformer Schema",
+    "title": "JSON Transformer Schema",
+    "type": "object",
+    "required": [
+      "transformMap"
+    ],
+    "properties": {
+      "sourceLocale": {
+        "type": "string",
+        "default": "en-US"
+      },
+      "targetLocale": {
+        "type": "string",
+        "default": "en-US"
+      },
+      "transformMap": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "sourcePtr": {
+              "type": "string"
+            },
+            "targetPtr": {
+              "type": "string"
+            },
+            "customFormatter": {
+              "type": "string"
+            },
+            "defaultValue": {
+              "oneOf": [
+                {
+                  "type": [
+                    "array",
+                    "object",
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string"
+                  ]
+                }
+              ]
+            }
+          },
+          "requiredProperties": [
+            "sourcePtr",
+            "targetPtr"
+          ]
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "sourceLocale": "en-US",
+        "targetLocale": "fr-FR",
+        "transformMap": [
+          {
+            "sourcePtr": "/name",
+            "targetPtr": "/nom",
+            "customFormatter": "uppercase"
+          },
+          {
+            "sourcePtr": "/age",
+            "targetPtr": "/âge",
+            "defaultValue": 25
+          },
+          {
+            "sourcePtr": "/address/street",
+            "targetPtr": "/adresse/rue",
+            "defaultValue": "Rue de la Paix"
+          },
+          {
+            "sourcePtr": "/isMarried",
+            "targetPtr": "/estMarié",
+            "defaultValue": false
+          },
+          {
+            "sourcePtr": "/phoneNumbers",
+            "targetPtr": "/numérosDeTéléphone",
+            "defaultValue": []
+          },
+          {
+            "sourcePtr": "/ occupation",
+            "targetPtr": "/ profession",
+            "defaultValue": {
+              "title": "Software Engineer",
+              "company": "ABC Inc."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not of type 'array', 'object', 'boolean', 'integer', 'number', 'string'\n\nFailed validating 'type' in schema[0]:\n    {'type': ['array', 'object', 'boolean', 'integer', 'number', 'string']}\n\nOn instance:\n    None",
+      "data": {
+        "sourceLocale": "en-US",
+        "targetLocale": "fr-FR",
+        "transformMap": [
+          {
+            "sourcePtr": "/name",
+            "targetPtr": "/nom",
+            "customFormatter": "uppercase"
+          },
+          {
+            "sourcePtr": "/age",
+            "targetPtr": "/âge",
+            "defaultValue": null
+          },
+          {
+            "sourcePtr": "/address/street",
+            "targetPtr": "/adresse/rue",
+            "defaultValue": "Rue de la Paix"
+          },
+          {
+            "sourcePtr": "/isMarried",
+            "targetPtr": "/estMarié",
+            "defaultValue": false
+          },
+          {
+            "sourcePtr": "/phoneNumbers",
+            "targetPtr": "/numérosDeTéléphone",
+            "defaultValue": []
+          },
+          {
+            "sourcePtr": "/ occupation",
+            "targetPtr": "/ profession",
+            "defaultValue": {
+              "title": "Software Engineer",
+              "company": "ABC Inc."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['transformMap']:\n    {'type': 'array',\n     'minItems': 1,\n     'items': {'type': 'object',\n               'properties': {'sourcePtr': {'type': 'string'},\n                              'targetPtr': {'type': 'string'},\n                              'customFormatter': {'type': 'string'},\n                              'defaultValue': {'oneOf': [{'type': ['array',\n                                                                   'object',\n                                                                   'boolean',\n                                                                   'integer',\n                                                                   'number',\n                                                                   'string']}]}},\n               'requiredProperties': ['sourcePtr', 'targetPtr']}}\n\nOn instance['transformMap']:\n    []",
+      "data": {
+        "sourceLocale": "en-US",
+        "targetLocale": "fr-FR",
+        "transformMap": []
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "transformMap": [
+          {
+            "sourcePtr": "/name",
+            "targetPtr": "/fullName",
+            "customFormatter": "uppercase"
+          },
+          {
+            "sourcePtr": "/age",
+            "targetPtr": "/age",
+            "defaultValue": 25
+          },
+          {
+            "sourcePtr": "/address/street",
+            "targetPtr": "/address/street",
+            "defaultValue": "Main Street"
+          },
+          {
+            "sourcePtr": "/phone",
+            "targetPtr": "/phone",
+            "customFormatter": "formatPhoneNumber"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['transformMap']:\n    {'type': 'array',\n     'minItems': 1,\n     'items': {'type': 'object',\n               'properties': {'sourcePtr': {'type': 'string'},\n                              'targetPtr': {'type': 'string'},\n                              'customFormatter': {'type': 'string'},\n                              'defaultValue': {'oneOf': [{'type': ['array',\n                                                                   'object',\n                                                                   'boolean',\n                                                                   'integer',\n                                                                   'number',\n                                                                   'string']}]}},\n               'requiredProperties': ['sourcePtr', 'targetPtr']}}\n\nOn instance['transformMap']:\n    []",
+      "data": {
+        "transformMap": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not of type 'array', 'object', 'boolean', 'integer', 'number', 'string'\n\nFailed validating 'type' in schema[0]:\n    {'type': ['array', 'object', 'boolean', 'integer', 'number', 'string']}\n\nOn instance:\n    None",
+      "data": {
+        "transformMap": [
+          {
+            "sourcePtr": "/name",
+            "targetPtr": "/fullName",
+            "customFormatter": "uppercase"
+          },
+          {
+            "sourcePtr": "/age",
+            "targetPtr": "/age",
+            "defaultValue": null
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not of type 'array', 'object', 'boolean', 'integer', 'number', 'string'\n\nFailed validating 'type' in schema[0]:\n    {'type': ['array', 'object', 'boolean', 'integer', 'number', 'string']}\n\nOn instance:\n    None",
+      "data": {
+        "transformMap": [
+          {
+            "sourcePtr": "/name",
+            "targetPtr": "/fullName",
+            "customFormatter": "uppercase"
+          },
+          {
+            "sourcePtr": "/age",
+            "targetPtr": "/age",
+            "defaultValue": null
+          },
+          {
+            "sourcePtr": "/address/street",
+            "targetPtr": "/address/street",
+            "defaultValue": "Main Street"
+          },
+          {
+            "sourcePtr": "/phone",
+            "targetPtr": "/phone",
+            "customFormatter": "formatPhoneNumber"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['transformMap']['items']['properties']['customFormatter']:\n    {'type': 'string'}\n\nOn instance['transformMap'][3]['customFormatter']:\n    123",
+      "data": {
+        "transformMap": [
+          {
+            "sourcePtr": "/name",
+            "targetPtr": "/fullName",
+            "customFormatter": "uppercase"
+          },
+          {
+            "sourcePtr": "/age",
+            "targetPtr": "/age",
+            "defaultValue": null
+          },
+          {
+            "sourcePtr": "/address/street",
+            "targetPtr": "/address/street"
+          },
+          {
+            "sourcePtr": "/phone",
+            "targetPtr": "/phone",
+            "customFormatter": 123
+          }
+        ]
+      }
+    }
+  ]
+}

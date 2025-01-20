@@ -1,0 +1,468 @@
+{
+  "description": "sample Snowplow/sp_203_Normalized.json",
+  "meta": {
+    "full_size": 1107,
+    "stripped_size": 998,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "data": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "arguments": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "command": {
+                  "type": "string"
+                },
+                "dependsOn": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "executor": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "onResult": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "continueJob": {
+                      "items": {
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    },
+                    "terminateJobWithSuccess": {
+                      "items": {
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "terminateJobWithSuccess",
+                    "continueJob"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "executor",
+                "dependsOn",
+                "command",
+                "arguments",
+                "name",
+                "onResult"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "tasks"
+        ],
+        "type": "object"
+      },
+      "schema": {
+        "pattern": "^iglu:[a-zA-Z0-9-_.]+/[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+/[0-9]+-[0-9]+-[0-9]+$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "schema",
+      "data"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "factfile",
+      "vendor": "com.snowplowanalytics.factotum",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "data": {
+          "name": "example",
+          "tasks": [
+            {
+              "arguments": [
+                "arg1",
+                "arg2"
+              ],
+              "command": "example command",
+              "dependsOn": [
+                "task1",
+                "task2"
+              ],
+              "executor": "example executor",
+              "name": "example task",
+              "onResult": {
+                "continueJob": [
+                  1,
+                  2
+                ],
+                "terminateJobWithSuccess": [
+                  0,
+                  1
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['data']['properties']['tasks']['items']['properties']['onResult']['properties']['continueJob']['items']:\n    {'maximum': 32767, 'minimum': 0, 'type': 'integer'}\n\nOn instance['data']['tasks'][0]['onResult']['continueJob'][0]:\n    -1",
+      "data": {
+        "data": {
+          "name": "example",
+          "tasks": [
+            {
+              "arguments": [
+                "arg1",
+                "arg2"
+              ],
+              "command": "example command",
+              "dependsOn": [
+                "task1",
+                "task2"
+              ],
+              "executor": "example executor",
+              "name": "example task",
+              "onResult": {
+                "continueJob": [
+                  -1,
+                  2
+                ],
+                "terminateJobWithSuccess": [
+                  0,
+                  1
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['data']['properties']['tasks']['items']['properties']['onResult']:\n    {'additionalProperties': False,\n     'properties': {'continueJob': {'items': {'maximum': 32767,\n                                              'minimum': 0,\n                                              'type': 'integer'},\n                                    'type': 'array'},\n                    'terminateJobWithSuccess': {'items': {'maximum': 32767,\n                                                          'minimum': 0,\n                                                          'type': 'integer'},\n                                                'type': 'array'}},\n     'required': ['terminateJobWithSuccess', 'continueJob'],\n     'type': 'object'}\n\nOn instance['data']['tasks'][0]['onResult']:\n    {'continueJob': [1, 2],\n     'terminateJobWithSuccess': [0, 1],\n     'extraProperty': 'extraValue'}",
+      "data": {
+        "data": {
+          "name": "example",
+          "tasks": [
+            {
+              "arguments": [
+                "arg1",
+                "arg2"
+              ],
+              "command": "example command",
+              "dependsOn": [
+                "task1",
+                "task2"
+              ],
+              "executor": "example executor",
+              "name": "example task",
+              "onResult": {
+                "continueJob": [
+                  1,
+                  2
+                ],
+                "terminateJobWithSuccess": [
+                  0,
+                  1
+                ],
+                "extraProperty": "extraValue"
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-abc\" does not match \"^iglu:[a-zA-Z0-9-_.]+/[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+/[0-9]+-[0-9]+-[0-9]+$\"",
+      "python_error": "'iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-abc' does not match '^iglu:[a-zA-Z0-9-_.]+/[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+/[0-9]+-[0-9]+-[0-9]+$'\n\nFailed validating 'pattern' in schema['properties']['schema']:\n    {'pattern': '^iglu:[a-zA-Z0-9-_.]+/[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+/[0-9]+-[0-9]+-[0-9]+$',\n     'type': 'string'}\n\nOn instance['schema']:\n    'iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-abc'",
+      "data": {
+        "data": {
+          "name": "example",
+          "tasks": [
+            {
+              "arguments": [
+                "arg1",
+                "arg2"
+              ],
+              "command": "example command",
+              "dependsOn": [
+                "task1",
+                "task2"
+              ],
+              "executor": "example executor",
+              "name": "example task",
+              "onResult": {
+                "continueJob": [
+                  1,
+                  2
+                ],
+                "terminateJobWithSuccess": [
+                  0,
+                  1
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-abc"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "32768 is greater than the maximum of 32767",
+      "python_error": "32768 is greater than the maximum of 32767\n\nFailed validating 'maximum' in schema['properties']['data']['properties']['tasks']['items']['properties']['onResult']['properties']['continueJob']['items']:\n    {'maximum': 32767, 'minimum': 0, 'type': 'integer'}\n\nOn instance['data']['tasks'][0]['onResult']['continueJob'][2]:\n    32768",
+      "data": {
+        "data": {
+          "name": "example",
+          "tasks": [
+            {
+              "arguments": [
+                "arg1",
+                "arg2"
+              ],
+              "command": "example command",
+              "dependsOn": [
+                "task1",
+                "task2"
+              ],
+              "executor": "example executor",
+              "name": "example task",
+              "onResult": {
+                "continueJob": [
+                  1,
+                  2,
+                  32768
+                ],
+                "terminateJobWithSuccess": [
+                  0,
+                  1
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "32768 is greater than the maximum of 32767",
+      "python_error": "32768 is greater than the maximum of 32767\n\nFailed validating 'maximum' in schema['properties']['data']['properties']['tasks']['items']['properties']['onResult']['properties']['terminateJobWithSuccess']['items']:\n    {'maximum': 32767, 'minimum': 0, 'type': 'integer'}\n\nOn instance['data']['tasks'][0]['onResult']['terminateJobWithSuccess'][0]:\n    32768",
+      "data": {
+        "data": {
+          "name": "example",
+          "tasks": [
+            {
+              "arguments": [
+                "arg1",
+                "arg2"
+              ],
+              "command": "example command",
+              "dependsOn": [
+                "task1",
+                "task2"
+              ],
+              "executor": "example executor",
+              "name": "example task",
+              "onResult": {
+                "continueJob": [
+                  1,
+                  2
+                ],
+                "terminateJobWithSuccess": [
+                  32768,
+                  1
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "data": {
+          "name": "example_factfile",
+          "tasks": [
+            {
+              "arguments": [
+                "example_argument"
+              ],
+              "command": "example_command",
+              "dependsOn": [],
+              "executor": "example_executor",
+              "name": "example_task",
+              "onResult": {
+                "continueJob": [
+                  1
+                ],
+                "terminateJobWithSuccess": [
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-\" does not match \"^iglu:[a-zA-Z0-9-_.]+/[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+/[0-9]+-[0-9]+-[0-9]+$\"",
+      "python_error": "'iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-' does not match '^iglu:[a-zA-Z0-9-_.]+/[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+/[0-9]+-[0-9]+-[0-9]+$'\n\nFailed validating 'pattern' in schema['properties']['schema']:\n    {'pattern': '^iglu:[a-zA-Z0-9-_.]+/[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+/[0-9]+-[0-9]+-[0-9]+$',\n     'type': 'string'}\n\nOn instance['schema']:\n    'iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-'",
+      "data": {
+        "data": {
+          "name": "example_factfile",
+          "tasks": [
+            {
+              "arguments": [
+                "example_argument"
+              ],
+              "command": "example_command",
+              "dependsOn": [],
+              "executor": "example_executor",
+              "name": "example_task",
+              "onResult": {
+                "continueJob": [
+                  1
+                ],
+                "terminateJobWithSuccess": [
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0-"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['data']['properties']['tasks']['items']['properties']['onResult']['properties']['terminateJobWithSuccess']['items']:\n    {'maximum': 32767, 'minimum': 0, 'type': 'integer'}\n\nOn instance['data']['tasks'][0]['onResult']['terminateJobWithSuccess'][0]:\n    -1",
+      "data": {
+        "data": {
+          "name": "example_factfile",
+          "tasks": [
+            {
+              "arguments": [
+                "example_argument"
+              ],
+              "command": "example_command",
+              "dependsOn": [],
+              "executor": "example_executor",
+              "name": "example_task",
+              "onResult": {
+                "continueJob": [
+                  1
+                ],
+                "terminateJobWithSuccess": [
+                  -1
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "32768 is greater than the maximum of 32767",
+      "python_error": "32768 is greater than the maximum of 32767\n\nFailed validating 'maximum' in schema['properties']['data']['properties']['tasks']['items']['properties']['onResult']['properties']['terminateJobWithSuccess']['items']:\n    {'maximum': 32767, 'minimum': 0, 'type': 'integer'}\n\nOn instance['data']['tasks'][0]['onResult']['terminateJobWithSuccess'][0]:\n    32768",
+      "data": {
+        "data": {
+          "name": "example_factfile",
+          "tasks": [
+            {
+              "arguments": [
+                "example_argument"
+              ],
+              "command": "example_command",
+              "dependsOn": [],
+              "executor": "example_executor",
+              "name": "example_task",
+              "onResult": {
+                "continueJob": [
+                  1
+                ],
+                "terminateJobWithSuccess": [
+                  32768
+                ]
+              }
+            }
+          ]
+        },
+        "schema": "iglu:com.snowplowanalytics.factotum/factfile/jsonschema/1-0-0"
+      }
+    }
+  ]
+}

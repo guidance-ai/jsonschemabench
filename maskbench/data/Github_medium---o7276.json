@@ -1,0 +1,173 @@
+{
+  "description": "sample Github_medium/o7276.json",
+  "meta": {
+    "full_size": 827,
+    "stripped_size": 446,
+    "features": [
+      "additionalProperties",
+      "format",
+      "format:email",
+      "format:uri",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "name": "Package",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "formats": {
+        "type": "array",
+        "description": "List of available parsing formats confirguation.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Full name of the author."
+            },
+            "email": {
+              "type": "string",
+              "description": "Email address of the author.",
+              "format": "email"
+            },
+            "homepage": {
+              "type": "string",
+              "description": "Homepage URL for the author.",
+              "format": "uri"
+            },
+            "role": {
+              "type": "string",
+              "description": "Author's role in the project."
+            }
+          }
+        }
+      },
+      "config": {
+        "type": "object",
+        "description": "Composer options.",
+        "properties": {
+          "process-timeout": {
+            "type": "integer",
+            "description": "The timeout in seconds for process executions, defaults to 300 (5mins)."
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "formats": [
+          {
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "homepage": "https://johndoe.example.com",
+            "role": "Maintainer"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane.doe@example.com",
+            "homepage": "https://janedoe.example.com",
+            "role": "Contributor"
+          }
+        ],
+        "config": {
+          "process-timeout": 300
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "formats": [
+          {
+            "name": "John Doe",
+            "email": "john@example.com",
+            "homepage": "https://johndoe.com",
+            "role": "Maintainer"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "homepage": "https://janedoe.com",
+            "role": "Contributor"
+          }
+        ],
+        "config": {
+          "process-timeout": 300
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not-an-email\" is not a \"email\"",
+      "python_error": "'not-a-uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['formats']['items']['properties']['homepage']:\n    {'type': 'string',\n     'description': 'Homepage URL for the author.',\n     'format': 'uri'}\n\nOn instance['formats'][1]['homepage']:\n    'not-a-uri'",
+      "data": {
+        "formats": [
+          {
+            "name": "John Doe",
+            "email": "not-an-email",
+            "homepage": "https://johndoe.com",
+            "role": "Maintainer"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "homepage": "not-a-uri",
+            "role": "Contributor"
+          }
+        ],
+        "config": {
+          "process-timeout": 300
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-email\" is not a \"email\"",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'name': 'Package',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'formats': {'type': 'array',\n                                'description': 'List of available parsing '\n                                               'formats confirguation.',\n                                'items': {'type': 'object',\n                                          'additionalProperties': False,\n                                          'required': ['name'],\n                                          'properties': {'name': {'type': 'string',\n                                                                  'description': 'Full '\n                                                                                 'name '\n                                                                                 'of '\n                      .. (3606 more)",
+      "data": {
+        "formats": [
+          {
+            "name": "John Doe",
+            "email": "invalid-email",
+            "homepage": "https://johndoe.com",
+            "role": "Maintainer"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "homepage": "invalid-uri",
+            "role": "Contributor"
+          }
+        ],
+        "config": {
+          "process-timeout": "300"
+        },
+        "extra": "extra property"
+      }
+    }
+  ]
+}

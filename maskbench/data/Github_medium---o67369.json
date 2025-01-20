@@ -1,0 +1,276 @@
+{
+  "description": "sample Github_medium/o67369.json",
+  "meta": {
+    "full_size": 1975,
+    "stripped_size": 817,
+    "features": [
+      "format",
+      "format:checkbox",
+      "format:code",
+      "format:tabs",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "配置",
+    "type": "object",
+    "properties": {
+      "localFiles": {
+        "title": "本地文件",
+        "type": "object",
+        "readonly": true,
+        "collapsed": true,
+        "properties": {
+          "configurationPath": {
+            "type": "string",
+            "title": "配置文件路径"
+          },
+          "historyPath": {
+            "type": "string",
+            "title": "历史文件路径"
+          }
+        },
+        "required": [
+          "configurationPath",
+          "historyPath"
+        ]
+      },
+      "sync": {
+        "title": "同步配置",
+        "type": "object",
+        "collapsed": true,
+        "properties": {
+          "willSync": {
+            "type": "boolean",
+            "title": "是否开启同步，如果不开启同步，历史纪录会保存在本地",
+            "default": false,
+            "format": "checkbox",
+            "propertyOrder": 1
+          },
+          "serverUrl": {
+            "type": "string",
+            "title": "服务器地址",
+            "default": "",
+            "propertyOrder": 2,
+            "requiredWhen": [
+              "willSync",
+              "===",
+              true
+            ]
+          },
+          "key": {
+            "type": "string",
+            "title": "密钥",
+            "default": "",
+            "propertyOrder": 3,
+            "requiredWhen": [
+              "willSync",
+              "===",
+              true
+            ]
+          }
+        },
+        "required": [
+          "willSync"
+        ]
+      },
+      "rawSources": {
+        "type": "array",
+        "title": "数据源配置",
+        "format": "tabs",
+        "_uniqueItems": true,
+        "collapsed": true,
+        "items": {
+          "type": "object",
+          "title": "Source",
+          "collapsed": true,
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "命名",
+              "default": "",
+              "propertyOrder": 1
+            },
+            "disabled": {
+              "type": "boolean",
+              "title": "是否禁用",
+              "default": false,
+              "format": "checkbox",
+              "propertyOrder": 2
+            },
+            "url": {
+              "type": "string",
+              "title": "页面URL",
+              "default": "",
+              "propertyOrder": 3
+            },
+            "isMilestone": {
+              "type": "boolean",
+              "title": "是否github项目的milestone页",
+              "default": false,
+              "propertyOrder": 4
+            },
+            "selector": {
+              "type": "string",
+              "title": "选择器",
+              "propertyOrder": 5,
+              "requiredWhen": [
+                "isMilestone",
+                "===",
+                false
+              ]
+            },
+            "getItem": {
+              "type": "string",
+              "title": "获取信息函数",
+              "default": "(cheerio, $) => {\n    return {\n        href: \"\", \n        title: \"\"\n    };\n}",
+              "format": "code",
+              "propertyOrder": 6,
+              "requiredWhen": [
+                "isMilestone",
+                "===",
+                false
+              ]
+            },
+            "limit": {
+              "type": "number",
+              "title": "限制数目",
+              "propertyOrder": 7,
+              "requiredWhen": [
+                "isMilestone",
+                "===",
+                false
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "url",
+            "isMilestone",
+            "disabled"
+          ]
+        }
+      }
+    },
+    "required": [
+      "sync",
+      "rawSources"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "localFiles": {
+          "configurationPath": "/path/to/config/file",
+          "historyPath": "/path/to/history/file"
+        },
+        "sync": {
+          "willSync": true,
+          "serverUrl": "https://example.com/sync-server",
+          "key": "your-sync-key"
+        },
+        "rawSources": [
+          {
+            "name": "Source 1",
+            "disabled": false,
+            "url": "https://example.com/source1",
+            "isMilestone": false,
+            "selector": ".item-list",
+            "getItem": "(cheerio, $) => {\n    return {\n        href: $(this).find('a').attr('href'), \n        title: $(this).find('a').text()\n    };\n}",
+            "limit": 10
+          },
+          {
+            "name": "Source 2",
+            "disabled": false,
+            "url": "https://example.com/source2",
+            "isMilestone": true,
+            "selector": "",
+            "getItem": "",
+            "limit": 0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "localFiles": {
+          "configurationPath": "/path/to/config.json",
+          "historyPath": "/path/to/history.json"
+        },
+        "sync": {
+          "willSync": true,
+          "serverUrl": "https://example.com/sync",
+          "key": "your_secret_key"
+        },
+        "rawSources": [
+          {
+            "name": "Source 1",
+            "disabled": false,
+            "url": "https://example.com/source1",
+            "isMilestone": false,
+            "selector": ".item",
+            "getItem": "(cheerio, $) => {\n    return {\n        href: $(\".item a\").attr(\"href\"), \n        title: $(\".item a\").text()\n    };\n}",
+            "limit": 10
+          },
+          {
+            "name": "Source 2",
+            "disabled": false,
+            "url": "https://example.com/source2",
+            "isMilestone": true
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sync']['properties']['serverUrl']:\n    {'type': 'string',\n     'title': '服务器地址',\n     'default': '',\n     'propertyOrder': 2,\n     'requiredWhen': ['willSync', '===', True]}\n\nOn instance['sync']['serverUrl']:\n    None",
+      "data": {
+        "localFiles": {
+          "configurationPath": "/path/to/config.json",
+          "historyPath": "/path/to/history.json"
+        },
+        "sync": {
+          "willSync": true,
+          "serverUrl": null,
+          "key": "your_secret_key"
+        },
+        "rawSources": [
+          {
+            "name": "Source 1",
+            "disabled": false,
+            "url": "https://example.com/source1",
+            "isMilestone": false,
+            "selector": ".item",
+            "getItem": "(cheerio, $) => {\n    return {\n        href: $(\".item a\").attr(\"href\"), \n        title: $(\".item a\").text()\n    };\n}",
+            "limit": "string instead of a number"
+          },
+          {
+            "name": "Source 2",
+            "disabled": false,
+            "url": "https://example.com/source2",
+            "isMilestone": true,
+            "selector": ".item"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,431 @@
+{
+  "description": "sample Github_medium/o13692.json",
+  "meta": {
+    "full_size": 2579,
+    "stripped_size": 1332,
+    "features": [
+      "$ref",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "assigned_resources": {
+        "description": "Resource assigned for the processing block",
+        "properties": {
+          "status": {
+            "description": "Status of the resource assigned",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "processing_blocks": {
+        "description": "Array of processing blocks associated with this scheduling block",
+        "items": {
+          "description": "Processing block specification - description of required processing",
+          "properties": {
+            "assigned_resources": {
+              "$ref": "#/definitions/assigned_resources"
+            },
+            "id": {
+              "description": "[project]-[type][id] for the processing block",
+              "pattern": "^[a-z]+-[a-z]+[0-9]+$",
+              "type": "string"
+            },
+            "priority": {
+              "description": "The Priority of the processing block",
+              "type": "number"
+            },
+            "resource_requirement": {
+              "$ref": "#/definitions/resources_requirement"
+            },
+            "status": {
+              "description": "Status of the processing block",
+              "type": "string"
+            },
+            "type": {
+              "description": "Type of the processing block",
+              "type": "string"
+            },
+            "workflow": {
+              "$ref": "#/definitions/workflow"
+            }
+          },
+          "required": [
+            "id",
+            "resources_requirement",
+            "workflow"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "resources_requirement": {
+        "description": "Resources required for the processing block",
+        "properties": {
+          "storage_type": {
+            "description": "Hot or cold buffer storage type",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "workflow": {
+        "description": "Workflow stages",
+        "properties": {
+          "status": {
+            "description": "Status of the workflow stage",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "description": "Schema for an SKA Scheduling Block Instance",
+    "properties": {
+      "date": {
+        "description": "YYYYmmdd for the date",
+        "pattern": "^[0-9]{8}$",
+        "type": "string"
+      },
+      "id": {
+        "description": "[date]-[project]-[type][id] for the scheduling block instance id",
+        "pattern": "^[0-9]{8}-[\\w\\d]+-sbi[0-9]{3}$",
+        "type": "string"
+      },
+      "name": {
+        "description": "Optional name string",
+        "type": "string"
+      },
+      "processing_blocks": {
+        "$ref": "#/definitions/processing_blocks"
+      },
+      "project": {
+        "description": "Project of the scheduling block instance",
+        "type": "string"
+      },
+      "sched_block_id": {
+        "description": "[date]-[project]-[type][id] for the scheduling block id",
+        "pattern": "^[0-9]{8}-[\\w|\\d]+-sb[0-9]{3}$",
+        "type": "string"
+      },
+      "status": {
+        "description": "Status of the scheduling block instance",
+        "type": "string"
+      },
+      "sub_array_id": {
+        "description": "[type][id] for the sub array id",
+        "pattern": "^subarray-0[0-9]|subarray-1[0-5]$",
+        "type": "string"
+      },
+      "type": {
+        "description": "Type of scheduling block",
+        "type": "string"
+      },
+      "version": {
+        "description": "Version of the scheduling block instance",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "sched_block_id",
+      "sub_array_id",
+      "processing_blocks"
+    ],
+    "title": "Scheduling Block Instance",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "date": "20221231",
+        "id": "20221231-myproject-sbi001",
+        "name": "My Scheduling Block Instance",
+        "processing_blocks": [
+          {
+            "assigned_resources": {
+              "status": "assigned"
+            },
+            "id": "myproject-processingblock1",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            },
+            "resources_requirement": {
+              "storage_type": "cold"
+            },
+            "workflow_status": "pending"
+          }
+        ],
+        "project": "myproject",
+        "sched_block_id": "20221231-myproject-sb001",
+        "status": "pending",
+        "sub_array_id": "subarray-01",
+        "type": "science",
+        "version": "1.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"myproject-processingblock\" does not match \"^[a-z]+-[a-z]+[0-9]+$\"",
+      "python_error": "'myproject-processingblock' does not match '^[a-z]+-[a-z]+[0-9]+$'\n\nFailed validating 'pattern' in schema['properties']['processing_blocks']['items']['properties']['id']:\n    {'description': '[project]-[type][id] for the processing block',\n     'pattern': '^[a-z]+-[a-z]+[0-9]+$',\n     'type': 'string'}\n\nOn instance['processing_blocks'][0]['id']:\n    'myproject-processingblock'",
+      "data": {
+        "date": "20221231",
+        "id": "20221231-myproject-sbi001",
+        "name": "My Scheduling Block Instance",
+        "processing_blocks": [
+          {
+            "assigned_resources": {
+              "status": "assigned"
+            },
+            "id": "myproject-processingblock",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            },
+            "resources_requirement": {
+              "storage_type": "cold"
+            },
+            "workflow_status": "pending"
+          }
+        ],
+        "project": "myproject",
+        "sched_block_id": "20221231-myproject-sb001",
+        "status": "pending",
+        "sub_array_id": "subarray-01",
+        "type": "science",
+        "version": "1.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"subarray-16\" does not match \"^subarray-0[0-9]|subarray-1[0-5]$\"",
+      "python_error": "'subarray-16' does not match '^subarray-0[0-9]|subarray-1[0-5]$'\n\nFailed validating 'pattern' in schema['properties']['sub_array_id']:\n    {'description': '[type][id] for the sub array id',\n     'pattern': '^subarray-0[0-9]|subarray-1[0-5]$',\n     'type': 'string'}\n\nOn instance['sub_array_id']:\n    'subarray-16'",
+      "data": {
+        "date": "20221231",
+        "id": "20221231-myproject-sbi001",
+        "name": "My Scheduling Block Instance",
+        "processing_blocks": [
+          {
+            "assigned_resources": {
+              "status": "assigned"
+            },
+            "id": "myproject-processingblock1",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            },
+            "resources_requirement": {
+              "storage_type": "cold"
+            },
+            "workflow_status": "pending"
+          }
+        ],
+        "project": "myproject",
+        "sched_block_id": "20221231-myproject-sb001",
+        "status": "pending",
+        "sub_array_id": "subarray-16",
+        "version": "1.0",
+        "Invalid: sub_array_id should be one of subarray-0[0-9] or subarray-1[0-5]": "type",
+        "science": "Invalid: type should be a string, not a key-value pair"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"2022123\" does not match \"^[0-9]{8}$\"",
+      "python_error": "'2022123' does not match '^[0-9]{8}$'\n\nFailed validating 'pattern' in schema['properties']['date']:\n    {'description': 'YYYYmmdd for the date',\n     'pattern': '^[0-9]{8}$',\n     'type': 'string'}\n\nOn instance['date']:\n    '2022123'",
+      "data": {
+        "date": "2022123",
+        "id": "20221231-myproject-sbi001",
+        "name": "My Scheduling Block Instance",
+        "processing_blocks": [
+          {
+            "assigned_resources": {
+              "status": "assigned"
+            },
+            "id": "myproject-processingblock1",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            }
+          }
+        ],
+        "project": "myproject",
+        "sched_block_id": "20221231-myproject-sb001",
+        "status": "pending",
+        "sub_array_id": "subarray-01",
+        "type": "science",
+        "version": "1.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"subarray-16\" does not match \"^subarray-0[0-9]|subarray-1[0-5]$\"",
+      "python_error": "'subarray-16' does not match '^subarray-0[0-9]|subarray-1[0-5]$'\n\nFailed validating 'pattern' in schema['properties']['sub_array_id']:\n    {'description': '[type][id] for the sub array id',\n     'pattern': '^subarray-0[0-9]|subarray-1[0-5]$',\n     'type': 'string'}\n\nOn instance['sub_array_id']:\n    'subarray-16'",
+      "data": {
+        "date": "20221231",
+        "id": "20221231-myproject-sbi001",
+        "name": "My Scheduling Block Instance",
+        "processing_blocks": [
+          {
+            "assigned_resources": {
+              "status": "assigned"
+            },
+            "id": "myproject-processingblock1",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            },
+            "resources_requirement": {
+              "storage_type": "cold"
+            },
+            "workflow_status": "pending"
+          },
+          {
+            "assigned_resources": {
+              "status": "assigned"
+            },
+            "id": "myproject-processingblock2",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            },
+            "resources_requirement": {
+              "storage_type": "cold"
+            },
+            "workflow_status": "pending"
+          }
+        ],
+        "project": "myproject",
+        "sched_block_id": "20221231-myproject-sb001",
+        "status": "pending",
+        "sub_array_id": "subarray-16",
+        "type": "science",
+        "version": "1.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"2022123123\" does not match \"^[0-9]{8}$\"",
+      "python_error": "'2022123123' does not match '^[0-9]{8}$'\n\nFailed validating 'pattern' in schema['properties']['date']:\n    {'description': 'YYYYmmdd for the date',\n     'pattern': '^[0-9]{8}$',\n     'type': 'string'}\n\nOn instance['date']:\n    '2022123123'",
+      "data": {
+        "date": "2022123123",
+        "id": "20221231-myproject-sbi001",
+        "name": "My Scheduling Block Instance",
+        "processing_blocks": [
+          {
+            "assigned_resources": {
+              "status": "assigned"
+            },
+            "id": "myproject-processingblock1",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            }
+          }
+        ],
+        "project": "myproject",
+        "sched_block_id": "20221231-myproject-sb001",
+        "status": "pending",
+        "sub_array_id": "subarray-01",
+        "type": "science",
+        "version": "1.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['processing_blocks']['items']['properties']['assigned_resources']['properties']['status']:\n    {'description': 'Status of the resource assigned', 'type': 'string'}\n\nOn instance['processing_blocks'][0]['assigned_resources']['status']:\n    12345",
+      "data": {
+        "date": "20221231",
+        "id": "20221231-myproject-sbi001",
+        "name": "My Scheduling Block Instance",
+        "processing_blocks": [
+          {
+            "assigned_resources": {
+              "status": 12345
+            },
+            "id": "myproject-processingblock1",
+            "priority": 1,
+            "resource_requirement": {
+              "storage_type": "hot"
+            },
+            "status": "pending",
+            "type": "processing",
+            "workflow": {
+              "status": "pending"
+            },
+            "resources_requirement": {
+              "storage_type": "cold"
+            },
+            "workflow_status": "pending"
+          }
+        ],
+        "project": "myproject",
+        "sched_block_id": "20221231-myproject-sb001",
+        "status": "pending",
+        "sub_array_id": "subarray-01",
+        "type": "science",
+        "version": "1.0"
+      }
+    }
+  ]
+}

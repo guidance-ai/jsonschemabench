@@ -1,0 +1,414 @@
+{
+  "description": "sample Github_medium/o68600.json",
+  "meta": {
+    "full_size": 1122,
+    "stripped_size": 964,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Domain set",
+    "type": "array",
+    "items": {
+      "title": "Domain",
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "enum": [
+            "v1beta1",
+            "v1.0",
+            "v1"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "Domain",
+            "domain"
+          ],
+          "readOnly": true
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 30
+            },
+            "createdOn": {
+              "type": "string",
+              "readOnly": true
+            },
+            "modifiedOn": {
+              "type": "string",
+              "readOnly": true
+            },
+            "ref": {
+              "type": "string",
+              "readOnly": true,
+              "minLength": 3,
+              "maxLength": 24
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "spec": {
+          "type": "object",
+          "properties": {
+            "context": {
+              "type": "object",
+              "properties": {
+                "domainUri": {
+                  "type": "string",
+                  "readOnly": true,
+                  "minLength": 1
+                },
+                "egressPolicy": {
+                  "type": "object",
+                  "properties": {
+                    "rule": {
+                      "type": "string"
+                    },
+                    "numberRef": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "rule",
+                    "numberRef"
+                  ]
+                },
+                "accessControlList": {
+                  "type": "object",
+                  "properties": {
+                    "allow": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1,
+                      "_uniqueItems": true
+                    },
+                    "deny": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1,
+                      "_uniqueItems": true
+                    }
+                  }
+                }
+              },
+              "required": [
+                "domainUri"
+              ]
+            }
+          },
+          "required": [
+            "context"
+          ]
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "spec",
+        "metadata"
+      ]
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": [
+        {
+          "apiVersion": "v1",
+          "kind": "Domain",
+          "metadata": {
+            "name": "example-domain",
+            "createdOn": "2022-01-01T12:00:00Z",
+            "modifiedOn": "2022-01-01T12:00:00Z",
+            "ref": "example-ref"
+          },
+          "spec": {
+            "context": {
+              "domainUri": "https://example.com",
+              "egressPolicy": {
+                "rule": "allow",
+                "numberRef": "example-number-ref"
+              },
+              "accessControlList": {
+                "allow": [
+                  "example-allow-1",
+                  "example-allow-2"
+                ],
+                "deny": [
+                  "example-deny-1",
+                  "example-deny-2"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "v1beta1",
+          "kind": "domain",
+          "metadata": {
+            "name": "another-example-domain",
+            "createdOn": "2022-01-02T12:00:00Z",
+            "modifiedOn": "2022-01-02T12:00:00Z",
+            "ref": "another-example-ref"
+          },
+          "spec": {
+            "context": {
+              "domainUri": "https://another-example.com",
+              "egressPolicy": {
+                "rule": "deny",
+                "numberRef": "another-example-number-ref"
+              },
+              "accessControlList": {
+                "allow": [
+                  "another-example-allow-1",
+                  "another-example-allow-2"
+                ],
+                "deny": [
+                  "another-example-deny-1",
+                  "another-example-deny-2"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Domain\",\"metadata\":{\"name\":\"ex\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"ex\"},\"spec\":{\"context\":{\"domainUri\":\"https://example.com\",\"egressPolicy\":{\"rule\":\"allow\",\"numberRef\":\"example-number-ref\"},\"accessControlList\":{\"allow\":[\"example-allow-1\",\"example-allow-2\"],\"deny\":[\"example-deny-1\",\"example-deny-2\"]}}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Domain', 'metadata': {'name': 'ex', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': 'ex'}, 'spec': {'context': {'domainUri': 'https://example.com', 'egressPolicy': {'rule': 'allow', 'numberRef': 'example-number-ref'}, 'accessControlList': {'allow': ['example-allow-1', 'example-allow-2'], 'deny': ['example-deny-1', 'example-deny-2']}}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Domain set',\n     'type': 'array',\n     'items': {'title': 'Domain',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Domain', 'domain'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n         .. (4428 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Domain",
+        "metadata": {
+          "name": "ex",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "ex"
+        },
+        "spec": {
+          "context": {
+            "domainUri": "https://example.com",
+            "egressPolicy": {
+              "rule": "allow",
+              "numberRef": "example-number-ref"
+            },
+            "accessControlList": {
+              "allow": [
+                "example-allow-1",
+                "example-allow-2"
+              ],
+              "deny": [
+                "example-deny-1",
+                "example-deny-2"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Domain\",\"metadata\":{\"name\":\"example-domain\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"example-ref\"},\"spec\":{\"context\":{\"domainUri\":\"https://example.com\",\"egressPolicy\":{\"rule\":\"allow\",\"numberRef\":\"example-number-ref\"},\"accessControlList\":{\"allow\":[],\"deny\":[\"example-deny-1\",\"example-deny-2\"]}}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Domain', 'metadata': {'name': 'example-domain', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': 'example-ref'}, 'spec': {'context': {'domainUri': 'https://example.com', 'egressPolicy': {'rule': 'allow', 'numberRef': 'example-number-ref'}, 'accessControlList': {'allow': [], 'deny': ['example-deny-1', 'example-deny-2']}}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Domain set',\n     'type': 'array',\n     'items': {'title': 'Domain',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Domain', 'domain'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                        .. (4340 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Domain",
+        "metadata": {
+          "name": "example-domain",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "example-ref"
+        },
+        "spec": {
+          "context": {
+            "domainUri": "https://example.com",
+            "egressPolicy": {
+              "rule": "allow",
+              "numberRef": "example-number-ref"
+            },
+            "accessControlList": {
+              "allow": [],
+              "deny": [
+                "example-deny-1",
+                "example-deny-2"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Domain\",\"metadata\":{\"name\":\"example-domain\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"ex\"},\"spec\":{\"context\":{\"domainUri\":\"https://example.com\",\"egressPolicy\":{\"rule\":\"allow\",\"numberRef\":\"example-number-ref\"},\"accessControlList\":{\"allow\":[\"example-allow-1\",\"example-allow-1\"],\"deny\":[\"example-deny-1\",\"example-deny-2\"]}}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Domain', 'metadata': {'name': 'example-domain', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': 'ex'}, 'spec': {'context': {'domainUri': 'https://example.com', 'egressPolicy': {'rule': 'allow', 'numberRef': 'example-number-ref'}, 'accessControlList': {'allow': ['example-allow-1', 'example-allow-1'], 'deny': ['example-deny-1', 'example-deny-2']}}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Domain set',\n     'type': 'array',\n     'items': {'title': 'Domain',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Domain', 'domain'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object.. (4452 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Domain",
+        "metadata": {
+          "name": "example-domain",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "ex"
+        },
+        "spec": {
+          "context": {
+            "domainUri": "https://example.com",
+            "egressPolicy": {
+              "rule": "allow",
+              "numberRef": "example-number-ref"
+            },
+            "accessControlList": {
+              "allow": [
+                "example-allow-1",
+                "example-allow-1"
+              ],
+              "deny": [
+                "example-deny-1",
+                "example-deny-2"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Domain\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"example-ref\"},\"spec\":{\"context\":{\"domainUri\":\"https://example.com\",\"egressPolicy\":{\"rule\":\"allow\",\"numberRef\":\"example-number-ref\"},\"accessControlList\":{\"allow\":[\"example-allow-1\",\"example-allow-2\"],\"deny\":[\"example-deny-1\",\"example-deny-2\"]}}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Domain', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': 'example-ref'}, 'spec': {'context': {'domainUri': 'https://example.com', 'egressPolicy': {'rule': 'allow', 'numberRef': 'example-number-ref'}, 'accessControlList': {'allow': ['example-allow-1', 'example-allow-2'], 'deny': ['example-deny-1', 'example-deny-2']}}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Domain set',\n     'type': 'array',\n     'items': {'title': 'Domain',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Domain', 'domain'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n .. (4444 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Domain",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "example-ref"
+        },
+        "spec": {
+          "context": {
+            "domainUri": "https://example.com",
+            "egressPolicy": {
+              "rule": "allow",
+              "numberRef": "example-number-ref"
+            },
+            "accessControlList": {
+              "allow": [
+                "example-allow-1",
+                "example-allow-2"
+              ],
+              "deny": [
+                "example-deny-1",
+                "example-deny-2"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Domain\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"example-ref\"},\"spec\":{\"context\":{\"domainUri\":\"https://example.com\",\"egressPolicy\":{\"rule\":\"allow\",\"numberRef\":\"example-number-ref\"},\"accessControlList\":{\"allow\":[\"example-allow-1\",\"example-allow-1\"],\"deny\":[\"example-deny-1\",\"example-deny-2\"]}}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Domain', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': 'example-ref'}, 'spec': {'context': {'domainUri': 'https://example.com', 'egressPolicy': {'rule': 'allow', 'numberRef': 'example-number-ref'}, 'accessControlList': {'allow': ['example-allow-1', 'example-allow-1'], 'deny': ['example-deny-1', 'example-deny-2']}}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Domain set',\n     'type': 'array',\n     'items': {'title': 'Domain',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Domain', 'domain'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n .. (4444 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Domain",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "example-ref"
+        },
+        "spec": {
+          "context": {
+            "domainUri": "https://example.com",
+            "egressPolicy": {
+              "rule": "allow",
+              "numberRef": "example-number-ref"
+            },
+            "accessControlList": {
+              "allow": [
+                "example-allow-1",
+                "example-allow-1"
+              ],
+              "deny": [
+                "example-deny-1",
+                "example-deny-2"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Domain\",\"metadata\":{\"name\":\"ex\",\"createdOn\":\"2022-01-01T12:00:00Z\",\"modifiedOn\":\"2022-01-01T12:00:00Z\",\"ref\":\"example-ref\"},\"spec\":{\"context\":{\"domainUri\":\"https://example.com\",\"egressPolicy\":{\"rule\":\"allow\",\"numberRef\":\"example-number-ref\"},\"accessControlList\":{\"allow\":[\"example-allow-1\",\"example-allow-2\",\"example-allow-2\"],\"deny\":[\"example-deny-1\",\"example-deny-2\"]}}}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Domain', 'metadata': {'name': 'ex', 'createdOn': '2022-01-01T12:00:00Z', 'modifiedOn': '2022-01-01T12:00:00Z', 'ref': 'example-ref'}, 'spec': {'context': {'domainUri': 'https://example.com', 'egressPolicy': {'rule': 'allow', 'numberRef': 'example-number-ref'}, 'accessControlList': {'allow': ['example-allow-1', 'example-allow-2', 'example-allow-2'], 'deny': ['example-deny-1', 'example-deny-2']}}}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Domain set',\n     'type': 'array',\n     'items': {'title': 'Domain',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Domain', 'domain'],\n                                       'readOnly': True},\n                              'metadata': .. (4542 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Domain",
+        "metadata": {
+          "name": "ex",
+          "createdOn": "2022-01-01T12:00:00Z",
+          "modifiedOn": "2022-01-01T12:00:00Z",
+          "ref": "example-ref"
+        },
+        "spec": {
+          "context": {
+            "domainUri": "https://example.com",
+            "egressPolicy": {
+              "rule": "allow",
+              "numberRef": "example-number-ref"
+            },
+            "accessControlList": {
+              "allow": [
+                "example-allow-1",
+                "example-allow-2",
+                "example-allow-2"
+              ],
+              "deny": [
+                "example-deny-1",
+                "example-deny-2"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

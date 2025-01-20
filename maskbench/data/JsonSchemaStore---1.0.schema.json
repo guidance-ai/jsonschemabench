@@ -1,0 +1,288 @@
+{
+  "description": "sample JsonSchemaStore/1.0.schema.json",
+  "meta": {
+    "full_size": 1978,
+    "stripped_size": 798,
+    "features": [
+      "additionalProperties",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Error-Pages config file schema",
+    "description": "Error-Pages config file schema.",
+    "type": "object",
+    "properties": {
+      "templates": {
+        "type": "array",
+        "description": "Templates list",
+        "items": {
+          "type": "object",
+          "description": "Template properties",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Path to the template file",
+              "examples": [
+                "./templates/ghost.html",
+                "/opt/tpl/ghost.htm"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "description": "Template name (optional, if path is defined)",
+              "examples": [
+                "ghost"
+              ]
+            },
+            "content": {
+              "type": "string",
+              "description": "Template content, if path is not defined",
+              "examples": [
+                "<html><body>{{ code }}: {{ message }}</body></html>"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "formats": {
+        "type": "object",
+        "description": "Responses, based on requested content-type format",
+        "properties": {
+          "json": {
+            "type": "object",
+            "description": "JSON format",
+            "properties": {
+              "content": {
+                "type": "string",
+                "description": "JSON response body (template tags are allowed here)",
+                "examples": [
+                  "{\"error\": true, \"code\": {{ code | json }}, \"message\": {{ message | json }}}"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "xml": {
+            "type": "object",
+            "description": "XML format",
+            "properties": {
+              "content": {
+                "type": "string",
+                "description": "XML response body (template tags are allowed here)",
+                "examples": [
+                  "<?xml version=\"1.0\" encoding=\"utf-8\"?><error><code>{{ code }}</code><message>{{ message }}</message></error>"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "pages": {
+        "type": "object",
+        "description": "Error pages (codes)",
+        "patternProperties": {
+          "^[a-zA-Z0-9_-]+$": {
+            "type": "object",
+            "description": "Error page (code)",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "Error page message (title)",
+                "examples": [
+                  "Bad Request"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "description": "Error page description",
+                "examples": [
+                  "The server did not understand the request"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "templates"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "templates": [
+          {
+            "path": "./templates/ghost.html",
+            "name": "ghost"
+          },
+          {
+            "content": "<html><body>{{ code }}: {{ message }}</body></html>"
+          }
+        ],
+        "formats": {
+          "json": {
+            "content": "{\"error\": true, \"code\": {{ code | json }}, \"message\": {{ message | json }}}"
+          },
+          "xml": {
+            "content": "<?xml version=\"1.0\" encoding=\"utf-8\"?><error><code>{{ code }}</code><message>{{ message }}</message></error>"
+          }
+        },
+        "pages": {
+          "400": {
+            "message": "Bad Request",
+            "description": "The server did not understand the request"
+          },
+          "404": {
+            "message": "Not Found",
+            "description": "The requested resource was not found"
+          },
+          "500": {
+            "message": "Internal Server Error",
+            "description": "An internal server error occurred"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "templates": [
+          {
+            "path": "./templates/ghost.html",
+            "name": "ghost"
+          },
+          {
+            "content": "<html><body>{{ code }}: {{ message }}</body></html>"
+          }
+        ],
+        "formats": {
+          "json": {
+            "content": "{\"error\": true, \"code\": {{ code | json }}, \"message\": {{ message | json }}}"
+          },
+          "xml": {
+            "content": "<?xml version=\"1.0\" encoding=\"utf-8\"?><error><code>{{ code }}</code><message>{{ message }}</message></error>"
+          }
+        },
+        "pages": {
+          "400": {
+            "message": "Bad Request",
+            "description": "The server did not understand the request"
+          },
+          "404": {
+            "message": "Not Found",
+            "description": "The requested resource could not be found"
+          },
+          "500": {
+            "message": "Internal Server Error",
+            "description": "An unexpected condition was encountered"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('400!' was unexpected)",
+      "python_error": "'400!' does not match any of the regexes: '^[a-zA-Z0-9_-]+$'\n\nFailed validating 'additionalProperties' in schema['properties']['pages']:\n    {'type': 'object',\n     'description': 'Error pages (codes)',\n     'patternProperties': {'^[a-zA-Z0-9_-]+$': {'type': 'object',\n                                                'description': 'Error page '\n                                                               '(code)',\n                                                'properties': {'message': {'type': 'string',\n                                                                           'description': 'Error '\n                                                                                          'page '\n                                                                                          'message '\n                                                                                          '(title)',\n                                                                           'examples': ['Bad '\n                  .. (1690 more)",
+      "data": {
+        "templates": [
+          {
+            "path": "./templates/ghost.html",
+            "name": "ghost"
+          },
+          {
+            "content": "<html><body>{{ code }}: {{ message }}</body></html>"
+          }
+        ],
+        "formats": {
+          "json": {
+            "content": "{\"error\": true, \"code\": {{ code | json }}, \"message\": {{ message | json }}}"
+          },
+          "xml": {
+            "content": "<?xml version=\"1.0\" encoding=\"utf-8\"?><error><code>{{ code }}</code><message>{{ message }}</message></error>"
+          }
+        },
+        "pages": {
+          "400!": {
+            "message": "Bad Request",
+            "description": "The server did not understand the request"
+          },
+          "404": {
+            "message": "Not Found",
+            "description": "The requested resource could not be found"
+          },
+          "500": {
+            "message": "Internal Server Error",
+            "description": "An unexpected condition was encountered"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('extraRootProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-07/schema#',\n     'title': 'Error-Pages config file schema',\n     'description': 'Error-Pages config file schema.',\n     'type': 'object',\n     'properties': {'templates': {'type': 'array',\n                                  'description': 'Templates list',\n                                  'items': {'type': 'object',\n                                            'description': 'Template '\n                                                           'properties',\n                                            'properties': {'path': {'type': 'string',\n                                                                    'description': 'Path '\n                                                                                   'to '\n                                                                                   'the '\n                               .. (12116 more)",
+      "data": {
+        "templates": [
+          {
+            "path": "./templates/ghost.html",
+            "name": 123
+          },
+          {
+            "content": "<html><body>{{ code }}: {{ message }}</body></html>",
+            "extraProperty": "Invalid"
+          }
+        ],
+        "formats": {
+          "json": {
+            "content": "{\"error\": true, \"code\": {{ code | json }}, \"message\": {{ message | json }}",
+            "extraProperty": "Invalid"
+          },
+          "xml": {
+            "content": "<?xml version=\"1.0\" encoding=\"utf-8\"?><error><code>{{ code }}</code><message>{{ message }}</message></error>"
+          }
+        },
+        "pages": {
+          "400": {
+            "message": "Bad Request",
+            "description": "The server did not understand the request"
+          },
+          "404": {
+            "message": "Not Found",
+            "description": "The requested resource could not be found",
+            "extraProperty": "Invalid"
+          },
+          "123abc": {
+            "message": "Internal Server Error",
+            "description": "An unexpected condition was encountered"
+          }
+        },
+        "extraRootProperty": "Invalid"
+      }
+    }
+  ]
+}

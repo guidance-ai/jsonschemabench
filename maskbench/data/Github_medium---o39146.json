@@ -1,0 +1,174 @@
+{
+  "description": "sample Github_medium/o39146.json",
+  "meta": {
+    "full_size": 920,
+    "stripped_size": 920,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "statusCode",
+      "reasonPhrase"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "statusCode": {
+        "type": "integer"
+      },
+      "reasonPhrase": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "details": {},
+      "stackTrace": {
+        "$ref": "#/definitions/exception"
+      }
+    },
+    "definitions": {
+      "exception": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "at": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/maybeCircularException"
+            }
+          },
+          "causedBy": {
+            "$ref": "#/definitions/maybeCircularException"
+          }
+        }
+      },
+      "circularReference": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "circularReference"
+        ],
+        "properties": {
+          "circularReference": {
+            "$ref": "#/definitions/exception"
+          }
+        }
+      },
+      "maybeCircularException": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/exception"
+          },
+          {
+            "$ref": "#/definitions/circularReference"
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "statusCode": 404,
+        "reasonPhrase": "Not Found",
+        "message": "The requested resource was not found",
+        "details": {},
+        "stackTrace": {
+          "type": "NotFoundException",
+          "message": "Resource not found",
+          "at": [
+            "com.example.ResourceController.getResource(ResourceController.java:12)",
+            "com.example.ResourceService.getResource(ResourceService.java:20)"
+          ],
+          "suppressed": [
+            {
+              "type": "IOException",
+              "message": "Error reading resource",
+              "at": [
+                "com.example.ResourceService.getResource(ResourceService.java:25)"
+              ]
+            }
+          ],
+          "causedBy": {
+            "type": "FileNotFoundException",
+            "message": "File not found",
+            "at": [
+              "com.example.ResourceService.getResource(ResourceService.java:30)"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['stackTrace']['properties']['at']['items']:\n    {'type': 'string'}\n\nOn instance['stackTrace']['at'][1]:\n    12345",
+      "data": {
+        "statusCode": 404,
+        "reasonPhrase": "Not Found",
+        "message": "The requested resource was not found",
+        "details": {},
+        "stackTrace": {
+          "type": "NotFoundException",
+          "message": "Resource not found",
+          "at": [
+            "com.example.ResourceController.getResource(ResourceController.java:12)",
+            12345
+          ],
+          "suppressed": [
+            {
+              "type": "IOException",
+              "message": "Error reading resource",
+              "at": [
+                "com.example.ResourceService.getResource(ResourceService.java:25)"
+              ]
+            }
+          ],
+          "causedBy": {
+            "type": "FileNotFoundException",
+            "message": "File not found",
+            "at": [
+              "com.example.ResourceService.getResource(ResourceService.java:30)"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

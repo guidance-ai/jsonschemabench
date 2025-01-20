@@ -1,0 +1,119 @@
+{
+  "description": "sample Kubernetes/kb_558_Normalized.json",
+  "meta": {
+    "full_size": 1251,
+    "stripped_size": 597,
+    "features": [
+      "$ref",
+      "format",
+      "format:int32",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "description": "MetricTarget defines the target value, average value, or average utilization of a specific metric",
+    "properties": {
+      "averageUtilization": {
+        "description": "averageUtilization is the target value of the average of the resource metric across all relevant pods, represented as a percentage of the requested value of the resource for the pods. Currently only valid for Resource metric source type",
+        "format": "int32",
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "averageValue": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity",
+        "description": "averageValue is the target value of the average of the metric across all relevant pods (as a quantity)"
+      },
+      "type": {
+        "description": "type represents whether the metric type is Utilization, Value, or AverageValue",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "value": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity",
+        "description": "value is the target value of the metric (as a quantity)."
+      }
+    },
+    "required": [
+      "type"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "averageUtilization": 50,
+        "averageValue": "10Mi",
+        "type": "Utilization",
+        "value": 100
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "averageUtilization": 50,
+        "averageValue": "100m",
+        "type": "Utilization",
+        "value": 200
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"abc\" is not of types \"integer\", \"null\"",
+      "python_error": "'abc' is not of type 'integer', 'null'\n\nFailed validating 'type' in schema['properties']['averageUtilization']:\n    {'description': 'averageUtilization is the target value of the average '\n                    'of the resource metric across all relevant pods, '\n                    'represented as a percentage of the requested value of '\n                    'the resource for the pods. Currently only valid for '\n                    'Resource metric source type',\n     'format': 'int32',\n     'type': ['integer', 'null']}\n\nOn instance['averageUtilization']:\n    'abc'",
+      "data": {
+        "type": "InvalidType",
+        "averageUtilization": "abc",
+        "averageValue": "100m",
+        "value": 200
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "[1,2,3] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "[1, 2, 3] is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['averageValue']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['averageValue']:\n    [1, 2, 3]",
+      "data": {
+        "type": "Utilization",
+        "averageUtilization": 50,
+        "averageValue": [
+          1,
+          2,
+          3
+        ],
+        "value": 200
+      }
+    }
+  ]
+}

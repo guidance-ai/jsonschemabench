@@ -1,0 +1,785 @@
+{
+  "description": "sample Github_medium/o41780.json",
+  "meta": {
+    "full_size": 1675,
+    "stripped_size": 1642,
+    "features": [
+      "$ref",
+      "@minmaxNumber",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$ref": "#/definitions/network",
+    "definitions": {
+      "network": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/definitions/name"
+          },
+          "meta": {
+            "$ref": "#/definitions/metadata"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/transaction"
+            }
+          },
+          "ussd_codes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ussd-code"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "meta",
+          "transactions",
+          "ussd_codes"
+        ]
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "spec": {
+            "type": "string",
+            "pattern": "^[0-9].[0-9]$"
+          },
+          "date_updated": {
+            "$ref": "#/definitions/date"
+          },
+          "url": {
+            "type": "string",
+            "_format": "uri"
+          }
+        },
+        "required": [
+          "spec",
+          "date_updated",
+          "url"
+        ]
+      },
+      "transaction": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/definitions/name"
+          },
+          "classes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/class"
+            }
+          },
+          "amount_input": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "classes"
+        ]
+      },
+      "class": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/definitions/name"
+          },
+          "ranges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/range"
+            }
+          },
+          "amount": {
+            "$ref": "#/definitions/cost"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "range": {
+        "type": "object",
+        "properties": {
+          "low": {
+            "$ref": "#/definitions/cost"
+          },
+          "high": {
+            "$ref": "#/definitions/cost"
+          },
+          "amount": {
+            "$ref": "#/definitions/cost"
+          }
+        },
+        "required": [
+          "low",
+          "high",
+          "amount"
+        ]
+      },
+      "cost": {
+        "type": [
+          "number",
+          "string"
+        ],
+        "minimum": -2,
+        "pattern": "^[+-]Infinity$"
+      },
+      "ussd-code": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "description"
+        ]
+      },
+      "name": {
+        "type": "string"
+      },
+      "date": {
+        "type": "string",
+        "_format": "date"
+      },
+      "error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "message",
+          "name",
+          "statusCode"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.0",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": 0,
+                    "high": 100,
+                    "amount": 10
+                  }
+                ],
+                "amount": 20,
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          },
+          {
+            "name": "Transaction 2",
+            "classes": [
+              {
+                "name": "Class 2",
+                "ranges": [
+                  {
+                    "low": 100,
+                    "high": 200,
+                    "amount": 20
+                  }
+                ],
+                "amount": 30,
+                "message": "This is another message"
+              }
+            ],
+            "amount_input": false
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1.0.0\" does not match \"^[0-9].[0-9]$\"",
+      "python_error": "'1.0.0' does not match '^[0-9].[0-9]$'\n\nFailed validating 'pattern' in schema['properties']['meta']['properties']['spec']:\n    {'type': 'string', 'pattern': '^[0-9].[0-9]$'}\n\nOn instance['meta']['spec']:\n    '1.0.0'",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.0.0",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": 0,
+                    "high": 100,
+                    "amount": 10
+                  }
+                ],
+                "amount": 20,
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          },
+          {
+            "name": "Transaction 2",
+            "classes": [
+              {
+                "name": "Class 2",
+                "ranges": [
+                  {
+                    "low": 100,
+                    "high": 200,
+                    "amount": 20
+                  }
+                ],
+                "amount": 30,
+                "message": "This is another message"
+              }
+            ],
+            "amount_input": false
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"Invalid\" does not match \"^[+-]Infinity$\"",
+      "python_error": "'Invalid' does not match '^[+-]Infinity$'\n\nFailed validating 'pattern' in schema['properties']['transactions']['items']['properties']['classes']['items']['properties']['amount']:\n    {'type': ['number', 'string'],\n     'minimum': -2,\n     'pattern': '^[+-]Infinity$'}\n\nOn instance['transactions'][1]['classes'][0]['amount']:\n    'Invalid'",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.0",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": 0,
+                    "high": 100,
+                    "amount": "Invalid"
+                  }
+                ],
+                "amount": 20,
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          },
+          {
+            "name": "Transaction 2",
+            "classes": [
+              {
+                "name": "Class 2",
+                "ranges": [
+                  {
+                    "low": 100,
+                    "high": 200,
+                    "amount": 20
+                  }
+                ],
+                "amount": "Invalid",
+                "message": "This is another message"
+              }
+            ],
+            "amount_input": false
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-3 is less than the minimum of -2",
+      "python_error": "-3 is less than the minimum of -2\n\nFailed validating 'minimum' in schema['properties']['transactions']['items']['properties']['classes']['items']['properties']['ranges']['items']['properties']['low']:\n    {'type': ['number', 'string'],\n     'minimum': -2,\n     'pattern': '^[+-]Infinity$'}\n\nOn instance['transactions'][0]['classes'][0]['ranges'][0]['low']:\n    -3",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.0",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": -3,
+                    "high": 100,
+                    "amount": 10
+                  }
+                ],
+                "amount": 20,
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          },
+          {
+            "name": "Transaction 2",
+            "classes": [
+              {
+                "name": "Class 2",
+                "ranges": [
+                  {
+                    "low": 100,
+                    "high": 200,
+                    "amount": 20
+                  }
+                ],
+                "amount": 30,
+                "message": "This is another message"
+              }
+            ],
+            "amount_input": false
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1.01\" does not match \"^[0-9].[0-9]$\"",
+      "python_error": "'1.01' does not match '^[0-9].[0-9]$'\n\nFailed validating 'pattern' in schema['properties']['meta']['properties']['spec']:\n    {'type': 'string', 'pattern': '^[0-9].[0-9]$'}\n\nOn instance['meta']['spec']:\n    '1.01'",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.01",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": 0,
+                    "high": 100,
+                    "amount": 10
+                  }
+                ],
+                "amount": 20,
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          },
+          {
+            "name": "Transaction 2",
+            "classes": [
+              {
+                "name": "Class 2",
+                "ranges": [
+                  {
+                    "low": 100,
+                    "high": 200,
+                    "amount": 20
+                  }
+                ],
+                "amount": 30,
+                "message": "This is another message"
+              }
+            ],
+            "amount_input": false
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"Infinity\" does not match \"^[+-]Infinity$\"",
+      "python_error": "'Invalid' does not match '^[+-]Infinity$'\n\nFailed validating 'pattern' in schema['properties']['transactions']['items']['properties']['classes']['items']['properties']['amount']:\n    {'type': ['number', 'string'],\n     'minimum': -2,\n     'pattern': '^[+-]Infinity$'}\n\nOn instance['transactions'][0]['classes'][0]['amount']:\n    'Invalid'",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.0",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": 0,
+                    "high": 100,
+                    "amount": "Infinity"
+                  }
+                ],
+                "amount": "Invalid",
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          },
+          {
+            "name": "Transaction 2",
+            "classes": [
+              {
+                "name": "Class 2",
+                "ranges": [
+                  {
+                    "low": 100,
+                    "high": 200,
+                    "amount": 20
+                  }
+                ],
+                "amount": 30,
+                "message": "This is another message"
+              }
+            ],
+            "amount_input": false
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"1.01\" does not match \"^[0-9].[0-9]$\"",
+      "python_error": "'transactions' is a required property\n\nFailed validating 'required' in schema:\n    {'type': 'object',\n     'properties': {'name': {'$ref': '#/definitions/name'},\n                    'meta': {'$ref': '#/definitions/metadata'},\n                    'transactions': {'type': 'array',\n                                     'items': {'$ref': '#/definitions/transaction'}},\n                    'ussd_codes': {'type': 'array',\n                                   'items': {'$ref': '#/definitions/ussd-code'}}},\n     'required': ['name', 'meta', 'transactions', 'ussd_codes']}\n\nOn instance:\n    {'name': 'Example Network',\n     'meta': {'spec': '1.01',\n              \"Invalid spec, should be in the format '^[0-9].[0-9]$'\": 'date_updated',\n              'Missing required property date_updated': 'url',\n              'Missing required property url': 'transactions',\n              'Missing required property transactions': 'ussd_codes',\n              'Missing required property ussd_codes': 'transactions',\n              'Added this bac.. (3972 more)",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.01",
+          "Invalid spec, should be in the format '^[0-9].[0-9]$'": "date_updated",
+          "Missing required property date_updated": "url",
+          "Missing required property url": "transactions",
+          "Missing required property transactions": "ussd_codes",
+          "Missing required property ussd_codes": "transactions",
+          "Added this back in, but with an invalid transaction": [
+            {
+              "name": "Transaction 1",
+              "classes": [
+                {
+                  "name": "Class 1",
+                  "ranges": [
+                    {
+                      "low": 100,
+                      "high": 100,
+                      "Invalid range, low should be less than high": "amount",
+                      "Missing required property amount": "amount",
+                      "Added this back in, but with an invalid amount": "Infinity",
+                      "Invalid amount, should be a number or a string in the format '^[+-]Infinity$'": "amount",
+                      "Added this back in, but with a valid amount": "-Infinity"
+                    }
+                  ],
+                  "amount": 20,
+                  "message": "This is a message"
+                }
+              ],
+              "amount_input": true
+            },
+            {
+              "name": "Transaction 2",
+              "classes": [
+                {
+                  "name": "Class 2",
+                  "ranges": [
+                    {
+                      "low": 100,
+                      "high": 200,
+                      "amount": 20
+                    }
+                  ],
+                  "amount": 30,
+                  "message": "This is another message"
+                }
+              ],
+              "amount_input": false
+            }
+          ],
+          "ussd_codes": [
+            {
+              "code": "*123#",
+              "Invalid code, should be a string": "description",
+              "Missing required property description": "description",
+              "Added this back in, but with an invalid description": 123,
+              "Invalid description, should be a string": "description",
+              "Added this back in, but with a valid description": "Check balance"
+            },
+            {
+              "code": "*456#",
+              "description": "Transfer money"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-3 is less than the minimum of -2",
+      "python_error": "-3 is less than the minimum of -2\n\nFailed validating 'minimum' in schema['properties']['transactions']['items']['properties']['classes']['items']['properties']['ranges']['items']['properties']['amount']:\n    {'type': ['number', 'string'],\n     'minimum': -2,\n     'pattern': '^[+-]Infinity$'}\n\nOn instance['transactions'][0]['classes'][0]['ranges'][0]['amount']:\n    -3",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.0",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": 0,
+                    "high": 100,
+                    "amount": -3
+                  }
+                ],
+                "amount": 20,
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          },
+          {
+            "name": "Transaction 2",
+            "classes": [
+              {
+                "name": "Class 2",
+                "ranges": [
+                  {
+                    "low": 100,
+                    "high": 200,
+                    "amount": 20
+                  }
+                ],
+                "amount": 30,
+                "message": "This is another message"
+              }
+            ],
+            "amount_input": false
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"Invalid Cost\" does not match \"^[+-]Infinity$\"",
+      "python_error": "'Invalid Cost' does not match '^[+-]Infinity$'\n\nFailed validating 'pattern' in schema['properties']['transactions']['items']['properties']['classes']['items']['properties']['amount']:\n    {'type': ['number', 'string'],\n     'minimum': -2,\n     'pattern': '^[+-]Infinity$'}\n\nOn instance['transactions'][0]['classes'][0]['amount']:\n    'Invalid Cost'",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.0",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": 0,
+                    "high": 100,
+                    "amount": 10
+                  }
+                ],
+                "amount": "Invalid Cost",
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          },
+          {
+            "code": "*456#",
+            "description": "Transfer money"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"1.00\" does not match \"^[0-9].[0-9]$\"",
+      "python_error": "'1.00' does not match '^[0-9].[0-9]$'\n\nFailed validating 'pattern' in schema['properties']['meta']['properties']['spec']:\n    {'type': 'string', 'pattern': '^[0-9].[0-9]$'}\n\nOn instance['meta']['spec']:\n    '1.00'",
+      "data": {
+        "name": "Example Network",
+        "meta": {
+          "spec": "1.00",
+          "date_updated": "2022-01-01",
+          "url": "https://example.com/network"
+        },
+        "transactions": [
+          {
+            "name": "Transaction 1",
+            "classes": [
+              {
+                "name": "Class 1",
+                "ranges": [
+                  {
+                    "low": -3,
+                    "high": 100,
+                    "amount": 10
+                  }
+                ],
+                "amount": 20,
+                "message": "This is a message"
+              }
+            ],
+            "amount_input": true
+          }
+        ],
+        "ussd_codes": [
+          {
+            "code": "*123#",
+            "description": "Check balance"
+          }
+        ]
+      }
+    }
+  ]
+}

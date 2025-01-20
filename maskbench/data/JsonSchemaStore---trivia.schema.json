@@ -1,0 +1,251 @@
+{
+  "description": "sample JsonSchemaStore/trivia.schema.json",
+  "meta": {
+    "full_size": 1519,
+    "stripped_size": 689,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "additionalProperties:object",
+      "format",
+      "format:uri",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "exclusiveMinimum",
+      "minimum",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://raw.githubusercontent.com/Cog-Creators/Red-DiscordBot/V3/develop/schema/trivia.schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Red-DiscordBot Trivia List file",
+    "type": "object",
+    "properties": {
+      "$schema": {
+        "type": "string",
+        "format": "uri"
+      },
+      "AUTHOR": {
+        "type": "string",
+        "description": "Author of the Trivia list."
+      },
+      "CONFIG": {
+        "type": "object",
+        "description": "The configuration for a trivia session.",
+        "properties": {
+          "bot_plays": {
+            "type": "boolean",
+            "description": "Whether or not the bot gains points during the session."
+          },
+          "delay": {
+            "type": "number",
+            "description": "The maximum number of seconds permitted to answer a question, must be a positive number greater than or equal to 4.0.",
+            "minimum": 4.0
+          },
+          "max_score": {
+            "type": "integer",
+            "description": "Number of points required in order to win the trivia, must be a positive integer.",
+            "exclusiveMinimum": 0
+          },
+          "payout_multiplier": {
+            "type": "number",
+            "description": "The payout multiplier, must be a positive number or zero.",
+            "minimum": 0
+          },
+          "reveal_answer": {
+            "type": "boolean",
+            "description": "Whether or not to reveal the answer when the question times out."
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Number of seconds that need to pass until trivia stops due to no response, must be a positive number greater than 0.0.",
+            "exclusiveMinimum": 0
+          },
+          "use_spoilers": {
+            "type": "boolean",
+            "description": "Whether to hide the answers in spoilers when revealing the question's answers."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://raw.githubusercontent.com/Cog-Creators/Red-DiscordBot/V3/develop/schema/trivia.schema.json",
+        "AUTHOR": "John Doe",
+        "CONFIG": {
+          "bot_plays": false,
+          "delay": 10.0,
+          "max_score": 10,
+          "payout_multiplier": 1.5,
+          "reveal_answer": true,
+          "timeout": 60.0,
+          "use_spoilers": true
+        },
+        "Question 1": [
+          "What is the capital of France?",
+          "Paris"
+        ],
+        "Question 2": [
+          "What is the largest planet in our solar system?",
+          "Jupiter"
+        ],
+        "Question 3": [
+          "Who painted the Mona Lisa?",
+          "Leonardo da Vinci"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid Uri\" is not a \"uri\"",
+      "python_error": "'Invalid Uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['$schema']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['$schema']:\n    'Invalid Uri'",
+      "data": {
+        "$schema": "Invalid Uri",
+        "AUTHOR": "John Doe",
+        "CONFIG": {
+          "bot_plays": false,
+          "delay": 10.0,
+          "max_score": 10,
+          "payout_multiplier": 1.5,
+          "reveal_answer": true,
+          "timeout": 60.0,
+          "use_spoilers": true
+        },
+        "Question 1": [
+          "What is the capital of France?",
+          "Paris"
+        ],
+        "Question 2": [
+          "What is the largest planet in our solar system?",
+          "Jupiter"
+        ],
+        "Question 3": [
+          "Who painted the Mona Lisa?",
+          "Leonardo da Vinci"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or exclusiveMinimum keyword",
+      "valid": false,
+      "rust_error": "3.0 is less than the minimum of 4.0",
+      "python_error": "Additional properties are not allowed (\"<--- The schema says this should be a positive number or zero but it's not explicitly defined as minimum hence may be ignored by some validators\", '<--- This should be invalid as it is less than the exclusiveMinimum of 0.0', '<--- This should be invalid as it is less than the minimum of 4.0', '<--- This should be invalid as it is not exclusiveMinimum of 0' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['CONFIG']:\n    {'type': 'object',\n     'description': 'The configuration for a trivia session.',\n     'properties': {'bot_plays': {'type': 'boolean',\n                                  'description': 'Whether or not the bot '\n                                                 'gains points during the '\n                                                 'session.'},\n                    'delay': {'type': 'number',\n                              'description': 'The maximum number of '\n                                             'seconds permitt.. (2948 more)",
+      "data": {
+        "$schema": "https://raw.githubusercontent.com/Cog-Creators/Red-DiscordBot/V3/develop/schema/trivia.schema.json",
+        "AUTHOR": "John Doe",
+        "CONFIG": {
+          "bot_plays": false,
+          "delay": 3.0,
+          "<--- This should be invalid as it is less than the minimum of 4.0": "max_score",
+          "max_score": 0,
+          "<--- This should be invalid as it is not exclusiveMinimum of 0": "payout_multiplier",
+          "payout_multiplier": -1,
+          "<--- The schema says this should be a positive number or zero but it's not explicitly defined as minimum hence may be ignored by some validators": "reveal_answer",
+          "reveal_answer": true,
+          "timeout": -1.0,
+          "<--- This should be invalid as it is less than the exclusiveMinimum of 0.0": "use_spoilers",
+          "use_spoilers": true
+        },
+        "Question 1": [
+          "What is the capital of France?",
+          "Paris"
+        ],
+        "Question 2": [
+          "What is the largest planet in our solar system?",
+          "Jupiter"
+        ],
+        "Question 3": [
+          "Who painted the Mona Lisa?",
+          "Leonardo da Vinci"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"array\"",
+      "python_error": "123 is not of type 'array'\n\nFailed validating 'type' in schema['additionalProperties']:\n    {'type': 'array', 'items': {'type': 'string'}}\n\nOn instance['additional_property']:\n    123",
+      "data": {
+        "$schema": "https://raw.githubusercontent.com/Cog-Creators/Red-DiscordBot/V3/develop/schema/trivia.schema.json",
+        "AUTHOR": "John Doe",
+        "CONFIG": {
+          "bot_plays": false,
+          "delay": 10.0,
+          "max_score": 10,
+          "payout_multiplier": 1.5,
+          "reveal_answer": true,
+          "timeout": 60.0,
+          "use_spoilers": true
+        },
+        "additional_property": 123,
+        "Question 1": [
+          "What is the capital of France?",
+          "Paris"
+        ],
+        "Question 2": [
+          "What is the largest planet in our solar system?",
+          "Jupiter"
+        ],
+        "Question 3": [
+          "Who painted the Mona Lisa?",
+          "Leonardo da Vinci"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "3.9 is less than the minimum of 4.0",
+      "python_error": "'use_spoilers' is not of type 'array'\n\nFailed validating 'type' in schema['additionalProperties']:\n    {'type': 'array', 'items': {'type': 'string'}}\n\nOn instance['timeout should be greater than 0.0']:\n    'use_spoilers'",
+      "data": {
+        "$schema": "https://raw.githubusercontent.com/Cog-Creators/Red-DiscordBot/V3/develop/schema/trivia.schema.json",
+        "AUTHOR": "John Doe",
+        "CONFIG": {
+          "bot_plays": false,
+          "delay": 3.9,
+          "minimum delay should be 4.0, so this is invalid": "max_score"
+        },
+        "payout_multiplier": -1,
+        "payout multiplier should be greater than or equal to 0.0": "reveal_answer",
+        "timeout": 0,
+        "timeout should be greater than 0.0": "use_spoilers",
+        "Question 1": [
+          "What is the capital of France?",
+          "Paris"
+        ],
+        "Question 2": [
+          "What is the largest planet in our solar system?",
+          "Jupiter"
+        ],
+        "Question 3": [
+          "Who painted the Mona Lisa?",
+          "Leonardo da Vinci"
+        ]
+      }
+    }
+  ]
+}

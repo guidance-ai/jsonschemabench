@@ -1,0 +1,293 @@
+{
+  "description": "sample Github_medium/o79604.json",
+  "meta": {
+    "full_size": 1363,
+    "stripped_size": 886,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "additionalProperties": false,
+    "definitions": {
+      "crudOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "failed": {
+            "description": "how many objects in the set have so far been unsuccessfully [operation]",
+            "type": "integer"
+          },
+          "failureDetails": {
+            "items": {
+              "$ref": "#/definitions/failureDetail"
+            },
+            "type": "array"
+          },
+          "operation": {
+            "enum": [
+              "Created",
+              "Updated",
+              "Closed"
+            ]
+          },
+          "succeeded": {
+            "description": "how many objects in the set have so far been successfully [operation]",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "operation",
+          "succeeded",
+          "failed"
+        ],
+        "type": "object"
+      },
+      "crudOutcomes": {
+        "items": {
+          "$ref": "#/definitions/crudOutcome"
+        },
+        "type": "array"
+      },
+      "failureDetail": {
+        "additionalProperties": false,
+        "description": "details of why a single object failed the crud operation (create or whatever)",
+        "properties": {
+          "code": {
+            "description": "A code, e.g. on a job or job ad, that uniquely identifies the object",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object"
+      }
+    },
+    "description": "the status of a previously launched upload",
+    "properties": {
+      "id": {
+        "description": "id of the upload operation",
+        "type": "integer"
+      },
+      "results": {
+        "$ref": "#/definitions/crudOutcomes"
+      },
+      "started": {
+        "_format": "date-time",
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "Queued",
+          "Underway",
+          "Complete",
+          "Error"
+        ]
+      }
+    },
+    "required": [
+      "id",
+      "started",
+      "status",
+      "results"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "id": 1,
+        "results": [
+          {
+            "failed": 0,
+            "operation": "Created",
+            "succeeded": 10
+          },
+          {
+            "failed": 2,
+            "failureDetails": [
+              {
+                "code": "JOB-123",
+                "message": "Job already exists"
+              },
+              {
+                "code": "JOB-456",
+                "message": "Invalid job data"
+              }
+            ],
+            "operation": "Updated",
+            "succeeded": 8
+          }
+        ],
+        "started": "2022-01-01T12:00:00Z",
+        "status": "Complete"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"Deleted\" is not one of [\"Created\",\"Updated\",\"Closed\"]",
+      "python_error": "Additional properties are not allowed ('succeeded' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema',\n     'additionalProperties': False,\n     'definitions': {'crudOutcome': {'additionalProperties': False,\n                                     'properties': {'failed': {'description': 'how '\n                                                                              'many '\n                                                                              'objects '\n                                                                              'in '\n                                                                              'the '\n                                                                              'set '\n                                                                              'have '\n                                                                              'so '\n                                                          .. (5534 more)",
+      "data": {
+        "id": 1,
+        "results": [
+          {
+            "failed": 0,
+            "operation": "Created",
+            "succeeded": 10
+          },
+          {
+            "failed": 2,
+            "failureDetails": [
+              {
+                "code": "JOB-123",
+                "message": "Job already exists"
+              },
+              {
+                "code": "JOB-456",
+                "message": "Invalid job data"
+              }
+            ],
+            "operation": "Deleted",
+            "Invalid operation, should be one of Created, Updated, Closed": "succeeded"
+          },
+          "succeeded"
+        ],
+        "succeeded": 8
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['results']['items']:\n    {'additionalProperties': False,\n     'properties': {'failed': {'description': 'how many objects in the set '\n                                              'have so far been '\n                                              'unsuccessfully [operation]',\n                               'type': 'integer'},\n                    'failureDetails': {'items': {'$ref': '#/definitions/failureDetail'},\n                                       'type': 'array'},\n                    'operation': {'enum': ['Created', 'Updated', 'Closed']},\n                    'succeeded': {'description': 'how many objects in the '\n                                                 'set have so far been '\n                                                 'successfully [operation]',\n                                  'type': 'integer'}},\n     'required': ['operation', 'succeeded', 'failed'],\n .. (151 more)",
+      "data": {
+        "id": 1,
+        "results": [
+          {
+            "failed": 0,
+            "operation": "Created",
+            "succeeded": 10,
+            "extraProperty": "Invalid"
+          },
+          {
+            "failed": 2,
+            "failureDetails": [
+              {
+                "code": "JOB-123",
+                "message": "Job already exists"
+              },
+              {
+                "code": "JOB-456",
+                "message": "Invalid job data"
+              }
+            ],
+            "operation": "Updated",
+            "succeeded": 8
+          }
+        ],
+        "started": "2022-01-01T12:00:00Z",
+        "status": "Complete"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": 1,
+        "results": [
+          {
+            "failed": 2,
+            "failureDetails": [
+              {
+                "code": "JOB-123",
+                "message": "Invalid job description"
+              },
+              {
+                "code": "JOB-456",
+                "message": "Invalid job location"
+              }
+            ],
+            "operation": "Created",
+            "succeeded": 10
+          },
+          {
+            "failed": 1,
+            "failureDetails": [
+              {
+                "code": "JOB-789",
+                "message": "Invalid job title"
+              }
+            ],
+            "operation": "Updated",
+            "succeeded": 5
+          }
+        ],
+        "started": "2022-01-01T12:00:00Z",
+        "status": "Complete"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('invalidProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('invalidProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['results']['items']:\n    {'additionalProperties': False,\n     'properties': {'failed': {'description': 'how many objects in the set '\n                                              'have so far been '\n                                              'unsuccessfully [operation]',\n                               'type': 'integer'},\n                    'failureDetails': {'items': {'$ref': '#/definitions/failureDetail'},\n                                       'type': 'array'},\n                    'operation': {'enum': ['Created', 'Updated', 'Closed']},\n                    'succeeded': {'description': 'how many objects in the '\n                                                 'set have so far been '\n                                                 'successfully [operation]',\n                                  'type': 'integer'}},\n     'required': ['operation', 'succeeded', 'failed'],.. (375 more)",
+      "data": {
+        "id": 1,
+        "started": "2022-01-01T12:00:00Z",
+        "status": "Complete",
+        "results": [
+          {
+            "operation": "Created",
+            "succeeded": 10,
+            "failed": 2,
+            "failureDetails": [
+              {
+                "code": "JOB-123",
+                "message": "Invalid job description"
+              },
+              {
+                "code": "JOB-456",
+                "message": "Invalid job location"
+              }
+            ],
+            "invalidProperty": "Invalid Value"
+          },
+          {
+            "operation": "Updated",
+            "succeeded": 5,
+            "failed": 1,
+            "failureDetails": [
+              {
+                "code": "JOB-789",
+                "message": "Invalid job title"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "description": "sample Handwritten/oneofpr2.json",
+  "meta": {
+    "full_size": 533,
+    "stripped_size": 533,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "allOf",
+      "not",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "definitions",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "type": "object",
+    "oneOf": [
+      {
+        "allOf": [
+          {
+            "patternProperties": {
+              "a": {
+                "$ref": "#/definitions/inside1"
+              }
+            }
+          },
+          {
+            "not": {
+              "patternProperties": {
+                "a": {
+                  "not": {
+                    "$ref": "#/definitions/inside1"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "allOf": [
+          {
+            "patternProperties": {
+              "b": {
+                "$ref": "#/definitions/inside2"
+              }
+            }
+          },
+          {
+            "not": {
+              "patternProperties": {
+                "b": {
+                  "not": {
+                    "$ref": "#/definitions/inside1"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "definitions": {
+      "inside1": {
+        "type": "object",
+        "not": {
+          "patternProperties": {
+            "c": {
+              "not": {
+                "type": "string",
+                "pattern": "99"
+              }
+            }
+          }
+        }
+      },
+      "inside2": {
+        "type": "object",
+        "patternProperties": {
+          "c": {
+            "type": "string",
+            "pattern": "77"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "a": {
+          "c": "99"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"a\":{\"c\":\"101\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'c': '101'} should not be valid under {'patternProperties': {'c': {'not': {'type': 'string', 'pattern': '99'}}}}\n\nFailed validating 'not' in schema[0]['allOf'][0]['patternProperties']['a']:\n    {'type': 'object',\n     'not': {'patternProperties': {'c': {'not': {'type': 'string',\n                                                 'pattern': '99'}}}}}\n\nOn instance['a']:\n    {'c': '101'}",
+      "data": {
+        "a": {
+          "c": "101"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"a\":{\"c\":99}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'c': 99} should not be valid under {'patternProperties': {'c': {'not': {'type': 'string', 'pattern': '99'}}}}\n\nFailed validating 'not' in schema[0]['allOf'][0]['patternProperties']['a']:\n    {'type': 'object',\n     'not': {'patternProperties': {'c': {'not': {'type': 'string',\n                                                 'pattern': '99'}}}}}\n\nOn instance['a']:\n    {'c': 99}",
+      "data": {
+        "a": {
+          "c": 99
+        }
+      }
+    }
+  ]
+}

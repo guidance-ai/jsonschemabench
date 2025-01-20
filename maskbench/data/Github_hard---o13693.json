@@ -1,0 +1,698 @@
+{
+  "description": "sample Github_hard/o13693.json",
+  "meta": {
+    "full_size": 2644,
+    "stripped_size": 1554,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@siblingKeys",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Scheduling Block Instance (SBI)",
+    "description": "Schema for a SIP interpretation of an SKA SBI",
+    "version": "1.0.0",
+    "type": "object",
+    "required": [
+      "id",
+      "version",
+      "scheduling_block",
+      "processing_blocks"
+    ],
+    "properties": {
+      "id": {
+        "description": "Primary SBI Id, SBI-[date]-[project]-*",
+        "type": "string",
+        "pattern": "^SBI-[0-9]{8}-[a-z|A-Z]+-.*$"
+      },
+      "version": {
+        "description": "SBI configuration version",
+        "type": "string",
+        "pattern": "[0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}"
+      },
+      "scheduling_block": {
+        "description": "Scheduling Block properties",
+        "$ref": "#/definitions/scheduling_block"
+      },
+      "processing_blocks": {
+        "description": "Array of PBs defined for this SBI",
+        "type": "array",
+        "items": {
+          "description": "PB configuration",
+          "$ref": "#/definitions/processing_block"
+        }
+      },
+      "scans": {
+        "description": "Array of Scans assocaited with this SBI",
+        "type": "array",
+        "items": {
+          "description": "Scan configuration object",
+          "type": "object"
+        }
+      }
+    },
+    "definitions": {
+      "scheduling_block": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "description": "SB Id",
+            "type": "string"
+          },
+          "project": {
+            "description": "Project Id",
+            "type": "string"
+          },
+          "telescope": {
+            "description": "Telescope Id",
+            "type": "string"
+          },
+          "programme_block": {
+            "description": "Programme block Id",
+            "type": "string"
+          }
+        }
+      },
+      "processing_block": {
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "type",
+          "workflow"
+        ],
+        "properties": {
+          "id": {
+            "description": "Primary PB Id, PB-[date]-[project]-*",
+            "type": "string",
+            "pattern": "^PB-[0-9]{8}-[a-z|A-Z]+-.*$"
+          },
+          "version": {
+            "description": "PB configuration version",
+            "type": "string",
+            "pattern": "[0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}"
+          },
+          "type": {
+            "description": "[realtime, offline]",
+            "enum": [
+              "realtime",
+              "offline"
+            ]
+          },
+          "workflow": {
+            "description": "PB workflow description",
+            "type": "object",
+            "required": [
+              "id",
+              "version",
+              "configuration"
+            ],
+            "$ref": "#/definitions/workflow"
+          },
+          "priority": {
+            "description": "PB priority",
+            "type": "number",
+            "minimum": -1,
+            "maximum": 100
+          },
+          "dependencies": {
+            "description": "PB dependencies",
+            "type": "array",
+            "items": {
+              "description": "PB dependency",
+              "type": "object",
+              "required": [
+                "type",
+                "value",
+                "condition"
+              ],
+              "$ref": "#/definitions/dependency"
+            }
+          }
+        }
+      },
+      "workflow": {
+        "properties": {
+          "id": {
+            "description": "Workflow Id",
+            "type": "string"
+          },
+          "version": {
+            "description": "Workflow version",
+            "type": "string",
+            "pattern": "^[0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}"
+          },
+          "parameters": {
+            "description": "Workflow parameters",
+            "type": "object"
+          }
+        }
+      },
+      "dependency": {
+        "properties": {
+          "type": {
+            "description": "Type of dependency",
+            "type": "string"
+          },
+          "value": {
+            "description": "Value of the dependency",
+            "type": "string"
+          },
+          "condition": {
+            "description": "Dependency condition",
+            "type": "string"
+          },
+          "parameters": {
+            "description": "Additional parameters describing the dependency",
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "id": "SBI-20221201-MyProject-001",
+        "version": "1.2.3",
+        "scheduling_block": {
+          "id": "SB-001",
+          "project": "MyProject",
+          "telescope": "SKA-1",
+          "programme_block": "PB-001"
+        },
+        "processing_blocks": [
+          {
+            "id": "PB-20221201-MyProject-001",
+            "version": "1.2.3",
+            "type": "realtime",
+            "workflow": {
+              "id": "WF-001",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": 50,
+            "dependencies": [
+              {
+                "type": "PB",
+                "value": "PB-20221201-MyProject-002",
+                "condition": "success"
+              }
+            ]
+          },
+          {
+            "id": "PB-20221201-MyProject-002",
+            "version": "1.2.3",
+            "type": "offline",
+            "workflow": {
+              "id": "WF-002",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": 30
+          }
+        ],
+        "scans": [
+          {
+            "scan_id": "SCAN-001",
+            "scan_type": "science",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          },
+          {
+            "scan_id": "SCAN-002",
+            "scan_type": "calibration",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-2 is less than the minimum of -1",
+      "python_error": "101 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['processing_blocks']['items']['properties']['priority']:\n    {'description': 'PB priority',\n     'type': 'number',\n     'minimum': -1,\n     'maximum': 100}\n\nOn instance['processing_blocks'][1]['priority']:\n    101",
+      "data": {
+        "id": "SBI-20221201-MyProject-001",
+        "version": "1.2.3",
+        "scheduling_block": {
+          "id": "SB-001",
+          "project": "MyProject",
+          "telescope": "SKA-1",
+          "programme_block": "PB-001"
+        },
+        "processing_blocks": [
+          {
+            "id": "PB-20221201-MyProject-001",
+            "version": "1.2.3",
+            "type": "realtime",
+            "workflow": {
+              "id": "WF-001",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": -2,
+            "dependencies": [
+              {
+                "type": "PB",
+                "value": "PB-20221201-MyProject-002",
+                "condition": "success"
+              }
+            ]
+          },
+          {
+            "id": "PB-20221201-MyProject-002",
+            "version": "1.2.3",
+            "type": "offline",
+            "workflow": {
+              "id": "WF-002",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": 101
+          }
+        ],
+        "scans": [
+          {
+            "scan_id": "SCAN-001",
+            "scan_type": "science",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          },
+          {
+            "scan_id": "SCAN-002",
+            "scan_type": "calibration",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "150 is greater than the maximum of 100",
+      "python_error": "150 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['processing_blocks']['items']['properties']['priority']:\n    {'description': 'PB priority',\n     'type': 'number',\n     'minimum': -1,\n     'maximum': 100}\n\nOn instance['processing_blocks'][0]['priority']:\n    150",
+      "data": {
+        "id": "SBI-20221201-MyProject-001",
+        "version": "1.2.3",
+        "scheduling_block": {
+          "id": "SB-001",
+          "project": "MyProject",
+          "telescope": "SKA-1",
+          "programme_block": "PB-001"
+        },
+        "processing_blocks": [
+          {
+            "id": "PB-20221201-MyProject-001",
+            "version": "1.2.3",
+            "type": "realtime",
+            "workflow": {
+              "id": "WF-001",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": 150,
+            "Invalid: Priority should be between -1 and 100": "dependencies",
+            "Invalid: Dependencies should be an array of objects": [
+              {
+                "type": "PB",
+                "value": "PB-20221201-MyProject-002",
+                "condition": "success"
+              }
+            ]
+          },
+          {
+            "id": "PB-20221201-MyProject-002",
+            "version": "1.2.3",
+            "type": "offline",
+            "workflow": {
+              "id": "WF-002",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": 30
+          }
+        ],
+        "scans": [
+          {
+            "scan_id": "SCAN-001",
+            "scan_type": "science",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          },
+          {
+            "scan_id": "SCAN-002",
+            "scan_type": "calibration",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "101 is greater than the maximum of 100",
+      "python_error": "101 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['processing_blocks']['items']['properties']['priority']:\n    {'description': 'PB priority',\n     'type': 'number',\n     'minimum': -1,\n     'maximum': 100}\n\nOn instance['processing_blocks'][0]['priority']:\n    101",
+      "data": {
+        "id": "SBI-20221201-MyProject-001",
+        "version": "1.2.3",
+        "scheduling_block": {
+          "id": "SB-001",
+          "project": "MyProject",
+          "telescope": "SKA-1",
+          "programme_block": "PB-001"
+        },
+        "processing_blocks": [
+          {
+            "id": "PB-20221201-MyProject-001",
+            "version": "1.2.3",
+            "type": "realtime",
+            "workflow": {
+              "id": "WF-001",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": 101,
+            "dependencies": [
+              {
+                "type": "PB",
+                "value": "PB-20221201-MyProject-002",
+                "condition": "success"
+              }
+            ]
+          },
+          {
+            "id": "PB-20221201-MyProject-002",
+            "version": "1.2.3",
+            "type": "offline",
+            "workflow": {
+              "id": "WF-002",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              },
+              "configuration": {
+                "config1": "value1",
+                "config2": "value2"
+              }
+            },
+            "priority": 30
+          }
+        ],
+        "scans": [
+          {
+            "scan_id": "SCAN-001",
+            "scan_type": "science",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          },
+          {
+            "scan_id": "SCAN-002",
+            "scan_type": "calibration",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "SBI-20221201-MyProject-12345",
+        "version": "1.2.3",
+        "scheduling_block": {
+          "id": "SB-12345",
+          "project": "MyProject",
+          "telescope": "SKA-Mid",
+          "programme_block": "PB-12345"
+        },
+        "processing_blocks": [
+          {
+            "id": "PB-20221201-MyProject-12345",
+            "version": "1.2.3",
+            "type": "realtime",
+            "workflow": {
+              "id": "WF-12345",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              }
+            },
+            "priority": 50,
+            "dependencies": [
+              {
+                "type": "PB",
+                "value": "PB-20221201-MyProject-67890",
+                "condition": "success"
+              }
+            ]
+          },
+          {
+            "id": "PB-20221201-MyProject-67890",
+            "version": "1.2.3",
+            "type": "offline",
+            "workflow": {
+              "id": "WF-67890",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              }
+            },
+            "priority": 100
+          }
+        ],
+        "scans": [
+          {
+            "scan_id": "SCAN-12345",
+            "scan_type": "science",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "101 is greater than the maximum of 100",
+      "python_error": "101 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['processing_blocks']['items']['properties']['priority']:\n    {'description': 'PB priority',\n     'type': 'number',\n     'minimum': -1,\n     'maximum': 100}\n\nOn instance['processing_blocks'][0]['priority']:\n    101",
+      "data": {
+        "id": "SBI-20221201-MyProject-12345",
+        "version": "1.2.3",
+        "scheduling_block": {
+          "id": "SB-12345",
+          "project": "MyProject",
+          "telescope": "SKA-Mid",
+          "programme_block": "PB-12345"
+        },
+        "processing_blocks": [
+          {
+            "id": "PB-20221201-MyProject-12345",
+            "version": "1.2.3",
+            "type": "realtime",
+            "workflow": {
+              "id": "WF-12345",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              }
+            },
+            "priority": 101,
+            "dependencies": [
+              {
+                "type": "PB",
+                "value": "PB-20221201-MyProject-67890",
+                "condition": "success"
+              }
+            ]
+          },
+          {
+            "id": "PB-20221201-MyProject-67890",
+            "version": "1.2.3",
+            "type": "offline",
+            "workflow": {
+              "id": "WF-67890",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              }
+            },
+            "priority": 100
+          }
+        ],
+        "scans": [
+          {
+            "scan_id": "SCAN-12345",
+            "scan_type": "science",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"SBI-20221201-MyProject\" does not match \"^SBI-[0-9]{8}-[a-z|A-Z]+-.*$\"",
+      "python_error": "'SBI-20221201-MyProject' does not match '^SBI-[0-9]{8}-[a-z|A-Z]+-.*$'\n\nFailed validating 'pattern' in schema['properties']['id']:\n    {'description': 'Primary SBI Id, SBI-[date]-[project]-*',\n     'type': 'string',\n     'pattern': '^SBI-[0-9]{8}-[a-z|A-Z]+-.*$'}\n\nOn instance['id']:\n    'SBI-20221201-MyProject'",
+      "data": {
+        "id": "SBI-20221201-MyProject",
+        "version": "1.2.3",
+        "scheduling_block": {
+          "id": "SB-12345",
+          "project": "MyProject",
+          "telescope": "SKA-Mid",
+          "programme_block": "PB-12345"
+        },
+        "processing_blocks": [
+          {
+            "id": "PB-20221201-MyProject-12345",
+            "version": "1.2.3",
+            "type": "realtime",
+            "workflow": {
+              "id": "WF-12345",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              }
+            },
+            "priority": 101,
+            "dependencies": [
+              {
+                "type": "PB",
+                "value": "PB-20221201-MyProject-67890",
+                "condition": "success"
+              }
+            ]
+          },
+          {
+            "id": "PB-20221201-MyProject-67890",
+            "version": "1.2.3",
+            "type": "offline",
+            "workflow": {
+              "id": "WF-67890",
+              "version": "1.2.3",
+              "parameters": {
+                "param1": "value1",
+                "param2": "value2"
+              }
+            },
+            "priority": 100
+          }
+        ],
+        "scans": [
+          {
+            "scan_id": "SCAN-12345",
+            "scan_type": "science",
+            "scan_parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

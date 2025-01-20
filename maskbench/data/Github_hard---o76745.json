@@ -1,0 +1,424 @@
+{
+  "description": "sample Github_hard/o76745.json",
+  "meta": {
+    "full_size": 3346,
+    "stripped_size": 1499,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://skydive.github.com/openflow.schema.json",
+    "title": "Openflow rules in JSON",
+    "oneOf": [
+      {
+        "$ref": "#/definitions/rule"
+      },
+      {
+        "$ref": "#/definitions/group"
+      }
+    ],
+    "definitions": {
+      "rule": {
+        "type": [
+          "object"
+        ],
+        "properties": {
+          "Priority": {
+            "type": "integer",
+            "description": "Priority of the rule"
+          },
+          "Cookie": {
+            "type": "integer",
+            "description": "Cookie of the rule"
+          },
+          "Table": {
+            "type": "integer",
+            "description": "table of the rule"
+          },
+          "Meta": {
+            "description": "All the fields we do not really use as duration, counters",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/meta"
+            }
+          },
+          "Filters": {
+            "description": "the filters of the rule (without priority which is not a filter)",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "Key": {
+                  "description": "name of the filtered element",
+                  "type": "string"
+                },
+                "Value": {
+                  "description": "value expected",
+                  "type": "string"
+                },
+                "Mask": {
+                  "description": "if provided a mask for the relevant bits checked",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "Key",
+                "Value"
+              ]
+            },
+            "$comment": "We assume that abbreviated fields are translated into canonical ones eg: ip => { 'Key': 'eth_type', 'Value': '0x0800' } We assume that we only have the largest field for fields with subfields We assume that we only have 1.5 canonical names or Nicira names only when no standard name exists."
+          },
+          "Actions": {
+            "$comment": "output actions are normalized we use symbolic names for standard output ports, integers for others if args is provided we have a function otherwise it is a value standardize load/set (tricky. probably require field length) name start end field when used as explicit start end keys. if arguments are positional, use their index as their key. arrays: sometimes values are array. We code them as a call to an array function.",
+            "description": "list of actions of the rule",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/action"
+            }
+          }
+        },
+        "required": [
+          "Priority",
+          "Table",
+          "Filters",
+          "Actions"
+        ]
+      },
+      "group": {
+        "type": [
+          "object"
+        ],
+        "properties": {
+          "GroupId": {
+            "description": "id of the group",
+            "type": [
+              "number"
+            ]
+          },
+          "Type": {
+            "description": "type of the group (all, select, indirect, fast_failover)",
+            "type": [
+              "string"
+            ]
+          },
+          "Meta": {
+            "type": [
+              "array"
+            ],
+            "description": "any additional parameter (selection method, fields)",
+            "items": {
+              "$ref": "#/definitions/meta"
+            }
+          },
+          "Buckets": {
+            "type": [
+              "array"
+            ],
+            "description": "the bucket list, order is relevant.",
+            "items": {
+              "$ref": "#/definitions/bucket"
+            }
+          }
+        },
+        "required": [
+          "GroupId",
+          "Bucket"
+        ]
+      },
+      "bucket": {
+        "type": [
+          "object"
+        ],
+        "properties": {
+          "Id": {
+            "description": "id of bucket (Openflow 1.5)",
+            "type": [
+              "number"
+            ]
+          },
+          "Meta": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "$ref": "#/definitions/meta"
+            },
+            "required": [
+              "k"
+            ]
+          },
+          "Actions": {
+            "description": "list of actions",
+            "type": [
+              "array"
+            ],
+            "items": {
+              "$ref": "#/definitions/action"
+            }
+          }
+        }
+      },
+      "meta": {
+        "type": [
+          "object"
+        ],
+        "properties": {
+          "Key": {
+            "description": "key of the element (defined by ovs)",
+            "type": [
+              "string"
+            ]
+          },
+          "Value": {
+            "description": "value of the element",
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "Key"
+        ]
+      },
+      "action": {
+        "type": [
+          "object"
+        ],
+        "properties": {
+          "Function": {
+            "description": "action function or value if no argument or 'array' for arrays",
+            "type": "string"
+          },
+          "Arguments": {
+            "description": "a list of arguments described as action items (use null for non supplied positional argument)",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/action"
+                }
+              ]
+            }
+          },
+          "Key": {
+            "description": "for named arguments, the name used",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Function"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "Priority": 1,
+        "Cookie": 123456789,
+        "Table": 0,
+        "Meta": [
+          {
+            "Key": "duration",
+            "Value": "12345"
+          },
+          {
+            "Key": "packet_count",
+            "Value": "100"
+          }
+        ],
+        "Filters": [
+          {
+            "Key": "dl_dst",
+            "Value": "00:11:22:33:44:55"
+          },
+          {
+            "Key": "nw_dst",
+            "Value": "10.0.0.1",
+            "Mask": "255.255.255.255"
+          }
+        ],
+        "Actions": [
+          {
+            "Function": "output",
+            "Arguments": [
+              {
+                "Function": "port",
+                "Arguments": [
+                  {
+                    "Key": "port_number",
+                    "Function": "1"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Function": "set_field",
+            "Arguments": [
+              {
+                "Function": "field",
+                "Arguments": [
+                  {
+                    "Key": "field_name",
+                    "Function": "dl_src"
+                  },
+                  {
+                    "Key": "field_value",
+                    "Function": "00:11:22:33:44:55"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "Priority": 1,
+        "Cookie": 123456789,
+        "Table": 0,
+        "Meta": [
+          {
+            "Key": "duration",
+            "Value": "123"
+          },
+          {
+            "Key": "packet_count",
+            "Value": "456"
+          }
+        ],
+        "Filters": [
+          {
+            "Key": "dl_dst",
+            "Value": "00:11:22:33:44:55"
+          },
+          {
+            "Key": "nw_dst",
+            "Value": "192.168.1.1",
+            "Mask": "255.255.255.255"
+          }
+        ],
+        "Actions": [
+          {
+            "Function": "output",
+            "Arguments": [
+              {
+                "Function": "port",
+                "Arguments": [
+                  {
+                    "Function": "1"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Function": "set_field",
+            "Arguments": [
+              {
+                "Function": "dl_dst",
+                "Arguments": [
+                  {
+                    "Function": "00:11:22:33:44:55"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"Priority\":1,\"Cookie\":123456789,\"Table\":0,\"Meta\":[{\"Key\":\"duration\",\"Value\":123},{\"Key\":\"packet_count\",\"Value\":\"456\"}],\"Filters\":[{\"Key\":\"dl_dst\",\"Value\":\"00:11:22:33:44:55\"},{\"Key\":\"nw_dst\",\"Value\":\"192.168.1.1\",\"Mask\":255.255}],\"Actions\":[{\"Function\":\"output\",\"Arguments\":[{\"Function\":\"port\",\"Arguments\":[{\"Function\":\"1\"}]}]},{\"Function\":\"set_field\",\"Arguments\":[{\"Function\":\"dl_dst\",\"Arguments\":[{\"Function\":\"00:11:22:33:44:55\"}]}]}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "255.255 is not of type 'string'\n\nFailed validating 'type' in schema[0]['properties']['Filters']['items']['properties']['Mask']:\n    {'description': 'if provided a mask for the relevant bits checked',\n     'type': 'string'}\n\nOn instance['Filters'][1]['Mask']:\n    255.255",
+      "data": {
+        "Priority": 1,
+        "Cookie": 123456789,
+        "Table": 0,
+        "Meta": [
+          {
+            "Key": "duration",
+            "Value": 123
+          },
+          {
+            "Key": "packet_count",
+            "Value": "456"
+          }
+        ],
+        "Filters": [
+          {
+            "Key": "dl_dst",
+            "Value": "00:11:22:33:44:55"
+          },
+          {
+            "Key": "nw_dst",
+            "Value": "192.168.1.1",
+            "Mask": 255.255
+          }
+        ],
+        "Actions": [
+          {
+            "Function": "output",
+            "Arguments": [
+              {
+                "Function": "port",
+                "Arguments": [
+                  {
+                    "Function": "1"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Function": "set_field",
+            "Arguments": [
+              {
+                "Function": "dl_dst",
+                "Arguments": [
+                  {
+                    "Function": "00:11:22:33:44:55"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

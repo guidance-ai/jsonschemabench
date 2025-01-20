@@ -1,0 +1,154 @@
+{
+  "description": "sample Github_easy/o9783.json",
+  "meta": {
+    "full_size": 507,
+    "stripped_size": 507,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 32767
+      },
+      "filterType": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "all",
+              "whitelist",
+              "blacklist"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "none"
+            ]
+          }
+        ]
+      },
+      "pubTopics": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "subTopics": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "active",
+        "description": "Example filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "topic1",
+          "topic2"
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('filterType2' was unexpected)",
+      "python_error": "Additional properties are not allowed ('filterType2' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'status': {'type': 'string',\n                               'enum': ['active', 'inactive']},\n                    'description': {'type': 'string', 'maxLength': 32767},\n                    'filterType': {'oneOf': [{'type': 'string',\n                                              'enum': ['all',\n                                                       'whitelist',\n                                                       'blacklist']},\n                                             {'type': 'string',\n                                              'enum': ['none']}]},\n                    'pubTopics': {'type': 'array',\n                                  'items': {'type': 'string',\n                                            'minLength': 1,\n                                            'maxLength': 1024}},.. (486 more)",
+      "data": {
+        "status": "active",
+        "description": "Example filter",
+        "filterType": "all",
+        "filterType2": "none",
+        "pubTopics": [
+          "topic1",
+          "topic2"
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['pubTopics']['items']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 1024}\n\nOn instance['pubTopics'][0]:\n    ''",
+      "data": {
+        "status": "active",
+        "description": "Example filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "",
+          "topic2"
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['pubTopics']['items']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 1024}\n\nOn instance['pubTopics'][1]:\n    ''",
+      "data": {
+        "status": "active",
+        "description": "Example filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "topic1",
+          ""
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    }
+  ]
+}

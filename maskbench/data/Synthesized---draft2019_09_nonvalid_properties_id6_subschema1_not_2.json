@@ -1,0 +1,143 @@
+{
+  "description": "sample Synthesized/draft2019_09_nonvalid_properties_id6_subschema1_not_2.json",
+  "meta": {
+    "full_size": 213,
+    "stripped_size": 213,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "additionalProperties:object",
+      "allOf",
+      "enum",
+      "not",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "maxItems",
+      "minItems",
+      "properties",
+      "type",
+      "type:array",
+      "type:integer"
+    ]
+  },
+  "schema": {
+    "allOf": [
+      {
+        "enum": [
+          {
+            "fxo": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      {
+        "not": {
+          "not": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "patternProperties": {
+              "f.o": {
+                "minItems": 2
+              }
+            },
+            "properties": {
+              "bar": {
+                "type": "array"
+              },
+              "foo": {
+                "maxItems": 3,
+                "type": "array"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "fxo": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"fxo\":[1,2],\"bar\":[\"a\"]} is not one of [{\"fxo\":[1,2]}]",
+      "python_error": "{'fxo': [1, 2], 'bar': ['a']} is not one of [{'fxo': [1, 2]}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'fxo': [1, 2]}]}\n\nOn instance:\n    {'fxo': [1, 2], 'bar': ['a']}",
+      "data": {
+        "fxo": [
+          1,
+          2
+        ],
+        "bar": [
+          "a"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"f o\":[1]} is not one of [{\"fxo\":[1,2]}]",
+      "python_error": "{'f o': [1]} is not one of [{'fxo': [1, 2]}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'fxo': [1, 2]}]}\n\nOn instance:\n    {'f o': [1]}",
+      "data": {
+        "f o": [
+          1
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"fxo\":[1,2],\"baz\":4} is not one of [{\"fxo\":[1,2]}]",
+      "python_error": "{'fxo': [1, 2], 'baz': 4} is not one of [{'fxo': [1, 2]}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'fxo': [1, 2]}]}\n\nOn instance:\n    {'fxo': [1, 2], 'baz': 4}",
+      "data": {
+        "fxo": [
+          1,
+          2
+        ],
+        "baz": 4
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "{\"fxo\":[1],\"bar\":[1],\"foo\":[1,2,3,4]} is not one of [{\"fxo\":[1,2]}]",
+      "python_error": "{'fxo': [1], 'bar': [1], 'foo': [1, 2, 3, 4]} is not one of [{'fxo': [1, 2]}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'fxo': [1, 2]}]}\n\nOn instance:\n    {'fxo': [1], 'bar': [1], 'foo': [1, 2, 3, 4]}",
+      "data": {
+        "fxo": [
+          1
+        ],
+        "bar": [
+          1
+        ],
+        "foo": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"fxo\":[1]} is not one of [{\"fxo\":[1,2]}]",
+      "python_error": "{'fxo': [1]} is not one of [{'fxo': [1, 2]}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'fxo': [1, 2]}]}\n\nOn instance:\n    {'fxo': [1]}",
+      "data": {
+        "fxo": [
+          1
+        ]
+      }
+    }
+  ]
+}

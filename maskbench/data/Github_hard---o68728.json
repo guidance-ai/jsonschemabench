@@ -1,0 +1,647 @@
+{
+  "description": "sample Github_hard/o68728.json",
+  "meta": {
+    "full_size": 4386,
+    "stripped_size": 1391,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "application manifest",
+    "description": "In the application manifest a developer defines the application, its dependencies on other applications, services and environment variables that should be set. The application manifest is a JSON file. While the two required values are located in the root object, all deployment information is located under the ```deployment``` key. This way, applications written in NodeJS can reuse their existing package.json file as their application manifest by simply adding the ```deployment``` section.",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://github.com/push2cloud/push2cloud/schemas/application-manifest.json",
+    "type": "object",
+    "example": {
+      "name": "push2cloud-example-api",
+      "version": "1.0.0",
+      "deployment": {
+        "memory": 512,
+        "disk": 512,
+        "instances": 1,
+        "startTimeout": 100,
+        "stageTimeout": 200,
+        "gracePeriod": 20,
+        "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+        "env": {
+          "FOO": "BAR"
+        },
+        "appConnections": {
+          "push2cloud-example-host": {
+            "injectCredentials": false,
+            "urls": {
+              "START_URL": "/start"
+            }
+          }
+        },
+        "serviceBinding": [
+          "todo-db"
+        ],
+        "path": "build/libs/java-1.0.jar",
+        "scripts": {
+          "package": [
+            "gradle jar"
+          ]
+        }
+      }
+    },
+    "properties": {
+      "name": {
+        "id": "name",
+        "type": "string",
+        "description": "Identifier for the application. Must be unique in a release. This value is used to identify an application throughout push2cloud, such as in `appConnections`, the [release manifest](release_manifest.md) and the [deployment manifest](deployment_manifest.md)."
+      },
+      "version": {
+        "id": "version",
+        "type": "string",
+        "description": "The version of your application. Use [semver](http://semver.org/). The version is used in certain [workflows](workflows.md) to determine if an update is required."
+      },
+      "deployment": {
+        "id": "deployment",
+        "description": "the entrypoint for all deployment information",
+        "type": "object",
+        "properties": {
+          "memory": {
+            "id": "memory",
+            "description": "the amount of memory the app requires, e.g.: 128M, 1G",
+            "type": "string",
+            "pattern": "^[0-9]*[MG]$",
+            "default": "256M"
+          },
+          "disk": {
+            "id": "disk",
+            "type": "string",
+            "description": "the amount of disk the app requires, e.g.: 128M, 1G",
+            "pattern": "^[0-9]*[MG]$",
+            "default": "256M"
+          },
+          "instances": {
+            "id": "instances",
+            "description": "the base amount of instances",
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "startTimeout": {
+            "id": "startTimeout",
+            "description": "how long the app can take to start before it is considered an error",
+            "type": "integer",
+            "minimum": 0
+          },
+          "stageTimeout": {
+            "id": "stageTimeout",
+            "description": "how long the app can take to stage before it is considered an error",
+            "type": "integer",
+            "minimum": 0,
+            "default": 300
+          },
+          "gracePeriod": {
+            "id": "gracePeriod",
+            "description": "how long the app has to run without crashing to be considered successfully started",
+            "type": "integer",
+            "minimum": 0,
+            "default": 40
+          },
+          "buildpack": {
+            "id": "buildpack",
+            "description": "buildbpack to build the application",
+            "type": "string"
+          },
+          "path": {
+            "id": "path",
+            "description": "which folder/file should be used for deployment. Useful for java applications. Similar to [path in CloudFoundry manifests](http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html#path).",
+            "type": "string"
+          },
+          "appBits": {
+            "id": "appBits",
+            "description": "Alias for path. Will be overwritten by path.",
+            "type": "string"
+          },
+          "env": {
+            "id": "env",
+            "description": "environment variables to set/substitue for this app",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "serviceBinding": {
+            "id": "serviceBinding",
+            "description": "names of services this app needs connections to",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scripts": {
+            "id": "scripts",
+            "description": "scripts that are used in workflows during the apps deployment",
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "prepare": {
+                  "description": "scripts that run during the [packageApp helper](https://github.com/push2cloud/workflow-utils/blob/master/packageApp.js).",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "appConnections": {
+            "id": "appConnections",
+            "description": "names of other apps this app needs connections to",
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "urls": {
+                  "description": "inject the connection information additonally with the following key and with value as a suffix to the URL",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "injectCredentials": {
+                  "description": "controls the injection of _USERNAME and _PASSWORD credentials for this connection",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "required": [
+      "name",
+      "version",
+      "deployment"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512M",
+          "disk": "1G",
+          "instances": 2,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "injectCredentials": true,
+              "urls ": {
+                "START_URL": "/start"
+              }
+            }
+          },
+          "scripts ": {
+            "package": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "['npm install'] is not of type 'object'\n\nFailed validating 'type' in schema['properties']['deployment']['properties']['scripts']['additionalProperties']:\n    {'type': 'object',\n     'properties': {'prepare': {'description': 'scripts that run during '\n                                               'the [packageApp '\n                                               'helper](https://github.com/push2cloud/workflow-utils/blob/master/packageApp.js).',\n                                'type': 'array',\n                                'items': {'type': 'string'}}}}\n\nOn instance['deployment']['scripts']['package']:\n    ['npm install']",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512M",
+          "disk": "1G",
+          "instances": 2,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production",
+            "INVALID_PROPERTY": 123
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "injectCredentials": true,
+              "urls": {
+                "START_URL": "/start"
+              },
+              "INVALID_PROPERTY": true
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ],
+            "INVALID_PROPERTY": "INVALID_VALUE"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"512MB\" does not match \"^[0-9]*[MG]$\"",
+      "python_error": "'512MB' does not match '^[0-9]*[MG]$'\n\nFailed validating 'pattern' in schema['properties']['deployment']['properties']['memory']:\n    {'id': 'memory',\n     'description': 'the amount of memory the app requires, e.g.: 128M, 1G',\n     'type': 'string',\n     'pattern': '^[0-9]*[MG]$',\n     'default': '256M'}\n\nOn instance['deployment']['memory']:\n    '512MB'",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512MB",
+          "disk": "1GB",
+          "instances": 2,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "urls": {
+                "START_URL": "/start"
+              },
+              "injectCredentials": true
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['deployment']['properties']['startTimeout']:\n    {'id': 'startTimeout',\n     'description': 'how long the app can take to start before it is '\n                    'considered an error',\n     'type': 'integer',\n     'minimum': 0}\n\nOn instance['deployment']['startTimeout']:\n    -1",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512M",
+          "disk": "1G",
+          "instances": 0,
+          "startTimeout": -1,
+          "stageTimeout": 300,
+          "gracePeriod": -1,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "urls": {
+                "START_URL": "/start"
+              },
+              "injectCredentials": true
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"512MB\" does not match \"^[0-9]*[MG]$\"",
+      "python_error": "'512MB' does not match '^[0-9]*[MG]$'\n\nFailed validating 'pattern' in schema['properties']['deployment']['properties']['memory']:\n    {'id': 'memory',\n     'description': 'the amount of memory the app requires, e.g.: 128M, 1G',\n     'type': 'string',\n     'pattern': '^[0-9]*[MG]$',\n     'default': '256M'}\n\nOn instance['deployment']['memory']:\n    '512MB'",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512MB",
+          "Invalid unit, should be M or G": "disk",
+          "Missing value for disk": "instances",
+          "Missing value for instances": "startTimeout",
+          "Missing value for startTimeout": "stageTimeout",
+          "Missing value for stageTimeout": "gracePeriod",
+          "Missing value for gracePeriod": "buildpack",
+          "Missing value for buildpack": "env",
+          "Missing value for env": "serviceBinding",
+          "Missing value for serviceBinding": "appConnections",
+          "Missing value for appConnections": "scripts",
+          "Missing value for scripts": "Invalid key, should be one of the defined keys in the schema"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"512MB\" does not match \"^[0-9]*[MG]$\"",
+      "python_error": "'512MB' does not match '^[0-9]*[MG]$'\n\nFailed validating 'pattern' in schema['properties']['deployment']['properties']['memory']:\n    {'id': 'memory',\n     'description': 'the amount of memory the app requires, e.g.: 128M, 1G',\n     'type': 'string',\n     'pattern': '^[0-9]*[MG]$',\n     'default': '256M'}\n\nOn instance['deployment']['memory']:\n    '512MB'",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512MB",
+          "disk": "1G",
+          "instances": 2,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "urls": {
+                "START_URL": "/start"
+              },
+              "injectCredentials": true
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['deployment']['properties']['instances']:\n    {'id': 'instances',\n     'description': 'the base amount of instances',\n     'type': 'integer',\n     'minimum': 1,\n     'default': 1}\n\nOn instance['deployment']['instances']:\n    0",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512M",
+          "disk": "1G",
+          "instances": 0,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "urls": {
+                "START_URL": "/start"
+              },
+              "injectCredentials": true
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "['npm install'] is not of type 'object'\n\nFailed validating 'type' in schema['properties']['deployment']['properties']['scripts']['additionalProperties']:\n    {'type': 'object',\n     'properties': {'prepare': {'description': 'scripts that run during '\n                                               'the [packageApp '\n                                               'helper](https://github.com/push2cloud/workflow-utils/blob/master/packageApp.js).',\n                                'type': 'array',\n                                'items': {'type': 'string'}}}}\n\nOn instance['deployment']['scripts']['package']:\n    ['npm install']",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512M",
+          "disk": "1G",
+          "instances": 2,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production",
+            "extraProperty": 123
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "injectCredentials": true,
+              "urls": {
+                "START_URL": "/start",
+                "extraProperty": "/extra"
+              },
+              "extraProperty": true
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ],
+            "extraProperty": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"512\" does not match \"^[0-9]*[MG]$\"",
+      "python_error": "'512' does not match '^[0-9]*[MG]$'\n\nFailed validating 'pattern' in schema['properties']['deployment']['properties']['memory']:\n    {'id': 'memory',\n     'description': 'the amount of memory the app requires, e.g.: 128M, 1G',\n     'type': 'string',\n     'pattern': '^[0-9]*[MG]$',\n     'default': '256M'}\n\nOn instance['deployment']['memory']:\n    '512'",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512",
+          "Invalid memory format, should be '512M' or '1G'": "disk",
+          "Missing disk property, should be '1G' or '512M'": "instances",
+          "Missing instances property, should be a number greater than 0": "startTimeout",
+          "Missing startTimeout property, should be a number greater than 0": "stageTimeout",
+          "Missing stageTimeout property, should be a number greater than 0": "gracePeriod",
+          "Missing gracePeriod property, should be a number greater than 0": "buildpack",
+          "Missing buildpack property, should be a string": "env",
+          "Missing env property, should be an object": "serviceBinding",
+          "Missing serviceBinding property, should be an array of strings": "appConnections",
+          "Missing appConnections property, should be an object": "scripts",
+          "Missing scripts property, should be an object": "path",
+          "Missing path property, should be a string": "appBits",
+          "Missing appBits property, should be a string": "additionalProperty",
+          "Additional property not defined in the schema": {
+            "additionalProperty": "additionalValue"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['deployment']['properties']['startTimeout']:\n    {'id': 'startTimeout',\n     'description': 'how long the app can take to start before it is '\n                    'considered an error',\n     'type': 'integer',\n     'minimum': 0}\n\nOn instance['deployment']['startTimeout']:\n    -1",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512M",
+          "disk": "1G",
+          "instances": 0,
+          "startTimeout": -1,
+          "stageTimeout": -1,
+          "gracePeriod": -1,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "urls": {
+                "START_URL": "/start"
+              },
+              "injectCredentials": true
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"512MB\" does not match \"^[0-9]*[MG]$\"",
+      "python_error": "'512MB' does not match '^[0-9]*[MG]$'\n\nFailed validating 'pattern' in schema['properties']['deployment']['properties']['memory']:\n    {'id': 'memory',\n     'description': 'the amount of memory the app requires, e.g.: 128M, 1G',\n     'type': 'string',\n     'pattern': '^[0-9]*[MG]$',\n     'default': '256M'}\n\nOn instance['deployment']['memory']:\n    '512MB'",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512MB",
+          "disk": "1G",
+          "instances": 2,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "injectCredentials": true,
+              "urls ": {
+                "START_URL": "/start"
+              }
+            }
+          },
+          "scripts ": {
+            "package": [
+              "npm install"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "[\"npm install\"] is not of type \"object\"",
+      "python_error": "['npm install'] is not of type 'object'\n\nFailed validating 'type' in schema['properties']['deployment']['properties']['scripts']['additionalProperties']:\n    {'type': 'object',\n     'properties': {'prepare': {'description': 'scripts that run during '\n                                               'the [packageApp '\n                                               'helper](https://github.com/push2cloud/workflow-utils/blob/master/packageApp.js).',\n                                'type': 'array',\n                                'items': {'type': 'string'}}}}\n\nOn instance['deployment']['scripts']['package']:\n    ['npm install']",
+      "data": {
+        "name": "my-node-app",
+        "version": "1.0.0",
+        "deployment": {
+          "memory": "512M",
+          "disk": "1G",
+          "instances": 2,
+          "startTimeout": 150,
+          "stageTimeout": 300,
+          "gracePeriod": 60,
+          "buildpack": "https://github.com/cloudfoundry/nodejs-buildpack.git",
+          "env": {
+            "NODE_ENV": "production",
+            "extra_key": "extra_value"
+          },
+          "serviceBinding": [
+            "my-mysql-service"
+          ],
+          "appConnections": {
+            "my-other-app": {
+              "urls": {
+                "START_URL": "/start",
+                "extra_url_key": "/extra_url"
+              },
+              "injectCredentials": true,
+              "extra_key": "extra_value"
+            }
+          },
+          "scripts": {
+            "package": [
+              "npm install"
+            ],
+            "extra_key": "extra_value"
+          }
+        }
+      }
+    }
+  ]
+}

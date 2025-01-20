@@ -1,0 +1,79 @@
+{
+  "description": "sample Github_trivial/o2140.json",
+  "meta": {
+    "full_size": 259,
+    "stripped_size": 218,
+    "features": [
+      "@siblingKeys",
+      "anyOf",
+      "not"
+    ],
+    "raw_features": [
+      "$schema",
+      "anyOf:trivial",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Verify annotation has @context",
+    "type": "object",
+    "properties": {
+      "@context": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "anyOf": [
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ],
+        "not": {
+          "type": "object"
+        }
+      }
+    },
+    "required": [
+      "@context"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "@context": "https://schema.org"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"key\":\"https://schema.org\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'key': 'https://schema.org'} should not be valid under {'type': 'object'}\n\nFailed validating 'not' in schema['properties']['@context']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'array', 'anyOf': [{'type': 'string'}]}],\n     'not': {'type': 'object'}}\n\nOn instance['@context']:\n    {'key': 'https://schema.org'}",
+      "data": {
+        "@context": {
+          "key": "https://schema.org"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{} should not be valid under {'type': 'object'}\n\nFailed validating 'not' in schema['properties']['@context']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'array', 'anyOf': [{'type': 'string'}]}],\n     'not': {'type': 'object'}}\n\nOn instance['@context']:\n    {}",
+      "data": {
+        "@context": {}
+      }
+    }
+  ]
+}

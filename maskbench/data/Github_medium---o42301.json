@@ -1,0 +1,276 @@
+{
+  "description": "sample Github_medium/o42301.json",
+  "meta": {
+    "full_size": 844,
+    "stripped_size": 766,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "org.eclipse.persistence.testing.jaxb.xmlelements.EmployeeCollection",
+    "type": "object",
+    "properties": {
+      "employee-data": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "integer": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "address": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Address"
+                },
+                {
+                  "$ref": "#/definitions/CanadianAddress"
+                }
+              ]
+            }
+          },
+          "string": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "definitions": {
+      "Address": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CanadianAddress": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "employee-data": {
+          "id": 1,
+          "integer": [
+            1,
+            2,
+            3
+          ],
+          "address": [
+            {
+              "type": "home",
+              "street": "123 Main St",
+              "city": "New York"
+            },
+            {
+              "type": "work",
+              "street": "456 Elm St",
+              "city": "Toronto",
+              "postalCode": "M5A 1A1"
+            }
+          ],
+          "string": [
+            "hello",
+            "world"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"abc\" is not of type \"integer\"",
+      "python_error": "'abc' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['employee-data']['properties']['id']:\n    {'type': 'integer'}\n\nOn instance['employee-data']['id']:\n    'abc'",
+      "data": {
+        "employee-data": {
+          "id": "abc",
+          "integer": [
+            1,
+            2,
+            3
+          ],
+          "address": [
+            {
+              "type": "home",
+              "street": "123 Main St",
+              "city": "New York"
+            },
+            {
+              "type": "work",
+              "street": "456 Elm St",
+              "city": "Toronto",
+              "postalCode": "M5A 1A1"
+            }
+          ],
+          "string": [
+            "hello",
+            123
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"3\" is not of type \"integer\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['employee-data']['properties']['string']['items']:\n    {'type': 'string'}\n\nOn instance['employee-data']['string'][1]:\n    123",
+      "data": {
+        "employee-data": {
+          "id": 1,
+          "integer": [
+            1,
+            2,
+            "3",
+            4
+          ],
+          "address": [
+            {
+              "type": "home",
+              "street": "123 Main St",
+              "city": "New York"
+            },
+            {
+              "type": "work",
+              "street": "456 Elm St",
+              "city": "Toronto",
+              "postalCode": 12345
+            }
+          ],
+          "string": [
+            "hello",
+            123,
+            "world"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "employee-data": {
+          "id": 1,
+          "integer": [
+            1,
+            2,
+            3
+          ],
+          "address": [
+            {
+              "type": "home",
+              "street": "123 Main St",
+              "city": "Anytown"
+            },
+            {
+              "type": "work",
+              "street": "456 Elm St",
+              "city": "Othertown",
+              "postalCode": "A1A 1A1"
+            },
+            {
+              "type": "vacation",
+              "street": "789 Oak St",
+              "city": "Thirdtown"
+            }
+          ],
+          "string": [
+            "hello",
+            "world"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"vacation\",\"street\":\"789 Oak St\",\"city\":\"Thirdtown\",\"unknownProperty\":\"unknownValue\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'type': 'vacation', 'street': '789 Oak St', 'city': 'Thirdtown', 'unknownProperty': 'unknownValue'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['employee-data']['properties']['address']['items']:\n    {'anyOf': [{'$ref': '#/definitions/Address'},\n               {'$ref': '#/definitions/CanadianAddress'}]}\n\nOn instance['employee-data']['address'][2]:\n    {'type': 'vacation',\n     'street': '789 Oak St',\n     'city': 'Thirdtown',\n     'unknownProperty': 'unknownValue'}",
+      "data": {
+        "employee-data": {
+          "id": 1,
+          "integer": [
+            1,
+            2,
+            3
+          ],
+          "address": [
+            {
+              "type": "home",
+              "street": "123 Main St",
+              "city": "Anytown"
+            },
+            {
+              "type": "work",
+              "street": "456 Elm St",
+              "city": "Othertown",
+              "postalCode": "A1A 1A1"
+            },
+            {
+              "type": "vacation",
+              "street": "789 Oak St",
+              "city": "Thirdtown",
+              "unknownProperty": "unknownValue"
+            }
+          ],
+          "string": [
+            "hello",
+            "world"
+          ]
+        }
+      }
+    }
+  ]
+}

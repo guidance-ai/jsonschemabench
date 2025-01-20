@@ -1,0 +1,94 @@
+{
+  "description": "sample Github_easy/o27356.json",
+  "meta": {
+    "full_size": 371,
+    "stripped_size": 338,
+    "features": [
+      "$ref",
+      "@minmaxProperties",
+      "additionalProperties",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "definitions",
+      "minProperties",
+      "properties",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "absolute_path": {
+        "pattern": "^/[^\u0000]+$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "plugins": {
+        "properties": {
+          "puppet": {
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "assets": {
+                "$ref": "#/definitions/absolute_path"
+              },
+              "manifest": {
+                "$ref": "#/definitions/absolute_path"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "title": "Puppet plugin manifest",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "plugins": {
+          "puppet": {
+            "assets": "/path/to/assets",
+            "manifest": "/path/to/manifest"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"/path/to/assets\\u0000suffix\" does not match \"^/[^\u0000]+$\"",
+      "python_error": "'/path/to/assets\\x00suffix' does not match '^/[^\\x00]+$'\n\nFailed validating 'pattern' in schema['properties']['plugins']['properties']['puppet']['properties']['assets']:\n    {'pattern': '^/[^\\x00]+$', 'type': 'string'}\n\nOn instance['plugins']['puppet']['assets']:\n    '/path/to/assets\\x00suffix'",
+      "data": {
+        "plugins": {
+          "puppet": {
+            "assets": "/path/to/assets\u0000suffix",
+            "manifest": "/path/to/manifest"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['plugins']['properties']['puppet']['properties']['assets']:\n    {'pattern': '^/[^\\x00]+$', 'type': 'string'}\n\nOn instance['plugins']['puppet']['assets']:\n    None",
+      "data": {
+        "plugins": {
+          "puppet": {
+            "assets": null,
+            "manifest": "/path/to/manifest"
+          }
+        }
+      }
+    }
+  ]
+}

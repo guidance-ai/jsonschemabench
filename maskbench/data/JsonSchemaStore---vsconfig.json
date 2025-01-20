@@ -1,0 +1,89 @@
+{
+  "description": "sample JsonSchemaStore/vsconfig.json",
+  "meta": {
+    "full_size": 509,
+    "stripped_size": 309,
+    "features": [
+      "@minmaxLength",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://json.schemastore.org/vsconfig.json",
+    "properties": {
+      "version": {
+        "description": "The version of the component configuration file format.",
+        "type": "string",
+        "pattern": "^(\\d+\\.)?(\\d+\\.)?(\\d+\\.)?(\\d+)$"
+      },
+      "components": {
+        "type": "array",
+        "description": "An array of Visual Studio component names",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "required": [
+      "components"
+    ],
+    "title": "JSON schema for Visual Studio component configuration files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "version": "1.2.3.4",
+        "components": [
+          "Component1",
+          "Component2",
+          "Component3"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['components']['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['components'][0]:\n    ''",
+      "data": {
+        "version": "1.2.3.4",
+        "components": [
+          "",
+          "Component2",
+          "Component3"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1.2.3.4.5\" does not match \"^(\\d+\\.)?(\\d+\\.)?(\\d+\\.)?(\\d+)$\"",
+      "python_error": "'1.2.3.4.5' does not match '^(\\\\d+\\\\.)?(\\\\d+\\\\.)?(\\\\d+\\\\.)?(\\\\d+)$'\n\nFailed validating 'pattern' in schema['properties']['version']:\n    {'description': 'The version of the component configuration file '\n                    'format.',\n     'type': 'string',\n     'pattern': '^(\\\\d+\\\\.)?(\\\\d+\\\\.)?(\\\\d+\\\\.)?(\\\\d+)$'}\n\nOn instance['version']:\n    '1.2.3.4.5'",
+      "data": {
+        "version": "1.2.3.4.5",
+        "components": [
+          "Component1",
+          "Component2",
+          "Component3"
+        ]
+      }
+    }
+  ]
+}

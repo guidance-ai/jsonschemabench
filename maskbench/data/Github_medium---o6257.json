@@ -1,0 +1,322 @@
+{
+  "description": "sample Github_medium/o6257.json",
+  "meta": {
+    "full_size": 683,
+    "stripped_size": 683,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "start": {
+        "type": "number"
+      },
+      "end": {
+        "type": "number"
+      },
+      "duration": {
+        "type": "number"
+      },
+      "resolution": {
+        "type": "number"
+      },
+      "aggregation": {
+        "type": "string",
+        "enum": [
+          "FIRST",
+          "LAST",
+          "COUNT",
+          "MAX",
+          "MIN",
+          "MEDIAN",
+          "MEAN",
+          "SUM"
+        ]
+      },
+      "attributes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+        }
+      },
+      "deviceTags": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          }
+        }
+      },
+      "deviceIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Fa-f\\d]{24}$"
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "start": 1643723400,
+        "end": 1643724000,
+        "duration": 600,
+        "resolution": 60,
+        "aggregation": "MEAN",
+        "attributes": [
+          "temperature",
+          "humidity"
+        ],
+        "deviceTags": [
+          {
+            "key": "location",
+            "value": "New York"
+          },
+          {
+            "key": "device_type",
+            "value": "thermostat"
+          }
+        ],
+        "deviceIds": [
+          "5f9f1c9b9c9b9c9b9c9b9c9b",
+          "5f9f1c9b9c9b9c9b9c9b9c9c"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['deviceTags']['items']['properties']['value']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['deviceTags'][0]['value']:\n    ''",
+      "data": {
+        "start": 1643723400,
+        "end": 1643724000,
+        "duration": 600,
+        "resolution": 60,
+        "aggregation": "MEAN",
+        "attributes": [
+          "temperature",
+          "humidity"
+        ],
+        "deviceTags": [
+          {
+            "key": "location",
+            "value": ""
+          },
+          {
+            "key": "device_type",
+            "value": "thermostat"
+          }
+        ],
+        "deviceIds": [
+          "5f9f1c9b9c9b9c9b9c9b9c9b",
+          "5f9f1c9b9c9b9c9b9c9b9c9c"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"temperature!\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'5f9f1c9b9c9b9c9b9c9b9c' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['deviceIds']['items']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['deviceIds'][0]:\n    '5f9f1c9b9c9b9c9b9c9b9c'",
+      "data": {
+        "start": 1643723400,
+        "end": 1643724000,
+        "duration": 600,
+        "resolution": 60,
+        "aggregation": "MEAN",
+        "attributes": [
+          "temperature!",
+          "humidity"
+        ],
+        "deviceTags": [
+          {
+            "key": "location!",
+            "value": "New York"
+          },
+          {
+            "key": "device_type",
+            "value": "thermostat"
+          }
+        ],
+        "deviceIds": [
+          "5f9f1c9b9c9b9c9b9c9b9c",
+          "5f9f1c9b9c9b9c9b9c9b9c9c"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"AVERAGE\" is not one of [\"FIRST\",\"LAST\",\"COUNT\",\"MAX\",\"MIN\",\"MEDIAN\",\"MEAN\",\"SUM\"]",
+      "python_error": "Additional properties are not allowed ('Invalid aggregation type', 'Missing colon after attributes' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'start': {'type': 'number'},\n                    'end': {'type': 'number'},\n                    'duration': {'type': 'number'},\n                    'resolution': {'type': 'number'},\n                    'aggregation': {'type': 'string',\n                                    'enum': ['FIRST',\n                                             'LAST',\n                                             'COUNT',\n                                             'MAX',\n                                             'MIN',\n                                             'MEDIAN',\n                                             'MEAN',\n                                             'SUM']},\n                    'attributes': {'type': 'array',\n                                   'i.. (1450 more)",
+      "data": {
+        "start": 1643723400,
+        "end": 1643724000,
+        "duration": 600,
+        "resolution": 60,
+        "aggregation": "AVERAGE",
+        "Invalid aggregation type": "attributes",
+        "Missing colon after attributes": [
+          "temperature",
+          "humidity"
+        ],
+        "deviceTags": [
+          {
+            "key": "location",
+            "value": "New York"
+          },
+          {
+            "key": "device_type",
+            "value": "thermostat"
+          }
+        ],
+        "deviceIds": [
+          "5f9f1c9b9c9b9c9b9c9b9c",
+          "Invalid deviceId, missing one character",
+          "5f9f1c9b9c9b9c9b9c9b9c9c"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"attribute_with_special_chars!@#$%^&*()\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'invalid_device_id' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['deviceIds']['items']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['deviceIds'][2]:\n    'invalid_device_id'",
+      "data": {
+        "start": 1643723400,
+        "end": 1643724000,
+        "duration": 600,
+        "resolution": 60,
+        "aggregation": "MEAN",
+        "attributes": [
+          "temperature",
+          "humidity",
+          "attribute_with_special_chars!@#$%^&*()"
+        ],
+        "deviceTags": [
+          {
+            "key": "location",
+            "value": "New York"
+          },
+          {
+            "key": "device_type",
+            "value": "thermostat"
+          },
+          {
+            "key": "invalid_key!@#$%^&*()",
+            "value": "invalid_value"
+          }
+        ],
+        "deviceIds": [
+          "5f9f1c9b9c9b9c9b9c9b9c9b",
+          "5f9f1c9b9c9b9c9b9c9b9c9c",
+          "invalid_device_id"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"!temperature\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'5f9f1c9b9c9b9c9b9c9b9c' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['deviceIds']['items']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['deviceIds'][0]:\n    '5f9f1c9b9c9b9c9b9c9b9c'",
+      "data": {
+        "start": 1643723400,
+        "end": 1643724000,
+        "duration": 600,
+        "resolution": 60,
+        "aggregation": "MEAN",
+        "attributes": [
+          "!temperature",
+          "humidity"
+        ],
+        "deviceTags": [
+          {
+            "key": "#location",
+            "value": "New York"
+          },
+          {
+            "key": "device_type",
+            "value": "thermostat"
+          }
+        ],
+        "deviceIds": [
+          "5f9f1c9b9c9b9c9b9c9b9c",
+          "5f9f1c9b9c9b9c9b9c9b9c9c"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"MEDIANX\" is not one of [\"FIRST\",\"LAST\",\"COUNT\",\"MAX\",\"MIN\",\"MEDIAN\",\"MEAN\",\"SUM\"]",
+      "python_error": "Additional properties are not allowed ('Additional property', 'Invalid aggregation value', 'Missing colon', 'deviceIds2' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'start': {'type': 'number'},\n                    'end': {'type': 'number'},\n                    'duration': {'type': 'number'},\n                    'resolution': {'type': 'number'},\n                    'aggregation': {'type': 'string',\n                                    'enum': ['FIRST',\n                                             'LAST',\n                                             'COUNT',\n                                             'MAX',\n                                             'MIN',\n                                             'MEDIAN',\n                                             'MEAN',\n                                             'SUM']},\n                    'attributes': {'type': 'array',\n                .. (1631 more)",
+      "data": {
+        "start": 1643723400,
+        "end": 1643724000,
+        "duration": 600,
+        "resolution": 60,
+        "aggregation": "MEDIANX",
+        "Invalid aggregation value": "attributes",
+        "Missing colon": [
+          "temperature",
+          "humidity"
+        ],
+        "deviceTags": [
+          {
+            "key": "location",
+            "value": "New York"
+          },
+          {
+            "key": "device_type",
+            "valuex": "thermostat",
+            "Typo in the key": "key2",
+            "Extra key": "value2"
+          }
+        ],
+        "deviceIds": [
+          "5f9f1c9b9c9b9c9b9c9b9c",
+          "Missing one character",
+          "5f9f1c9b9c9b9c9b9c9b9c9c"
+        ],
+        "deviceIds2": [
+          "5f9f1c9b9c9b9c9b9c9b9c9c"
+        ],
+        "Additional property": 1
+      }
+    }
+  ]
+}

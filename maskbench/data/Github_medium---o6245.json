@@ -1,0 +1,227 @@
+{
+  "description": "sample Github_medium/o6245.json",
+  "meta": {
+    "full_size": 1525,
+    "stripped_size": 1170,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "definitions": {
+      "_methodNoBody": {
+        "title": "HTTP Method",
+        "description": "GET, DELETE, POST, PATCH or PUT",
+        "enum": [
+          "GET",
+          "DELETE"
+        ]
+      },
+      "_methodWithBody": {
+        "title": "HTTP Method",
+        "description": "GET, DELETE, POST, PATCH or PUT",
+        "enum": [
+          "POST",
+          "PATCH",
+          "PUT"
+        ]
+      },
+      "responsePath": {
+        "title": "Response Path",
+        "description": "JSON path for where to store response",
+        "type": "string",
+        "minLength": 1
+      },
+      "uriTemplate": {
+        "title": "URI Template",
+        "minLength": 1,
+        "type": "string",
+        "messages": {
+          "required": "URI Template is required"
+        }
+      },
+      "bodyTemplate": {
+        "title": "Request Body",
+        "type": "string"
+      },
+      "headerInfo": {
+        "type": "array",
+        "items": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "key": {
+              "title": "Name",
+              "type": "string",
+              "minLength": 1
+            },
+            "valueTemplate": {
+              "title": "Value Template",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "key",
+            "valueTemplate"
+          ]
+        }
+      }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "method": {
+            "$ref": "#/definitions/_methodNoBody"
+          },
+          "responsePath": {
+            "$ref": "#/definitions/responsePath"
+          },
+          "uriTemplate": {
+            "$ref": "#/definitions/uriTemplate"
+          },
+          "headerInfo": {
+            "$ref": "#/definitions/headerInfo"
+          }
+        },
+        "required": [
+          "method",
+          "uriTemplate"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "properties": {
+          "method": {
+            "$ref": "#/definitions/_methodWithBody"
+          },
+          "responsePath": {
+            "$ref": "#/definitions/responsePath"
+          },
+          "uriTemplate": {
+            "$ref": "#/definitions/uriTemplate"
+          },
+          "bodyTemplate": {
+            "$ref": "#/definitions/bodyTemplate"
+          },
+          "headerInfo": {
+            "$ref": "#/definitions/headerInfo"
+          }
+        },
+        "required": [
+          "method",
+          "uriTemplate",
+          "bodyTemplate"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "POST",
+        "responsePath": "$.users",
+        "uriTemplate": "https://example.com/api/users",
+        "bodyTemplate": "{\"name\":\"John Doe\",\"age\":30}",
+        "headerInfo": [
+          {
+            "key": "Content-Type",
+            "valueTemplate": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "valueTemplate": "Bearer {{token}}"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "POST",
+        "responsePath": "$.users",
+        "uriTemplate": "/users",
+        "bodyTemplate": "{\"name\": \"John Doe\", \"email\": \"john@example.com\"}",
+        "headerInfo": [
+          {
+            "key": "Content-Type",
+            "valueTemplate": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "valueTemplate": "Bearer {{token}}"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"method\":\"POST\",\"uriTemplate\":\"/users\",\"bodyTemplate\":\"{\\\"name\\\": \\\"John Doe\\\", \\\"email\\\": \\\"john@example.com\\\"}\",\"responsePath\":\"$.users\",\"headerInfo\":[{\"key\":\"Content-Type\",\"valueTemplate\":\"application/json\"},{\"key\":\"Authorization\",\"valueTemplate\":\"Bearer {{token}}\"}],\"extraKey\":\"extraValue\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'POST' is not one of ['GET', 'DELETE']\n\nFailed validating 'enum' in schema[0]['properties']['method']:\n    {'title': 'HTTP Method',\n     'description': 'GET, DELETE, POST, PATCH or PUT',\n     'enum': ['GET', 'DELETE']}\n\nOn instance['method']:\n    'POST'",
+      "data": {
+        "method": "POST",
+        "uriTemplate": "/users",
+        "bodyTemplate": "{\"name\": \"John Doe\", \"email\": \"john@example.com\"}",
+        "responsePath": "$.users",
+        "headerInfo": [
+          {
+            "key": "Content-Type",
+            "valueTemplate": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "valueTemplate": "Bearer {{token}}"
+          }
+        ],
+        "extraKey": "extraValue"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"method\":\"POST\",\"responsePath\":\"$.users\",\"uriTemplate\":\"\",\"bodyTemplate\":\"{\\\"name\\\": \\\"John Doe\\\", \\\"email\\\": \\\"john@example.com\\\"}\",\"headerInfo\":[{\"key\":\"Content-Type\",\"valueTemplate\":\"application/json\"},{\"key\":\"Authorization\",\"valueTemplate\":\"\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'method': 'POST', 'uriTemplate': '', 'bodyTemplate': '{\"name\": \"John Doe\", \"email\": \"john@example.com\"}', 'responsePath': '$.users', 'headerInfo': [{'key': 'Content-Type', 'valueTemplate': 'application/json'}, {'key': 'Authorization', 'valueTemplate': ''}]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'definitions': {'_methodNoBody': {'title': 'HTTP Method',\n                                       'description': 'GET, DELETE, POST, '\n                                                      'PATCH or PUT',\n                                       'enum': ['GET', 'DELETE']},\n                     '_methodWithBody': {'title': 'HTTP Method',\n                                         'description': 'GET, DELETE, '\n                                                        'POST, PATCH or '\n                                                        'PUT',\n                                         'enum': ['.. (3177 more)",
+      "data": {
+        "method": "POST",
+        "responsePath": "$.users",
+        "uriTemplate": "",
+        "bodyTemplate": "{\"name\": \"John Doe\", \"email\": \"john@example.com\"}",
+        "headerInfo": [
+          {
+            "key": "Content-Type",
+            "valueTemplate": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "valueTemplate": ""
+          }
+        ]
+      }
+    }
+  ]
+}

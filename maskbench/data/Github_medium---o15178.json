@@ -1,0 +1,350 @@
+{
+  "description": "sample Github_medium/o15178.json",
+  "meta": {
+    "full_size": 996,
+    "stripped_size": 978,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "version": "1.1.0",
+    "type": "object",
+    "properties": {
+      "book": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "author": {
+              "type": "string"
+            },
+            "published": {
+              "type": "string"
+            },
+            "coverUrl": {
+              "type": "string"
+            },
+            "contents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "headers": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "depth": {
+                              "type": "integer"
+                            },
+                            "header": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "depth",
+                            "header"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "ordinal": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "chapter",
+                          "appendix",
+                          "part",
+                          "episode",
+                          "level"
+                        ]
+                      },
+                      "identifier": {
+                        "type": [
+                          "integer",
+                          "string"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "type",
+                      "identifier"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "id",
+            "source",
+            "contents",
+            "published"
+          ]
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "source": "example-source",
+            "author": "John Doe",
+            "published": "2022-01-01",
+            "coverUrl": "https://example.com/cover.jpg",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the Book",
+                  {
+                    "depth": 2,
+                    "header": "Subsection 1"
+                  },
+                  {
+                    "depth": 2,
+                    "header": "Subsection 2"
+                  }
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Chapter 1: Getting Started",
+                  "Subsection 1",
+                  {
+                    "depth": 2,
+                    "header": "Subsection 2"
+                  }
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 2
+                }
+              },
+              {
+                "name": "Appendix A",
+                "headers": [
+                  "Appendix A: References"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "source": "example-source",
+            "author": "John Doe",
+            "published": "2022-01-01",
+            "coverUrl": "https://example.com/cover.jpg",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the Book",
+                  {
+                    "depth": 2,
+                    "header": "Subheading"
+                  }
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 1
+                }
+              },
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Chapter 1: Getting Started",
+                  "Subheading 1",
+                  {
+                    "depth": 3,
+                    "header": "Subheading 2"
+                  }
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 2
+                }
+              },
+              {
+                "name": "Appendix",
+                "headers": [
+                  "Appendix: Additional Information"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of types \"integer\", \"string\"",
+      "python_error": "None is not of type 'integer', 'string'\n\nFailed validating 'type' in schema['properties']['book']['items']['properties']['contents']['items']['properties']['ordinal']['properties']['identifier']:\n    {'type': ['integer', 'string']}\n\nOn instance['book'][0]['contents'][0]['ordinal']['identifier']:\n    None",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "source": "example-source",
+            "author": "John Doe",
+            "published": "2022-01-01",
+            "coverUrl": "https://example.com/cover.jpg",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the Book",
+                  {
+                    "depth": 2,
+                    "header": "Subheading"
+                  }
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": null
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "2022 is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('Invalid date format, should be a string', \"Missing 'U' in coverUrl, should be 'coverUrl'\" were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['book']['items']:\n    {'type': 'object',\n     'properties': {'name': {'type': 'string'},\n                    'id': {'type': 'string'},\n                    'source': {'type': 'string'},\n                    'author': {'type': 'string'},\n                    'published': {'type': 'string'},\n                    'coverUrl': {'type': 'string'},\n                    'contents': {'type': 'array',\n                                 'items': {'type': 'object',\n                                           'properties': {'name': {'type': 'string'},\n                                                          'headers': {'type': 'array',\n                                                                      'items': {'oneOf': [{'type': 'string'},\n                                                                             .. (3981 more)",
+      "data": {
+        "book": [
+          {
+            "name": "Example Book",
+            "id": "example-book-id",
+            "source": "example-source",
+            "author": "John Doe",
+            "published": 2022,
+            "Invalid date format, should be a string": "coverUrl",
+            "Missing 'U' in coverUrl, should be 'coverUrl'": "https://example.com/cover.jpg",
+            "contents": [
+              {
+                "name": "Introduction",
+                "headers": [
+                  "Introduction to the Book",
+                  {
+                    "depth": "two",
+                    "Invalid depth type, should be an integer": "header",
+                    "Missing 'h' in header, should be 'header'": "Subheading"
+                  }
+                ],
+                "ordinal": {
+                  "type": "article",
+                  "Invalid ordinal type, should be one of 'chapter', 'appendix', 'part', 'episode', 'level'": "identifier",
+                  "Missing 'i' in identifier, should be 'identifier'": 1
+                }
+              },
+              {
+                "name": "Chapter 1",
+                "headers": [
+                  "Chapter 1: Getting Started",
+                  "Subheading 1",
+                  4,
+                  "Invalid header type, should be either a string or an object with 'depth' and 'header' properties"
+                ],
+                "ordinal": {
+                  "type": "chapter",
+                  "identifier": 2
+                }
+              },
+              {
+                "name": "Appendix",
+                "headers": [
+                  "Appendix: Additional Information"
+                ],
+                "ordinal": {
+                  "type": "appendix",
+                  "identifier": "A",
+                  "extraProperty": true,
+                  "Invalid additional property in ordinal object, should not have any extra properties": "invalidProperty",
+                  "Invalid additional property in content object, should not have any extra properties": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

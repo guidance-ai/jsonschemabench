@@ -1,0 +1,525 @@
+{
+  "description": "sample Github_medium/o82259.json",
+  "meta": {
+    "full_size": 2157,
+    "stripped_size": 898,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "Esquema de validación para parámetros de getPackageList.",
+    "description": "Este esquema contiene los datos que se reciben como parámetro de entrada para el método getPackageList.",
+    "properties": {
+      "order_field": {
+        "type": "string",
+        "enum": [
+          "PRICE",
+          "DEPARTURE_DATE"
+        ],
+        "title": "Campo  que marcará orden de resultados.",
+        "description": "Atributo de paquete por el cual se establecerá el orden de los resultados."
+      },
+      "order_type": {
+        "type": "string",
+        "enum": [
+          "ASC",
+          "DESC"
+        ],
+        "title": "Criterio de orden de resultados",
+        "description": "Criterio de orden de resultados ascendente o descendente."
+      },
+      "currency": {
+        "type": "string",
+        "enum": [
+          "EUR",
+          "USD",
+          "ARS"
+        ],
+        "title": "Tipo de cambio de paquetes.",
+        "description": "Especifica el tipo de cambio que tendrán los paquetes retornadoss por el getPackageList."
+      },
+      "origin_place": {
+        "type": "array",
+        "title": "Lugares de salida de los paquetes.",
+        "items": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 4,
+          "title": "IATA de los lugares de salida de los paquetes."
+        }
+      },
+      "destination_place": {
+        "type": "array",
+        "title": "Destinos de los paquetes.",
+        "items": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 4,
+          "title": "IATA de los destinos de los paquetes."
+        }
+      },
+      "month_departure": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 12,
+        "title": "Mes de salida.",
+        "description": "Mes en el cual el pasajeros desean salir."
+      },
+      "year_departure": {
+        "type": "integer",
+        "title": "Año de salida.",
+        "description": "Junto con month_departure forman el mes en que el pasajeros desean salir."
+      },
+      "Room": {
+        "type": "array",
+        "title": "Habitación.",
+        "description": " .",
+        "items": {
+          "adult": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8,
+            "title": "Adultos de la habitación.",
+            "description": "Cantidad de adultos que ocupan la habitación."
+          },
+          "Children": {
+            "type": "array",
+            "title": "Niños de la habitación.",
+            "description": " .",
+            "items": {
+              "type": "object",
+              "title": "Un niño de la habitación.",
+              "description": " .",
+              "properties": {
+                "age": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 18,
+                  "title": "Edad del niño."
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "adult",
+          "Children"
+        ]
+      }
+    },
+    "required": [
+      "order_type",
+      "order_field",
+      "currency",
+      "origin_place",
+      "destination_place",
+      "month_departure",
+      "year_departure",
+      "Room"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "MAD",
+          "BCN"
+        ],
+        "destination_place": [
+          "PAR",
+          "ROM"
+        ],
+        "month_departure": 6,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 10
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"M\" is shorter than 2 characters",
+      "python_error": "'M' is too short\n\nFailed validating 'minLength' in schema['properties']['origin_place']['items']:\n    {'type': 'string',\n     'minLength': 2,\n     'maxLength': 4,\n     'title': 'IATA de los lugares de salida de los paquetes.'}\n\nOn instance['origin_place'][0]:\n    'M'",
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "M",
+          "BCN"
+        ],
+        "destination_place": [
+          "PAR",
+          "ROM"
+        ],
+        "month_departure": 6,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 10
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "13 is greater than the maximum of 12",
+      "python_error": "'year_departure' is a required property\n\nFailed validating 'required' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'title': 'Esquema de validación para parámetros de getPackageList.',\n     'description': 'Este esquema contiene los datos que se reciben como '\n                    'parámetro de entrada para el método getPackageList.',\n     'properties': {'order_field': {'type': 'string',\n                                    'enum': ['PRICE', 'DEPARTURE_DATE'],\n                                    'title': 'Campo  que marcará orden de '\n                                             'resultados.',\n                                    'description': 'Atributo de paquete '\n                                                   'por el cual se '\n                                                   'establecerá el orden '\n                                                   'de los resultados.'},\n                    'order_type': {'type': 'string',\n                       .. (6625 more)",
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "MAD",
+          "BCN"
+        ],
+        "destination_place": [
+          "PAR",
+          "ROM"
+        ],
+        "month_departure": 13,
+        "Invalid month value, should be between 0 and 12": "year_departure",
+        ", 2024,  ": "year_departure",
+        "Room": [
+          {
+            "adult": 9,
+            "Invalid adult value, should be between 1 and 8": "Children",
+            "Children": [
+              {
+                "age": 19,
+                "Invalid age value, should be between 0 and 18": "age"
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "13 is greater than the maximum of 12",
+      "python_error": "13 is greater than the maximum of 12\n\nFailed validating 'maximum' in schema['properties']['month_departure']:\n    {'type': 'integer',\n     'minimum': 0,\n     'maximum': 12,\n     'title': 'Mes de salida.',\n     'description': 'Mes en el cual el pasajeros desean salir.'}\n\nOn instance['month_departure']:\n    13",
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "MAD",
+          "BCN",
+          "ABC"
+        ],
+        "destination_place": [
+          "PAR",
+          "ROM"
+        ],
+        "month_departure": 13,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 10
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 19
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ABCDEF\" is longer than 4 characters",
+      "python_error": "13 is greater than the maximum of 12\n\nFailed validating 'maximum' in schema['properties']['month_departure']:\n    {'type': 'integer',\n     'minimum': 0,\n     'maximum': 12,\n     'title': 'Mes de salida.',\n     'description': 'Mes en el cual el pasajeros desean salir.'}\n\nOn instance['month_departure']:\n    13",
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "MAD",
+          "BCN",
+          "ABCDEF",
+          "A"
+        ],
+        "destination_place": [
+          "PAR",
+          "ROM"
+        ],
+        "month_departure": 13,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 10
+              },
+              {
+                "age": 19
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "MAD",
+          "BCN"
+        ],
+        "destination_place": [
+          "PAR",
+          "LON"
+        ],
+        "month_departure": 6,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 10
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"M\" is shorter than 2 characters",
+      "python_error": "'M' is too short\n\nFailed validating 'minLength' in schema['properties']['origin_place']['items']:\n    {'type': 'string',\n     'minLength': 2,\n     'maxLength': 4,\n     'title': 'IATA de los lugares de salida de los paquetes.'}\n\nOn instance['origin_place'][0]:\n    'M'",
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "M",
+          "BCN"
+        ],
+        "destination_place": [
+          "PAR",
+          "LON"
+        ],
+        "month_departure": 6,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 10
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "13 is greater than the maximum of 12",
+      "python_error": "13 is greater than the maximum of 12\n\nFailed validating 'maximum' in schema['properties']['month_departure']:\n    {'type': 'integer',\n     'minimum': 0,\n     'maximum': 12,\n     'title': 'Mes de salida.',\n     'description': 'Mes en el cual el pasajeros desean salir.'}\n\nOn instance['month_departure']:\n    13",
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "MAD",
+          "BCN"
+        ],
+        "destination_place": [
+          "PAR",
+          "LON"
+        ],
+        "month_departure": 13,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 10
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ABCDEF\" is longer than 4 characters",
+      "python_error": "13 is greater than the maximum of 12\n\nFailed validating 'maximum' in schema['properties']['month_departure']:\n    {'type': 'integer',\n     'minimum': 0,\n     'maximum': 12,\n     'title': 'Mes de salida.',\n     'description': 'Mes en el cual el pasajeros desean salir.'}\n\nOn instance['month_departure']:\n    13",
+      "data": {
+        "order_field": "PRICE",
+        "order_type": "ASC",
+        "currency": "EUR",
+        "origin_place": [
+          "MAD",
+          "BCN",
+          "ABCDEF",
+          "D"
+        ],
+        "destination_place": [
+          "PAR",
+          "LON"
+        ],
+        "month_departure": 13,
+        "year_departure": 2024,
+        "Room": [
+          {
+            "adult": 2,
+            "Children": [
+              {
+                "age": 19
+              },
+              {
+                "age": 12
+              }
+            ]
+          },
+          {
+            "adult": 1,
+            "Children": [
+              {
+                "age": 5
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

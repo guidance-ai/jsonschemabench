@@ -1,0 +1,400 @@
+{
+  "description": "sample Github_medium/o50479.json",
+  "meta": {
+    "full_size": 2495,
+    "stripped_size": 948,
+    "features": [
+      "$ref",
+      "items",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "JSON schema for .graphlconfig",
+    "id": "https://github.com/kamilkisiela/graphql-config/tree/legacy/specification.md",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "schemaPath": {
+        "type": "string",
+        "default": "./schema.graphql",
+        "description": "A .graphql file that describes the schema using GraphQL SDL, e.g. \"./schema.graphql\", or a JSON file containing the result of a GraphQL Introspection query"
+      },
+      "includes": {
+        "type": "array",
+        "description": "A glob pattern matching included files",
+        "items": {
+          "type": "string"
+        }
+      },
+      "excludes": {
+        "type": "array",
+        "description": "A glob pattern matching excluded files",
+        "items": {
+          "type": "string"
+        }
+      },
+      "extensions": {
+        "$ref": "#/definitions/extensions"
+      },
+      "projects": {
+        "type": "object",
+        "description": "One or more projects as an object keyed by project name. Values are objects with fields describing schema structure, endpoints etc.",
+        "patternProperties": {
+          ".*": {
+            "description": "A named project with fields for describing schema structure, endpoints etc.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of this project. If absent, the key of this project config object will be used as the project name."
+              },
+              "schemaPath": {
+                "type": "string",
+                "description": "A .graphql file that describes the schema for this project using GraphQL SDL, e.g. \"./project-one-schema.graphql\""
+              },
+              "includes": {
+                "type": "array",
+                "description": "A glob pattern matching included files",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "excludes": {
+                "type": "array",
+                "description": "A glob pattern matching excluded files",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "extensions": {
+                "$ref": "#/definitions/extensions"
+              }
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "extensions": {
+        "type": "object",
+        "description": "Extensions to add additional configuration such as locations of GraphQL endpoint and framework-specific configuration.",
+        "properties": {
+          "endpoints": {
+            "type": "object",
+            "description": "GraphQL endpoints used for introspection and queries etc.",
+            "patternProperties": {
+              ".*": {
+                "description": "A string containing the URL of the endpoint, or an object with the URL and headers",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "description": "The URL of the endpoint"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL of the endpoint"
+                      },
+                      "headers": {
+                        "type": "object",
+                        "description": "HTTP headers to send with requests"
+                      },
+                      "introspect": {
+                        "type": "boolean",
+                        "description": "Boolean indicating whether this endpoint should be introspected automatically by the tool that loads the configuration, e.g. an IDE"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "My GraphQL Project",
+        "schemaPath": "./schema.graphql",
+        "includes": [
+          "./src/**/*.graphql",
+          "./src/**/*.js"
+        ],
+        "excludes": [
+          "./src/**/*.test.js"
+        ],
+        "extensions": {
+          "endpoints": {
+            "development": {
+              "url": "http://localhost:3000/graphql",
+              "headers": {
+                "Authorization": "Bearer my-secret-token"
+              },
+              "introspect": true
+            },
+            "production": "https://api.example.com/graphql"
+          }
+        },
+        "projects": {
+          "project-one": {
+            "name": "Project One",
+            "schemaPath": "./project-one-schema.graphql",
+            "includes": [
+              "./project-one/src/**/*.graphql",
+              "./project-one/src/**/*.js"
+            ],
+            "excludes": [
+              "./project-one/src/**/*.test.js"
+            ],
+            "extensions": {
+              "endpoints": {
+                "development": {
+                  "url": "http://localhost:3001/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": true
+                },
+                "production": "https://api.example.com/project-one/graphql"
+              }
+            }
+          },
+          "project-two": {
+            "schemaPath": "./project-two-schema.graphql",
+            "includes": [
+              "./project-two/src/**/*.graphql",
+              "./project-two/src/**/*.js"
+            ],
+            "excludes": [
+              "./project-two/src/**/*.test.js"
+            ],
+            "extensions": {
+              "endpoints": {
+                "development": {
+                  "url": "http://localhost:3002/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": true
+                },
+                "production": "https://api.example.com/project-two/graphql"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "My GraphQL Project",
+        "schemaPath": "./schema.graphql",
+        "includes": [
+          "**/*.graphql",
+          "**/*.js"
+        ],
+        "excludes": [
+          "**/node_modules/**",
+          "**/coverage/**"
+        ],
+        "extensions": {
+          "endpoints": {
+            "development": {
+              "url": "http://localhost:3000/graphql",
+              "headers": {
+                "Authorization": "Bearer my-secret-token"
+              },
+              "introspect": true
+            },
+            "production": {
+              "url": "https://api.example.com/graphql",
+              "headers": {
+                "Authorization": "Bearer my-secret-token"
+              },
+              "introspect": false
+            }
+          }
+        },
+        "projects": {
+          "project-one": {
+            "name": "Project One",
+            "schemaPath": "./project-one-schema.graphql",
+            "includes": [
+              "**/*.graphql",
+              "**/*.js"
+            ],
+            "excludes": [
+              "**/node_modules/**",
+              "**/coverage/**"
+            ],
+            "extensions": {
+              "endpoints": {
+                "development": {
+                  "url": "http://localhost:3001/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": true
+                },
+                "production": {
+                  "url": "https://api.example.com/project-one/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": false
+                }
+              }
+            }
+          },
+          "project-two": {
+            "schemaPath": "./project-two-schema.graphql",
+            "includes": [
+              "**/*.graphql",
+              "**/*.js"
+            ],
+            "excludes": [
+              "**/node_modules/**",
+              "**/coverage/**"
+            ],
+            "extensions": {
+              "endpoints": {
+                "development": {
+                  "url": "http://localhost:3002/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": true
+                },
+                "production": {
+                  "url": "https://api.example.com/project-two/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"url\":12345,\"<--- Modified, the url should be a string or an object with a url property\":\"headers\",\"introspect\":true} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['url']:\n    {'type': 'string', 'description': 'The URL of the endpoint'}\n\nOn instance['url']:\n    12345",
+      "data": {
+        "name": "My GraphQL Project",
+        "schemaPath": "./schema.graphql",
+        "includes": [
+          "**/*.graphql",
+          "**/*.js"
+        ],
+        "excludes": [
+          "**/node_modules/**",
+          "**/coverage/**"
+        ],
+        "extensions": {
+          "endpoints": {
+            "development": {
+              "url": 12345,
+              "<--- Modified, the url should be a string or an object with a url property": "headers",
+              "introspect": true
+            },
+            "production": {
+              "url": "https://api.example.com/graphql",
+              "headers": {
+                "Authorization": "Bearer my-secret-token"
+              },
+              "introspect": false
+            }
+          }
+        },
+        "projects": {
+          "project-one": {
+            "name": "Project One",
+            "schemaPath": "./project-one-schema.graphql",
+            "includes": [
+              "**/*.graphql",
+              "**/*.js"
+            ],
+            "excludes": [
+              "**/node_modules/**",
+              "**/coverage/**"
+            ],
+            "extensions": {
+              "endpoints": {
+                "development": {
+                  "url": "http://localhost:3001/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": true
+                },
+                "production": {
+                  "url": "https://api.example.com/project-one/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": false
+                }
+              }
+            }
+          },
+          "project-two": {
+            "schemaPath": "./project-two-schema.graphql",
+            "includes": [
+              "**/*.graphql",
+              "**/*.js"
+            ],
+            "excludes": [
+              "**/node_modules/**",
+              "**/coverage/**"
+            ],
+            "extensions": {
+              "endpoints": {
+                "development": {
+                  "url": "http://localhost:3002/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": true
+                },
+                "production": {
+                  "url": "https://api.example.com/project-two/graphql",
+                  "headers": {
+                    "Authorization": "Bearer my-secret-token"
+                  },
+                  "introspect": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

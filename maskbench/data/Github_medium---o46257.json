@@ -1,0 +1,189 @@
+{
+  "description": "sample Github_medium/o46257.json",
+  "meta": {
+    "full_size": 862,
+    "stripped_size": 741,
+    "features": [
+      "$ref",
+      "additionalProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Investment Info",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "activity": {
+        "$ref": "#/definitions/InvestmentActivity"
+      },
+      "security": {
+        "$ref": "#/definitions/Security"
+      },
+      "transaction": {
+        "$ref": "#/definitions/InvestmentTransaction"
+      }
+    },
+    "definitions": {
+      "InvestmentActivity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "integer"
+          }
+        }
+      },
+      "Security": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "_id": {
+            "type": "integer",
+            "description": "A unique ID for Security"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        }
+      },
+      "InvestmentTransaction": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "_id": {
+            "type": "integer",
+            "description": "A unique ID for InvestmentTransaction"
+          },
+          "price": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "activity": {
+          "label": "Buy",
+          "type": 1
+        },
+        "security": {
+          "_id": 12345,
+          "name": "Apple Inc.",
+          "symbol": "AAPL"
+        },
+        "transaction": {
+          "_id": 67890,
+          "price": 150.5,
+          "quantity": 10.0
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"one\" is not of type \"integer\"",
+      "python_error": "'one' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['activity']['properties']['type']:\n    {'type': 'integer'}\n\nOn instance['activity']['type']:\n    'one'",
+      "data": {
+        "activity": {
+          "label": "Buy",
+          "type": "one"
+        },
+        "security": {
+          "_id": 12345,
+          "name": "Apple Inc.",
+          "symbol": "AAPL"
+        },
+        "transaction": {
+          "_id": 67890,
+          "price": 150.5,
+          "quantity": 10.0
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1.5 is not of type \"integer\"",
+      "python_error": "1.5 is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['activity']['properties']['type']:\n    {'type': 'integer'}\n\nOn instance['activity']['type']:\n    1.5",
+      "data": {
+        "activity": {
+          "label": "Buy",
+          "type": 1.5
+        },
+        "security": {
+          "_id": 12345,
+          "name": "Apple Inc.",
+          "symbol": "AAPL"
+        },
+        "transaction": {
+          "_id": 67890,
+          "price": 150.5,
+          "quantity": 10.0
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "activity": {
+          "label": "Buy",
+          "type": 1
+        },
+        "security": {
+          "_id": 123,
+          "name": "Apple Inc.",
+          "symbol": "AAPL"
+        },
+        "transaction": {
+          "_id": 456,
+          "price": 145.5,
+          "quantity": 10.0
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraField' was unexpected)",
+      "python_error": "Additional properties are not allowed ('<-- Changed to invalid JSON', '<-- Changed to string' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['security']:\n    {'type': 'object',\n     'additionalProperties': False,\n     'properties': {'_id': {'type': 'integer',\n                            'description': 'A unique ID for Security'},\n                    'name': {'type': 'string'},\n                    'symbol': {'type': 'string'}}}\n\nOn instance['security']:\n    {'_id': '123',\n     '<-- Changed to string': 'name',\n     '<-- Changed to invalid JSON': 'symbol'}",
+      "data": {
+        "activity": {
+          "label": "Buy",
+          "type": 1,
+          "extraField": "invalid"
+        },
+        "security": {
+          "_id": "123",
+          "<-- Changed to string": "name",
+          "<-- Changed to invalid JSON": "symbol"
+        }
+      }
+    }
+  ]
+}

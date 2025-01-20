@@ -1,0 +1,157 @@
+{
+  "description": "sample Kubernetes/kb_846_Normalized.json",
+  "meta": {
+    "full_size": 1158,
+    "stripped_size": 574,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "type",
+      "type:[]",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "description": "ResourceRequirements describes the compute resource requirements.",
+    "properties": {
+      "limits": {
+        "additionalProperties": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity"
+        },
+        "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/",
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "requests": {
+        "additionalProperties": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity"
+        },
+        "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/",
+        "type": [
+          "object",
+          "null"
+        ]
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "limits": {
+          "cpu": "100m",
+          "memory": 512
+        },
+        "requests": {
+          "cpu": 50,
+          "memory": "256Mi"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "limits": {
+          "cpu": "200m",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": 100,
+          "memory": "512Mi"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"null\", \"object\"",
+      "python_error": "True is not of type 'object', 'null'\n\nFailed validating 'type' in schema['properties']['limits']:\n    {'additionalProperties': {'$ref': '#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity'},\n     'description': 'Limits describes the maximum amount of compute '\n                    'resources allowed. More info: '\n                    'https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/',\n     'type': ['object', 'null']}\n\nOn instance['limits']:\n    True",
+      "data": {
+        "limits": true,
+        "requests": {
+          "cpu": 100,
+          "memory": "512Mi"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['limits']['additionalProperties']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['limits']['cpu']:\n    True",
+      "data": {
+        "limits": {
+          "cpu": true,
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": 100,
+          "memory": "512Mi"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"unwanted\":true} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'unwanted': True} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['limits']['additionalProperties']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['limits']['extra']:\n    {'unwanted': True}",
+      "data": {
+        "limits": {
+          "cpu": "200m",
+          "memory": "1Gi",
+          "gpu": 100,
+          "extra": {
+            "unwanted": true
+          }
+        },
+        "requests": {
+          "cpu": 100,
+          "memory": "512Mi"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['limits']['additionalProperties']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['limits']['gpu']:\n    True",
+      "data": {
+        "limits": {
+          "cpu": "200m",
+          "memory": "1Gi",
+          "gpu": true
+        },
+        "requests": {
+          "cpu": 100,
+          "memory": "512Mi"
+        }
+      }
+    }
+  ]
+}

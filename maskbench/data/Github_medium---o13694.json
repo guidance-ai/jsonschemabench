@@ -1,0 +1,596 @@
+{
+  "description": "sample Github_medium/o13694.json",
+  "meta": {
+    "full_size": 2148,
+    "stripped_size": 1274,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "anyOf",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "SIP workflow schema ",
+    "description": "Schema for SIP workflow definition",
+    "version": "1.0.0",
+    "type": "object",
+    "required": [
+      "id",
+      "version"
+    ],
+    "properties": {
+      "id": {
+        "description": "Workflow identifier",
+        "type": "string"
+      },
+      "version": {
+        "description": "Workflow version",
+        "type": "string",
+        "pattern": "^([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4})|(test)"
+      },
+      "stages": {
+        "description": "Array of workflow stages",
+        "type": "array",
+        "items": {
+          "description": "Workflow stage specification",
+          "type": "object",
+          "$ref": "#/definitions/workflow_stage"
+        }
+      }
+    },
+    "definitions": {
+      "workflow_stage": {
+        "required": [
+          "id",
+          "type",
+          "version",
+          "resources_required",
+          "ee_config",
+          "app_config"
+        ],
+        "properties": {
+          "id": {
+            "description": "Workflow stage: identifier",
+            "type": "string"
+          },
+          "type": {
+            "description": "Workflow stage: type",
+            "enum": [
+              "emulator",
+              "setup",
+              "cleanup",
+              "processing",
+              "simulator"
+            ]
+          },
+          "version": {
+            "description": "Workflow stage version",
+            "type": "string",
+            "pattern": "^([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4})|(test)"
+          },
+          "dependencies": {
+            "description": "Workflow stage: dependencies",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "$ref": "#/definitions/dependency"
+            }
+          },
+          "resources_required": {
+            "description": "Workflow stage: resources required",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "$ref": "#/definitions/resources"
+            }
+          },
+          "ee_config": {
+            "description": "Execution Engine configuration",
+            "type": "object"
+          },
+          "app_config": {
+            "description": "Application configuration",
+            "type": "object"
+          }
+        }
+      },
+      "dependency": {
+        "required": [
+          "type",
+          "value",
+          "condition"
+        ],
+        "properties": {
+          "type": {
+            "description": "Type of dependency",
+            "enum": [
+              "stage",
+              "buffer_object"
+            ]
+          },
+          "value": {
+            "description": "Value of the dependency",
+            "type": "string"
+          },
+          "condition": {
+            "description": "Dependency condition",
+            "enum": [
+              "complete",
+              "started",
+              "present"
+            ]
+          },
+          "parameters": {
+            "description": "Additional parameters describing the dependency",
+            "type": "object"
+          }
+        }
+      },
+      "resources": {
+        "required": [
+          "type",
+          "value"
+        ],
+        "properties": {
+          "type": {
+            "description": "Resource type",
+            "enum": [
+              "cpu",
+              "memory",
+              "node"
+            ]
+          },
+          "value": {
+            "description": "Value (amount) of the resource",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "parameters": {
+            "description": "Additional parameters describing the resource",
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "id": "sip-workflow-1",
+        "version": "1.0.0",
+        "stages": [
+          {
+            "id": "stage-1",
+            "type": "emulator",
+            "version": "1.0.0",
+            "dependencies": [
+              {
+                "type": "stage",
+                "value": "stage-0",
+                "condition": "complete"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "cpu",
+                "value": 4
+              },
+              {
+                "type": "memory",
+                "value": "16GB"
+              }
+            ],
+            "ee_config": {
+              "timeout": 3600
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          },
+          {
+            "id": "stage-2",
+            "type": "processing",
+            "version": "test",
+            "dependencies": [
+              {
+                "type": "buffer_object",
+                "value": "buffer-1",
+                "condition": "present"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "node",
+                "value": 2
+              }
+            ],
+            "ee_config": {
+              "retry_count": 3
+            },
+            "app_config": {
+              "algorithm": "algorithm-1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['stages']['items']['properties']['resources_required']['items']['properties']['value']:\n    {'description': 'Value (amount) of the resource',\n     'anyOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['stages'][0]['resources_required'][0]['value']:\n    True",
+      "data": {
+        "id": "sip-workflow-1",
+        "version": "1.0.0",
+        "stages": [
+          {
+            "id": "stage-1",
+            "type": "emulator",
+            "version": "1.0.0",
+            "dependencies": [
+              {
+                "type": "stage",
+                "value": "stage-0",
+                "condition": "complete"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "cpu",
+                "value": true
+              },
+              {
+                "type": "memory",
+                "value": "16GB"
+              }
+            ],
+            "ee_config": {
+              "timeout": 3600
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          },
+          {
+            "id": "stage-2",
+            "type": "processing",
+            "version": "test",
+            "dependencies": [
+              {
+                "type": "buffer_object",
+                "value": "buffer-1",
+                "condition": "present"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "node",
+                "value": 2
+              }
+            ],
+            "ee_config": {
+              "retry_count": 3
+            },
+            "app_config": {
+              "algorithm": "algorithm-1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid_type\" is not one of [\"emulator\",\"setup\",\"cleanup\",\"processing\",\"simulator\"]",
+      "python_error": "'invalid_type' is not one of ['emulator', 'setup', 'cleanup', 'processing', 'simulator']\n\nFailed validating 'enum' in schema['properties']['stages']['items']['properties']['type']:\n    {'description': 'Workflow stage: type',\n     'enum': ['emulator', 'setup', 'cleanup', 'processing', 'simulator']}\n\nOn instance['stages'][2]['type']:\n    'invalid_type'",
+      "data": {
+        "id": "sip-workflow-1",
+        "version": "1.0.0",
+        "stages": [
+          {
+            "id": "stage-1",
+            "type": "emulator",
+            "version": "1.0.0",
+            "dependencies": [
+              {
+                "type": "stage",
+                "value": "stage-0",
+                "condition": "complete"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "cpu",
+                "value": 4
+              },
+              {
+                "type": "memory",
+                "value": "16GB"
+              }
+            ],
+            "ee_config": {
+              "timeout": 3600
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          },
+          {
+            "id": "stage-2",
+            "type": "processing",
+            "version": "test",
+            "dependencies": [
+              {
+                "type": "buffer_object",
+                "value": "buffer-1",
+                "condition": "present"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "node",
+                "value": 2
+              }
+            ],
+            "ee_config": {
+              "retry_count": 3
+            },
+            "app_config": {
+              "algorithm": "algorithm-1"
+            }
+          },
+          {
+            "id": "stage-3",
+            "type": "invalid_type",
+            "version": "1.0.0",
+            "dependencies": [
+              {
+                "type": "stage",
+                "value": "stage-0",
+                "condition": "complete"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "cpu",
+                "value": 4
+              },
+              {
+                "type": "memory",
+                "value": "16GB"
+              }
+            ],
+            "ee_config": {
+              "timeout": 3600
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "sip-workflow-1",
+        "version": "1.0.0",
+        "stages": [
+          {
+            "id": "stage-1",
+            "type": "emulator",
+            "version": "1.0.0",
+            "dependencies": [
+              {
+                "type": "stage",
+                "value": "stage-0",
+                "condition": "complete",
+                "parameters": {
+                  "timeout": 300
+                }
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "cpu",
+                "value": 4,
+                "parameters": {
+                  "architecture": "x86_64"
+                }
+              },
+              {
+                "type": "memory",
+                "value": "16GB",
+                "parameters": {
+                  "type": "DDR4"
+                }
+              }
+            ],
+            "ee_config": {
+              "execution_timeout": 3600,
+              "retry_count": 3
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          },
+          {
+            "id": "stage-2",
+            "type": "processing",
+            "version": "test",
+            "dependencies": [
+              {
+                "type": "buffer_object",
+                "value": "buffer-1",
+                "condition": "present"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "node",
+                "value": 2,
+                "parameters": {
+                  "node_type": "GPU"
+                }
+              }
+            ],
+            "ee_config": {
+              "execution_timeout": 7200,
+              "retry_count": 5
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['stages']['items']['properties']['resources_required']['items']['properties']['value']:\n    {'description': 'Value (amount) of the resource',\n     'anyOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['stages'][0]['resources_required'][0]['value']:\n    True",
+      "data": {
+        "id": "sip-workflow-1",
+        "version": "1.0.0",
+        "stages": [
+          {
+            "id": "stage-1",
+            "type": "emulator",
+            "version": "1.0.0",
+            "dependencies": [
+              {
+                "type": "stage",
+                "value": "stage-0",
+                "condition": "complete",
+                "parameters": {
+                  "timeout": 300
+                }
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "cpu",
+                "value": true,
+                "parameters": {
+                  "architecture": "x86_64"
+                }
+              }
+            ],
+            "ee_config": {
+              "execution_timeout": 3600,
+              "retry_count": 3
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-stage-type\" is not one of [\"emulator\",\"setup\",\"cleanup\",\"processing\",\"simulator\"]",
+      "python_error": "'invalid-stage-type' is not one of ['emulator', 'setup', 'cleanup', 'processing', 'simulator']\n\nFailed validating 'enum' in schema['properties']['stages']['items']['properties']['type']:\n    {'description': 'Workflow stage: type',\n     'enum': ['emulator', 'setup', 'cleanup', 'processing', 'simulator']}\n\nOn instance['stages'][1]['type']:\n    'invalid-stage-type'",
+      "data": {
+        "id": "sip-workflow-1",
+        "version": "1.0.0",
+        "stages": [
+          {
+            "id": "stage-1",
+            "type": "emulator",
+            "version": "1.0.0",
+            "dependencies": [
+              {
+                "type": "stage",
+                "value": "stage-0",
+                "condition": "complete",
+                "parameters": {
+                  "timeout": "invalid"
+                }
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "cpu",
+                "value": "invalid",
+                "parameters": {
+                  "architecture": "x86_64"
+                }
+              }
+            ],
+            "ee_config": {
+              "execution_timeout": 3600,
+              "retry_count": 3
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          },
+          {
+            "id": "stage-2",
+            "type": "invalid-stage-type",
+            "version": "test",
+            "dependencies": [
+              {
+                "type": "buffer_object",
+                "value": "buffer-1",
+                "condition": "present"
+              }
+            ],
+            "resources_required": [
+              {
+                "type": "invalid-resource-type",
+                "value": 2,
+                "parameters": {
+                  "node_type": "GPU"
+                }
+              }
+            ],
+            "ee_config": {
+              "execution_timeout": 7200,
+              "retry_count": 5
+            },
+            "app_config": {
+              "input_file": "input.txt",
+              "output_file": "output.txt"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

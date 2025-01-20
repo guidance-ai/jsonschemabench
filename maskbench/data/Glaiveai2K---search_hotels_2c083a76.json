@@ -1,0 +1,96 @@
+{
+  "description": "sample Glaiveai2K/search_hotels_2c083a76.json",
+  "meta": {
+    "full_size": 426,
+    "stripped_size": 253,
+    "features": [
+      "format",
+      "format:date",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "check_in": {
+        "description": "The check-in date",
+        "format": "date",
+        "type": "string"
+      },
+      "check_out": {
+        "description": "The check-out date",
+        "format": "date",
+        "type": "string"
+      },
+      "criteria": {
+        "description": "Criteria to filter the search results",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "location": {
+        "description": "The location to search for hotels",
+        "type": "string"
+      }
+    },
+    "required": [
+      "location",
+      "check_in",
+      "check_out"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "check_in": "2022-01-01",
+        "check_out": "2022-01-31",
+        "criteria": [
+          "free_wifi",
+          "breakfast_included"
+        ],
+        "location": "New York"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"30 February 2022\" is not a \"date\"",
+      "python_error": "'30 February 2022' is not a 'date'\n\nFailed validating 'format' in schema['properties']['check_in']:\n    {'description': 'The check-in date', 'format': 'date', 'type': 'string'}\n\nOn instance['check_in']:\n    '30 February 2022'",
+      "data": {
+        "check_in": "30 February 2022",
+        "check_out": "2022-01-31",
+        "criteria": [
+          "free_wifi",
+          "breakfast_included"
+        ],
+        "location": "New York"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['criteria']['items']:\n    {'type': 'string'}\n\nOn instance['criteria'][0]:\n    123",
+      "data": {
+        "check_in": "2022-01-01",
+        "check_out": "2022-01-31",
+        "location": "New York",
+        "criteria": [
+          123,
+          "breakfast_included"
+        ]
+      }
+    }
+  ]
+}

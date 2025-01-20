@@ -1,0 +1,99 @@
+{
+  "description": "sample Github_easy/o9884.json",
+  "meta": {
+    "full_size": 278,
+    "stripped_size": 278,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "version": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "slug": {
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 63,
+        "pattern": "^[0-9a-z-]*$"
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0.0",
+        "slug": "example-slug"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Example-Slug\" does not match \"^[0-9a-z-]*$\"",
+      "python_error": "'Example-Slug' does not match '^[0-9a-z-]*$'\n\nFailed validating 'pattern' in schema['properties']['slug']:\n    {'type': 'string',\n     'minLength': 4,\n     'maxLength': 63,\n     'pattern': '^[0-9a-z-]*$'}\n\nOn instance['slug']:\n    'Example-Slug'",
+      "data": {
+        "version": "1.0.0",
+        "slug": "Example-Slug"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "1 is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "1 is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['version']:\n    {'oneOf': [{'type': 'string', 'minLength': 1, 'maxLength': 255},\n               {'type': 'null'}]}\n\nOn instance['version']:\n    1",
+      "data": {
+        "version": 1,
+        "slug": "example-slug"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[0]:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance:\n    ''",
+      "data": {
+        "version": ""
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra-field' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra-field' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'version': {'oneOf': [{'type': 'string',\n                                           'minLength': 1,\n                                           'maxLength': 255},\n                                          {'type': 'null'}]},\n                    'slug': {'type': 'string',\n                             'minLength': 4,\n                             'maxLength': 63,\n                             'pattern': '^[0-9a-z-]*$'}},\n     'additionalProperties': False}\n\nOn instance:\n    {'version': '1.0.0', 'slug': 'example-slug-', 'extra-field': 'value'}",
+      "data": {
+        "version": "1.0.0",
+        "slug": "example-slug-",
+        "extra-field": "value"
+      }
+    }
+  ]
+}

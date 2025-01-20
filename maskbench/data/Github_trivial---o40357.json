@@ -1,0 +1,231 @@
+{
+  "description": "sample Github_trivial/o40357.json",
+  "meta": {
+    "full_size": 873,
+    "stripped_size": 800,
+    "features": [
+      "@siblingKeys",
+      "anyOf",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://letsencrypt.org/schema/01/signature#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for a signature (alg RS256/e=65537 or P-256 ONLY)",
+    "type": "object",
+    "required": [
+      "alg",
+      "nonce",
+      "sig",
+      "jwk"
+    ],
+    "anyOf": [
+      {
+        "properties": {
+          "alg": {
+            "enum": [
+              "RS256"
+            ]
+          },
+          "nonce": {
+            "type": "string"
+          },
+          "sig": {
+            "type": "string",
+            "pattern": "^[-_=0-9A-Za-z]+$"
+          },
+          "jwk": {
+            "type": "object",
+            "required": [
+              "kty",
+              "e",
+              "n"
+            ],
+            "properties": {
+              "kty": {
+                "enum": [
+                  "RSA"
+                ]
+              },
+              "e": {
+                "enum": [
+                  "AQAB"
+                ]
+              },
+              "n": {
+                "type": "string",
+                "pattern": "^[-_=0-9A-Za-z]+$"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "alg": {
+            "enum": [
+              "ES256"
+            ]
+          },
+          "nonce": {
+            "type": "string"
+          },
+          "sig": {
+            "type": "string",
+            "pattern": "^[-_=0-9A-Za-z]+$"
+          },
+          "jwk": {
+            "type": "object",
+            "required": [
+              "kty",
+              "crv",
+              "x",
+              "y"
+            ],
+            "properties": {
+              "kty": {
+                "enum": [
+                  "EC"
+                ]
+              },
+              "crv": {
+                "enum": [
+                  "P-256"
+                ]
+              },
+              "x": {
+                "type": "string",
+                "pattern": "^[-_=0-9A-Za-z]+$"
+              },
+              "y": {
+                "type": "string",
+                "pattern": "^[-_=0-9A-Za-z]+$"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "alg": "RS256",
+        "nonce": "random_nonce",
+        "sig": "random_signature",
+        "jwk": {
+          "kty": "RSA",
+          "e": "AQAB",
+          "n": "random_modulus"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"alg\":\"RS256\",\"nonce\":\"random_nonce\",\"sig\":\"random_signature!\",\"jwk\":{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"random_modulus\"}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'RSA' is not one of ['EC']\n\nFailed validating 'enum' in schema[1]['properties']['jwk']['properties']['kty']:\n    {'enum': ['EC']}\n\nOn instance['jwk']['kty']:\n    'RSA'",
+      "data": {
+        "alg": "RS256",
+        "nonce": "random_nonce",
+        "sig": "random_signature!",
+        "jwk": {
+          "kty": "RSA",
+          "e": "AQAB",
+          "n": "random_modulus"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"alg\":\"RS256\",\"nonce\":\"random_nonce\",\"sig\":\"random_signature\",\"jwk\":{\"kty\":\"EC\",\"e\":\"AQAB\",\"n\":\"random_modulus\"}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'EC' is not one of ['RSA']\n\nFailed validating 'enum' in schema[0]['properties']['jwk']['properties']['kty']:\n    {'enum': ['RSA']}\n\nOn instance['jwk']['kty']:\n    'EC'",
+      "data": {
+        "alg": "RS256",
+        "nonce": "random_nonce",
+        "sig": "random_signature",
+        "jwk": {
+          "kty": "EC",
+          "e": "AQAB",
+          "n": "random_modulus"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "alg": "RS256",
+        "nonce": "example_nonce",
+        "sig": "example_signature",
+        "jwk": {
+          "kty": "RSA",
+          "e": "AQAB",
+          "n": "example_modulus"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"alg\":\"ES256\",\"nonce\":\"example_nonce\",\"sig\":\"example_signature\",\"jwk\":{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"example_modulus\"}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'RSA' is not one of ['EC']\n\nFailed validating 'enum' in schema[1]['properties']['jwk']['properties']['kty']:\n    {'enum': ['EC']}\n\nOn instance['jwk']['kty']:\n    'RSA'",
+      "data": {
+        "alg": "ES256",
+        "nonce": "example_nonce",
+        "sig": "example_signature",
+        "jwk": {
+          "kty": "RSA",
+          "e": "AQAB",
+          "n": "example_modulus"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"alg\":\"RS256\",\"nonce\":\"example_nonce\",\"sig\":\"example_signature!\",\"jwk\":{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"example_modulus\"}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'RSA' is not one of ['EC']\n\nFailed validating 'enum' in schema[1]['properties']['jwk']['properties']['kty']:\n    {'enum': ['EC']}\n\nOn instance['jwk']['kty']:\n    'RSA'",
+      "data": {
+        "alg": "RS256",
+        "nonce": "example_nonce",
+        "sig": "example_signature!",
+        "jwk": {
+          "kty": "RSA",
+          "e": "AQAB",
+          "n": "example_modulus"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"alg\":\"RS256\",\"nonce\":\"example_nonce\",\"sig\":\"example_signature!\",\"jwk\":{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"example_modulus\"}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'RSA' is not one of ['EC']\n\nFailed validating 'enum' in schema[1]['properties']['jwk']['properties']['kty']:\n    {'enum': ['EC']}\n\nOn instance['jwk']['kty']:\n    'RSA'",
+      "data": {
+        "alg": "RS256",
+        "nonce": "example_nonce",
+        "sig": "example_signature!",
+        "jwk": {
+          "kty": "RSA",
+          "e": "AQAB",
+          "n": "example_modulus"
+        }
+      }
+    }
+  ]
+}

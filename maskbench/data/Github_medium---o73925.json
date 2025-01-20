@@ -1,0 +1,286 @@
+{
+  "description": "sample Github_medium/o73925.json",
+  "meta": {
+    "full_size": 2192,
+    "stripped_size": 940,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "JSON schema for any Grunt task",
+    "definitions": {
+      "dynamic": {
+        "type": "object",
+        "properties": {
+          "expand": {
+            "description": "Must be set to true to use properties other than 'src' and 'dest'",
+            "type": "boolean",
+            "default": false
+          },
+          "cwd": {
+            "description": "All 'src' matches are relative to (but don't include) this path",
+            "type": "string"
+          },
+          "dest": {
+            "description": "Destination path prefix.",
+            "type": "string"
+          },
+          "ext": {
+            "description": "Replace any existing extension with this value in generated 'dest' paths.",
+            "type": "string"
+          },
+          "extDot": {
+            "description": "Used to indicate where the period indicating the extension is located.",
+            "enum": [
+              "first",
+              "last"
+            ],
+            "default": "first"
+          },
+          "filter": {
+            "description": "The 'filter' property can help you target files with a greater level of detail",
+            "enum": [
+              "isFile",
+              "isDirectory",
+              "isBlockDevice",
+              "isCharacterDevice",
+              "isSymbolicLink",
+              "isFIFO",
+              "isSocket"
+            ]
+          },
+          "flatten": {
+            "description": "Remove all path parts from generated 'dest' paths",
+            "type": "boolean",
+            "default": false
+          },
+          "matchBase": {
+            "description": "If set, patterns without slashes will be matched against the basename of the path if it contains slashes. For example, 'a?b' would match the path '/xyz/123/acb', but not '/xyz/acb/123'.",
+            "type": "boolean",
+            "default": false
+          },
+          "nonull": {
+            "description": "If set to 'true' then the operation will include non-matching patterns. Combined with grunt's '--verbose' flag, this option can help debug file path issues.",
+            "type": "boolean",
+            "default": false
+          },
+          "rename": {
+            "description": "This function is called for each matched 'src' file, (after extension renaming and flattening). ",
+            "type": "string"
+          },
+          "src": {
+            "description": "Pattern(s) to match, relative to the 'cwd'.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "_uniqueItems": true
+            }
+          }
+        },
+        "required": [
+          "src"
+        ]
+      },
+      "fileFormat": {
+        "properties": {
+          "files": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "array",
+                    "string"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "minItems": 1,
+                    "_uniqueItems": true
+                  }
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/dynamic"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "options": {
+        "type": "object"
+      }
+    },
+    "additionalProperties": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/fileFormat"
+        },
+        {
+          "$ref": "#/definitions/dynamic"
+        }
+      ]
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "options": {
+          "encoding": "utf8"
+        },
+        "files": [
+          {
+            "expand": true,
+            "cwd": "src/",
+            "dest": "dist/",
+            "ext": ".min.js",
+            "extDot": "last",
+            "filter": "isFile",
+            "flatten": true,
+            "matchBase": true,
+            "nonull": true,
+            "rename": "function (dest, src) { return src.replace(/\\.[^\\]+$/, '.min.js'); }",
+            "src": [
+              "**/*.js"
+            ]
+          },
+          {
+            "expand": true,
+            "cwd": "src/",
+            "dest": "dist/",
+            "ext": ".min.css",
+            "extDot": "last",
+            "filter": "isFile",
+            "flatten": true,
+            "matchBase": true,
+            "nonull": true,
+            "rename": "function (dest, src) { return src.replace(/\\.[^\\]+$/, '.min.css'); }",
+            "src": [
+              "**/*.css"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "options": {
+          "encoding": "utf8"
+        },
+        "files": [
+          {
+            "expand": true,
+            "cwd": "src/",
+            "src": [
+              "**/*.js"
+            ],
+            "dest": "dist/",
+            "ext": ".min.js"
+          },
+          {
+            "expand": true,
+            "cwd": "src/",
+            "src": [
+              "**/*.css"
+            ],
+            "dest": "dist/",
+            "ext": ".min.css"
+          }
+        ],
+        "anotherTask": {
+          "expand": true,
+          "cwd": "src/",
+          "dest": "dist/",
+          "ext": ".min.html",
+          "src": [
+            "**/*.html"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"files\":{\"invalidKey\":42,\"<--- Invalid (additionalProperties should be of type 'array' or 'string')\":\"file1.txt\"}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "42 is not of type 'array', 'string'\n\nFailed validating 'type' in schema[0]['additionalProperties']:\n    {'type': ['array', 'string'],\n     'items': {'type': 'string', 'minItems': 1, '_uniqueItems': True}}\n\nOn instance['invalidKey']:\n    42",
+      "data": {
+        "options": {
+          "encoding": "utf8"
+        },
+        "files": [
+          {
+            "expand": true,
+            "cwd": "src/",
+            "src": [
+              "**/*.js"
+            ],
+            "dest": 123,
+            "<--- Invalid (should be string)": "dist/",
+            "ext": ".min.js"
+          },
+          {
+            "expand": true,
+            "cwd": "src/",
+            "src": [
+              "**/*.css"
+            ],
+            "dest": "dist/",
+            "ext": ".min.css"
+          }
+        ],
+        "anotherTask": {
+          "expand": true,
+          "cwd": "src/",
+          "dest": "dist/",
+          "ext": ".min.html",
+          "src": [
+            "**/*.html",
+            "**/*.txt",
+            "**/*.html",
+            "<--- Invalid (array should have unique items)"
+          ]
+        },
+        "invalidTask": {
+          "files": {
+            "invalidKey": 42,
+            "<--- Invalid (additionalProperties should be of type 'array' or 'string')": "file1.txt"
+          }
+        }
+      }
+    }
+  ]
+}

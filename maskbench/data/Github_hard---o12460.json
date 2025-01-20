@@ -1,0 +1,1713 @@
+{
+  "description": "sample Github_hard/o12460.json",
+  "meta": {
+    "full_size": 9131,
+    "stripped_size": 4822,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "additionalProperties",
+      "allOf",
+      "anyOf",
+      "enum",
+      "items",
+      "patternProperties",
+      "propertyNames"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "pipetteName": {
+        "description": "Name of a pipette. Does not contain info about specific model/version. Should match keys in pipetteNameSpecs.json file",
+        "type": "string",
+        "enum": [
+          "p10_single",
+          "p10_multi",
+          "p50_single",
+          "p50_multi",
+          "p300_single",
+          "p300_multi",
+          "p1000_single",
+          "p1000_multi"
+        ]
+      },
+      "pipette-model": {
+        "description": "DEPRECATED. Exists to support backwards compatibility",
+        "type": "string",
+        "$comment": "TODO: Ian 2018-11-06 remove this def and every usage of it",
+        "enum": [
+          "p10_single_v1",
+          "p10_multi_v1",
+          "p50_single_v1",
+          "p50_multi_v1",
+          "p300_single_v1",
+          "p300_multi_v1",
+          "p1000_single_v1",
+          "p1000_multi_v1",
+          "p10_single_v1.3",
+          "p10_multi_v1.3",
+          "p50_single_v1.3",
+          "p50_multi_v1.3",
+          "p300_single_v1.3",
+          "p300_multi_v1.3",
+          "p1000_single_v1.3",
+          "p1000_multi_v1.3"
+        ]
+      },
+      "mm-offset": {
+        "description": "Millimeters for pipette location offsets",
+        "type": "number"
+      },
+      "flow-rate-for-pipettes": {
+        "description": "Flow rate in mm/sec for each pipette model used in the protocol",
+        "type": "object",
+        "propertyNames": {
+          "$ref": "#/definitions/pipetteName"
+        },
+        "patternProperties": {
+          ".*": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "flow-rate-params": {
+        "properties": {
+          "flow-rate": {
+            "description": "Flow rate for aspirate/dispense. If omitted, defaults to the corresponding values in \"default-values\"",
+            "type": "number"
+          }
+        }
+      },
+      "offsetFromBottomMm": {
+        "description": "Offset from bottom of well in millimeters",
+        "properties": {
+          "offsetFromBottomMm": {
+            "$ref": "#/definitions/mm-offset"
+          }
+        }
+      },
+      "pipette-access-params": {
+        "required": [
+          "pipette",
+          "labware",
+          "well"
+        ],
+        "properties": {
+          "pipette": {
+            "type": "string"
+          },
+          "labware": {
+            "type": "string"
+          },
+          "well": {
+            "type": "string"
+          }
+        }
+      },
+      "volume-params": {
+        "required": [
+          "volume"
+        ],
+        "volume": {
+          "type": "number"
+        }
+      },
+      "slot": {
+        "description": "Slot on the deck of an OT-2 robot",
+        "type": "string",
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12"
+        ]
+      }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "protocol-schema",
+      "default-values",
+      "metadata",
+      "robot",
+      "pipettes",
+      "labware",
+      "procedure"
+    ],
+    "properties": {
+      "protocol-schema": {
+        "description": "A version string for the Opentrons JSON Protocol schema being used. \"<major>.<minor>.<patch>\"",
+        "type": "string"
+      },
+      "metadata": {
+        "description": "Optional metadata about the protocol",
+        "type": "object",
+        "properties": {
+          "protocol-name": {
+            "description": "A short, human-readable name for the protocol",
+            "type": "string"
+          },
+          "author": {
+            "description": "The author or organization who created the protocol",
+            "type": "string"
+          },
+          "description": {
+            "description": "A text description of the protocol. For guidelines about how to write a good description, see (TODO WRITE DOCS & LINK HERE)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created": {
+            "description": "UNIX timestamp when this file was created",
+            "type": "number"
+          },
+          "last-modified": {
+            "description": "UNIX timestamp when this file was last modified",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "category": {
+            "description": "Category of protocol (eg, \"Basic Pipetting\")",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subcategory": {
+            "description": "Subcategory of protocol (eg, \"Cell Plating\")",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tags": {
+            "description": "Tags to be used in searching for this protocol",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "default-values": {
+        "description": "Default values required for protocol execution",
+        "type": "object",
+        "$note": "TODO: Ian 2018-10-29 make touch-tip-mm-from-top required (breaking change)",
+        "required": [
+          "aspirate-flow-rate",
+          "dispense-flow-rate",
+          "aspirate-mm-from-bottom",
+          "dispense-mm-from-bottom"
+        ],
+        "properties": {
+          "aspirate-flow-rate": {
+            "$ref": "#/definitions/flow-rate-for-pipettes"
+          },
+          "dispense-flow-rate": {
+            "$ref": "#/definitions/flow-rate-for-pipettes"
+          },
+          "aspirate-mm-from-bottom": {
+            "$ref": "#/definitions/mm-offset"
+          },
+          "dispense-mm-from-bottom": {
+            "$ref": "#/definitions/mm-offset"
+          },
+          "touch-tip-mm-from-top": {
+            "$ref": "#/definitions/mm-offset"
+          }
+        }
+      },
+      "designer-application": {
+        "description": "Optional data & metadata not required to execute the protocol, used by the application that created this protocol",
+        "type": "object",
+        "properties": {
+          "application-name": {
+            "description": "Name of the application that created the protocol. Should be namespaced under the organization or individual who owns the organization, and be kebab-cased, eg \"opentrons/protocol-designer\"",
+            "type": "string"
+          },
+          "application-version": {
+            "description": "Version of the application that created the protocol",
+            "type": "string"
+          },
+          "data": {
+            "description": "Any data used by the application that created this protocol)",
+            "type": "object"
+          }
+        }
+      },
+      "robot": {
+        "required": [
+          "model"
+        ],
+        "properties": {
+          "model": {
+            "description": "Model of the robot this (currently only OT-2 Standard is supported)",
+            "type": "string",
+            "enum": [
+              "OT-2 Standard"
+            ]
+          }
+        }
+      },
+      "pipettes": {
+        "description": "The pipettes used in this protocol, keyed by an arbitrary unique ID",
+        "additionalProperties": false,
+        "$comment": "TODO: Ian 2018-11-06 next breaking change, drop 'model' and require 'name' field",
+        "patternProperties": {
+          ".+": {
+            "description": "Fields describing an individual pipette",
+            "type": "object",
+            "required": [
+              "mount",
+              "model"
+            ],
+            "properties": {
+              "mount": {
+                "description": "Where the pipette is mounted",
+                "type": "string",
+                "enum": [
+                  "left",
+                  "right"
+                ]
+              },
+              "name": {
+                "$ref": "#/definitions/pipetteName"
+              },
+              "model": {
+                "$ref": "#/definitions/pipette-model"
+              }
+            }
+          }
+        }
+      },
+      "labware": {
+        "description": "The labware used in this protocol, keyed by an arbitrary unique ID",
+        "patternProperties": {
+          ".+": {
+            "description": "Fields describing a single labware on the deck",
+            "type": "object",
+            "required": [
+              "slot",
+              "model"
+            ],
+            "properties": {
+              "slot": {
+                "$ref": "#/definitions/slot"
+              },
+              "model": {
+                "description": "Labware type, eg \"96-flat\". See http://docs.opentrons.com/containers.html for a full list of supported labware. TODO support custom labware in JSON",
+                "type": "string"
+              },
+              "display-name": {
+                "description": "An optional human-readable nickname for this labware. Eg \"Buffer Trough\"",
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "procedure": {
+        "description": "An array of \"subprocedure\" objects representing the steps to be executed on the robot",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "subprocedure"
+          ],
+          "properties": {
+            "annotation": {
+              "description": "Optional info annotating the subprocedure",
+              "type": "object",
+              "required": [
+                "name",
+                "description"
+              ],
+              "properties": {
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "subprocedure": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "description": "Aspirate / dispense / air gap commands",
+                    "type": "object",
+                    "required": [
+                      "command",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "command": {
+                        "enum": [
+                          "aspirate",
+                          "dispense",
+                          "air-gap"
+                        ]
+                      },
+                      "params": {
+                        "allOf": [
+                          {
+                            "$ref": "#/definitions/flow-rate-params"
+                          },
+                          {
+                            "$ref": "#/definitions/pipette-access-params"
+                          },
+                          {
+                            "$ref": "#/definitions/volume-params"
+                          },
+                          {
+                            "$ref": "#/definitions/offsetFromBottomMm"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "description": "Touch tip commands",
+                    "type": "object",
+                    "required": [
+                      "command",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "command": {
+                        "enum": [
+                          "touch-tip"
+                        ]
+                      },
+                      "params": {
+                        "allOf": [
+                          {
+                            "$ref": "#/definitions/pipette-access-params"
+                          },
+                          {
+                            "$ref": "#/definitions/offsetFromBottomMm"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "description": "Pick up tip / drop tip / blowout commands",
+                    "type": "object",
+                    "required": [
+                      "command",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "command": {
+                        "enum": [
+                          "pick-up-tip",
+                          "drop-tip",
+                          "blowout"
+                        ]
+                      },
+                      "params": {
+                        "allOf": [
+                          {
+                            "$ref": "#/definitions/pipette-access-params"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "description": "Move to slot command. NOTE: this is an EXPERIMENTAL command, its behavior is subject to change in future releases.",
+                    "type": "object",
+                    "required": [
+                      "command",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "command": {
+                        "enum": [
+                          "move-to-slot"
+                        ]
+                      },
+                      "params": {
+                        "type": "object",
+                        "required": [
+                          "pipette",
+                          "slot"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "pipette": {
+                            "type": "string"
+                          },
+                          "slot": {
+                            "$ref": "#/definitions/slot"
+                          },
+                          "offset": {
+                            "description": "Optional offset from slot bottom left corner, in mm",
+                            "type": "object",
+                            "required": [
+                              "x",
+                              "y",
+                              "z"
+                            ],
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "type": "number"
+                              },
+                              "z": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "minimum-z-height": {
+                            "description": "Optional minimal Z margin in mm. If this is larger than the API's default safe Z margin, it will make the arc higher. If it's smaller, it will have no effect. Specifying this for movements that would not arc (moving within the same well in the same labware) will cause an arc movement instead. This param only supported in API v2, API v1 will ignore it.",
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "force-direct": {
+                            "description": "Default is false. If true, moving from one labware/well to another will not arc to the default safe z, but instead will move directly to the specified location. This will also force the 'minimum-z-height' param to be ignored. In APIv1, this will use strategy='direct', which moves first in X/Y plane and then in Z. In API v2, a 'direct' movement is in X/Y/Z simultaneously",
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "Delay command",
+                    "type": "object",
+                    "required": [
+                      "command",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "command": {
+                        "enum": [
+                          "delay"
+                        ]
+                      },
+                      "params": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "wait"
+                        ],
+                        "properties": {
+                          "wait": {
+                            "description": "either a number of seconds to wait (fractional values OK), or `true` to wait indefinitely until the user manually resumes the protocol",
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "enum": [
+                                  true
+                                ]
+                              }
+                            ]
+                          },
+                          "message": {
+                            "description": "optional message describing the delay"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "protocol-schema": "1.0.0",
+        "default-values": {
+          "aspirate-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "dispense-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "aspirate-mm-from-bottom": 1,
+          "dispense-mm-from-bottom": 1,
+          "touch-tip-mm-from-top": 1
+        },
+        "metadata": {
+          "protocol-name": "Example Protocol",
+          "author": "John Doe",
+          "description": "This is an example protocol.",
+          "created": 1643723400,
+          "last-modified": 1643723400,
+          "category": "Basic Pipetting",
+          "subcategory": "Cell Plating",
+          "tags": [
+            "example",
+            "protocol"
+          ]
+        },
+        "robot": {
+          "model": "OT-2 Standard"
+        },
+        "pipettes": {
+          "pipette1": {
+            "mount": "left",
+            "model": "p10_single_v1",
+            "name": "p10_single"
+          },
+          "pipette2": {
+            "mount": "right",
+            "model": "p300_single_v1",
+            "name": "p300_single"
+          }
+        },
+        "labware": {
+          "labware1": {
+            "slot": "1",
+            "model": "96-flat",
+            "display-name": "96 Well Plate"
+          },
+          "labware2": {
+            "slot": "2",
+            "model": "trough-12row",
+            "display-name": "Trough"
+          }
+        },
+        "procedure": [
+          {
+            "annotation": {
+              "name": "Step 1",
+              "description": "Aspirate 10ul from well A1"
+            },
+            "subprocedure": [
+              {
+                "command": "aspirate",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 2",
+              "description": "Dispense 10ul to well B1"
+            },
+            "subprocedure": [
+              {
+                "command": "dispense",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "B1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 3",
+              "description": "Touch tip"
+            },
+            "subprocedure": [
+              {
+                "command": "touch-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 4",
+              "description": "Pick up tip"
+            },
+            "subprocedure": [
+              {
+                "command": "pick-up-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 5",
+              "description": "Drop tip"
+            },
+            "subprocedure": [
+              {
+                "command": "drop-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 6",
+              "description": "Blowout"
+            },
+            "subprocedure": [
+              {
+                "command": "blowout",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 7",
+              "description": "Move to slot 2"
+            },
+            "subprocedure": [
+              {
+                "command": "move-to-slot",
+                "params": {
+                  "pipette": "pipette1",
+                  "slot": "2"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 8",
+              "description": "Delay for 10 seconds"
+            },
+            "subprocedure": [
+              {
+                "command": "delay",
+                "params": {
+                  "wait": 10
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on propertyNames keyword",
+      "valid": false,
+      "rust_error": "\"invalid-pipette-name\" is not one of [\"p10_single\",\"p10_multi\",\"p50_single\",\"p50_multi\",\"p300_single\",\"p300_multi\",\"p1000_single\",\"p1000_multi\"]",
+      "python_error": "'invalid-pipette-name' is not one of ['p10_single', 'p10_multi', 'p50_single', 'p50_multi', 'p300_single', 'p300_multi', 'p1000_single', 'p1000_multi']\n\nFailed validating 'enum' in schema['properties']['default-values']['properties']['aspirate-flow-rate']['propertyNames']:\n    {'description': 'Name of a pipette. Does not contain info about '\n                    'specific model/version. Should match keys in '\n                    'pipetteNameSpecs.json file',\n     'type': 'string',\n     'enum': ['p10_single',\n              'p10_multi',\n              'p50_single',\n              'p50_multi',\n              'p300_single',\n              'p300_multi',\n              'p1000_single',\n              'p1000_multi']}\n\nOn instance['default-values']['aspirate-flow-rate']:\n    'invalid-pipette-name'",
+      "data": {
+        "protocol-schema": "1.0.0",
+        "default-values": {
+          "aspirate-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000,
+            "invalid-pipette-name": 1000
+          },
+          "dispense-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "aspirate-mm-from-bottom": 1,
+          "dispense-mm-from-bottom": 1,
+          "touch-tip-mm-from-top": 1
+        },
+        "metadata": {
+          "protocol-name": "Example Protocol",
+          "author": "John Doe",
+          "description": "This is an example protocol.",
+          "created": 1643723400,
+          "last-modified": 1643723400,
+          "category": "Basic Pipetting",
+          "subcategory": "Cell Plating",
+          "tags": [
+            "example",
+            "protocol"
+          ]
+        },
+        "robot": {
+          "model": "OT-2 Standard"
+        },
+        "pipettes": {
+          "pipette1": {
+            "mount": "left",
+            "model": "p10_single_v1",
+            "name": "p10_single"
+          },
+          "pipette2": {
+            "mount": "right",
+            "model": "p300_single_v1",
+            "name": "p300_single"
+          }
+        },
+        "labware": {
+          "labware1": {
+            "slot": "1",
+            "model": "96-flat",
+            "display-name": "96 Well Plate"
+          },
+          "labware2": {
+            "slot": "2",
+            "model": "trough-12row",
+            "display-name": "Trough"
+          }
+        },
+        "procedure": [
+          {
+            "annotation": {
+              "name": "Step 1",
+              "description": "Aspirate 10ul from well A1"
+            },
+            "subprocedure": [
+              {
+                "command": "aspirate",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 2",
+              "description": "Dispense 10ul to well B1"
+            },
+            "subprocedure": [
+              {
+                "command": "dispense",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "B1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 3",
+              "description": "Touch tip"
+            },
+            "subprocedure": [
+              {
+                "command": "touch-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 4",
+              "description": "Pick up tip"
+            },
+            "subprocedure": [
+              {
+                "command": "pick-up-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 5",
+              "description": "Drop tip"
+            },
+            "subprocedure": [
+              {
+                "command": "drop-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 6",
+              "description": "Blowout"
+            },
+            "subprocedure": [
+              {
+                "command": "blowout",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 7",
+              "description": "Move to slot 2"
+            },
+            "subprocedure": [
+              {
+                "command": "move-to-slot",
+                "params": {
+                  "pipette": "pipette1",
+                  "slot": "2"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 8",
+              "description": "Delay for 10 seconds"
+            },
+            "subprocedure": [
+              {
+                "command": "delay",
+                "params": {
+                  "wait": 10
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "\"dispense-flow-rate\" is a required property",
+      "python_error": "'dispense-flow-rate' is a required property\n\nFailed validating 'required' in schema['properties']['default-values']:\n    {'description': 'Default values required for protocol execution',\n     'type': 'object',\n     '$note': 'TODO: Ian 2018-10-29 make touch-tip-mm-from-top required '\n              '(breaking change)',\n     'required': ['aspirate-flow-rate',\n                  'dispense-flow-rate',\n                  'aspirate-mm-from-bottom',\n                  'dispense-mm-from-bottom'],\n     'properties': {'aspirate-flow-rate': {'$ref': '#/definitions/flow-rate-for-pipettes'},\n                    'dispense-flow-rate': {'$ref': '#/definitions/flow-rate-for-pipettes'},\n                    'aspirate-mm-from-bottom': {'$ref': '#/definitions/mm-offset'},\n                    'dispense-mm-from-bottom': {'$ref': '#/definitions/mm-offset'},\n                    'touch-tip-mm-from-top': {'$ref': '#/definitions/mm-offset'}}}\n\nOn instance['default-values']:\n    {'aspirate-flow-rate': {'p10_single': 10,\n                     .. (362 more)",
+      "data": {
+        "protocol-schema": "1.0.0",
+        "default-values": {
+          "aspirate-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000,
+            "invalid-pipette": 1000
+          }
+        },
+        "metadata": {
+          "protocol-name": "Example Protocol",
+          "author": "John Doe",
+          "description": "This is an example protocol.",
+          "created": 1643723400,
+          "last-modified": 1643723400,
+          "category": "Basic Pipetting",
+          "subcategory": "Cell Plating",
+          "tags": [
+            "example",
+            "protocol"
+          ]
+        },
+        "robot": {
+          "model": "OT-2 Standard"
+        },
+        "pipettes": {
+          "pipette1": {
+            "mount": "left",
+            "model": "p10_single_v1",
+            "name": "p10_single"
+          },
+          "pipette2": {
+            "mount": "right",
+            "model": "p300_single_v1",
+            "name": "p300_single"
+          }
+        },
+        "labware": {
+          "labware1": {
+            "slot": "1",
+            "model": "96-flat",
+            "display-name": "96 Well Plate"
+          },
+          "labware2": {
+            "slot": "2",
+            "model": "trough-12row",
+            "display-name": "Trough"
+          }
+        },
+        "procedure": [
+          {
+            "annotation": {
+              "name": "Step 1",
+              "description": "Aspirate 10ul from well A1"
+            },
+            "subprocedure": [
+              {
+                "command": "aspirate",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "[\"this is a description\"] is not of types \"null\", \"string\"",
+      "python_error": "['this is a description'] is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['metadata']['properties']['description']:\n    {'description': 'A text description of the protocol. For guidelines '\n                    'about how to write a good description, see (TODO '\n                    'WRITE DOCS & LINK HERE)',\n     'type': ['string', 'null']}\n\nOn instance['metadata']['description']:\n    ['this is a description']",
+      "data": {
+        "protocol-schema": "1.0.0",
+        "default-values": {
+          "aspirate-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "dispense-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "aspirate-mm-from-bottom": 1,
+          "dispense-mm-from-bottom": 1,
+          "touch-tip-mm-from-top": 1
+        },
+        "metadata": {
+          "protocol-name": "Example Protocol",
+          "author": "John Doe",
+          "description": [
+            "this is a description"
+          ],
+          "created": 1643723400,
+          "last-modified": 1643723400,
+          "category": "Basic Pipetting",
+          "subcategory": "Cell Plating",
+          "tags": [
+            "example",
+            "protocol"
+          ]
+        },
+        "robot": {
+          "model": "OT-2 Standard"
+        },
+        "pipettes": {
+          "pipette1": {
+            "mount": "left",
+            "model": "p10_single_v1",
+            "name": "p10_single"
+          },
+          "pipette2": {
+            "mount": "right",
+            "model": "p300_single_v1",
+            "name": "p300_single"
+          }
+        },
+        "labware": {
+          "labware1": {
+            "slot": "1",
+            "model": "96-flat",
+            "display-name": "96 Well Plate"
+          },
+          "labware2": {
+            "slot": "2",
+            "model": "trough-12row",
+            "display-name": "Trough"
+          }
+        },
+        "procedure": [
+          {
+            "annotation": {
+              "name": "Step 1",
+              "description": "Aspirate 10ul from well A1"
+            },
+            "subprocedure": [
+              {
+                "command": "aspirate",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 2",
+              "description": "Dispense 10ul to well B1"
+            },
+            "subprocedure": [
+              {
+                "command": "dispense",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "B1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 3",
+              "description": "Touch tip"
+            },
+            "subprocedure": [
+              {
+                "command": "touch-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 4",
+              "description": "Pick up tip"
+            },
+            "subprocedure": [
+              {
+                "command": "pick-up-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 5",
+              "description": "Drop tip"
+            },
+            "subprocedure": [
+              {
+                "command": "drop-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 6",
+              "description": "Blowout"
+            },
+            "subprocedure": [
+              {
+                "command": "blowout",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 7",
+              "description": "Move to slot 2"
+            },
+            "subprocedure": [
+              {
+                "command": "move-to-slot",
+                "params": {
+                  "pipette": "pipette1",
+                  "slot": "2"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 8",
+              "description": "Delay for 10 seconds"
+            },
+            "subprocedure": [
+              {
+                "command": "delay",
+                "params": {
+                  "wait": 10
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"string\" is not of type \"number\"",
+      "python_error": "'string' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['default-values']['properties']['touch-tip-mm-from-top']:\n    {'description': 'Millimeters for pipette location offsets',\n     'type': 'number'}\n\nOn instance['default-values']['touch-tip-mm-from-top']:\n    'string'",
+      "data": {
+        "protocol-schema": "1.0.0",
+        "default-values": {
+          "aspirate-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "dispense-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "aspirate-mm-from-bottom": 1,
+          "dispense-mm-from-bottom": 1,
+          "touch-tip-mm-from-top": "string"
+        },
+        "metadata": {
+          "protocol-name": "Example Protocol",
+          "author": "John Doe",
+          "description": "This is an example protocol.",
+          "created": 1643723400,
+          "last-modified": 1643723400,
+          "category": "Basic Pipetting",
+          "subcategory": "Cell Plating",
+          "tags": [
+            "example",
+            "protocol"
+          ]
+        },
+        "robot": {
+          "model": "OT-2 Standard"
+        },
+        "pipettes": {
+          "pipette1": {
+            "mount": "left",
+            "model": "p10_single_v1",
+            "name": "p10_single"
+          },
+          "pipette2": {
+            "mount": "right",
+            "model": "p300_single_v1",
+            "name": "p300_single"
+          }
+        },
+        "labware": {
+          "labware1": {
+            "slot": "1",
+            "model": "96-flat",
+            "display-name": "96 Well Plate"
+          },
+          "labware2": {
+            "slot": "2",
+            "model": "trough-12row",
+            "display-name": "Trough"
+          }
+        },
+        "procedure": [
+          {
+            "annotation": {
+              "name": "Step 1",
+              "description": "Aspirate 10ul from well A1"
+            },
+            "subprocedure": [
+              {
+                "command": "aspirate",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "volume": 10,
+                  "flow-rate": "string",
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"invalid_pipette\" is not one of [\"p10_single\",\"p10_multi\",\"p50_single\",\"p50_multi\",\"p300_single\",\"p300_multi\",\"p1000_single\",\"p1000_multi\"]",
+      "python_error": "'invalid_pipette' is not one of ['p10_single', 'p10_multi', 'p50_single', 'p50_multi', 'p300_single', 'p300_multi', 'p1000_single', 'p1000_multi']\n\nFailed validating 'enum' in schema['properties']['default-values']['properties']['aspirate-flow-rate']['propertyNames']:\n    {'description': 'Name of a pipette. Does not contain info about '\n                    'specific model/version. Should match keys in '\n                    'pipetteNameSpecs.json file',\n     'type': 'string',\n     'enum': ['p10_single',\n              'p10_multi',\n              'p50_single',\n              'p50_multi',\n              'p300_single',\n              'p300_multi',\n              'p1000_single',\n              'p1000_multi']}\n\nOn instance['default-values']['aspirate-flow-rate']:\n    'invalid_pipette'",
+      "data": {
+        "protocol-schema": "1.0.0",
+        "default-values": {
+          "aspirate-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000,
+            "invalid_pipette": 100
+          },
+          "dispense-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "aspirate-mm-from-bottom": 1,
+          "dispense-mm-from-bottom": 1,
+          "touch-tip-mm-from-top": 1
+        },
+        "metadata": {
+          "protocol-name": "Example Protocol",
+          "author": "John Doe",
+          "description": "This is an example protocol.",
+          "created": 1643723400,
+          "last-modified": 1643723400,
+          "category": "Basic Pipetting",
+          "subcategory": "Cell Plating",
+          "tags": [
+            "example",
+            "protocol"
+          ]
+        },
+        "robot": {
+          "model": "OT-2 Standard"
+        },
+        "pipettes": {
+          "pipette1": {
+            "mount": "left",
+            "model": "p10_single_v1",
+            "name": "p10_single"
+          },
+          "pipette2": {
+            "mount": "right",
+            "model": "p300_single_v1",
+            "name": "p300_single"
+          }
+        },
+        "labware": {
+          "labware1": {
+            "slot": "1",
+            "model": "96-flat",
+            "display-name": "96 Well Plate"
+          },
+          "labware2": {
+            "slot": "2",
+            "model": "trough-12row",
+            "display-name": "Trough"
+          }
+        },
+        "procedure": [
+          {
+            "annotation": {
+              "name": "Step 1",
+              "description": "Aspirate 10ul from well A1"
+            },
+            "subprocedure": [
+              {
+                "command": "aspirate",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 2",
+              "description": "Dispense 10ul to well B1"
+            },
+            "subprocedure": [
+              {
+                "command": "dispense",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "B1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 3",
+              "description": "Invalid command"
+            },
+            "subprocedure": [
+              {
+                "command": "invalid_command",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"command\":\"move-to-slot\",\"params\":{\"pipette\":\"pipette1\",\"slot\":2}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'ten' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[4]['properties']['params']['properties']['wait']:\n    {'description': 'either a number of seconds to wait (fractional values '\n                    'OK), or `true` to wait indefinitely until the user '\n                    'manually resumes the protocol',\n     'anyOf': [{'type': 'number'}, {'enum': [True]}]}\n\nOn instance['params']['wait']:\n    'ten'",
+      "data": {
+        "protocol-schema": "1.0.0",
+        "default-values": {
+          "aspirate-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "dispense-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000,
+            "p1000_multi": 1000
+          },
+          "aspirate-mm-from-bottom": 1,
+          "dispense-mm-from-bottom": 1,
+          "touch-tip-mm-from-top": 1
+        },
+        "metadata": {
+          "protocol-name": "Example Protocol",
+          "author": "John Doe",
+          "description": "This is an example protocol.",
+          "created": 1643723400,
+          "last-modified": 1643723400,
+          "category": "Basic Pipetting",
+          "subcategory": "Cell Plating",
+          "tags": [
+            "example",
+            "protocol"
+          ]
+        },
+        "robot": {
+          "model": "OT-2 Standard"
+        },
+        "pipettes": {
+          "pipette1": {
+            "mount": "left",
+            "model": "p10_single_v1",
+            "name": "p10_single"
+          },
+          "pipette2": {
+            "mount": "right",
+            "model": "p300_single_v1",
+            "name": "p300_single"
+          }
+        },
+        "labware": {
+          "labware1": {
+            "slot": "1",
+            "model": "96-flat",
+            "display-name": "96 Well Plate"
+          },
+          "labware2": {
+            "slot": "2",
+            "model": "trough-12row",
+            "display-name": "Trough"
+          }
+        },
+        "procedure": [
+          {
+            "annotation": {
+              "name": "Step 1",
+              "description": "Aspirate 10ul from well A1"
+            },
+            "subprocedure": [
+              {
+                "command": "aspirate",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 2",
+              "description": "Dispense 10ul to well B1"
+            },
+            "subprocedure": [
+              {
+                "command": "dispense",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "B1",
+                  "volume": 10,
+                  "flow-rate": 10,
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 3",
+              "description": "Touch tip"
+            },
+            "subprocedure": [
+              {
+                "command": "touch-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1",
+                  "offsetFromBottomMm": 1
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 4",
+              "description": "Pick up tip"
+            },
+            "subprocedure": [
+              {
+                "command": "pick-up-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 5",
+              "description": "Drop tip"
+            },
+            "subprocedure": [
+              {
+                "command": "drop-tip",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 6",
+              "description": "Blowout"
+            },
+            "subprocedure": [
+              {
+                "command": "blowout",
+                "params": {
+                  "pipette": "pipette1",
+                  "labware": "labware1",
+                  "well": "A1"
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 7",
+              "description": "Move to slot 2"
+            },
+            "subprocedure": [
+              {
+                "command": "move-to-slot",
+                "params": {
+                  "pipette": "pipette1",
+                  "slot": 2
+                }
+              }
+            ]
+          },
+          {
+            "annotation": {
+              "name": "Step 8",
+              "description": "Delay for 10 seconds"
+            },
+            "subprocedure": [
+              {
+                "command": "delay",
+                "params": {
+                  "wait": "ten"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

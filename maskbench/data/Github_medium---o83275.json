@@ -1,0 +1,237 @@
+{
+  "description": "sample Github_medium/o83275.json",
+  "meta": {
+    "full_size": 1384,
+    "stripped_size": 750,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "A representation of storage resource usage",
+    "properties": {
+      "dt": {
+        "_format": "date-time",
+        "description": "Date and time usage data was recorded",
+        "type": "string"
+      },
+      "file_count": {
+        "description": "Number of files",
+        "maximum": 18446744073709551615,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "hard_threshold": {
+        "description": "Hard threshold quota measured in bytes",
+        "maximum": 18446744073709551615,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "logical_usage": {
+        "description": "Logical file system usage measured in bytes",
+        "maximum": 18446744073709551615,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "mountpoint": {
+        "description": "Storage file system mountpoint directory",
+        "maxLength": 255,
+        "type": "string"
+      },
+      "physical_usage": {
+        "description": "Physical file system usage measured in bytes",
+        "maximum": 18446744073709551615,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "pi": {
+        "description": "Storage principal investigator's system username",
+        "maxLength": 30,
+        "type": "string"
+      },
+      "resource": {
+        "description": "Storage resource name",
+        "maxLength": 200,
+        "type": "string"
+      },
+      "soft_threshold": {
+        "description": "Soft threshold quota measured in bytes",
+        "maximum": 18446744073709551615,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "user": {
+        "description": "Storage user's system username",
+        "maxLength": 30,
+        "type": "string"
+      }
+    },
+    "required": [
+      "resource",
+      "mountpoint",
+      "user",
+      "pi",
+      "dt",
+      "file_count",
+      "logical_usage"
+    ],
+    "title": "Storage usage data",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "dt": "2022-01-01T12:00:00Z",
+        "file_count": 1000,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage",
+        "physical_usage": 750000000,
+        "pi": "john_doe",
+        "resource": "storage_cluster_1",
+        "soft_threshold": 800000000,
+        "user": "jane_doe"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"john_doe_with_a_very_long_username\" is longer than 30 characters",
+      "python_error": "'john_doe_with_a_very_long_username' is too long\n\nFailed validating 'maxLength' in schema['properties']['pi']:\n    {'description': \"Storage principal investigator's system username\",\n     'maxLength': 30,\n     'type': 'string'}\n\nOn instance['pi']:\n    'john_doe_with_a_very_long_username'",
+      "data": {
+        "dt": "2022-01-01T12:00:00Z",
+        "file_count": 1000,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage_with_a_very_long_path_that_exceeds_the_max_length",
+        "physical_usage": 750000000,
+        "pi": "john_doe_with_a_very_long_username",
+        "resource": "storage_cluster_1_with_a_very_long_name",
+        "soft_threshold": 800000000,
+        "user": "jane_doe"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['file_count']:\n    {'description': 'Number of files',\n     'maximum': 18446744073709551615,\n     'minimum': 0,\n     'type': 'integer'}\n\nOn instance['file_count']:\n    -1",
+      "data": {
+        "dt": "2022-01-01T12:00:00Z",
+        "file_count": -1,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage",
+        "physical_usage": 750000000,
+        "pi": "john_doe",
+        "resource": "storage_cluster_1",
+        "soft_threshold": 800000000,
+        "user": "jane_doe"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"john_doe_is_a_very_long_username\" is longer than 30 characters",
+      "python_error": "'john_doe_is_a_very_long_username' is too long\n\nFailed validating 'maxLength' in schema['properties']['pi']:\n    {'description': \"Storage principal investigator's system username\",\n     'maxLength': 30,\n     'type': 'string'}\n\nOn instance['pi']:\n    'john_doe_is_a_very_long_username'",
+      "data": {
+        "dt": "2022-01-01T12:00:00Z",
+        "file_count": 1000,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage",
+        "physical_usage": 750000000,
+        "pi": "john_doe_is_a_very_long_username",
+        "resource": "storage_cluster_1",
+        "soft_threshold": 800000000,
+        "user": "jane_doe"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"john_doe_this_is_a_really_long_principal_investigator_name\" is longer than 30 characters",
+      "python_error": "'john_doe_this_is_a_really_long_principal_investigator_name' is too long\n\nFailed validating 'maxLength' in schema['properties']['pi']:\n    {'description': \"Storage principal investigator's system username\",\n     'maxLength': 30,\n     'type': 'string'}\n\nOn instance['pi']:\n    'john_doe_this_is_a_really_long_principal_investigator_name'",
+      "data": {
+        "dt": "2022-01-01T12:00:00Z",
+        "file_count": 1000,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage",
+        "physical_usage": 750000000,
+        "pi": "john_doe_this_is_a_really_long_principal_investigator_name",
+        "resource": "storage_cluster_1",
+        "soft_threshold": 800000000,
+        "user": "jane_doe"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dt": "2022-01-01T00:00:00Z",
+        "file_count": 1000,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage",
+        "physical_usage": 750000000,
+        "pi": "john_doe",
+        "resource": "storage_cluster_1",
+        "soft_threshold": 900000000,
+        "user": "jane_doe"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['file_count']:\n    {'description': 'Number of files',\n     'maximum': 18446744073709551615,\n     'minimum': 0,\n     'type': 'integer'}\n\nOn instance['file_count']:\n    -1",
+      "data": {
+        "dt": "2022-01-01T00:00:00Z",
+        "file_count": -1,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage",
+        "physical_usage": 750000000,
+        "pi": "john_doe",
+        "resource": "storage_cluster_1",
+        "soft_threshold": 900000000,
+        "user": "jane_doe"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['file_count']:\n    {'description': 'Number of files',\n     'maximum': 18446744073709551615,\n     'minimum': 0,\n     'type': 'integer'}\n\nOn instance['file_count']:\n    -1",
+      "data": {
+        "dt": "2022-01-01T00:00:00Z",
+        "file_count": -1,
+        "hard_threshold": 1000000000,
+        "logical_usage": 500000000,
+        "mountpoint": "/mnt/storage",
+        "physical_usage": 750000000,
+        "pi": "john_doe",
+        "resource": "storage_cluster_1",
+        "soft_threshold": 900000000,
+        "user": "jane_doe"
+      }
+    }
+  ]
+}

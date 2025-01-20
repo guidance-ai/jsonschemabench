@@ -1,0 +1,202 @@
+{
+  "description": "sample Github_medium/o83291.json",
+  "meta": {
+    "full_size": 900,
+    "stripped_size": 444,
+    "features": [
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "config": {
+        "properties": {
+          "endpoints": {
+            "items": {
+              "description": "Name of the method config yaml(json) file",
+              "examples": [
+                "hello.yaml"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rateLimit": {
+            "description": "How many requests per second are allowed",
+            "examples": [
+              100
+            ],
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "dependencies": {
+        "properties": {
+          "client": {
+            "items": {
+              "description": "The name of a client this endpoint depends on",
+              "examples": [
+                "bar"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "middleware": {
+            "items": {
+              "description": "The name of a middleware this endpoint depends on",
+              "examples": [
+                "example"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "name": {
+        "description": "Endpoint name",
+        "examples": [
+          "bar"
+        ],
+        "type": "string"
+      },
+      "type": {
+        "description": "Endpoint protocol, either http or tchannel",
+        "enum": [
+          "http",
+          "tchannel"
+        ],
+        "examples": [
+          "http"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "type",
+      "config",
+      "dependencies"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "config": {
+          "endpoints": [
+            "hello.yaml",
+            "world.yaml"
+          ],
+          "rateLimit": 100
+        },
+        "dependencies": {
+          "client": [
+            "bar",
+            "foo"
+          ],
+          "middleware": [
+            "example",
+            "another"
+          ]
+        },
+        "name": "bar",
+        "type": "http"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['config']['properties']['endpoints']['items']:\n    {'description': 'Name of the method config yaml(json) file',\n     'examples': ['hello.yaml'],\n     'type': 'string'}\n\nOn instance['config']['endpoints'][1]:\n    123",
+      "data": {
+        "config": {
+          "endpoints": [
+            "hello.yaml",
+            123
+          ],
+          "rateLimit": 100
+        },
+        "dependencies": {
+          "client": [
+            "bar",
+            "foo"
+          ],
+          "middleware": [
+            "example",
+            "another"
+          ]
+        },
+        "name": "bar",
+        "type": "http"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "config": {
+          "endpoints": [
+            "hello.yaml",
+            "world.yaml"
+          ],
+          "rateLimit": 100
+        },
+        "dependencies": {
+          "client": [
+            "bar",
+            "foo"
+          ],
+          "middleware": [
+            "example",
+            "another-example"
+          ]
+        },
+        "name": "example-endpoint",
+        "type": "http"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "True is not of type 'string'\n\nFailed validating 'type' in schema['properties']['dependencies']['properties']['middleware']['items']:\n    {'description': 'The name of a middleware this endpoint depends on',\n     'examples': ['example'],\n     'type': 'string'}\n\nOn instance['dependencies']['middleware'][1]:\n    True",
+      "data": {
+        "name": "example-endpoint",
+        "type": "http",
+        "config": {
+          "endpoints": [
+            "hello.yaml",
+            123
+          ],
+          "rateLimit": 100
+        },
+        "dependencies": {
+          "client": [
+            "bar",
+            "foo"
+          ],
+          "middleware": [
+            "example",
+            true
+          ]
+        }
+      }
+    }
+  ]
+}

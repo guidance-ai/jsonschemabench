@@ -1,0 +1,168 @@
+{
+  "description": "sample Snowplow/sp_267_Normalized.json",
+  "meta": {
+    "full_size": 1175,
+    "stripped_size": 553,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for a client-generated user session",
+    "properties": {
+      "firstEventId": {
+        "_format": "uuid",
+        "description": "The optional identifier of the first event id for this session",
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "previousSessionId": {
+        "_format": "uuid",
+        "description": "The previous session identifier for this user",
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "sessionId": {
+        "_format": "uuid",
+        "description": "An identifier for the session",
+        "type": "string"
+      },
+      "sessionIndex": {
+        "description": "The index of the current session for this user",
+        "maximum": 2147483647,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "storageMechanism": {
+        "description": "The mechanism that the session information has been stored on the device",
+        "enum": [
+          "SQLITE",
+          "COOKIE_1",
+          "COOKIE_3",
+          "LOCAL_STORAGE",
+          "FLASH_LSO"
+        ],
+        "type": "string"
+      },
+      "userId": {
+        "description": "An identifier for the user of the session",
+        "maxLength": 36,
+        "pattern": "^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$|^[0-9a-f]{16}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "userId",
+      "sessionId",
+      "sessionIndex",
+      "previousSessionId",
+      "storageMechanism"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "client_session",
+      "vendor": "com.snowplowanalytics.snowplow",
+      "version": "1-0-1"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "previousSessionId": null,
+        "sessionId": "123e4567-e89b-12d3-a456-426614174000",
+        "sessionIndex": 1,
+        "storageMechanism": "LOCAL_STORAGE",
+        "userId": "1234567890abcdef"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "previousSessionId": "123e4567-e89b-12d3-a456-426655440001",
+        "sessionId": "123e4567-e89b-12d3-a456-426655440000",
+        "sessionIndex": 1,
+        "storageMechanism": "LOCAL_STORAGE",
+        "userId": "1234567890abcdef"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1234567890abcdefg\" does not match \"^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$|^[0-9a-f]{16}$\"",
+      "python_error": "'1234567890abcdefg' does not match '^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$|^[0-9a-f]{16}$'\n\nFailed validating 'pattern' in schema['properties']['userId']:\n    {'description': 'An identifier for the user of the session',\n     'maxLength': 36,\n     'pattern': '^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$|^[0-9a-f]{16}$',\n     'type': 'string'}\n\nOn instance['userId']:\n    '1234567890abcdefg'",
+      "data": {
+        "previousSessionId": "123e4567-e89b-12d3-a456-426655440001",
+        "sessionId": "123e4567-e89b-12d3-a456-426655440000",
+        "sessionIndex": 1,
+        "storageMechanism": "LOCAL_STORAGE",
+        "userId": "1234567890abcdefg"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sessionId']:\n    {'_format': 'uuid',\n     'description': 'An identifier for the session',\n     'type': 'string'}\n\nOn instance['sessionId']:\n    123",
+      "data": {
+        "userId": "1234567890abcdef",
+        "sessionId": 123,
+        "sessionIndex": 1,
+        "previousSessionId": "123e4567-e89b-12d3-a456-426655440001",
+        "storageMechanism": "LOCAL_STORAGE"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['sessionIndex']:\n    {'description': 'The index of the current session for this user',\n     'maximum': 2147483647,\n     'minimum': 0,\n     'type': 'integer'}\n\nOn instance['sessionIndex']:\n    -1",
+      "data": {
+        "previousSessionId": "123e4567-e89b-12d3-a456-426655440001",
+        "sessionId": "123e4567-e89b-12d3-a456-426655440000",
+        "sessionIndex": -1,
+        "storageMechanism": "LOCAL_STORAGE",
+        "userId": "1234567890abcdef"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\" is longer than 36 characters",
+      "python_error": "'1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' is too long\n\nFailed validating 'maxLength' in schema['properties']['userId']:\n    {'description': 'An identifier for the user of the session',\n     'maxLength': 36,\n     'pattern': '^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$|^[0-9a-f]{16}$',\n     'type': 'string'}\n\nOn instance['userId']:\n    '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'",
+      "data": {
+        "previousSessionId": "123e4567-e89b-12d3-a456-426655440001",
+        "sessionId": "123e4567-e89b-12d3-a456-426655440000",
+        "sessionIndex": 1,
+        "storageMechanism": "LOCAL_STORAGE",
+        "userId": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+      }
+    }
+  ]
+}

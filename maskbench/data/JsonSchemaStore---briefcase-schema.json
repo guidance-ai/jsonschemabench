@@ -1,0 +1,1425 @@
+{
+  "description": "sample JsonSchemaStore/briefcase-schema.json",
+  "meta": {
+    "full_size": 10013,
+    "stripped_size": 4571,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "allOf",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "allOf:trivial",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://github.com/Microsoft/Briefcase/product.schema.json",
+    "title": "MLBriefcase",
+    "description": "A ML briefcase schema",
+    "type": "object",
+    "definitions": {
+      "resource": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of this resource"
+          },
+          "credentialprovider": {
+            "type": "string",
+            "description": "Name of the credential provider to be used."
+          },
+          "secret": {
+            "$ref": "#/definitions/property"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Allows to attach user-definied metadata to resources"
+          }
+        }
+      },
+      "property": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Overrides the key to lookup the value for the property."
+              }
+            }
+          }
+        ]
+      },
+      "azureTenantId": {
+        "type": "object",
+        "properties": {
+          "tenantid": {
+            "$ref": "#/definitions/property",
+            "description": "Azure tenant id (a GUID)",
+            "examples": [
+              "72f988bf-86f1-41af-91ab-2d7cd011db47"
+            ]
+          }
+        }
+      },
+      "awsBoto3": {
+        "type": "object",
+        "description": "AWS Boto3",
+        "allOf": [
+          {
+            "$ref": "#/definitions/resource"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "region_name": {
+                "$ref": "#/definitions/property",
+                "description": "Region name"
+              },
+              "key_id": {
+                "$ref": "#/definitions/property",
+                "description": "AWS Access Key ID"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "properties": {
+      "azure": {
+        "description": "Azure services",
+        "type": "object",
+        "properties": {
+          "auth": {
+            "description": "Azure authentication services",
+            "type": "object",
+            "properties": {
+              "devicecode": {
+                "description": "Azure Device Code authentication",
+                "type": "array",
+                "items": {
+                  "description": "Azure Device Code authentication. Prompts the user with a URL.",
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "$ref": "#/definitions/azureTenantId"
+                    },
+                    {
+                      "properties": {
+                        "name": {
+                          "default": "devicecode"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "managedserviceidentity": {
+                "description": "Azure Managed Service Idenity",
+                "type": "array",
+                "items": {
+                  "description": "Azure Managed Service Identity (https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview)",
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    }
+                  ]
+                }
+              },
+              "serviceprincipal": {
+                "description": "Azure Service Princiapl",
+                "type": "array",
+                "items": {
+                  "description": "Azure Service Principal",
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "$ref": "#/definitions/azureTenantId"
+                    },
+                    {
+                      "properties": {
+                        "name": {
+                          "default": "serviceprincipal"
+                        },
+                        "clientid": {
+                          "$ref": "#/definitions/property",
+                          "description": "TODO The client id (a guid)"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "subscription": {
+            "description": "Azure Subscription",
+            "type": "array",
+            "items": {
+              "description": "Azure Subscription",
+              "type": "object",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/resource"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "$ref": "#/definitions/property",
+                      "description": "Azure subscription id (e.g. guids)"
+                    },
+                    "ids": {
+                      "type": "array",
+                      "description": "List of Azure subscription ids (e.g. guids)",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "keyvault": {
+            "description": "Azure KeyVaults",
+            "type": "array",
+            "items": {
+              "description": "Azure KeyVault https://docs.microsoft.com/en-us/azure/key-vault",
+              "type": "object",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/resource"
+                },
+                {
+                  "$ref": "#/definitions/azureTenantId"
+                },
+                {
+                  "properties": {
+                    "name": {
+                      "default": "keyvault"
+                    },
+                    "dnsname": {
+                      "$ref": "#/definitions/property",
+                      "description": "DNS for the Azure KeyVault instance",
+                      "default": "https://<name>.vault.azure.net/",
+                      "examples": [
+                        "https://example1.vault.azure.net/"
+                      ]
+                    },
+                    "credential": {
+                      "$ref": "#/definitions/property",
+                      "description": "Name of credential resource. E.g. device code or service principal resource"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "cognitiveservice": {
+            "type": "object",
+            "description": "Azure Cognitive Services",
+            "properties": {
+              "anomalydetection": {
+                "type": "array",
+                "description": "Azure Cognitive Service Anomaly Detection",
+                "items": {
+                  "description": "Azure Cognitive Service Anomaly Detection (https://docs.microsoft.com/en-us/azure/cognitive-services/anomaly-detector/)",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "$ref": "#/definitions/property",
+                          "description": "End point URL for Azure Cognitive Service",
+                          "default": "https://<your-custom-subdomain>.api.cognitive.microsoft.com/anomalydetector/v1.0/timeseries/entire/detect",
+                          "examples": [
+                            "https://example1.api.cognitive.microsoft.com/anomalydetector/v1.0/timeseries/entire/detect"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "contentmoderator": {
+                "type": "array",
+                "description": "Azure Cognitive Service Content Moderator",
+                "items": {
+                  "description": "Azure Cognitive Service Content Moderator",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "$ref": "#/definitions/property",
+                          "description": "End point URL for Azure Cognitive Service",
+                          "default": "https://<your-custom-subdomain>.api.cognitive.microsoft.com/",
+                          "examples": [
+                            "https://example1.api.cognitive.microsoft.com/"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "face": {
+                "type": "array",
+                "description": "Azure Cognitive Service Face",
+                "items": {
+                  "description": "Azure Cognitive Service Face (https://azure.microsoft.com/en-us/services/cognitive-services/face/)",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "$ref": "#/definitions/property",
+                          "description": "End point URL for Azure Cognitive Service",
+                          "default": "https://<your-custom-subdomain>.api.cognitive.microsoft.com",
+                          "examples": [
+                            "https://example1.api.cognitive.microsoft.com"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "spellcheck": {
+                "type": "array",
+                "description": "Azure Cognitive Service Spell Checker",
+                "items": {
+                  "description": "Azure Cognitive Service Spell Checker",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "$ref": "#/definitions/property",
+                          "description": "End point URL for Azure Cognitive Service",
+                          "default": "https://<your-custom-subdomain>.api.cognitive.microsoft.com/",
+                          "examples": [
+                            "https://example1.api.cognitive.microsoft.com/"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "textanalytics": {
+                "type": "array",
+                "description": "Azure Cognitive Service Text Analytics",
+                "items": {
+                  "description": "Azure Cognitive Service Text Analytics",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "$ref": "#/definitions/property",
+                          "description": "End point URL for Azure Cognitive Service",
+                          "default": "https://<your-custom-subdomain>.api.cognitive.microsoft.com",
+                          "examples": [
+                            "https://example1.api.cognitive.microsoft.com"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "vision": {
+                "type": "array",
+                "description": "Azure Cognitive Service Vision",
+                "items": {
+                  "description": "Azure Cognitive Service Vision",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "$ref": "#/definitions/property",
+                          "description": "End point URL for Azure Cognitive Service",
+                          "default": "https://<your-custom-subdomain>.api.cognitive.microsoft.com",
+                          "examples": [
+                            "https://example1.api.cognitive.microsoft.com"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "storage": {
+            "type": "object",
+            "description": "Azure Storage Services",
+            "properties": {
+              "account": {
+                "type": "array",
+                "description": "Azure Storage Account",
+                "items": {
+                  "description": "Azure Storage Account",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "accountname": {
+                          "$ref": "#/definitions/property",
+                          "description": "Azure blob account name"
+                        },
+                        "accountkey": {
+                          "$ref": "#/definitions/property",
+                          "description": "Azure blob account key"
+                        },
+                        "secrettype": {
+                          "$ref": "#/definitions/property",
+                          "description": "Is the secret a key or SAS token",
+                          "default": "key",
+                          "enum": [
+                            "key",
+                            "sas"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "blob": {
+                "type": "array",
+                "description": "Azure Blob Storage",
+                "items": {
+                  "description": "Azure Blob Storage",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/resource"
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "$ref": "#/definitions/property",
+                          "description": "URL to Azure blob"
+                        },
+                        "account": {
+                          "$ref": "#/definitions/property",
+                          "description": "Name of Azure Storage account resource object"
+                        },
+                        "containername": {
+                          "$ref": "#/definitions/property",
+                          "description": "Name of container"
+                        },
+                        "path": {
+                          "$ref": "#/definitions/property",
+                          "description": "Path to blob"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "amazon": {
+        "type": "object",
+        "description": "Amazon Web Services (AWS)",
+        "properties": {
+          "rekognition": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "AWS Rekognition services",
+              "$ref": "#/definitions/awsBoto3"
+            }
+          },
+          "comprehend": {
+            "type": "array",
+            "items": {
+              "description": "AWS Rekognition services",
+              "$ref": "#/definitions/awsBoto3"
+            }
+          }
+        }
+      },
+      "google": {
+        "type": "object",
+        "description": "Google Cloud Platform services",
+        "properties": {
+          "language": {
+            "type": "array",
+            "description": "Google NER service",
+            "items": {
+              "$ref": "#/definitions/resource"
+            }
+          },
+          "video": {
+            "type": "array",
+            "description": "Google video intelligence for content moderation annotation",
+            "items": {
+              "$ref": "#/definitions/resource"
+            }
+          },
+          "vision": {
+            "type": "array",
+            "description": "Google Face Detect SDK",
+            "items": {
+              "$ref": "#/definitions/resource"
+            }
+          }
+        }
+      },
+      "clarifai": {
+        "type": "object",
+        "description": "ClarifAI Services",
+        "properties": {
+          "moderation": {
+            "type": "array",
+            "description": "Clarifai Moderation image SDK",
+            "items": {
+              "description": "Clarifai Moderation image SDK",
+              "$ref": "#/definitions/resource"
+            }
+          }
+        }
+      },
+      "python": {
+        "description": "Python specific resources",
+        "properties": {
+          "jupyterlabCredentialProvider": {
+            "description": "JupyterLab Credential Provider",
+            "$ref": "#/definitions/resource"
+          },
+          "env": {
+            "description": "Environment variable Credential Provider",
+            "$ref": "#/definitions/resource"
+          },
+          "dotenv": {
+            "description": ".env file Credential Provider",
+            "$ref": "#/definitions/resource"
+          },
+          "keyring": {
+            "description": "Python KeyRing Credential Provider (https://pypi.org/project/keyring)",
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/resource"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "service_name": {
+                      "$ref": "#/definitions/property",
+                      "description": "Service name used when calling get_password"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "sqlalchemy": {
+            "description": "Python SQL Alchemy (https://www.sqlalchemy.org/)",
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/resource"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "$ref": "#/definitions/property",
+                      "description": "drivername://username:password@host/path?query"
+                    },
+                    "drivername": {
+                      "$ref": "#/definitions/property",
+                      "description": "the name of the database backend. This name will correspond to a module in sqlalchemy/databases or a third party plug-in."
+                    },
+                    "username": {
+                      "$ref": "#/definitions/property",
+                      "description": "The user name."
+                    },
+                    "host": {
+                      "$ref": "#/definitions/property",
+                      "description": "The name of the host."
+                    },
+                    "port": {
+                      "$ref": "#/definitions/property",
+                      "description": "The port number."
+                    },
+                    "database": {
+                      "$ref": "#/definitions/property",
+                      "description": "The database name."
+                    },
+                    "query": {
+                      "$ref": "#/definitions/property",
+                      "description": "A dictionary of options to be passed to the dialect and/or the DBAPI upon connect."
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "azure": {
+          "auth": {
+            "devicecode": [
+              {
+                "name": "devicecode",
+                "credentialprovider": "devicecode",
+                "secret": {
+                  "key": "tenantid"
+                },
+                "metadata": {
+                  "description": "Azure Device Code authentication"
+                },
+                "tenantid": {
+                  "key": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                }
+              }
+            ],
+            "managedserviceidentity": [
+              {
+                "name": "managedserviceidentity",
+                "credentialprovider": "managedserviceidentity",
+                "secret": {
+                  "key": "clientid"
+                },
+                "metadata": {
+                  "description": "Azure Managed Service Identity"
+                }
+              }
+            ],
+            "serviceprincipal": [
+              {
+                "name": "serviceprincipal",
+                "credentialprovider": "serviceprincipal",
+                "secret": {
+                  "key": "clientsecret"
+                },
+                "metadata": {
+                  "description": "Azure Service Principal"
+                },
+                "tenantid": {
+                  "key": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                },
+                "clientid": {
+                  "key": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                }
+              }
+            ]
+          },
+          "subscription": [
+            {
+              "name": "subscription",
+              "credentialprovider": "subscription",
+              "secret": {
+                "key": "subscriptionid"
+              },
+              "metadata": {
+                "description": "Azure Subscription"
+              },
+              "id": {
+                "key": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+              }
+            }
+          ],
+          "keyvault": [
+            {
+              "name": "keyvault",
+              "credentialprovider": "keyvault",
+              "secret": {
+                "key": "keyvaultsecret"
+              },
+              "metadata": {
+                "description": "Azure KeyVault"
+              },
+              "tenantid": {
+                "key": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+              },
+              "dnsname": {
+                "key": "https://example1.vault.azure.net/"
+              },
+              "credential": {
+                "key": "serviceprincipal"
+              }
+            }
+          ],
+          "cognitiveservice": {
+            "anomalydetection": [
+              {
+                "name": "anomalydetection",
+                "credentialprovider": "anomalydetection",
+                "secret": {
+                  "key": "anomalydetectionsecret"
+                },
+                "metadata": {
+                  "description": "Azure Cognitive Service Anomaly Detection"
+                },
+                "url": {
+                  "key": "https://example1.api.cognitive.microsoft.com/anomalydetector/v1.0/timeseries/entire/detect"
+                }
+              }
+            ],
+            "contentmoderator": [
+              {
+                "name": "contentmoderator",
+                "credentialprovider": "contentmoderator",
+                "secret": {
+                  "key": "contentmoderatorsecret"
+                },
+                "metadata": {
+                  "description": "Azure Cognitive Service Content Moderator"
+                },
+                "url": {
+                  "key": "https://example1.api.cognitive.microsoft.com/"
+                }
+              }
+            ],
+            "face": [
+              {
+                "name": "face",
+                "credentialprovider": "face",
+                "secret": {
+                  "key": "facesecret"
+                },
+                "metadata": {
+                  "description": "Azure Cognitive Service Face"
+                },
+                "url": {
+                  "key": "https://example1.api.cognitive.microsoft.com"
+                }
+              }
+            ],
+            "spellcheck": [
+              {
+                "name": "spellcheck",
+                "credentialprovider": "spellcheck",
+                "secret": {
+                  "key": "spellchecksecret"
+                },
+                "metadata": {
+                  "description": "Azure Cognitive Service Spell Checker"
+                },
+                "url": {
+                  "key": "https://example1.api.cognitive.microsoft.com/"
+                }
+              }
+            ],
+            "textanalytics": [
+              {
+                "name": "textanalytics",
+                "credentialprovider": "textanalytics",
+                "secret": {
+                  "key": "textanalyticsecret"
+                },
+                "metadata": {
+                  "description": "Azure Cognitive Service Text Analytics"
+                },
+                "url": {
+                  "key": "https://example1.api.cognitive.microsoft.com"
+                }
+              }
+            ],
+            "vision": [
+              {
+                "name": "vision",
+                "credentialprovider": "vision",
+                "secret": {
+                  "key": "visionsecret"
+                },
+                "metadata": {
+                  "description": "Azure Cognitive Service Vision"
+                },
+                "url": {
+                  "key": "https://example1.api.cognitive.microsoft.com"
+                }
+              }
+            ]
+          },
+          "storage": {
+            "account": [
+              {
+                "name": "account",
+                "credentialprovider": "account",
+                "secret": {
+                  "key": "accountsecret"
+                },
+                "metadata": {
+                  "description": "Azure Storage Account"
+                },
+                "accountname": {
+                  "key": "example1"
+                },
+                "accountkey": {
+                  "key": "accountkey1"
+                },
+                "secrettype": {
+                  "key": "key"
+                }
+              }
+            ],
+            "blob": [
+              {
+                "name": "blob",
+                "credentialprovider": "blob",
+                "secret": {
+                  "key": "blobsecret"
+                },
+                "metadata": {
+                  "description": "Azure Blob Storage"
+                },
+                "url": {
+                  "key": "https://example1.blob.core.windows.net/"
+                },
+                "account": {
+                  "key": "account"
+                },
+                "containername": {
+                  "key": "container1"
+                },
+                "path": {
+                  "key": "path1"
+                }
+              }
+            ]
+          }
+        },
+        "amazon": {
+          "rekognition": [
+            {
+              "name": "rekognition",
+              "credentialprovider": "rekognition",
+              "secret": {
+                "key": "rekognitionsecret"
+              },
+              "metadata": {
+                "description": "AWS Rekognition services"
+              },
+              "region_name": {
+                "key": "us-east-1"
+              },
+              "key_id": {
+                "key": "AKIAIOSFODNN7EXAMPLE"
+              }
+            }
+          ],
+          "comprehend": [
+            {
+              "name": "comprehend",
+              "credentialprovider": "comprehend",
+              "secret": {
+                "key": "comprehendsecret"
+              },
+              "metadata": {
+                "description": "AWS Comprehend services"
+              },
+              "region_name": {
+                "key": "us-east-1"
+              },
+              "key_id": {
+                "key": "AKIAIOSFODNN7EXAMPLE"
+              }
+            }
+          ]
+        },
+        "google": {
+          "language": [
+            {
+              "name": "language",
+              "credentialprovider": "language",
+              "secret": {
+                "key": "languagesecret"
+              },
+              "metadata": {
+                "description": "Google NER service"
+              }
+            }
+          ],
+          "video": [
+            {
+              "name": "video",
+              "credentialprovider": "video",
+              "secret": {
+                "key": "videosecret"
+              },
+              "metadata": {
+                "description": "Google video intelligence for content moderation annotation"
+              }
+            }
+          ],
+          "vision": [
+            {
+              "name": "vision",
+              "credentialprovider": "vision",
+              "secret": {
+                "key": "visionsecret"
+              },
+              "metadata": {
+                "description": "Google Face Detect SDK"
+              }
+            }
+          ]
+        },
+        "clarifai": {
+          "moderation": [
+            {
+              "name": "moderation",
+              "credentialprovider": "moderation",
+              "secret": {
+                "key": "moderationsecret"
+              },
+              "metadata": {
+                "description": "Clarifai Moderation image SDK"
+              }
+            }
+          ]
+        },
+        "python": {
+          "jupyterlabCredentialProvider": {
+            "name": "jupyterlabCredentialProvider",
+            "credentialprovider": "jupyterlabCredentialProvider",
+            "secret": {
+              "key": "jupyterlabCredentialProvidersecret"
+            },
+            "metadata": {
+              "description": "JupyterLab Credential Provider"
+            }
+          },
+          "env": {
+            "name": "env",
+            "credentialprovider": "env",
+            "secret": {
+              "key": "envsecret"
+            },
+            "metadata": {
+              "description": "Environment variable Credential Provider"
+            }
+          },
+          "dotenv": {
+            "name": "dotenv",
+            "credentialprovider": "dotenv",
+            "secret": {
+              "key": "dotenvsecret"
+            },
+            "metadata": {
+              "description": ".env file Credential Provider"
+            }
+          },
+          "keyring": [
+            {
+              "name": "keyring",
+              "credentialprovider": "keyring",
+              "secret": {
+                "key": "keyringsecret"
+              },
+              "metadata": {
+                "description": "Python KeyRing Credential Provider"
+              },
+              "service_name": {
+                "key": "service1"
+              }
+            }
+          ],
+          "sqlalchemy": [
+            {
+              "name": "sqlalchemy",
+              "credentialprovider": "sqlalchemy",
+              "secret": {
+                "key": "sqlalchemysecret"
+              },
+              "metadata": {
+                "description": "Python SQL Alchemy"
+              },
+              "url": {
+                "key": "postgresql://user:password@host:port/dbname"
+              },
+              "drivername": {
+                "key": "postgresql"
+              },
+              "username": {
+                "key": "user"
+              },
+              "host": {
+                "key": "host"
+              },
+              "port": {
+                "key": "port"
+              },
+              "database": {
+                "key": "dbname"
+              },
+              "query": {
+                "key": "query"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "azure": {
+          "auth": {
+            "devicecode": [
+              {
+                "name": "devicecode",
+                "credentialprovider": "devicecode",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Device Code authentication"
+                },
+                "tenantid": {
+                  "key": "tenantid",
+                  "value": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                }
+              }
+            ],
+            "managedserviceidentity": [
+              {
+                "name": "managedserviceidentity",
+                "credentialprovider": "managedserviceidentity",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Managed Service Identity"
+                }
+              }
+            ],
+            "serviceprincipal": [
+              {
+                "name": "serviceprincipal",
+                "credentialprovider": "serviceprincipal",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Service Principal"
+                },
+                "tenantid": {
+                  "key": "tenantid",
+                  "value": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                },
+                "clientid": {
+                  "key": "clientid",
+                  "value": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                }
+              }
+            ]
+          },
+          "subscription": [
+            {
+              "name": "subscription",
+              "credentialprovider": "subscription",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Azure Subscription"
+              },
+              "id": {
+                "key": "id",
+                "value": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+              },
+              "ids": [
+                "72f988bf-86f1-41af-91ab-2d7cd011db47",
+                "72f988bf-86f1-41af-91ab-2d7cd011db47"
+              ]
+            }
+          ],
+          "keyvault": [
+            {
+              "name": "keyvault",
+              "credentialprovider": "keyvault",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Azure KeyVault"
+              },
+              "tenantid": {
+                "key": "tenantid",
+                "value": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+              },
+              "dnsname": {
+                "key": "dnsname",
+                "value": "https://example1.vault.azure.net/"
+              },
+              "credential": {
+                "key": "credential",
+                "value": "devicecode"
+              }
+            }
+          ],
+          "cognitiveservice": {
+            "anomalydetection": [
+              {
+                "name": "anomalydetection",
+                "credentialprovider": "anomalydetection",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Cognitive Service Anomaly Detection"
+                },
+                "url": {
+                  "key": "url",
+                  "value": "https://example1.api.cognitive.microsoft.com/anomalydetector/v1.0/timeseries/entire/detect"
+                }
+              }
+            ],
+            "contentmoderator": [
+              {
+                "name": "contentmoderator",
+                "credentialprovider": "contentmoderator",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Cognitive Service Content Moderator"
+                },
+                "url": {
+                  "key": "url",
+                  "value": "https://example1.api.cognitive.microsoft.com/"
+                }
+              }
+            ],
+            "face": [
+              {
+                "name": "face",
+                "credentialprovider": "face",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Cognitive Service Face"
+                },
+                "url": {
+                  "key": "url",
+                  "value": "https://example1.api.cognitive.microsoft.com"
+                }
+              }
+            ],
+            "spellcheck": [
+              {
+                "name": "spellcheck",
+                "credentialprovider": "spellcheck",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Cognitive Service Spell Checker"
+                },
+                "url": {
+                  "key": "url",
+                  "value": "https://example1.api.cognitive.microsoft.com/"
+                }
+              }
+            ],
+            "textanalytics": [
+              {
+                "name": "textanalytics",
+                "credentialprovider": "textanalytics",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Cognitive Service Text Analytics"
+                },
+                "url": {
+                  "key": "url",
+                  "value": "https://example1.api.cognitive.microsoft.com"
+                }
+              }
+            ],
+            "vision": [
+              {
+                "name": "vision",
+                "credentialprovider": "vision",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Cognitive Service Vision"
+                },
+                "url": {
+                  "key": "url",
+                  "value": "https://example1.api.cognitive.microsoft.com"
+                }
+              }
+            ]
+          },
+          "storage": {
+            "account": [
+              {
+                "name": "account",
+                "credentialprovider": "account",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Storage Account"
+                },
+                "accountname": {
+                  "key": "accountname",
+                  "value": "example1"
+                },
+                "accountkey": {
+                  "key": "accountkey",
+                  "value": "mysecret"
+                },
+                "secrettype": {
+                  "key": "secrettype",
+                  "value": "key"
+                }
+              }
+            ],
+            "blob": [
+              {
+                "name": "blob",
+                "credentialprovider": "blob",
+                "secret": "mysecret",
+                "metadata": {
+                  "description": "Azure Blob Storage"
+                },
+                "url": {
+                  "key": "url",
+                  "value": "https://example1.blob.core.windows.net/"
+                },
+                "account": {
+                  "key": "account",
+                  "value": "example1"
+                },
+                "containername": {
+                  "key": "containername",
+                  "value": "example1"
+                },
+                "path": {
+                  "key": "path",
+                  "value": "example1"
+                }
+              }
+            ]
+          }
+        },
+        "amazon": {
+          "rekognition": [
+            {
+              "name": "rekognition",
+              "credentialprovider": "rekognition",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "AWS Rekognition services"
+              },
+              "region_name": {
+                "key": "region_name",
+                "value": "us-east-1"
+              },
+              "key_id": {
+                "key": "key_id",
+                "value": "mysecret"
+              }
+            }
+          ],
+          "comprehend": [
+            {
+              "name": "comprehend",
+              "credentialprovider": "comprehend",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "AWS Comprehend services"
+              },
+              "region_name": {
+                "key": "region_name",
+                "value": "us-east-1"
+              },
+              "key_id": {
+                "key": "key_id",
+                "value": "mysecret"
+              }
+            }
+          ]
+        },
+        "google": {
+          "language": [
+            {
+              "name": "language",
+              "credentialprovider": "language",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Google NER service"
+              }
+            }
+          ],
+          "video": [
+            {
+              "name": "video",
+              "credentialprovider": "video",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Google video intelligence for content moderation annotation"
+              }
+            }
+          ],
+          "vision": [
+            {
+              "name": "vision",
+              "credentialprovider": "vision",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Google Face Detect SDK"
+              }
+            }
+          ]
+        },
+        "clarifai": {
+          "moderation": [
+            {
+              "name": "moderation",
+              "credentialprovider": "moderation",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Clarifai Moderation image SDK"
+              }
+            }
+          ]
+        },
+        "python": {
+          "jupyterlabCredentialProvider": {
+            "name": "jupyterlabCredentialProvider",
+            "credentialprovider": "jupyterlabCredentialProvider",
+            "secret": "mysecret",
+            "metadata": {
+              "description": "JupyterLab Credential Provider"
+            }
+          },
+          "env": {
+            "name": "env",
+            "credentialprovider": "env",
+            "secret": "mysecret",
+            "metadata": {
+              "description": "Environment variable Credential Provider"
+            }
+          },
+          "dotenv": {
+            "name": "dotenv",
+            "credentialprovider": "dotenv",
+            "secret": "mysecret",
+            "metadata": {
+              "description": ".env file Credential Provider"
+            }
+          },
+          "keyring": [
+            {
+              "name": "keyring",
+              "credentialprovider": "keyring",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Python KeyRing Credential Provider"
+              },
+              "service_name": {
+                "key": "service_name",
+                "value": "mysecret"
+              }
+            }
+          ],
+          "sqlalchemy": [
+            {
+              "name": "sqlalchemy",
+              "credentialprovider": "sqlalchemy",
+              "secret": "mysecret",
+              "metadata": {
+                "description": "Python SQL Alchemy"
+              },
+              "url": {
+                "key": "url",
+                "value": "drivername://username:password@host/path?query"
+              },
+              "drivername": {
+                "key": "drivername",
+                "value": "mysecret"
+              },
+              "username": {
+                "key": "username",
+                "value": "mysecret"
+              },
+              "host": {
+                "key": "host",
+                "value": "mysecret"
+              },
+              "port": {
+                "key": "port",
+                "value": "mysecret"
+              },
+              "database": {
+                "key": "database",
+                "value": "mysecret"
+              },
+              "query": {
+                "key": "query",
+                "value": "mysecret"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['azure']['properties']['auth']['properties']['devicecode']['items']['allOf'][0]['properties']['secret']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'object',\n                'properties': {'key': {'type': 'string',\n                                       'description': 'Overrides the key '\n                                                      'to lookup the value '\n                                                      'for the '\n                                                      'property.'}}}]}\n\nOn instance['azure']['auth']['devicecode'][0]['secret']:\n    123",
+      "data": {
+        "azure": {
+          "auth": {
+            "devicecode": [
+              {
+                "name": "devicecode",
+                "credentialprovider": "devicecode",
+                "secret": 123,
+                "metadata": {
+                  "description": "Azure Device Code authentication"
+                },
+                "tenantid": {
+                  "key": "tenantid",
+                  "value": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

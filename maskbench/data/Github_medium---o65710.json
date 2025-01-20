@@ -1,0 +1,603 @@
+{
+  "description": "sample Github_medium/o65710.json",
+  "meta": {
+    "full_size": 976,
+    "stripped_size": 857,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Archive List",
+    "description": "A list of OpenTok Archives",
+    "type": "object",
+    "properties": {
+      "count": {
+        "type": "integer"
+      },
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/archive"
+        }
+      }
+    },
+    "required": [
+      "count",
+      "items"
+    ],
+    "definitions": {
+      "archive": {
+        "title": "Archive",
+        "description": "An OpenTok Archive",
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "integer"
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "partnerId": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "started",
+              "stopped",
+              "failed",
+              "deleted",
+              "uploaded",
+              "expired",
+              "paused"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasVideo": {
+            "type": "boolean"
+          },
+          "hasAudio": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "partnerId",
+          "sessionId",
+          "status"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 3600,
+            "id": "12345678-1234-1234-1234-123456789012",
+            "name": "My Archive",
+            "partnerId": 12345,
+            "reason": "Manual",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1000000,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 7200,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Auto",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 2000000,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Invalid-Id\" does not match \"^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$\"",
+      "python_error": "'Invalid-Id' does not match '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'\n\nFailed validating 'pattern' in schema['properties']['items']['items']['properties']['id']:\n    {'type': 'string',\n     'pattern': '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'}\n\nOn instance['items'][0]['id']:\n    'Invalid-Id'",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 3600,
+            "id": "Invalid-Id",
+            "name": "My Archive",
+            "partnerId": 12345,
+            "reason": "Manual",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1000000,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 7200,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Auto",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 2000000,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "12345 is not of types \"null\", \"string\"",
+      "python_error": "67890 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['items']['items']['properties']['url']:\n    {'type': ['string', 'null']}\n\nOn instance['items'][1]['url']:\n    67890",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 3600,
+            "id": "12345678-1234-1234-1234-123456789012",
+            "name": 12345,
+            "partnerId": 12345,
+            "reason": "Manual",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1000000,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 7200,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Auto",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 2000000,
+            "status": "available",
+            "url": 67890,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-100 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['items']['items']['properties']['size']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['items'][0]['size']:\n    -100",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": -1,
+            "id": "12345678-1234-1234-1234-123456789012",
+            "name": "My Archive",
+            "partnerId": 12345,
+            "reason": "Manual",
+            "sessionId": "12345678901234567890123456789012",
+            "size": -100,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 7200,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Auto",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 2000000,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123456781234567890123456789012\" does not match \"^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$\"",
+      "python_error": "'partnerId' is a required property\n\nFailed validating 'required' in schema['properties']['items']['items']:\n    {'title': 'Archive',\n     'description': 'An OpenTok Archive',\n     'type': 'object',\n     'properties': {'createdAt': {'type': 'integer'},\n                    'duration': {'type': 'integer', 'minimum': 0},\n                    'id': {'type': 'string',\n                           'pattern': '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'},\n                    'name': {'type': ['string', 'null']},\n                    'partnerId': {'type': 'integer'},\n                    'reason': {'type': 'string'},\n                    'sessionId': {'type': 'string'},\n                    'size': {'type': 'integer', 'minimum': 0},\n                    'status': {'type': 'string',\n                               'enum': ['available',\n                                        'started',\n                                        'stopped',\n                                        'failed',\n                       .. (585 more)",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 3600,
+            "id": "123456781234567890123456789012",
+            "Invalid id, doesn't match the pattern": "name"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['items']['items']['properties']['name']:\n    {'type': ['string', 'null']}\n\nOn instance['items'][0]['name']:\n    123",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 3600,
+            "id": "12345678-1234-1234-1234-123456789012",
+            "name": 123,
+            "partnerId": 12345,
+            "reason": "Manual",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1000000,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 7200,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Auto",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 2000000,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1000000 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['items']['items']['properties']['size']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['items'][0]['size']:\n    -1000000",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": -1,
+            "id": "12345678-1234-1234-1234-123456789012",
+            "name": "My Archive",
+            "partnerId": 12345,
+            "reason": "Manual",
+            "sessionId": "12345678901234567890123456789012",
+            "size": -1000000,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 7200,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Auto",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 2000000,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"12345678-1234-1234-1234-12345678901\" does not match \"^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$\"",
+      "python_error": "'12345678-1234-1234-1234-12345678901' does not match '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'\n\nFailed validating 'pattern' in schema['properties']['items']['items']['properties']['id']:\n    {'type': 'string',\n     'pattern': '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'}\n\nOn instance['items'][0]['id']:\n    '12345678-1234-1234-1234-12345678901'",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 3600,
+            "id": "12345678-1234-1234-1234-12345678901",
+            "Invalid id - does not match pattern": "name",
+            "partnerId": 12345,
+            "reason": "Manual",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1000000,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 7200,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Auto",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 2000000,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 120,
+            "id": "12345678-1234-1234-1234-123456789012",
+            "name": "My Archive",
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1024,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 60,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 512,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "'status' is a required property\n\nFailed validating 'required' in schema['properties']['items']['items']:\n    {'title': 'Archive',\n     'description': 'An OpenTok Archive',\n     'type': 'object',\n     'properties': {'createdAt': {'type': 'integer'},\n                    'duration': {'type': 'integer', 'minimum': 0},\n                    'id': {'type': 'string',\n                           'pattern': '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'},\n                    'name': {'type': ['string', 'null']},\n                    'partnerId': {'type': 'integer'},\n                    'reason': {'type': 'string'},\n                    'sessionId': {'type': 'string'},\n                    'size': {'type': 'integer', 'minimum': 0},\n                    'status': {'type': 'string',\n                               'enum': ['available',\n                                        'started',\n                                        'stopped',\n                                        'failed',\n                          .. (803 more)",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": -1,
+            "<-- Note: minimum keyword in schema for duration": "id",
+            "name": "My Archive",
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1024,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 60,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "23456789012345678901234567890123",
+            "size": -1,
+            "<-- Note: minimum keyword in schema for size": "status",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"12345678-1234-1234-1234-12345678901\" does not match \"^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$\"",
+      "python_error": "'12345678-1234-1234-1234-12345678901' does not match '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'\n\nFailed validating 'pattern' in schema['properties']['items']['items']['properties']['id']:\n    {'type': 'string',\n     'pattern': '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'}\n\nOn instance['items'][0]['id']:\n    '12345678-1234-1234-1234-12345678901'",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 120,
+            "id": "12345678-1234-1234-1234-12345678901",
+            "Invalid id: The 'id' does not match the pattern": "^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$",
+            "name": "My Archive",
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1024,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 60,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 512,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['items']['items']['properties']['name']:\n    {'type': ['string', 'null']}\n\nOn instance['items'][0]['name']:\n    123",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": 120,
+            "id": "12345678-1234-1234-1234-123456789012",
+            "name": 123,
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "12345678901234567890123456789012",
+            "size": 1024,
+            "status": "available",
+            "url": "https://example.com/archive.mp4",
+            "hasVideo": true,
+            "hasAudio": true
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 60,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 512,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "'sessionId' is a required property\n\nFailed validating 'required' in schema['properties']['items']['items']:\n    {'title': 'Archive',\n     'description': 'An OpenTok Archive',\n     'type': 'object',\n     'properties': {'createdAt': {'type': 'integer'},\n                    'duration': {'type': 'integer', 'minimum': 0},\n                    'id': {'type': 'string',\n                           'pattern': '^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$'},\n                    'name': {'type': ['string', 'null']},\n                    'partnerId': {'type': 'integer'},\n                    'reason': {'type': 'string'},\n                    'sessionId': {'type': 'string'},\n                    'size': {'type': 'integer', 'minimum': 0},\n                    'status': {'type': 'string',\n                               'enum': ['available',\n                                        'started',\n                                        'stopped',\n                                        'failed',\n                       .. (767 more)",
+      "data": {
+        "count": 2,
+        "items": [
+          {
+            "createdAt": 1643723400,
+            "duration": -1,
+            "minimum duration should be 0": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": 12345,
+            "reason": "Completed",
+            "sessionId": "23456789012345678901234567890123",
+            "size": 512,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          },
+          {
+            "createdAt": 1643723401,
+            "duration": 60,
+            "id": "23456789-2345-2345-2345-234567890123",
+            "name": null,
+            "partnerId": "12345",
+            "partnerId should be an integer": "23456789012345678901234567890123",
+            "size": 512,
+            "status": "available",
+            "url": null,
+            "hasVideo": true,
+            "hasAudio": false
+          }
+        ]
+      }
+    }
+  ]
+}

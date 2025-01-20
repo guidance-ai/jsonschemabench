@@ -1,0 +1,178 @@
+{
+  "description": "sample Github_medium/o81746.json",
+  "meta": {
+    "full_size": 926,
+    "stripped_size": 701,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:uri",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "crs",
+    "description": "a Coordinate Reference System object",
+    "type": [
+      "object",
+      "null"
+    ],
+    "required": [
+      "type",
+      "properties"
+    ],
+    "properties": {
+      "type": {
+        "type": "string"
+      },
+      "properties": {
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "oneOf": [
+      {
+        "$ref": "#/definitions/namedCrs"
+      },
+      {
+        "$ref": "#/definitions/linkedCrs"
+      }
+    ],
+    "definitions": {
+      "namedCrs": {
+        "properties": {
+          "type": {
+            "enum": [
+              "name"
+            ]
+          },
+          "properties": {
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "FIXME": "semantic validation necessary"
+              }
+            }
+          }
+        }
+      },
+      "linkedObject": {
+        "type": "object",
+        "required": [
+          "href"
+        ],
+        "properties": {
+          "href": {
+            "type": "string",
+            "format": "uri",
+            "FIXME": "spec says \"dereferenceable\", cannot enforce that"
+          },
+          "type": {
+            "type": "string",
+            "description": "Suggested values: proj4, ogjwkt, esriwkt"
+          }
+        }
+      },
+      "linkedCrs": {
+        "properties": {
+          "type": {
+            "enum": [
+              "link"
+            ]
+          },
+          "properties": {
+            "$ref": "#/definitions/linkedObject"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "name",
+        "properties": {
+          "name": "EPSG:4326"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('additionalProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('additionalProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'crs',\n     'description': 'a Coordinate Reference System object',\n     'type': ['object', 'null'],\n     'required': ['type', 'properties'],\n     'properties': {'type': {'type': 'string'},\n                    'properties': {'type': 'object'}},\n     'additionalProperties': False,\n     'oneOf': [{'$ref': '#/definitions/namedCrs'},\n               {'$ref': '#/definitions/linkedCrs'}],\n     'definitions': {'namedCrs': {'properties': {'type': {'enum': ['name']},\n                                                 'properties': {'required': ['name'],\n                                                                'additionalProperties': False,\n                                                                'properties': {'name': {'type': 'string',\n                                                                          .. (1856 more)",
+      "data": {
+        "type": "name",
+        "properties": {
+          "name": "EPSG:4326"
+        },
+        "additionalProperty": "extraValue"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"link\",\"properties\":{\"href\":\"invalid uri\",\"type\":\"proj4\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'invalid uri' is not a 'uri'\n\nFailed validating 'format' in schema[1]['properties']['properties']['properties']['href']:\n    {'type': 'string',\n     'format': 'uri',\n     'FIXME': 'spec says \"dereferenceable\", cannot enforce that'}\n\nOn instance['properties']['href']:\n    'invalid uri'",
+      "data": {
+        "type": "link",
+        "properties": {
+          "href": "invalid uri",
+          "type": "proj4"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('href' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property', 'href', 'properties2', 'type2' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'crs',\n     'description': 'a Coordinate Reference System object',\n     'type': ['object', 'null'],\n     'required': ['type', 'properties'],\n     'properties': {'type': {'type': 'string'},\n                    'properties': {'type': 'object'}},\n     'additionalProperties': False,\n     'oneOf': [{'$ref': '#/definitions/namedCrs'},\n               {'$ref': '#/definitions/linkedCrs'}],\n     'definitions': {'namedCrs': {'properties': {'type': {'enum': ['name']},\n                                                 'properties': {'required': ['name'],\n                                                                'additionalProperties': False,\n                                                                'properties': {'name': {'type': 'string',\n                                             .. (1992 more)",
+      "data": {
+        "type": "name",
+        "properties": {
+          "name": "EPSG:4326",
+          "extra_property": "some_value"
+        },
+        "href": "some_value",
+        "type2": "some_value",
+        "extra_property": "some_value",
+        "properties2": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\",\"extra\":\"property\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'href' is a required property\n\nFailed validating 'required' in schema[1]['properties']['properties']:\n    {'type': 'object',\n     'required': ['href'],\n     'properties': {'href': {'type': 'string',\n                             'format': 'uri',\n                             'FIXME': 'spec says \"dereferenceable\", cannot '\n                                      'enforce that'},\n                    'type': {'type': 'string',\n                             'description': 'Suggested values: proj4, '\n                                            'ogjwkt, esriwkt'}}}\n\nOn instance['properties']:\n    {'name': 'EPSG:4326', 'extra': 'property'}",
+      "data": {
+        "type": "name",
+        "properties": {
+          "name": "EPSG:4326",
+          "extra": "property"
+        }
+      }
+    }
+  ]
+}

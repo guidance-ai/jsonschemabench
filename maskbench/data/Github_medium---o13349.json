@@ -1,0 +1,351 @@
+{
+  "description": "sample Github_medium/o13349.json",
+  "meta": {
+    "full_size": 1438,
+    "stripped_size": 586,
+    "features": [
+      "@minmaxInteger",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "description": "A response containing traffic flows between objects",
+    "properties": {
+      "header": {
+        "type": "object",
+        "description": "Object describing document data",
+        "properties": {
+          "time_range": {
+            "type": "object",
+            "description": "Time range of the document records",
+            "properties": {
+              "start": {
+                "type": "string",
+                "description": "ISO8601 timestamp of earliest record in document"
+              },
+              "end": {
+                "type": "string",
+                "description": "ISO8601 timestamp of latest record in document"
+              }
+            }
+          },
+          "recordCount": {
+            "type": "integer",
+            "description": "Total record count (number of array items in data)"
+          },
+          "objTypes": {
+            "type": "array",
+            "description": "A collection of object types",
+            "items": {
+              "type": "string",
+              "description": "An object type"
+            }
+          }
+        }
+      },
+      "data": {
+        "type": "array",
+        "description": "Array of historic records",
+        "items": {
+          "type": "object",
+          "description": "The schema of an array entry",
+          "properties": {
+            "srcObj": {
+              "type": "string",
+              "description": "The name/ID of source object"
+            },
+            "srcType": {
+              "type": "string",
+              "description": "The type of source object"
+            },
+            "destObj": {
+              "type": "string",
+              "description": "The name/ID of destination object"
+            },
+            "destType": {
+              "type": "string",
+              "description": "The type of destination object"
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "The volume of data that flows from source to destination"
+            },
+            "packets": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "The number of packets sent from source to destination"
+            }
+          }
+        }
+      }
+    },
+    "required": [
+      "data"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "header": {
+          "time_range": {
+            "start": "2022-01-01T00:00:00Z",
+            "end": "2022-01-01T23:59:59Z"
+          },
+          "recordCount": 2,
+          "objTypes": [
+            "Server",
+            "Client"
+          ]
+        },
+        "data": [
+          {
+            "srcObj": "Server1",
+            "srcType": "Server",
+            "destObj": "Client1",
+            "destType": "Client",
+            "bytes": 1000,
+            "packets": 10
+          },
+          {
+            "srcObj": "Client2",
+            "srcType": "Client",
+            "destObj": "Server2",
+            "destType": "Server",
+            "bytes": 500,
+            "packets": 5
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-5 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['data']['items']['properties']['packets']:\n    {'type': 'integer',\n     'minimum': 0,\n     'description': 'The number of packets sent from source to destination'}\n\nOn instance['data'][1]['packets']:\n    -5",
+      "data": {
+        "header": {
+          "time_range": {
+            "start": "2022-01-01T00:00:00Z",
+            "end": "2022-01-01T23:59:59Z"
+          },
+          "recordCount": 2,
+          "objTypes": [
+            "Server",
+            "Client"
+          ]
+        },
+        "data": [
+          {
+            "srcObj": "Server1",
+            "srcType": "Server",
+            "destObj": "Client1",
+            "destType": "Client",
+            "bytes": -1,
+            "packets": 10
+          },
+          {
+            "srcObj": "Client2",
+            "srcType": "Client",
+            "destObj": "Server2",
+            "destType": "Server",
+            "bytes": 500,
+            "packets": -5
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1000 is less than the minimum of 0",
+      "python_error": "-1000 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['data']['items']['properties']['bytes']:\n    {'type': 'integer',\n     'minimum': 0,\n     'description': 'The volume of data that flows from source to '\n                    'destination'}\n\nOn instance['data'][0]['bytes']:\n    -1000",
+      "data": {
+        "header": {
+          "time_range": {
+            "start": "2022-01-01T00:00:00Z",
+            "end": "2022-01-01T23:59:59Z"
+          },
+          "recordCount": 2,
+          "objTypes": [
+            "Server",
+            "Client"
+          ]
+        },
+        "data": [
+          {
+            "srcObj": "Server1",
+            "srcType": "Server",
+            "destObj": "Client1",
+            "destType": "Client",
+            "bytes": -1000,
+            "packets": 10
+          },
+          {
+            "srcObj": "Client2",
+            "srcType": "Client",
+            "destObj": "Server2",
+            "destType": "Server",
+            "bytes": 500,
+            "packets": 5
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['data']['items']['properties']['bytes']:\n    {'type': 'integer',\n     'minimum': 0,\n     'description': 'The volume of data that flows from source to '\n                    'destination'}\n\nOn instance['data'][0]['bytes']:\n    -1",
+      "data": {
+        "header": {
+          "time_range": {
+            "start": "2022-01-01T00:00:00Z",
+            "end": "2022-01-01T23:59:59Z"
+          },
+          "recordCount": 2,
+          "objTypes": [
+            "Server",
+            "Client"
+          ]
+        },
+        "data": [
+          {
+            "srcObj": "Server1",
+            "srcType": "Server",
+            "destObj": "Client1",
+            "destType": "Client",
+            "bytes": -1,
+            "packets": 10
+          },
+          {
+            "srcObj": "Client2",
+            "srcType": "Client",
+            "destObj": "Server2",
+            "destType": "Server",
+            "bytes": 500,
+            "packets": 5
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "header": {
+          "time_range": {
+            "start": "2022-01-01T00:00:00Z",
+            "end": "2022-01-01T23:59:59Z"
+          },
+          "recordCount": 2,
+          "objTypes": [
+            "Server",
+            "Client"
+          ]
+        },
+        "data": [
+          {
+            "srcObj": "Server1",
+            "srcType": "Server",
+            "destObj": "Client1",
+            "destType": "Client",
+            "bytes": 1024,
+            "packets": 10
+          },
+          {
+            "srcObj": "Client2",
+            "srcType": "Client",
+            "destObj": "Server2",
+            "destType": "Server",
+            "bytes": 512,
+            "packets": 5
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['data']['items']['properties']['bytes']:\n    {'type': 'integer',\n     'minimum': 0,\n     'description': 'The volume of data that flows from source to '\n                    'destination'}\n\nOn instance['data'][0]['bytes']:\n    -1",
+      "data": {
+        "header": {
+          "time_range": {
+            "start": "2022-01-01T00:00:00Z",
+            "end": "2022-01-01T23:59:59Z"
+          },
+          "recordCount": 2,
+          "objTypes": [
+            "Server",
+            "Client"
+          ]
+        },
+        "data": [
+          {
+            "srcObj": "Server1",
+            "srcType": "Server",
+            "destObj": "Client1",
+            "destType": "Client",
+            "bytes": -1,
+            "packets": 10
+          },
+          {
+            "srcObj": "Client2",
+            "srcType": "Client",
+            "destObj": "Server2",
+            "destType": "Server",
+            "bytes": 512,
+            "packets": 5
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['data']['items']['properties']['bytes']:\n    {'type': 'integer',\n     'minimum': 0,\n     'description': 'The volume of data that flows from source to '\n                    'destination'}\n\nOn instance['data'][0]['bytes']:\n    -1",
+      "data": {
+        "header": {
+          "time_range": {
+            "start": "2022-01-01T00:00:00Z",
+            "end": "2022-01-01T23:59:59Z"
+          },
+          "recordCount": 1,
+          "modified to mismatch the actual number of records in 'data'": "objTypes",
+          "missing value": [
+            "Server",
+            "Client"
+          ]
+        },
+        "data": [
+          {
+            "srcObj": "Server1",
+            "srcType": "Server",
+            "destObj": "Client1",
+            "destType": "Client",
+            "bytes": -1,
+            "negative value": "packets",
+            " missing value": 10
+          }
+        ]
+      }
+    }
+  ]
+}

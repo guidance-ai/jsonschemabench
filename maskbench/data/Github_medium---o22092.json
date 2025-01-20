@@ -1,0 +1,200 @@
+{
+  "description": "sample Github_medium/o22092.json",
+  "meta": {
+    "full_size": 996,
+    "stripped_size": 545,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "Prerender Target",
+    "type": "object",
+    "properties": {
+      "browserTarget": {
+        "type": "string",
+        "description": "Target to build.",
+        "pattern": "^[^:\\s]+:[^:\\s]+(:[^\\s]+)?$"
+      },
+      "serverTarget": {
+        "type": "string",
+        "description": "Server target to use for prerendering the app.",
+        "pattern": "^[^:\\s]+:[^:\\s]+(:[^\\s]+)?$"
+      },
+      "routesFile": {
+        "type": "string",
+        "description": "The path to a file containing routes separated by newlines."
+      },
+      "routes": {
+        "type": "array",
+        "description": "The routes to render.",
+        "items": {
+          "minItems": 1,
+          "type": "string",
+          "_uniqueItems": true
+        },
+        "default": []
+      },
+      "guessRoutes": {
+        "type": "boolean",
+        "description": "Whether or not the builder should extract routes and guess which paths to render.",
+        "default": true
+      },
+      "numProcesses": {
+        "type": "number",
+        "description": "The number of cpus to use. Defaults to all but one.",
+        "minimum": 1
+      }
+    },
+    "required": [
+      "browserTarget",
+      "serverTarget"
+    ],
+    "anyOf": [
+      {
+        "required": [
+          "routes"
+        ]
+      },
+      {
+        "required": [
+          "routesFile"
+        ]
+      }
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "browserTarget": "chrome:latest",
+        "serverTarget": "node:14",
+        "routes": [
+          "/",
+          "/about",
+          "/contact"
+        ],
+        "guessRoutes": false,
+        "numProcesses": 4
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['numProcesses']:\n    {'type': 'number',\n     'description': 'The number of cpus to use. Defaults to all but one.',\n     'minimum': 1}\n\nOn instance['numProcesses']:\n    0",
+      "data": {
+        "browserTarget": "chrome:latest",
+        "serverTarget": "node:14",
+        "routes": [
+          "/",
+          "/about",
+          "/contact"
+        ],
+        "guessRoutes": false,
+        "numProcesses": 0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"browserTarget\":\"chrome:latest\",\"serverTarget\":\"node:14\",\"guessRoutes\":false,\"numProcesses\":4} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'browserTarget': 'chrome:latest', 'serverTarget': 'node:14', 'guessRoutes': False, 'numProcesses': 4} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-07/schema',\n     'title': 'Prerender Target',\n     'type': 'object',\n     'properties': {'browserTarget': {'type': 'string',\n                                      'description': 'Target to build.',\n                                      'pattern': '^[^:\\\\s]+:[^:\\\\s]+(:[^\\\\s]+)?$'},\n                    'serverTarget': {'type': 'string',\n                                     'description': 'Server target to use '\n                                                    'for prerendering the '\n                                                    'app.',\n                                     'pattern': '^[^:\\\\s]+:[^:\\\\s]+(:[^\\\\s]+)?$'},\n                    'routesFile': {'type': 'string',\n                                   'description': 'The path to a file '\n                                    .. (1484 more)",
+      "data": {
+        "browserTarget": "chrome:latest",
+        "serverTarget": "node:14",
+        "guessRoutes": false,
+        "numProcesses": 4
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"chrome:latest:\" does not match \"^[^:\\s]+:[^:\\s]+(:[^\\s]+)?$\"",
+      "python_error": "'chrome:latest:' does not match '^[^:\\\\s]+:[^:\\\\s]+(:[^\\\\s]+)?$'\n\nFailed validating 'pattern' in schema['properties']['browserTarget']:\n    {'type': 'string',\n     'description': 'Target to build.',\n     'pattern': '^[^:\\\\s]+:[^:\\\\s]+(:[^\\\\s]+)?$'}\n\nOn instance['browserTarget']:\n    'chrome:latest:'",
+      "data": {
+        "browserTarget": "chrome:latest:",
+        "serverTarget": "node:14",
+        "routes": [
+          "/",
+          "/about",
+          "/contact"
+        ],
+        "guessRoutes": false,
+        "numProcesses": 4
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "browserTarget": "chrome:latest",
+        "serverTarget": "node:16",
+        "routes": [
+          "/",
+          "/about",
+          "/contact"
+        ],
+        "guessRoutes": false,
+        "numProcesses": 4
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['numProcesses']:\n    {'type': 'number',\n     'description': 'The number of cpus to use. Defaults to all but one.',\n     'minimum': 1}\n\nOn instance['numProcesses']:\n    0",
+      "data": {
+        "browserTarget": "chrome:latest",
+        "serverTarget": "node:16",
+        "routes": [
+          "/",
+          "/about",
+          "/contact"
+        ],
+        "guessRoutes": false,
+        "numProcesses": 0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\" chrome:latest\" does not match \"^[^:\\s]+:[^:\\s]+(:[^\\s]+)?$\"",
+      "python_error": "' chrome:latest' does not match '^[^:\\\\s]+:[^:\\\\s]+(:[^\\\\s]+)?$'\n\nFailed validating 'pattern' in schema['properties']['browserTarget']:\n    {'type': 'string',\n     'description': 'Target to build.',\n     'pattern': '^[^:\\\\s]+:[^:\\\\s]+(:[^\\\\s]+)?$'}\n\nOn instance['browserTarget']:\n    ' chrome:latest'",
+      "data": {
+        "browserTarget": " chrome:latest",
+        "serverTarget": "node:16",
+        "routes": [
+          "/",
+          "/about",
+          "/contact"
+        ],
+        "guessRoutes": false,
+        "numProcesses": 4
+      }
+    }
+  ]
+}

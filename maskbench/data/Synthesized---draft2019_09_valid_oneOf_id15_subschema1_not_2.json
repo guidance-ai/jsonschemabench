@@ -1,0 +1,99 @@
+{
+  "description": "sample Synthesized/draft2019_09_valid_oneOf_id15_subschema1_not_2.json",
+  "meta": {
+    "full_size": 186,
+    "stripped_size": 186,
+    "features": [
+      "allOf",
+      "enum",
+      "not",
+      "oneOf"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "allOf": [
+      {
+        "enum": [
+          {
+            "bar": "quux",
+            "foo": 2
+          }
+        ]
+      },
+      {
+        "not": {
+          "oneOf": [
+            {
+              "properties": {
+                "bar": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "bar"
+              ]
+            },
+            {
+              "properties": {
+                "foo": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "foo"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "bar": "quux",
+        "foo": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"bar\":\"quux\",\"foo\":2,\"extra\":\"x\"} is not one of [{\"bar\":\"quux\",\"foo\":2}]",
+      "python_error": "{'bar': 'quux', 'foo': 2, 'extra': 'x'} is not one of [{'bar': 'quux', 'foo': 2}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 'quux', 'foo': 2}]}\n\nOn instance:\n    {'bar': 'quux', 'foo': 2, 'extra': 'x'}",
+      "data": {
+        "bar": "quux",
+        "foo": 2,
+        "extra": "x"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"bar\":123,\"foo\":2} is not one of [{\"bar\":\"quux\",\"foo\":2}]",
+      "python_error": "{'bar': 123, 'foo': 2} is not one of [{'bar': 'quux', 'foo': 2}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 'quux', 'foo': 2}]}\n\nOn instance:\n    {'bar': 123, 'foo': 2}",
+      "data": {
+        "bar": 123,
+        "foo": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"bar\":\"quux\",\"foo\":\"2\"} is not one of [{\"bar\":\"quux\",\"foo\":2}]",
+      "python_error": "{'bar': 'quux', 'foo': '2'} is not one of [{'bar': 'quux', 'foo': 2}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 'quux', 'foo': 2}]}\n\nOn instance:\n    {'bar': 'quux', 'foo': '2'}",
+      "data": {
+        "bar": "quux",
+        "foo": "2"
+      }
+    }
+  ]
+}

@@ -1,0 +1,831 @@
+{
+  "description": "sample Github_medium/o27787.json",
+  "meta": {
+    "full_size": 1133,
+    "stripped_size": 1014,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "additionalProperties",
+      "anyOf",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "VRT to CWE Mapping",
+    "description": "Mapping from the Vulnerability Rating Taxonomy to CWE",
+    "definitions": {
+      "MappingMetadata": {
+        "type": "object",
+        "properties": {
+          "default": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "default"
+        ]
+      },
+      "VRTid": {
+        "type": "string",
+        "pattern": "^[a-z_]*$"
+      },
+      "CWE": {
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string",
+          "pattern": "^CWE-[0-9]*$"
+        },
+        "minItems": 1,
+        "_uniqueItems": true
+      },
+      "Mapping": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/VRTid"
+          },
+          "cwe": {
+            "$ref": "#/definitions/CWE"
+          }
+        },
+        "required": [
+          "id",
+          "cwe"
+        ],
+        "additionalProperties": false
+      },
+      "MappingParent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/VRTid"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/MappingParent"
+                },
+                {
+                  "$ref": "#/definitions/Mapping"
+                }
+              ]
+            }
+          },
+          "cwe": {
+            "$ref": "#/definitions/CWE"
+          }
+        },
+        "required": [
+          "id",
+          "children"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "type": "object",
+    "required": [
+      "metadata",
+      "content"
+    ],
+    "properties": {
+      "metadata": {
+        "$ref": "#/definitions/MappingMetadata"
+      },
+      "content": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/MappingParent"
+            },
+            {
+              "$ref": "#/definitions/Mapping"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_abc",
+            "cwe": [
+              "CWE-79",
+              "CWE-89"
+            ]
+          },
+          {
+            "id": "vrt_def",
+            "children": [
+              {
+                "id": "vrt_def_child",
+                "cwe": [
+                  "CWE-20",
+                  "CWE-200"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc",
+                "children": [
+                  {
+                    "id": "vrt_def_child_abc_grandchild",
+                    "cwe": [
+                      "CWE-400",
+                      "CWE-401"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-300",
+                  "CWE-301"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-100",
+              "CWE-101"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_def\",\"children\":[{\"id\":\"vrt_def_child\",\"cwe\":[\"CWE-20\",\"CWE-200\"]},{\"id\":\"vrt_def_child_abc\",\"children\":[{\"id\":\"vrt_def_child_abc_grandchild\",\"cwe\":[\"CWE-400\",\"CWE-401\"]},{\"id\":\"vrt_def_child_abc_grandchild_2\",\"cwe\":[\"CWE-402\",\"CWE-403\"],\"extra_property\":\"extra_value\"}],\"cwe\":[\"CWE-300\",\"CWE-301\"]},{\"id\":\"vrt_def_child_abc_grandchild_3\",\"cwe\":[\"CWE-404\",\"CWE-405\"]}],\"cwe\":[\"CWE-100\",\"CWE-101\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_def_child_abc_grandchild_2', 'cwe': ['CWE-402', 'CWE-403'], 'extra_property': 'extra_value'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][1]:\n    {'id': 'vrt_def_child_abc_grandchild_2',\n     'cwe': ['CWE-402', 'CWE-403'],\n     'extra_property': 'extra_value'}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_abc",
+            "cwe": [
+              "CWE-79",
+              "CWE-89"
+            ]
+          },
+          {
+            "id": "vrt_def",
+            "children": [
+              {
+                "id": "vrt_def_child",
+                "cwe": [
+                  "CWE-20",
+                  "CWE-200"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc",
+                "children": [
+                  {
+                    "id": "vrt_def_child_abc_grandchild",
+                    "cwe": [
+                      "CWE-400",
+                      "CWE-401"
+                    ]
+                  },
+                  {
+                    "id": "vrt_def_child_abc_grandchild_2",
+                    "cwe": [
+                      "CWE-402",
+                      "CWE-403"
+                    ],
+                    "extra_property": "extra_value"
+                  }
+                ],
+                "cwe": [
+                  "CWE-300",
+                  "CWE-301"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc_grandchild_3",
+                "cwe": [
+                  "CWE-404",
+                  "CWE-405"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-100",
+              "CWE-101"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_ABC\",\"cwe\":[\"CWE-79\",\"CWE-89\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_ABC', 'cwe': ['CWE-79', 'CWE-89']} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][0]:\n    {'id': 'vrt_ABC', 'cwe': ['CWE-79', 'CWE-89']}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_ABC",
+            "cwe": [
+              "CWE-79",
+              "CWE-89"
+            ]
+          },
+          {
+            "id": "vrt_def",
+            "children": [
+              {
+                "id": "vrt_def_child",
+                "cwe": [
+                  "CWE-20",
+                  "CWE-200"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc",
+                "children": [
+                  {
+                    "id": "vrt_def_child_abc_grandchild",
+                    "cwe": [
+                      "CWE-400",
+                      "CWE-401"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-300",
+                  "CWE-301"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-100",
+              "CWE-101"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_abc\",\"cwe\":\"CWE-79\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_abc', 'cwe': 'CWE-79'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][0]:\n    {'id': 'vrt_abc', 'cwe': 'CWE-79'}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_abc",
+            "cwe": "CWE-79"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_abc\",\"cwe\":[]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_def_child', 'cwe': []} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][0]:\n    {'id': 'vrt_def_child', 'cwe': []}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_abc",
+            "cwe": []
+          },
+          {
+            "id": "vrt_def",
+            "children": [
+              {
+                "id": "vrt_def_child",
+                "cwe": []
+              },
+              {
+                "id": "vrt_def_child_abc",
+                "children": [
+                  {
+                    "id": "vrt_def_child_abc_grandchild",
+                    "cwe": []
+                  }
+                ],
+                "cwe": []
+              }
+            ],
+            "cwe": []
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_def\",\"children\":[{\"id\":\"vrt_def_child\",\"cwe\":[\"CWE-20\",\"CWE-200\"]},{\"id\":\"vrt_def_child_abc\",\"children\":[{\"id\":\"vrt_def_child_abc_grandchild\",\"cwe\":[\"CWE-400\",\"CWE-401\"]}],\"cwe\":[\"CWE-300\",\"CWE-300\",\"Invalid: duplicate CWE id\"]}],\"cwe\":[\"CWE-100\",\"CWE-101\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_def_child_abc', 'children': [{'id': 'vrt_def_child_abc_grandchild', 'cwe': ['CWE-400', 'CWE-401']}], 'cwe': ['CWE-300', 'CWE-300', 'Invalid: duplicate CWE id']} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][1]:\n    {'id': 'vrt_def_child_abc',\n     'children': [{'id': 'vrt_def_child_abc_grandchild',\n                   'cwe': ['CWE-400', 'CWE-401']}],\n     'cwe': ['CWE-300', 'CWE-300', 'Invalid: duplicate CWE id']}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_abc",
+            "cwe": [
+              "CWE-79",
+              "CWE-89"
+            ]
+          },
+          {
+            "id": "vrt_def",
+            "children": [
+              {
+                "id": "vrt_def_child",
+                "cwe": [
+                  "CWE-20",
+                  "CWE-200"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc",
+                "children": [
+                  {
+                    "id": "vrt_def_child_abc_grandchild",
+                    "cwe": [
+                      "CWE-400",
+                      "CWE-401"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-300",
+                  "CWE-300",
+                  "Invalid: duplicate CWE id"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-100",
+              "CWE-101"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_abc\",\"cwe\":[]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_abc', 'cwe': []} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][0]:\n    {'id': 'vrt_abc', 'cwe': []}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_abc",
+            "cwe": []
+          },
+          {
+            "id": "vrt_def",
+            "children": [
+              {
+                "id": "vrt_def_child",
+                "cwe": [
+                  "CWE-20",
+                  "CWE-200"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc",
+                "children": [
+                  {
+                    "id": "vrt_def_child_abc_grandchild",
+                    "cwe": [
+                      "CWE-400",
+                      "CWE-401"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-300",
+                  "CWE-301"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-100",
+              "CWE-101"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vrt_def\",\"children\":[{\"id\":\"vrt_def_child\",\"cwe\":[\"CWE-20\",\"CWE-200\"]},{\"id\":\"vrt_def_child_abc\",\"children\":[{\"id\":\"vrt_def_child_abc_grandchild\",\"cwe\":[\"CWE-400\",\"CWE-401\"]}],\"cwe\":[\"CWE-300\",\"CWE-301\"]},{\"id\":\"vrt_def_child_abc_grandchild_2\",\"cwe\":[\"CWE-500\",\"CWE-501\"]}],\"cwe\":[\"CWE-100\",\"CWE-101\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vrt_def_child_abc_grandchild_2', 'cwe': ['CWE-500', 'CWE-501']} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][2]:\n    {'id': 'vrt_def_child_abc_grandchild_2', 'cwe': ['CWE-500', 'CWE-501']}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vrt_abc",
+            "cwe": [
+              "CWE-79",
+              "CWE-89"
+            ]
+          },
+          {
+            "id": "vrt_def",
+            "children": [
+              {
+                "id": "vrt_def_child",
+                "cwe": [
+                  "CWE-20",
+                  "CWE-200"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc",
+                "children": [
+                  {
+                    "id": "vrt_def_child_abc_grandchild",
+                    "cwe": [
+                      "CWE-400",
+                      "CWE-401"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-300",
+                  "CWE-301"
+                ]
+              },
+              {
+                "id": "vrt_def_child_abc_grandchild_2",
+                "cwe": [
+                  "CWE-500",
+                  "CWE-501"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-100",
+              "CWE-101"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "buffer_overflow",
+                "cwe": [
+                  "CWE-119",
+                  "CWE-120"
+                ]
+              },
+              {
+                "id": "sql_injection",
+                "cwe": [
+                  "CWE-89"
+                ]
+              },
+              {
+                "id": "cross_site_scripting",
+                "children": [
+                  {
+                    "id": "stored_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  },
+                  {
+                    "id": "reflected_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-79"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-119",
+              "CWE-120",
+              "CWE-89",
+              "CWE-79"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"buffer_overflow\",\"cwe\":[\"CWE-119\",\"CWE-120\"]},{\"id\":\"sql_injection\",\"cwe\":[\"CWE-89\"]},{\"id\":\"cross_site_scripting\",\"children\":[{\"id\":\"stored_xss\",\"cwe\":[\"CWE-79\"]},{\"id\":\"reflected_xss\",\"cwe\":[\"CWE-79\"]}],\"cwe\":[\"CWE-79\"]},{\"id\":\"sql_injection_2\",\"cwe\":[\"CWE-89\"]}],\"cwe\":[\"CWE-119\",\"CWE-120\",\"CWE-89\",\"CWE-79\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vulnerability_2', 'children': [{'id': 'buffer_overflow', 'cwe': ['CWE-119', 'CWE-120']}], 'cwe': ['CWE-119', 'CWE-120']} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][1]:\n    {'id': 'vulnerability_2',\n     'children': [{'id': 'buffer_overflow', 'cwe': ['CWE-119', 'CWE-120']}],\n     'cwe': ['CWE-119', 'CWE-120']}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "buffer_overflow",
+                "cwe": [
+                  "CWE-119",
+                  "CWE-120"
+                ]
+              },
+              {
+                "id": "sql_injection",
+                "cwe": [
+                  "CWE-89"
+                ]
+              },
+              {
+                "id": "cross_site_scripting",
+                "children": [
+                  {
+                    "id": "stored_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  },
+                  {
+                    "id": "reflected_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-79"
+                ]
+              },
+              {
+                "id": "sql_injection_2",
+                "cwe": [
+                  "CWE-89"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-119",
+              "CWE-120",
+              "CWE-89",
+              "CWE-79"
+            ]
+          },
+          {
+            "id": "vulnerability_2",
+            "children": [
+              {
+                "id": "buffer_overflow",
+                "cwe": [
+                  "CWE-119",
+                  "CWE-120"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-119",
+              "CWE-120"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability123\",\"children\":[{\"id\":\"buffer_overflow\",\"cwe\":[\"CWE-119\",\"CWE-120\"]},{\"id\":\"sql_injection\",\"cwe\":[\"CWE-89\"]},{\"id\":\"cross_site_scripting\",\"children\":[{\"id\":\"stored_xss\",\"cwe\":[\"CWE-79\"]},{\"id\":\"reflected_xss\",\"cwe\":[\"CWE-79\"]}],\"cwe\":[\"CWE-79\"]}],\"cwe\":[\"CWE-119\",\"CWE-120\",\"CWE-89\",\"CWE-79\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vulnerability123', 'children': [{'id': 'buffer_overflow', 'cwe': ['CWE-119', 'CWE-120']}, {'id': 'sql_injection', 'cwe': ['CWE-89']}, {'id': 'cross_site_scripting', 'children': [{'id': 'stored_xss', 'cwe': ['CWE-79']}, {'id': 'reflected_xss', 'cwe': ['CWE-79']}], 'cwe': ['CWE-79']}], 'cwe': ['CWE-119', 'CWE-120', 'CWE-89', 'CWE-79']} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][0]:\n    {'id': 'vulnerability123',\n     'children': [{'id': 'buffer_overflow', 'cwe': ['CWE-119', 'CWE-120']},\n                  {'id': 'sql_injection', 'cwe': ['CWE-89']},\n                  {'id': 'cross_site_scripting',\n                   'children': [{'id': 'stored_xss', 'cwe': ['CWE-79']},\n                                {'id': 'reflected_xss', 'cwe': ['CWE-79']}],\n                   'cwe': ['CWE-79']}],\n     'cwe': ['CWE-119', 'CWE-120', 'CWE-89', 'CWE-79']}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vulnerability123",
+            "children": [
+              {
+                "id": "buffer_overflow",
+                "cwe": [
+                  "CWE-119",
+                  "CWE-120"
+                ]
+              },
+              {
+                "id": "sql_injection",
+                "cwe": [
+                  "CWE-89"
+                ]
+              },
+              {
+                "id": "cross_site_scripting",
+                "children": [
+                  {
+                    "id": "stored_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  },
+                  {
+                    "id": "reflected_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-79"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-119",
+              "CWE-120",
+              "CWE-89",
+              "CWE-79"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"buffer_overflow\",\"cwe\":null},{\"id\":\"sql_injection\",\"cwe\":\"CWE-89\"}],\"cwe\":[\"CWE-119\",\"CWE-120\",\"CWE-89\",\"CWE-79\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'sql_injection', 'cwe': 'CWE-89'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][1]:\n    {'id': 'sql_injection', 'cwe': 'CWE-89'}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "buffer_overflow",
+                "cwe": null
+              },
+              {
+                "id": "sql_injection",
+                "cwe": "CWE-89"
+              }
+            ],
+            "cwe": [
+              "CWE-119",
+              "CWE-120",
+              "CWE-89",
+              "CWE-79"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"buffer_overflow\",\"cwe\":[]},{\"id\":\"sql_injection\",\"cwe\":[\"CWE-89\"]}],\"cwe\":[\"CWE-119\",\"CWE-120\",\"CWE-89\"]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'buffer_overflow', 'cwe': []} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][0]:\n    {'id': 'buffer_overflow', 'cwe': []}",
+      "data": {
+        "metadata": {
+          "default": null
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "buffer_overflow",
+                "cwe": []
+              },
+              {
+                "id": "sql_injection",
+                "cwe": [
+                  "CWE-89"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-119",
+              "CWE-120",
+              "CWE-89"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "true is not of type \"null\"",
+      "python_error": "True is not of type 'null'\n\nFailed validating 'type' in schema['properties']['metadata']['properties']['default']:\n    {'type': 'null'}\n\nOn instance['metadata']['default']:\n    True",
+      "data": {
+        "metadata": {
+          "default": true
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "buffer_overflow",
+                "cwe": [
+                  "CWE-119",
+                  "CWE-120"
+                ]
+              },
+              {
+                "id": "sql_injection",
+                "cwe": [
+                  "CWE-89"
+                ]
+              },
+              {
+                "id": "cross_site_scripting",
+                "children": [
+                  {
+                    "id": "stored_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  },
+                  {
+                    "id": "reflected_xss",
+                    "cwe": [
+                      "CWE-79"
+                    ]
+                  }
+                ],
+                "cwe": [
+                  "CWE-79",
+                  "CWE-79"
+                ]
+              }
+            ],
+            "cwe": [
+              "CWE-119",
+              "CWE-120",
+              "CWE-89",
+              "CWE-79"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,554 @@
+{
+  "description": "sample Github_medium/o76440.json",
+  "meta": {
+    "full_size": 1246,
+    "stripped_size": 1153,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "validate spider output",
+    "description": "validate spider output",
+    "type": "object",
+    "properties": {
+      "_metadata": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "crawlTime": {
+            "type": "object",
+            "properties": {
+              "started": {
+                "type": "string"
+              },
+              "durationInMs": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "started",
+              "durationInMs"
+            ],
+            "additionalProperties": false
+          },
+          "spider": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "version",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "crawlArgs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "_uniqueItems": false
+          }
+        },
+        "required": [
+          "status",
+          "crawlTime",
+          "spider",
+          "crawlArgs"
+        ],
+        "additionalProperties": false
+      },
+      "_debug": {
+        "type": "object",
+        "properties": {
+          "crawlLog": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "chromeDriverLog": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "screenshot": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "_metadata"
+    ],
+    "additionalProperties": true
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "Crawl log message",
+          "chromeDriverLog": "Chrome driver log message",
+          "screenshot": "Screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['_debug']['properties']['crawlLog']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 512}\n\nOn instance['_debug']['crawlLog']:\n    ''",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "",
+          "chromeDriverLog": "a"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde\" does not match \"^sha256:[a-f0-9]{64}$\"",
+      "python_error": "'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde' does not match '^sha256:[a-f0-9]{64}$'\n\nFailed validating 'pattern' in schema['properties']['_metadata']['properties']['spider']['properties']['version']:\n    {'type': 'string', 'pattern': '^sha256:[a-f0-9]{64}$'}\n\nOn instance['_metadata']['spider']['version']:\n    'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde'",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba987654321"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "Crawl log message",
+          "chromeDriverLog": "Chrome driver log message",
+          "screenshot": "Screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['_metadata']['properties']['status']['properties']['code']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['_metadata']['status']['code']:\n    -1",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": -1,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": -1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "Crawl log message",
+          "chromeDriverLog": "Chrome driver log message",
+          "screenshot": "Screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['_metadata']['properties']['status']['properties']['code']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['_metadata']['status']['code']:\n    -1",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": -1,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "Crawl log message",
+          "chromeDriverLog": "Chrome driver log message",
+          "screenshot": "Screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"crawlArgs\" is a required property",
+      "python_error": "'crawlArgs' is a required property\n\nFailed validating 'required' in schema['properties']['_metadata']:\n    {'type': 'object',\n     'properties': {'status': {'type': 'object',\n                               'properties': {'code': {'type': 'integer',\n                                                       'minimum': 0},\n                                              'message': {'type': 'string'}},\n                               'required': ['code', 'message'],\n                               'additionalProperties': False},\n                    'crawlTime': {'type': 'object',\n                                  'properties': {'started': {'type': 'string'},\n                                                 'durationInMs': {'type': 'integer',\n                                                                  'minimum': 0}},\n                                  'required': ['started', 'durationInMs'],\n                                  'additionalProperties': False},\n                    'spider': {'type': 'object',\n           .. (1047 more)",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde"
+          }
+        },
+        "crawlArgs": [
+          "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba987654321"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['_metadata']['properties']['status']['properties']['code']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['_metadata']['status']['code']:\n    -1",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": -1,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "Crawl log message",
+          "chromeDriverLog": "Chrome driver log message",
+          "screenshot": "Screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['_debug']['properties']['crawlLog']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 512}\n\nOn instance['_debug']['crawlLog']:\n    ''",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Crawl successful"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "",
+          "chromeDriverLog": "Chrome driver log message",
+          "screenshot": "Screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['_debug']['properties']['crawlLog']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 512}\n\nOn instance['_debug']['crawlLog']:\n    ''",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": -1,
+            "message": "Crawl failed"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": -1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "invalid-arg"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "",
+          "chromeDriverLog": "a",
+          "screenshot": "a"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Success"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "Example crawl log message",
+          "chromeDriverLog": "Example Chrome driver log message",
+          "screenshot": "Example screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['_metadata']['properties']['status']['properties']['code']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['_metadata']['status']['code']:\n    -1",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": -1,
+            "message": "Success"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "Example crawl log message",
+          "chromeDriverLog": "Example Chrome driver log message",
+          "screenshot": "Example screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"crawlArgs\" is a required property",
+      "python_error": "'crawlArgs' is a required property\n\nFailed validating 'required' in schema['properties']['_metadata']:\n    {'type': 'object',\n     'properties': {'status': {'type': 'object',\n                               'properties': {'code': {'type': 'integer',\n                                                       'minimum': 0},\n                                              'message': {'type': 'string'}},\n                               'required': ['code', 'message'],\n                               'additionalProperties': False},\n                    'crawlTime': {'type': 'object',\n                                  'properties': {'started': {'type': 'string'},\n                                                 'durationInMs': {'type': 'integer',\n                                                                  'minimum': 0}},\n                                  'required': ['started', 'durationInMs'],\n                                  'additionalProperties': False},\n                    'spider': {'type': 'object',\n           .. (1038 more)",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Success"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde"
+          }
+        },
+        "crawlArgs": [
+          "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde",
+          "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['_debug']['properties']['crawlLog']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 512}\n\nOn instance['_debug']['crawlLog']:\n    ''",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": 200,
+            "message": "Success"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+          ]
+        },
+        "_debug": {
+          "crawlLog": "",
+          "chromeDriverLog": "Example Chrome driver log message",
+          "screenshot": "Example screenshot URL"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['_metadata']['properties']['status']['properties']['code']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['_metadata']['status']['code']:\n    -1",
+      "data": {
+        "_metadata": {
+          "status": {
+            "code": -1,
+            "message": "Success"
+          },
+          "crawlTime": {
+            "started": "2022-01-01T12:00:00.000Z",
+            "durationInMs": 1000
+          },
+          "spider": {
+            "name": "example-spider",
+            "version": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "crawlArgs": [
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+            12345
+          ]
+        },
+        "_debug": {
+          "crawlLog": "a",
+          "chromeDriverLog": "Example Chrome driver log message",
+          "screenshot": "Example screenshot URL"
+        }
+      }
+    }
+  ]
+}

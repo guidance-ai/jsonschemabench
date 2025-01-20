@@ -1,0 +1,118 @@
+{
+  "description": "sample Github_easy/o83161.json",
+  "meta": {
+    "full_size": 814,
+    "stripped_size": 444,
+    "features": [
+      "@minmaxLength",
+      "anyOf",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://project-open-data.cio.gov/v1.1/schema/vcard.json#",
+    "title": "Project Open Data ContactPoint vCard",
+    "description": "A Dataset ContactPoint as a vCard object",
+    "type": "object",
+    "required": [
+      "fn",
+      "hasEmail"
+    ],
+    "properties": {
+      "@type": {
+        "title": "Metadata Context",
+        "description": "IRI for the JSON-LD data type. This should be vcard:Contact for contactPoint",
+        "enum": [
+          "vcard:Contact"
+        ]
+      },
+      "fn": {
+        "title": "Contact Name",
+        "description": "A full formatted name, eg Firstname Lastname",
+        "type": "string",
+        "minLength": 1
+      },
+      "hasEmail": {
+        "title": "Email",
+        "description": "Email address for the contact",
+        "anyOf": [
+          {
+            "pattern": "^mailto:[\\w\\_\\~\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=\\:.-]+@[\\w.-]+\\.[\\w.-]+?$",
+            "type": "string"
+          },
+          {
+            "type": "string",
+            "pattern": "^(\\[\\[REDACTED).*?(\\]\\])$"
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "@type": "vcard:Contact",
+        "fn": "John Doe",
+        "hasEmail": "mailto:johndoe@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['fn']:\n    {'title': 'Contact Name',\n     'description': 'A full formatted name, eg Firstname Lastname',\n     'type': 'string',\n     'minLength': 1}\n\nOn instance['fn']:\n    ''",
+      "data": {
+        "@type": "vcard:Contact",
+        "fn": "",
+        "hasEmail": "mailto:johndoe@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"johndoe@example.com\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'johndoe@example.com' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['hasEmail']:\n    {'title': 'Email',\n     'description': 'Email address for the contact',\n     'anyOf': [{'pattern': \"^mailto:[\\\\w\\\\_\\\\~\\\\!\\\\$\\\\&\\\\'\\\\(\\\\)\\\\*\\\\+\\\\,\\\\;\\\\=\\\\:.-]+@[\\\\w.-]+\\\\.[\\\\w.-]+?$\",\n                'type': 'string'},\n               {'type': 'string',\n                'pattern': '^(\\\\[\\\\[REDACTED).*?(\\\\]\\\\])$'}]}\n\nOn instance['hasEmail']:\n    'johndoe@example.com'",
+      "data": {
+        "@type": "vcard:Contact",
+        "fn": "John Doe",
+        "hasEmail": "johndoe@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"mailto:johndoe@example\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'mailto:johndoe@example' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['hasEmail']:\n    {'title': 'Email',\n     'description': 'Email address for the contact',\n     'anyOf': [{'pattern': \"^mailto:[\\\\w\\\\_\\\\~\\\\!\\\\$\\\\&\\\\'\\\\(\\\\)\\\\*\\\\+\\\\,\\\\;\\\\=\\\\:.-]+@[\\\\w.-]+\\\\.[\\\\w.-]+?$\",\n                'type': 'string'},\n               {'type': 'string',\n                'pattern': '^(\\\\[\\\\[REDACTED).*?(\\\\]\\\\])$'}]}\n\nOn instance['hasEmail']:\n    'mailto:johndoe@example'",
+      "data": {
+        "@type": "vcard:Contact",
+        "fn": "John Doe",
+        "hasEmail": "mailto:johndoe@example"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid_email\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalid_email' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['hasEmail']:\n    {'title': 'Email',\n     'description': 'Email address for the contact',\n     'anyOf': [{'pattern': \"^mailto:[\\\\w\\\\_\\\\~\\\\!\\\\$\\\\&\\\\'\\\\(\\\\)\\\\*\\\\+\\\\,\\\\;\\\\=\\\\:.-]+@[\\\\w.-]+\\\\.[\\\\w.-]+?$\",\n                'type': 'string'},\n               {'type': 'string',\n                'pattern': '^(\\\\[\\\\[REDACTED).*?(\\\\]\\\\])$'}]}\n\nOn instance['hasEmail']:\n    'invalid_email'",
+      "data": {
+        "@type": "vcard:Contact",
+        "fn": "John Doe",
+        "hasEmail": "invalid_email"
+      }
+    }
+  ]
+}

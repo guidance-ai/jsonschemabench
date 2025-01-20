@@ -1,0 +1,1441 @@
+{
+  "description": "sample JsonSchemaStore/schema-project.json",
+  "meta": {
+    "full_size": 8697,
+    "stripped_size": 4564,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "allOf",
+      "anyOf",
+      "const",
+      "enum",
+      "if",
+      "items",
+      "oneOf",
+      "patternProperties",
+      "then"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "JSON schema for Outblocks project configuration files",
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "$ref": "#/definitions/OutblocksProject",
+    "definitions": {
+      "OutblocksProject": {
+        "title": "Outblocks",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "dns": {
+            "description": "Project-wide DNS setup.",
+            "$ref": "#/definitions/DNS"
+          },
+          "state": {
+            "description": "Project-wide state source.",
+            "$ref": "#/definitions/State"
+          },
+          "secrets": {
+            "description": "Project-wide secrets provider.",
+            "$ref": "#/definitions/Secrets"
+          },
+          "dependencies": {
+            "description": "Project-wide dependencies to provision.",
+            "$ref": "#/definitions/Dependencies"
+          },
+          "monitoring": {
+            "description": "Project monitoring setup.",
+            "$ref": "#/definitions/Monitoring"
+          },
+          "plugins": {
+            "description": "Project-wide plugins.",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Plugin"
+            }
+          },
+          "defaults": {
+            "description": "Project-wide default app settings.",
+            "$ref": "#/definitions/Defaults"
+          }
+        }
+      },
+      "DNS": {
+        "title": "DNS",
+        "type": "array",
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "domains": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "plugin": {
+              "type": "string"
+            },
+            "ssl": {
+              "description": "SSL configuration.",
+              "$ref": "#/definitions/SSL"
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "domain"
+              ]
+            },
+            {
+              "required": [
+                "domains"
+              ]
+            }
+          ]
+        }
+      },
+      "SSL": {
+        "title": "SSL",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cert_file": {
+            "description": "Public key file path. Required to be in PEM format.",
+            "type": "string"
+          },
+          "key_file": {
+            "description": "Private key file path. Required to be in PEM format.",
+            "type": "string"
+          },
+          "cert": {
+            "description": "Public key value in PEM format.",
+            "type": "string"
+          },
+          "key": {
+            "description": "Private key value in PEM format.",
+            "type": "string"
+          }
+        }
+      },
+      "State": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "type": {
+            "description": "State type, plugin specific value e.g. 'gcp' for gcp plugin or use 'local' for local state.",
+            "type": "string"
+          },
+          "path": {
+            "description": "Path of local state, used only when state type is 'local'.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "State"
+      },
+      "Secrets": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "type": {
+            "description": "Secrets provider type, plugin specific value e.g. 'gcp' for gcp plugin.",
+            "type": "string"
+          }
+        },
+        "title": "Secrets"
+      },
+      "Dependencies": {
+        "title": "Dependencies",
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^[_a-zA-Z][a-zA-Z0-9_-]*$": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "description": "The type of the dependency.",
+                "type": "string"
+              },
+              "deploy": {
+                "description": "Deploy config.",
+                "$ref": "#/definitions/DependencyDeploy"
+              },
+              "run": {
+                "description": "Run config.",
+                "$ref": "#/definitions/DependencyRun"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "storage"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "versioning": {
+                      "description": "Enables versioning for objects.",
+                      "type": "boolean"
+                    },
+                    "location": {
+                      "description": "Specify location for storage, refer to cloud provider docs for possible options.",
+                      "type": "string"
+                    },
+                    "public": {
+                      "description": "Makes whole storage public so that all objects can be accessed.",
+                      "type": "boolean"
+                    },
+                    "max_versions": {
+                      "description": "Maximum amount of versions to keep.",
+                      "type": "integer"
+                    },
+                    "delete_in_days": {
+                      "description": "Delete new objects after X days.",
+                      "type": "integer"
+                    },
+                    "expire_versions_in_days": {
+                      "description": "Expire archived versions after X days.",
+                      "type": "integer"
+                    },
+                    "cors": {
+                      "description": "CORS settings.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/DependencyStorageCORS"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "type": {
+                          "const": "mysql"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "const": "postgresql"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "version": {
+                      "description": "Specify version of database, refer to cloud provider docs for possible options.",
+                      "type": "string"
+                    },
+                    "high_availability": {
+                      "description": "Makes database highly available meaning it will have a read replica available in case of master failure.",
+                      "type": "boolean"
+                    },
+                    "tier": {
+                      "description": "Specify tier of database, refer to cloud provider docs for possible options.",
+                      "type": "string"
+                    },
+                    "flags": {
+                      "description": "Database flags, refer to cloud provider docs for possible options.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "users": {
+                      "description": "Database users.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/definitions/DependencyDatabaseUser"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "DependencyDatabaseUser": {
+        "title": "Database user",
+        "type": "object",
+        "properties": {
+          "password": {
+            "description": "Explicitly set password, defaults to a randomly generated string.",
+            "type": "string"
+          },
+          "hostname": {
+            "description": "Hostname that user is allowed to connect from. Not all databases may support it.",
+            "type": "string"
+          }
+        }
+      },
+      "DependencyStorageCORS": {
+        "title": "Storage CORS",
+        "type": "object",
+        "properties": {
+          "origins": {
+            "description": "The list of Origins eligible to receive CORS response headers. Note: \"*\" is permitted in the list of origins, and means \"any Origin\".",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "methods": {
+            "description": "The list of HTTP methods on which to include CORS response headers, (GET, OPTIONS, POST, etc) Note: \"*\" is permitted in the list of methods, and means \"any method\".",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "response_headers": {
+            "description": "The list of HTTP headers other than the simple response headers to give permission for the user-agent to share across domains.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "max_age_in_seconds": {
+            "description": "The value in seconds to return in the Access-Control-Max-Age header used in preflight responses.",
+            "type": "integer"
+          }
+        }
+      },
+      "DependencyRun": {
+        "title": "Run",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "plugin": {
+            "type": "string"
+          }
+        }
+      },
+      "DependencyDeploy": {
+        "title": "Deploy",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "plugin": {
+            "type": "string"
+          }
+        }
+      },
+      "Monitoring": {
+        "title": "Monitoring",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "plugin": {
+            "description": "Monitoring plugin override. Defaults to first supported plugin available.",
+            "type": "string"
+          },
+          "channels": {
+            "description": "Monitoring notification channels.",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/MonitoringChannel"
+            }
+          },
+          "targets": {
+            "description": "Monitoring targets.",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/MonitoringTarget"
+            }
+          }
+        }
+      },
+      "MonitoringChannel": {
+        "title": "Monitoring channels",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "type": {
+            "description": "Notification channel type. Possible values: slack, email.",
+            "type": "string",
+            "enum": [
+              "slack",
+              "email"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "slack"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "token": {
+                  "description": "Bot user oauth token used for slack notification.",
+                  "type": "string"
+                },
+                "channel": {
+                  "description": "Channel used for slack notification.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "token",
+                "channel"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "email"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "email": {
+                  "description": "Email used for email channel type.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "email"
+              ]
+            }
+          }
+        ]
+      },
+      "MonitoringTarget": {
+        "title": "Monitoring target",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "description": "Target full url.",
+            "type": "string"
+          },
+          "frequency": {
+            "description": "Check frequency in minutes. Defaults to 5 minutes.",
+            "type": "integer",
+            "enum": [
+              1,
+              5,
+              10,
+              15
+            ]
+          },
+          "locations": {
+            "description": "Check locations to use. Defaults to 'all'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "Plugin": {
+        "title": "Plugin",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Defaults": {
+        "title": "Defaults",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "deploy": {
+            "description": "Deploy config.",
+            "$ref": "#/definitions/DefaultDeploy"
+          },
+          "dns": {
+            "description": "DNS config.",
+            "$ref": "#/definitions/DefaultDNS"
+          },
+          "run": {
+            "description": "Run config.",
+            "$ref": "#/definitions/DefaultRun"
+          }
+        }
+      },
+      "DefaultDeploy": {
+        "title": "Deploy defaults",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "plugin": {
+            "description": "Deploy plugin override. Defaults to first supported plugin available.",
+            "type": "string"
+          }
+        },
+        "env": {
+          "description": "Additional environment variables added to every app that supports environment variables.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "DefaultDNS": {
+        "title": "DNS defaults",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "plugin": {
+            "description": "DNS plugin override. Defaults to first supported plugin available.",
+            "type": "string"
+          }
+        }
+      },
+      "DefaultRun": {
+        "title": "Run defaults",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "plugin": {
+            "description": "Run plugin override. Defaults to first supported plugin available.",
+            "type": "string"
+          },
+          "env": {
+            "description": "Additional environment variables added to every app that supports environment variables.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "example-project",
+        "dns": [
+          {
+            "domain": "example.com",
+            "plugin": "cloudflare",
+            "ssl": {
+              "cert_file": "path/to/cert.pem",
+              "key_file": "path/to/key.pem"
+            }
+          }
+        ],
+        "state": {
+          "type": "gcp"
+        },
+        "secrets": {
+          "type": "gcp"
+        },
+        "dependencies": {
+          "storage": {
+            "type": "storage",
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            },
+            "versioning": true,
+            "location": "US",
+            "public": false,
+            "max_versions": 10,
+            "delete_in_days": 30,
+            "expire_versions_in_days": 60,
+            "cors": [
+              {
+                "origins": [
+                  "*"
+                ],
+                "methods": [
+                  "GET",
+                  "POST"
+                ],
+                "response_headers": [
+                  "Content-Type"
+                ],
+                "max_age_in_seconds": 3600
+              }
+            ]
+          },
+          "database": {
+            "type": "mysql",
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            },
+            "version": "8.0",
+            "high_availability": true,
+            "tier": "db-n1-standard-1",
+            "flags": {
+              "sql_mode": "STRICT_TRANS_TABLES"
+            },
+            "users": {
+              "admin": {
+                "password": "password123",
+                "hostname": "%"
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "plugin": "datadog",
+          "channels": [
+            {
+              "type": "slack",
+              "token": "xoxb-123456789012-1234567890123-abc123def456",
+              "channel": "#monitoring"
+            },
+            {
+              "type": "email",
+              "email": "monitoring@example.com"
+            }
+          ],
+          "targets": [
+            {
+              "url": "https://example.com",
+              "frequency": 5,
+              "locations": [
+                "US",
+                "EU"
+              ]
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "name": "cloudflare"
+          },
+          {
+            "name": "gcp"
+          }
+        ],
+        "defaults": {
+          "deploy": {
+            "plugin": "gcp"
+          },
+          "dns": {
+            "plugin": "cloudflare"
+          },
+          "run": {
+            "plugin": "gcp",
+            "env": {
+              "NODE_ENV": "production"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "example-project",
+        "dns": [
+          {
+            "domain": "example.com",
+            "plugin": "cloudflare",
+            "ssl": {
+              "cert_file": "path/to/cert.pem",
+              "key_file": "path/to/key.pem"
+            }
+          }
+        ],
+        "state": {
+          "type": "local",
+          "path": "/path/to/state"
+        },
+        "secrets": {
+          "type": "gcp"
+        },
+        "dependencies": {
+          "db": {
+            "type": "postgresql",
+            "version": "13",
+            "high_availability": true,
+            "tier": "db-f1-micro",
+            "flags": {
+              "log_statement": "all"
+            },
+            "users": {
+              "admin": {
+                "password": "password123"
+              }
+            },
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          },
+          "storage": {
+            "type": "storage",
+            "versioning": true,
+            "location": "US",
+            "public": true,
+            "max_versions": 10,
+            "delete_in_days": 30,
+            "expire_versions_in_days": 60,
+            "cors": [
+              {
+                "origins": [
+                  "*"
+                ],
+                "methods": [
+                  "GET",
+                  "POST"
+                ],
+                "response_headers": [
+                  "Content-Type"
+                ],
+                "max_age_in_seconds": 3600
+              }
+            ],
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          }
+        },
+        "monitoring": {
+          "plugin": "datadog",
+          "channels": [
+            {
+              "type": "slack",
+              "token": "xoxb-1234567890-1234567890123-123456789012345678901234567890",
+              "channel": "#monitoring"
+            },
+            {
+              "type": "email",
+              "email": "example@example.com"
+            }
+          ],
+          "targets": [
+            {
+              "url": "https://example.com",
+              "frequency": 5,
+              "locations": [
+                "US",
+                "EU"
+              ]
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "name": "gcp"
+          },
+          {
+            "name": "datadog"
+          }
+        ],
+        "defaults": {
+          "deploy": {
+            "plugin": "gcp"
+          },
+          "dns": {
+            "plugin": "cloudflare"
+          },
+          "run": {
+            "plugin": "gcp",
+            "env": {
+              "EXAMPLE_VAR": "example_value"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"domain\":\"example.com\",\"domains\":[\"example.net\"],\"plugin\":\"cloudflare\",\"ssl\":{\"cert_file\":\"path/to/cert.pem\",\"key_file\":\"path/to/key.pem\"}} is valid under more than one of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'domain': 'example.com', 'domains': ['example.net'], 'plugin': 'cloudflare', 'ssl': {'cert_file': 'path/to/cert.pem', 'key_file': 'path/to/key.pem'}} is valid under each of {'required': ['domains']}, {'required': ['domain']}\n\nFailed validating 'oneOf' in schema['properties']['dns']['items']:\n    {'additionalProperties': False,\n     'properties': {'domain': {'type': 'string'},\n                    'domains': {'type': 'array',\n                                'items': {'type': 'string'}},\n                    'plugin': {'type': 'string'},\n                    'ssl': {'description': 'SSL configuration.',\n                            '$ref': '#/definitions/SSL'}},\n     'oneOf': [{'required': ['domain']}, {'required': ['domains']}]}\n\nOn instance['dns'][0]:\n    {'domain': 'example.com',\n     'domains': ['example.net'],\n     'plugin': 'cloudflare',\n     'ssl': {'cert_file': 'path/to/cert.pem',\n             'key_file': 'path/to/key.pem'}}",
+      "data": {
+        "name": "example-project",
+        "dns": [
+          {
+            "domain": "example.com",
+            "domains": [
+              "example.net"
+            ],
+            "plugin": "cloudflare",
+            "ssl": {
+              "cert_file": "path/to/cert.pem",
+              "key_file": "path/to/key.pem"
+            }
+          }
+        ],
+        "state": {
+          "type": "local",
+          "path": "/path/to/state"
+        },
+        "secrets": {
+          "type": "gcp"
+        },
+        "dependencies": {
+          "db": {
+            "type": "postgresql",
+            "version": "13",
+            "high_availability": true,
+            "tier": "db-f1-micro",
+            "flags": {
+              "log_statement": "all"
+            },
+            "users": {
+              "admin": {
+                "password": "password123"
+              }
+            },
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          },
+          "storage": {
+            "type": "storage",
+            "versioning": true,
+            "location": "US",
+            "public": true,
+            "max_versions": 10,
+            "delete_in_days": 30,
+            "expire_versions_in_days": 60,
+            "cors": [
+              {
+                "origins": [
+                  "*"
+                ],
+                "methods": [
+                  "GET",
+                  "POST"
+                ],
+                "response_headers": [
+                  "Content-Type"
+                ],
+                "max_age_in_seconds": 3600
+              }
+            ],
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          }
+        },
+        "monitoring": {
+          "plugin": "datadog",
+          "channels": [
+            {
+              "type": "slack",
+              "token": "xoxb-1234567890-1234567890123-123456789012345678901234567890",
+              "channel": "#monitoring"
+            },
+            {
+              "type": "email",
+              "email": "example@example.com"
+            }
+          ],
+          "targets": [
+            {
+              "url": "https://example.com",
+              "frequency": 5,
+              "locations": [
+                "US",
+                "EU"
+              ]
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "name": "gcp"
+          },
+          {
+            "name": "datadog"
+          }
+        ],
+        "defaults": {
+          "deploy": {
+            "plugin": "gcp"
+          },
+          "dns": {
+            "plugin": "cloudflare"
+          },
+          "run": {
+            "plugin": "gcp",
+            "env": {
+              "EXAMPLE_VAR": "example_value"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('123' was unexpected)",
+      "python_error": "'123' does not match any of the regexes: '^[_a-zA-Z][a-zA-Z0-9_-]*$'\n\nFailed validating 'additionalProperties' in schema['properties']['dependencies']:\n    {'title': 'Dependencies',\n     'type': 'object',\n     'additionalProperties': False,\n     'patternProperties': {'^[_a-zA-Z][a-zA-Z0-9_-]*$': {'type': 'object',\n                                                         'properties': {'type': {'description': 'The '\n                                                                                                'type '\n                                                                                                'of '\n                                                                                                'the '\n                                                                                                'dependency.',\n                                                                                 'type': 'string'},\n                                                                        'deploy': {'d.. (17128 more)",
+      "data": {
+        "name": "example-project",
+        "dns": [
+          {
+            "domain": "example.com",
+            "plugin": "cloudflare",
+            "ssl": {
+              "cert_file": "path/to/cert.pem",
+              "key_file": "path/to/key.pem"
+            }
+          }
+        ],
+        "state": {
+          "type": "local",
+          "path": "/path/to/state"
+        },
+        "secrets": {
+          "type": "gcp"
+        },
+        "dependencies": {
+          "123": {
+            "type": "postgresql",
+            "version": "13",
+            "high_availability": true,
+            "tier": "db-f1-micro",
+            "flags": {
+              "log_statement": "all"
+            },
+            "users": {
+              "admin": {
+                "password": "password123"
+              }
+            },
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          },
+          "storage": {
+            "type": "storage",
+            "versioning": true,
+            "location": "US",
+            "public": true,
+            "max_versions": 10,
+            "delete_in_days": 30,
+            "expire_versions_in_days": 60,
+            "cors": [
+              {
+                "origins": [
+                  "*"
+                ],
+                "methods": [
+                  "GET",
+                  "POST"
+                ],
+                "response_headers": [
+                  "Content-Type"
+                ],
+                "max_age_in_seconds": 3600
+              }
+            ],
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          }
+        },
+        "monitoring": {
+          "plugin": "datadog",
+          "channels": [
+            {
+              "type": "slack",
+              "token": "xoxb-1234567890-1234567890123-123456789012345678901234567890",
+              "channel": "#monitoring"
+            },
+            {
+              "type": "email",
+              "email": "example@example.com"
+            }
+          ],
+          "targets": [
+            {
+              "url": "https://example.com",
+              "frequency": 5,
+              "locations": [
+                "US",
+                "EU"
+              ]
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "name": "gcp"
+          },
+          {
+            "name": "datadog"
+          }
+        ],
+        "defaults": {
+          "deploy": {
+            "plugin": "gcp"
+          },
+          "dns": {
+            "plugin": "cloudflare"
+          },
+          "run": {
+            "plugin": "gcp",
+            "env": {
+              "EXAMPLE_VAR": "example_value"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('unknown_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('unknown_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['dns']['items']['properties']['ssl']:\n    {'title': 'SSL',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'cert_file': {'description': 'Public key file path. '\n                                                 'Required to be in PEM '\n                                                 'format.',\n                                  'type': 'string'},\n                    'key_file': {'description': 'Private key file path. '\n                                                'Required to be in PEM '\n                                                'format.',\n                                 'type': 'string'},\n                    'cert': {'description': 'Public key value in PEM '\n                                            'format.',\n                             'type': 'string'},\n                    'key': {'description': 'Private key value in PEM '\n  .. (238 more)",
+      "data": {
+        "name": "example-project",
+        "dns": [
+          {
+            "domain": "example.com",
+            "plugin": "cloudflare",
+            "ssl": {
+              "cert_file": "path/to/cert.pem",
+              "key_file": "path/to/key.pem",
+              "unknown_property": "value"
+            }
+          }
+        ],
+        "state": {
+          "type": "local",
+          "path": "/path/to/state"
+        },
+        "secrets": {
+          "type": "gcp"
+        },
+        "dependencies": {
+          "db": {
+            "type": "postgresql",
+            "version": "13",
+            "high_availability": true,
+            "tier": "db-f1-micro",
+            "flags": {
+              "log_statement": "all"
+            },
+            "users": {
+              "admin": {
+                "password": "password123"
+              }
+            },
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          },
+          "storage": {
+            "type": "storage",
+            "versioning": true,
+            "location": "US",
+            "public": true,
+            "max_versions": 10,
+            "delete_in_days": 30,
+            "expire_versions_in_days": 60,
+            "cors": [
+              {
+                "origins": [
+                  "*"
+                ],
+                "methods": [
+                  "GET",
+                  "POST"
+                ],
+                "response_headers": [
+                  "Content-Type"
+                ],
+                "max_age_in_seconds": 3600
+              }
+            ],
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          }
+        },
+        "monitoring": {
+          "plugin": "datadog",
+          "channels": [
+            {
+              "type": "slack",
+              "token": "xoxb-1234567890-1234567890123-123456789012345678901234567890",
+              "channel": "#monitoring"
+            },
+            {
+              "type": "email",
+              "email": "example@example.com"
+            }
+          ],
+          "targets": [
+            {
+              "url": "https://example.com",
+              "frequency": 5,
+              "locations": [
+                "US",
+                "EU"
+              ]
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "name": "gcp"
+          },
+          {
+            "name": "datadog"
+          }
+        ],
+        "defaults": {
+          "deploy": {
+            "plugin": "gcp"
+          },
+          "dns": {
+            "plugin": "cloudflare"
+          },
+          "run": {
+            "plugin": "gcp",
+            "env": {
+              "EXAMPLE_VAR": "example_value"
+            },
+            "unknown_property": "value"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"domain\":\"example.com\",\"plugin\":\"cloudflare\",\"ssl\":{\"cert_file\":\"path/to/cert.pem\",\"key_file\":\"path/to/key.pem\"},\"domains\":[\"example2.com\"]} is valid under more than one of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'domain': 'example.com', 'plugin': 'cloudflare', 'ssl': {'cert_file': 'path/to/cert.pem', 'key_file': 'path/to/key.pem'}, 'domains': ['example2.com']} is valid under each of {'required': ['domains']}, {'required': ['domain']}\n\nFailed validating 'oneOf' in schema['properties']['dns']['items']:\n    {'additionalProperties': False,\n     'properties': {'domain': {'type': 'string'},\n                    'domains': {'type': 'array',\n                                'items': {'type': 'string'}},\n                    'plugin': {'type': 'string'},\n                    'ssl': {'description': 'SSL configuration.',\n                            '$ref': '#/definitions/SSL'}},\n     'oneOf': [{'required': ['domain']}, {'required': ['domains']}]}\n\nOn instance['dns'][0]:\n    {'domain': 'example.com',\n     'plugin': 'cloudflare',\n     'ssl': {'cert_file': 'path/to/cert.pem',\n             'key_file': 'path/to/key.pem'},\n     'domains': ['example2.com']}",
+      "data": {
+        "name": "example-project",
+        "dns": [
+          {
+            "domain": "example.com",
+            "plugin": "cloudflare",
+            "ssl": {
+              "cert_file": "path/to/cert.pem",
+              "key_file": "path/to/key.pem"
+            },
+            "domains": [
+              "example2.com"
+            ]
+          }
+        ],
+        "state": {
+          "type": "local",
+          "path": "/path/to/state"
+        },
+        "secrets": {
+          "type": "gcp"
+        },
+        "dependencies": {
+          "db": {
+            "type": "postgresql",
+            "version": "13",
+            "high_availability": true,
+            "tier": "db-f1-micro",
+            "flags": {
+              "log_statement": "all"
+            },
+            "users": {
+              "admin": {
+                "password": "password123"
+              }
+            },
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          },
+          "storage": {
+            "type": "storage",
+            "versioning": true,
+            "location": "US",
+            "public": true,
+            "max_versions": 10,
+            "delete_in_days": 30,
+            "expire_versions_in_days": 60,
+            "cors": [
+              {
+                "origins": [
+                  "*"
+                ],
+                "methods": [
+                  "GET",
+                  "POST"
+                ],
+                "response_headers": [
+                  "Content-Type"
+                ],
+                "max_age_in_seconds": 3600
+              }
+            ],
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          }
+        },
+        "monitoring": {
+          "plugin": "datadog",
+          "channels": [
+            {
+              "type": "slack",
+              "token": "xoxb-1234567890-1234567890123-123456789012345678901234567890",
+              "channel": "#monitoring"
+            },
+            {
+              "type": "email",
+              "email": "example@example.com"
+            }
+          ],
+          "targets": [
+            {
+              "url": "https://example.com",
+              "frequency": 5,
+              "locations": [
+                "US",
+                "EU"
+              ]
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "name": "gcp"
+          },
+          {
+            "name": "datadog"
+          }
+        ],
+        "defaults": {
+          "deploy": {
+            "plugin": "gcp"
+          },
+          "dns": {
+            "plugin": "cloudflare"
+          },
+          "run": {
+            "plugin": "gcp",
+            "env": {
+              "EXAMPLE_VAR": "example_value"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid\" is not one of [\"slack\",\"email\"]",
+      "python_error": "Additional properties are not allowed ('invalid_key' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'title': 'Outblocks',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'name': {'type': 'string'},\n                    'dns': {'description': 'Project-wide DNS setup.',\n                            '$ref': '#/definitions/DNS'},\n                    'state': {'description': 'Project-wide state source.',\n                              '$ref': '#/definitions/State'},\n                    'secrets': {'description': 'Project-wide secrets '\n                                               'provider.',\n                                '$ref': '#/definitions/Secrets'},\n                    'dependencies': {'description': 'Project-wide '\n                                                    'dependencies to '\n                                                    'provision.',\n                                     '$ref': '#/definitions/Dependencies'},\n                    'moni.. (3116 more)",
+      "data": {
+        "name": "example-project",
+        "dns": [
+          {
+            "domain": "example.com",
+            "plugin": "cloudflare",
+            "ssl": {
+              "cert_file": "path/to/cert.pem",
+              "key_file": "path/to/key.pem",
+              "cert": "invalid_cert"
+            }
+          }
+        ],
+        "state": {
+          "type": "local",
+          "path": "/path/to/state"
+        },
+        "secrets": {
+          "type": "gcp"
+        },
+        "dependencies": {
+          "db": {
+            "type": "postgresql",
+            "version": "13",
+            "high_availability": true,
+            "tier": "db-f1-micro",
+            "flags": {
+              "log_statement": "all"
+            },
+            "users": {
+              "admin": {
+                "password": "password123"
+              }
+            },
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          },
+          "storage": {
+            "type": "storage",
+            "versioning": true,
+            "location": "US",
+            "public": true,
+            "max_versions": 10,
+            "delete_in_days": 30,
+            "expire_versions_in_days": 60,
+            "cors": [
+              {
+                "origins": [
+                  "*"
+                ],
+                "methods": [
+                  "GET",
+                  "POST"
+                ],
+                "response_headers": [
+                  "Content-Type"
+                ],
+                "max_age_in_seconds": 3600
+              }
+            ],
+            "deploy": {
+              "plugin": "gcp"
+            },
+            "run": {
+              "plugin": "gcp"
+            }
+          }
+        },
+        "monitoring": {
+          "plugin": "datadog",
+          "channels": [
+            {
+              "type": "slack",
+              "token": "xoxb-1234567890-1234567890123-123456789012345678901234567890",
+              "channel": "#monitoring"
+            },
+            {
+              "type": "email",
+              "email": "example@example.com"
+            },
+            {
+              "type": "invalid"
+            }
+          ],
+          "targets": [
+            {
+              "url": "https://example.com",
+              "frequency": 5,
+              "locations": [
+                "US",
+                "EU"
+              ]
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "name": "gcp"
+          },
+          {
+            "name": "datadog"
+          }
+        ],
+        "defaults": {
+          "deploy": {
+            "plugin": "gcp"
+          },
+          "dns": {
+            "plugin": "cloudflare"
+          },
+          "run": {
+            "plugin": "gcp",
+            "env": {
+              "EXAMPLE_VAR": "example_value"
+            }
+          }
+        },
+        "invalid_key": "value"
+      }
+    }
+  ]
+}

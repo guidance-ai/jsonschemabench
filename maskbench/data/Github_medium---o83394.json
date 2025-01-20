@@ -1,0 +1,348 @@
+{
+  "description": "sample Github_medium/o83394.json",
+  "meta": {
+    "full_size": 745,
+    "stripped_size": 733,
+    "features": [
+      "$ref",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "definitions": {
+      "layoutName": {
+        "pattern": "^[a-z]+(?:-+[a-z]+)*-v\\d+$",
+        "type": "string"
+      },
+      "page": {
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/definitions/page"
+            },
+            "type": "array"
+          },
+          "layout": {
+            "$ref": "#/definitions/layoutName"
+          },
+          "slug": {
+            "$ref": "#/definitions/slug"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "layout"
+        ],
+        "type": "object"
+      },
+      "slug": {
+        "pattern": "^[a-z0-9A-Z-]*$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "availableLayouts": {
+        "items": {
+          "$ref": "#/definitions/layoutName"
+        },
+        "type": "array"
+      },
+      "defaultPages": {
+        "$ref": "#/definitions/page"
+      },
+      "label": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "version": {
+        "default": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "name",
+      "label",
+      "version",
+      "defaultPages"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "availableLayouts": [
+          "layout-abc-v1",
+          "layout-def-v2",
+          "layout-ghi-v3"
+        ],
+        "defaultPages": {
+          "children": [
+            {
+              "children": [],
+              "layout": "layout-abc-v1",
+              "slug": "child-page",
+              "title": "Child Page"
+            }
+          ],
+          "layout": "layout-abc-v1",
+          "slug": "parent-page",
+          "title": "Parent Page"
+        },
+        "label": "Example Theme",
+        "name": "example-theme",
+        "version": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Layout-abc-v1\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "'child-page!' does not match '^[a-z0-9A-Z-]*$'\n\nFailed validating 'pattern' in schema['properties']['defaultPages']['properties']['slug']:\n    {'pattern': '^[a-z0-9A-Z-]*$', 'type': 'string'}\n\nOn instance['defaultPages']['slug']:\n    'child-page!'",
+      "data": {
+        "availableLayouts": [
+          "Layout-abc-v1",
+          -1
+        ],
+        "defaultPages": {
+          "children": [
+            {
+              "children": [],
+              "layout": "layout-abc-v1",
+              "slug": "child-page",
+              "title": "Child Page"
+            }
+          ],
+          "layout": "layout-abc-v1",
+          "slug": "child-page!",
+          "title": "Parent Page"
+        },
+        "label": "Example Theme",
+        "name": "example-theme",
+        "version": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"parent-page!\" does not match \"^[a-z0-9A-Z-]*$\"",
+      "python_error": "'parent-page!' does not match '^[a-z0-9A-Z-]*$'\n\nFailed validating 'pattern' in schema['properties']['defaultPages']['properties']['slug']:\n    {'pattern': '^[a-z0-9A-Z-]*$', 'type': 'string'}\n\nOn instance['defaultPages']['slug']:\n    'parent-page!'",
+      "data": {
+        "availableLayouts": [
+          "layout-abc-v1",
+          "layout-def-v2",
+          "layout-ghi-v3"
+        ],
+        "defaultPages": {
+          "children": [
+            {
+              "children": [],
+              "layout": "layout-abc-v1",
+              "slug": "child-page",
+              "title": "Child Page"
+            }
+          ],
+          "layout": "layout-abc-v1",
+          "slug": "parent-page!",
+          "title": "Parent Page"
+        },
+        "label": "Example Theme",
+        "name": "example-theme",
+        "version": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"InvalidLayout\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "'InvalidLayout' does not match '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'\n\nFailed validating 'pattern' in schema['properties']['availableLayouts']['items']:\n    {'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$', 'type': 'string'}\n\nOn instance['availableLayouts'][3]:\n    'InvalidLayout'",
+      "data": {
+        "availableLayouts": [
+          "layout-abc-v1",
+          "layout-def-v2",
+          "layout-ghi-v3",
+          "InvalidLayout"
+        ],
+        "defaultPages": {
+          "children": [
+            {
+              "children": [],
+              "layout": "layout-abc-v1",
+              "slug": "child-page",
+              "title": "Child Page"
+            }
+          ],
+          "layout": "layout-abc-v1",
+          "slug": "parent-page",
+          "title": "Parent Page"
+        },
+        "label": "Example Theme",
+        "name": "example-theme",
+        "version": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"InvalidLayout\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "'layout-abc-v1-abc' does not match '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'\n\nFailed validating 'pattern' in schema['properties']['availableLayouts']['items']:\n    {'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$', 'type': 'string'}\n\nOn instance['availableLayouts'][4]:\n    'layout-abc-v1-abc'",
+      "data": {
+        "availableLayouts": [
+          "layout-abc-v1",
+          "layout-def-v2",
+          "layout-ghi-v3",
+          "InvalidLayout",
+          "layout-abc-v1-abc"
+        ],
+        "defaultPages": {
+          "children": [
+            {
+              "children": [],
+              "layout": "layout-abc-v1",
+              "slug": "child-page",
+              "title": "Child Page"
+            }
+          ],
+          "layout": "layout-abc-v1",
+          "slug": "parent-page",
+          "title": "Parent Page"
+        },
+        "label": "Example Theme",
+        "name": "example-theme",
+        "version": 1
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "availableLayouts": [
+          "home-v1",
+          "about-v1",
+          "contact-v1"
+        ],
+        "defaultPages": {
+          "children": [
+            {
+              "children": [],
+              "layout": "about-v1",
+              "slug": "about-us",
+              "title": "About Us"
+            },
+            {
+              "children": [],
+              "layout": "contact-v1",
+              "slug": "contact-us",
+              "title": "Contact Us"
+            }
+          ],
+          "layout": "home-v1",
+          "slug": "home",
+          "title": "Home"
+        },
+        "label": "Example Theme",
+        "name": "Example Theme",
+        "version": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"contact_v1\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "'contact!v1' does not match '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'\n\nFailed validating 'pattern' in schema['properties']['availableLayouts']['items']:\n    {'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$', 'type': 'string'}\n\nOn instance['availableLayouts'][3]:\n    'contact!v1'",
+      "data": {
+        "name": "Example Theme",
+        "label": "Example Theme",
+        "version": 1,
+        "availableLayouts": [
+          "home-v1",
+          "about-v1",
+          "contact_v1",
+          "contact!v1"
+        ],
+        "defaultPages": {
+          "children": [
+            {
+              "children": [],
+              "layout": "about-v1",
+              "slug": "About-Us",
+              "title": "About Us"
+            },
+            {
+              "children": [],
+              "layout": "contact-v1",
+              "slug": "contact-us",
+              "title": "Contact Us"
+            }
+          ],
+          "layout": "home-v1",
+          "slug": "home",
+          "title": "Home"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"home_v1\" does not match \"^[a-z]+(?:-+[a-z]+)*-v\\d+$\"",
+      "python_error": "'home-v1a' does not match '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$'\n\nFailed validating 'pattern' in schema['properties']['defaultPages']['properties']['layout']:\n    {'pattern': '^[a-z]+(?:-+[a-z]+)*-v\\\\d+$', 'type': 'string'}\n\nOn instance['defaultPages']['layout']:\n    'home-v1a'",
+      "data": {
+        "name": "Example Theme",
+        "label": "Example Theme",
+        "version": 1,
+        "availableLayouts": [
+          "home-v1",
+          "about-v1",
+          "contact-v1",
+          "home_v1",
+          "home-v1a"
+        ],
+        "defaultPages": {
+          "title": "Home",
+          "slug": "home",
+          "layout": "home-v1a",
+          "children": [
+            {
+              "children": [],
+              "layout": "about-v1",
+              "slug": "about-us",
+              "title": "About Us"
+            },
+            {
+              "children": [],
+              "layout": "contact-v1",
+              "slug": "contact-us",
+              "title": "Contact Us"
+            },
+            {
+              "layout": "faq-v1",
+              "slug": "faq",
+              "title": "FAQ",
+              "invalid": {}
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

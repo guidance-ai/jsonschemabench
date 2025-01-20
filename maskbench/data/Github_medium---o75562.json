@@ -1,0 +1,289 @@
+{
+  "description": "sample Github_medium/o75562.json",
+  "meta": {
+    "full_size": 1767,
+    "stripped_size": 1037,
+    "features": [
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "carrier": {
+        "description": "carrier used for this pickup request",
+        "type": "string"
+      },
+      "carrier_pickup_number": {
+        "description": "carrier identifier for this pickup request",
+        "type": "string"
+      },
+      "id": {
+        "description": "shipcloud identifier for this pickup request",
+        "type": "string"
+      },
+      "pickup_address": {
+        "additionalProperties": false,
+        "description": "address where the carrier should pick up shipments",
+        "properties": {
+          "care_of": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "country": {
+            "description": "Country as uppercase ISO 3166-1 alpha-2 code",
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "id": {
+            "description": "identifier of a previously created address",
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "phone": {
+            "description": "telephone number (mandatory when using UPS and the following terms apply: service is one_day or one_day_early or ship to country is different than ship from country)",
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "street_no": {
+            "type": "string"
+          },
+          "zip_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "last_name",
+          "street",
+          "street_no",
+          "city",
+          "zip_code",
+          "country"
+        ],
+        "type": "object"
+      },
+      "pickup_time": {
+        "additionalProperties": false,
+        "description": "defined time window when the carrier should pickup shipments",
+        "properties": {
+          "earliest": {
+            "_format": "date-time",
+            "type": "string"
+          },
+          "latest": {
+            "_format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "earliest",
+          "latest"
+        ],
+        "type": "object"
+      },
+      "shipments": {
+        "additionalProperties": false,
+        "items": {
+          "properties": {
+            "id": {
+              "description": "id of the shipment included in this pickup request",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "required": [
+          "id"
+        ],
+        "type": "array"
+      }
+    },
+    "required": [
+      "id",
+      "carrier",
+      "pickup_time"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "carrier": "UPS",
+        "carrier_pickup_number": "1234567890",
+        "id": "shipcloud-pickup-123",
+        "pickup_address": {
+          "care_of": "John Doe",
+          "city": "New York",
+          "company": "ABC Inc.",
+          "country": "US",
+          "first_name": "John",
+          "last_name": "Doe",
+          "phone": "+1 123 456 7890",
+          "state": "NY",
+          "street": "Main Street",
+          "street_no": "123",
+          "zip_code": "10001"
+        },
+        "pickup_time": {
+          "earliest": "2024-12-10T08:00:00Z",
+          "latest": "2024-12-10T17:00:00Z"
+        },
+        "shipments": [
+          {
+            "id": "shipcloud-shipment-1"
+          },
+          {
+            "id": "shipcloud-shipment-2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('Invalid country code, should be uppercase ISO 3166-1 alpha-2 code' was unexpected)",
+      "python_error": "Additional properties are not allowed (\"Invalid key, should be 'shipments': [...]\" was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'properties': {'carrier': {'description': 'carrier used for this '\n                                               'pickup request',\n                                'type': 'string'},\n                    'carrier_pickup_number': {'description': 'carrier '\n                                                             'identifier '\n                                                             'for this '\n                                                             'pickup '\n                                                             'request',\n                                              'type': 'string'},\n                    'id': {'description': 'shipcloud identifier for this '\n                                          'pickup request',\n                          .. (8560 more)",
+      "data": {
+        "carrier": "UPS",
+        "carrier_pickup_number": "1234567890",
+        "id": "shipcloud-pickup-123",
+        "pickup_address": {
+          "care_of": "John Doe",
+          "city": "New York",
+          "company": "ABC Inc.",
+          "country": "usa",
+          "Invalid country code, should be uppercase ISO 3166-1 alpha-2 code": "first_name",
+          "Invalid key, should be 'first_name': 'John',": "John",
+          "last_name": "Doe",
+          "phone": "+1 123 456 7890",
+          "state": "NY",
+          "street": "Main Street",
+          "street_no": "123",
+          "zip_code": "10001"
+        },
+        "pickup_time": {
+          "earliest": "2024-12-10T08:00:00Z",
+          "latest": "2024-12-09T17:00:00Z",
+          "Invalid time window, 'latest' should be later than 'earliest'": "shipments",
+          "Invalid key, should be 'shipments': [...]": [
+            {
+              "id": "shipcloud-shipment-1"
+            },
+            {
+              "id": "shipcloud-shipment-2"
+            }
+          ]
+        },
+        "Invalid key, should be 'shipments': [...]": [
+          {
+            "id": "shipcloud-shipment-1"
+          },
+          {
+            "id": "shipcloud-shipment-2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('Invalid country code, should be uppercase ISO 3166-1 alpha-2 code' was unexpected)",
+      "python_error": "Additional properties are not allowed (\"Invalid date-time format, should be 'date-time' as per the schema\", \"Invalid property name, should be 'latest'\" were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['pickup_time']:\n    {'additionalProperties': False,\n     'description': 'defined time window when the carrier should pickup '\n                    'shipments',\n     'properties': {'earliest': {'_format': 'date-time', 'type': 'string'},\n                    'latest': {'_format': 'date-time', 'type': 'string'}},\n     'required': ['earliest', 'latest'],\n     'type': 'object'}\n\nOn instance['pickup_time']:\n    {'earliest': '2024-12-10T08:00:00',\n     \"Invalid date-time format, should be 'date-time' as per the schema\": 'latest',\n     \"Invalid property name, should be 'latest'\": '2024-12-10T17:00:00Z'}",
+      "data": {
+        "carrier": "UPS",
+        "carrier_pickup_number": "1234567890",
+        "id": "shipcloud-pickup-123",
+        "pickup_address": {
+          "care_of": "John Doe",
+          "city": "New York",
+          "company": "ABC Inc.",
+          "country": "usa",
+          "Invalid country code, should be uppercase ISO 3166-1 alpha-2 code": "first_name",
+          "Invalid property name, should be 'first_name'": "John",
+          "last_name": "Doe",
+          "phone": "+1 123 456 7890",
+          "state": "NY",
+          "street": "Main Street",
+          "street_no": "123",
+          "zip_code": "10001"
+        },
+        "pickup_time": {
+          "earliest": "2024-12-10T08:00:00",
+          "Invalid date-time format, should be 'date-time' as per the schema": "latest",
+          "Invalid property name, should be 'latest'": "2024-12-10T17:00:00Z"
+        },
+        "shipments": [
+          {
+            "id": "shipcloud-shipment-1"
+          },
+          {
+            "id": "shipcloud-shipment-2",
+            "extra_property": "extra_value"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "carrier": "UPS",
+        "carrier_pickup_number": "1Z1234567890123456",
+        "id": "PC123456789",
+        "pickup_address": {
+          "care_of": "John Doe",
+          "city": "New York",
+          "company": "ABC Inc.",
+          "country": "US",
+          "first_name": "John",
+          "last_name": "Doe",
+          "phone": "+1 123 456 7890",
+          "state": "NY",
+          "street": "Main Street",
+          "street_no": "123",
+          "zip_code": "10001"
+        },
+        "pickup_time": {
+          "earliest": "2023-12-15T08:00:00Z",
+          "latest": "2023-12-15T17:00:00Z"
+        },
+        "shipments": [
+          {
+            "id": "SH123456789"
+          },
+          {
+            "id": "SH987654321"
+          }
+        ]
+      }
+    }
+  ]
+}

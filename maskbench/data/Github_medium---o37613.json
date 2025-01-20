@@ -1,0 +1,204 @@
+{
+  "description": "sample Github_medium/o37613.json",
+  "meta": {
+    "full_size": 1948,
+    "stripped_size": 1928,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "anyOf",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://www.yacpdb.org/schemas/yacpdb-person.schema.json",
+    "type": "object",
+    "properties": {
+      "familyname": {
+        "$ref": "#/definitions/name_type"
+      },
+      "givennames": {
+        "$ref": "#/definitions/name_type"
+      },
+      "foreignids": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/foreignid_type"
+        },
+        "minItems": 1
+      },
+      "comments": {
+        "$ref": "#/definitions/text_list"
+      }
+    },
+    "required": [
+      "familyname",
+      "givennames"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+      "text": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "string",
+            "minLength": 1
+          }
+        ]
+      },
+      "text_list": {
+        "type": "array",
+        "elements": {
+          "$ref": "#/definitions/text"
+        },
+        "minItems": 1,
+        "_uniqueItems": true
+      },
+      "name_type": {
+        "type": "string",
+        "pattern": "^[^,\"]+$",
+        "maxLength": 255
+      },
+      "ISO31661alpha3": {
+        "type": "string",
+        "pattern": "^(ABW|AFG|AGO|AIA|ALB|AND|ANT|ARE|ARG|ARM|ASM|ATA|ATF|ATG|AUS|AUT|AZE|BDI|BEL|BEN|BFA|BGD|BGR|BHR|BHS|BIH|BLR|BLZ|BMU|BOL|BRA|BRB|BRN|BTN|BVT|BWA|CAF|CAN|CCK|CHE|CHL|CHN|CIV|CMR|COD|COG|COK|COL|COM|CPV|CRI|CUB|CXR|CYM|CYP|CZE|DEU|DJI|DMA|DNK|DOM|DZA|ECU|EGY|ERI|ESH|ESP|EST|ETH|FIN|FJI|FLK|FRA|FRO|FSM|GAB|GBR|GEO|GGY|GHA|GIB|GIN|GLP|GMB|GNB|GNQ|GRC|GRD|GRL|GTM|GUF|GUM|GUY|HKG|HMD|HND|HRV|HTI|HUN|IDN|IMN|IND|IOT|IRL|IRN|IRQ|ISL|ISR|ITA|JAM|JEY|JOR|JPN|KAZ|KEN|KGZ|KHM|KIR|KNA|KOR|KWT|LAO|LBN|LBR|LBY|LCA|LIE|LKA|LSO|LTU|LUX|LVA|MAC|MAR|MCO|MDA|MDG|MDV|MEX|MHL|MKD|MLI|MLT|MMR|MNE|MNG|MNP|MOZ|MRT|MSR|MTQ|MUS|MWI|MYS|MYT|NAM|NCL|NER|NFK|NGA|NIC|NIU|NLD|NOR|NPL|NRU|NZL|OMN|PAK|PAN|PCN|PER|PHL|PLW|PNG|POL|PRI|PRK|PRT|PRY|PSE|PYF|QAT|REU|ROU|RUS|RWA|SAU|SDN|SEN|SGP|SGS|SHN|SJM|SLB|SLE|SLV|SMR|SOM|SPM|SRB|STP|SUR|SVK|SVN|SWE|SWZ|SYC|SYR|TCA|TCD|TGO|THA|TJK|TKL|TKM|TLS|TON|TTO|TUN|TUR|TUV|TWN|TZA|UGA|UKR|UMI|URY|USA|UZB|VAT|VCT|VEN|VGB|VIR|VNM|VUT|WLF|WSM|YEM|ZAF|ZMB|ZWE)$",
+        "maxLength": 255
+      },
+      "foreignid_type": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "pattern": "^database\\.wfcc\\.ch$"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "domain",
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "familyname": "Doe",
+        "givennames": "John",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 123
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Doe, John\" does not match \"^[^,\"]+$\"",
+      "python_error": "'Doe, John' does not match '^[^,\"]+$'\n\nFailed validating 'pattern' in schema['properties']['familyname']:\n    {'type': 'string', 'pattern': '^[^,\"]+$', 'maxLength': 255}\n\nOn instance['familyname']:\n    'Doe, John'",
+      "data": {
+        "familyname": "Doe, John",
+        "givennames": "John",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 123
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['foreignids']:\n    {'type': 'array',\n     'items': {'$ref': '#/definitions/foreignid_type'},\n     'minItems': 1}\n\nOn instance['foreignids']:\n    []",
+      "data": {
+        "familyname": "Doe",
+        "givennames": "John",
+        "foreignids": [],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['foreignids']:\n    {'type': 'array',\n     'items': {'$ref': '#/definitions/foreignid_type'},\n     'minItems': 1}\n\nOn instance['foreignids']:\n    []",
+      "data": {
+        "familyname": "Doe",
+        "givennames": "John",
+        "foreignids": [],
+        "comments": [
+          "This is a comment",
+          "This is another comment"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"Doe, Jane\" does not match \"^[^,\"]+$\"",
+      "python_error": "Additional properties are not allowed ('extra_field' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-07/schema',\n     '$id': 'https://www.yacpdb.org/schemas/yacpdb-person.schema.json',\n     'type': 'object',\n     'properties': {'familyname': {'$ref': '#/definitions/name_type'},\n                    'givennames': {'$ref': '#/definitions/name_type'},\n                    'foreignids': {'type': 'array',\n                                   'items': {'$ref': '#/definitions/foreignid_type'},\n                                   'minItems': 1},\n                    'comments': {'$ref': '#/definitions/text_list'}},\n     'required': ['familyname', 'givennames'],\n     'additionalProperties': False,\n     'definitions': {'text': {'anyOf': [{'type': 'number'},\n                                        {'type': 'string',\n                                         'minLength': 1}]},\n                     'text_list': {'type': 'array',\n                                  .. (2314 more)",
+      "data": {
+        "familyname": "Doe, Jane",
+        "givennames": "John",
+        "foreignids": [
+          {
+            "domain": "database.wfcc.ch",
+            "id": 123
+          }
+        ],
+        "comments": [
+          "This is a comment",
+          "This is another comment",
+          "This is another comment"
+        ],
+        "extra_field": "extra_value"
+      }
+    }
+  ]
+}

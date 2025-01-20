@@ -1,0 +1,206 @@
+{
+  "description": "sample Github_medium/o38445.json",
+  "meta": {
+    "full_size": 1883,
+    "stripped_size": 833,
+    "features": [
+      "enum",
+      "format",
+      "format:uri",
+      "format:uri-reference",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://readium.org/webpub-manifest/schema/extensions/epub/properties.schema.json",
+    "title": "EPUB Extension - Link Properties",
+    "type": "object",
+    "properties": {
+      "contains": {
+        "description": "Identifies content contained in the linked resource, that cannot be strictly identified using a media type.",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "mathml",
+            "onix",
+            "remote-resources",
+            "js",
+            "svg",
+            "xmp"
+          ]
+        },
+        "_uniqueItems": true
+      },
+      "layout": {
+        "description": "Hints how the layout of the resource should be presented",
+        "type": "string",
+        "enum": [
+          "fixed",
+          "reflowable"
+        ]
+      },
+      "media-overlay": {
+        "description": "Location of a media-overlay for the resource referenced in the Link Object",
+        "type": "string",
+        "format": "uri-reference"
+      },
+      "overflow": {
+        "description": "Suggested method for handling overflow while displaying the linked resource",
+        "type": "string",
+        "enum": [
+          "auto",
+          "paginated",
+          "scrolled",
+          "scrolled-continuous"
+        ]
+      },
+      "spread": {
+        "description": "Indicates the condition to be met for the linked resource to be rendered within a synthetic spread",
+        "type": "string",
+        "enum": [
+          "auto",
+          "both",
+          "none",
+          "landscape"
+        ]
+      },
+      "encrypted": {
+        "description": "Indicates that a resource is encrypted/obfuscated and provides relevant information for decryption",
+        "type": "object",
+        "properties": {
+          "algorithm": {
+            "description": "Identifies the algorithm used to encrypt the resource",
+            "type": "string",
+            "format": "uri"
+          },
+          "compression": {
+            "description": "Compression method used on the resource",
+            "type": "string"
+          },
+          "original-length": {
+            "description": "Original length of the resource in bytes before compression and/or encryption",
+            "type": "integer"
+          },
+          "profile": {
+            "description": "Identifies the encryption profile used to encrypt the resource",
+            "type": "string",
+            "format": "uri"
+          },
+          "scheme": {
+            "description": "Identifies the encryption scheme used to encrypt the resource",
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "algorithm"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "contains": [
+          "mathml",
+          "js"
+        ],
+        "layout": "fixed",
+        "media-overlay": "https://example.com/media-overlay.json",
+        "overflow": "scrolled",
+        "spread": "both",
+        "encrypted": {
+          "algorithm": "https://example.com/encryption-algorithm",
+          "compression": "gzip",
+          "original-length": 1024,
+          "profile": "https://example.com/encryption-profile",
+          "scheme": "https://example.com/encryption-scheme"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "contains": [
+          "mathml",
+          "svg"
+        ],
+        "layout": "fixed",
+        "media-overlay": "https://example.com/media-overlay.json",
+        "overflow": "paginated",
+        "spread": "both",
+        "encrypted": {
+          "algorithm": "https://www.w3.org/2001/04/xmlenc#aes256-cbc",
+          "compression": "gzip",
+          "original-length": 1024,
+          "profile": "https://readium.org/epub-cfi/profile-1.1",
+          "scheme": "https://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\" invalid_uri\" is not a \"uri-reference\"",
+      "python_error": "' invalid_uri' is not a 'uri-reference'\n\nFailed validating 'format' in schema['properties']['media-overlay']:\n    {'description': 'Location of a media-overlay for the resource '\n                    'referenced in the Link Object',\n     'type': 'string',\n     'format': 'uri-reference'}\n\nOn instance['media-overlay']:\n    ' invalid_uri'",
+      "data": {
+        "contains": [
+          "mathml",
+          "svg"
+        ],
+        "layout": "fixed",
+        "media-overlay": " invalid_uri",
+        "overflow": "paginated",
+        "spread": "both",
+        "encrypted": {
+          "algorithm": " invalid_uri",
+          "compression": "gzip",
+          "original-length": 1024,
+          "profile": "https://readium.org/epub-cfi/profile-1.1",
+          "scheme": " invalid_uri"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid\" is not one of [\"mathml\",\"onix\",\"remote-resources\",\"js\",\"svg\",\"xmp\"]",
+      "python_error": "'invalid' is not one of ['auto', 'both', 'none', 'landscape']\n\nFailed validating 'enum' in schema['properties']['spread']:\n    {'description': 'Indicates the condition to be met for the linked '\n                    'resource to be rendered within a synthetic spread',\n     'type': 'string',\n     'enum': ['auto', 'both', 'none', 'landscape']}\n\nOn instance['spread']:\n    'invalid'",
+      "data": {
+        "contains": [
+          "mathml",
+          "svg",
+          "svg",
+          "invalid"
+        ],
+        "layout": "invalid",
+        "media-overlay": "invalid",
+        "overflow": "invalid",
+        "spread": "invalid",
+        "encrypted": {
+          "algorithm": "invalid",
+          "compression": "gzip",
+          "original-length": -1024,
+          "profile": "https://readium.org/epub-cfi/profile-1.1",
+          "scheme": "https://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"
+        }
+      }
+    }
+  ]
+}

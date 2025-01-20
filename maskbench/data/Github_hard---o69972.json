@@ -1,0 +1,412 @@
+{
+  "description": "sample Github_hard/o69972.json",
+  "meta": {
+    "full_size": 4026,
+    "stripped_size": 904,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "format",
+      "format:email",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Location",
+    "description": "JSON schema for an location",
+    "additionalProperties": false,
+    "required": [
+      "$schema",
+      "pid",
+      "code",
+      "name",
+      "library",
+      "allow_request"
+    ],
+    "propertiesOrder": [
+      "name",
+      "code",
+      "is_online",
+      "is_pickup",
+      "pickup_name",
+      "allow_request",
+      "send_notification",
+      "notification_email",
+      "restrict_pickup_to"
+    ],
+    "properties": {
+      "$schema": {
+        "title": "Schema",
+        "description": "Schema to validate organisation records against.",
+        "type": "string",
+        "minLength": 9,
+        "default": "https://ils.rero.ch/schemas/locations/location-v0.0.1.json"
+      },
+      "pid": {
+        "title": "Location ID",
+        "type": "string"
+      },
+      "code": {
+        "title": "Code",
+        "description": "Code of the location.",
+        "type": "string",
+        "form": {
+          "validation": {
+            "validators": {
+              "valueAlreadyExists": {}
+            },
+            "messages": {
+              "alreadyTakenMessage": "The code is already taken."
+            }
+          }
+        }
+      },
+      "name": {
+        "title": "Name",
+        "description": "Name of the location.",
+        "type": "string",
+        "minLength": 1,
+        "form": {
+          "focus": true
+        }
+      },
+      "is_pickup": {
+        "title": "Is pickup location",
+        "type": "boolean",
+        "default": false,
+        "description": "Qualify this location as a pickup location.",
+        "form": {
+          "validation": {
+            "validators": {
+              "valueAlreadyExists": {
+                "limitToValues": [
+                  true
+                ],
+                "filter": "'library.pid:' + model.library.pid"
+              }
+            },
+            "messages": {
+              "alreadyTakenMessage": "There is already one pickup location in this library."
+            }
+          }
+        }
+      },
+      "is_online": {
+        "title": "Is online location",
+        "type": "boolean",
+        "default": false,
+        "description": "Qualify this location as an online location.",
+        "form": {
+          "validation": {
+            "validators": {
+              "valueAlreadyExists": {
+                "limitToValues": [
+                  true
+                ],
+                "filter": "'library.pid:' + model.library.pid"
+              }
+            },
+            "messages": {
+              "alreadyTakenMessage": "There is already one online location in this library."
+            }
+          }
+        }
+      },
+      "pickup_name": {
+        "title": "Pickup location name",
+        "type": "string",
+        "description": "Displayed pickup location name, if different from the location name.",
+        "form": {
+          "hideExpression": "model.is_pickup === false",
+          "expressionProperties": {
+            "templateOptions.required": "model.is_pickup === true"
+          },
+          "validation": {
+            "validators": {
+              "valueAlreadyExists": {
+                "filter": "'library.pid:' + model.library.pid"
+              }
+            },
+            "messages": {
+              "alreadyTakenMessage": "The pickup location name is already taken."
+            }
+          }
+        }
+      },
+      "library": {
+        "title": "Library",
+        "type": "object",
+        "properties": {
+          "$ref": {
+            "title": "Library URI",
+            "type": "string",
+            "pattern": "^https://ils.rero.ch/api/libraries/.*?$"
+          }
+        }
+      },
+      "allow_request": {
+        "title": "Allow request",
+        "type": "boolean",
+        "description": "If enabled, it allows requests for items linked to this location.",
+        "default": true
+      },
+      "send_notification": {
+        "title": "Send notification",
+        "description": "Send a email notification when an item of the location has been requested.",
+        "type": "boolean",
+        "default": false,
+        "form": {
+          "hideExpression": "model.allow_request === false",
+          "expressionProperties": {
+            "templateOptions.required": "model.allow_request === true"
+          }
+        }
+      },
+      "notification_email": {
+        "title": "Notification email",
+        "description": "Specify a generic email address used for notification.",
+        "type": "string",
+        "format": "email",
+        "pattern": "^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,})+$",
+        "minLength": 6,
+        "form": {
+          "hideExpression": "model.allow_request === false || model.send_notification === false",
+          "expressionProperties": {
+            "templateOptions.required": "model.send_notification === true && model.allow_request === true"
+          },
+          "templateOptions": {
+            "addonLeft": {
+              "class": "fa fa-at"
+            }
+          },
+          "validation": {
+            "messages": {
+              "patternMessage": "Email should have at least one <code>@</code> and one <code>.</code>."
+            }
+          }
+        }
+      },
+      "restrict_pickup_to": {
+        "title": "Restrict pickup to",
+        "description": "Select locations where items linked to the current location could be requested.",
+        "type": "array",
+        "minItems": 1,
+        "_uniqueItems": true,
+        "items": {
+          "type": "object",
+          "title": "Location",
+          "properties": {
+            "$ref": {
+              "title": "Location URI",
+              "type": "string",
+              "pattern": "^https://ils.rero.ch/api/locations/.*?$",
+              "form": {
+                "remoteOptions": {
+                  "type": "locations",
+                  "query": "is_pickup:true",
+                  "labelField": "pickup_name"
+                }
+              }
+            }
+          }
+        },
+        "form": {
+          "wrappers": [
+            "toggle-switch"
+          ],
+          "templateOptions": {
+            "label": "",
+            "toggle-switch": {
+              "label": "Restrict pickup to",
+              "description": "If enabled, restrict pickup to specific pickup locations."
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/locations/location-v0.0.1.json",
+        "pid": "loc-1",
+        "code": "LOC-1",
+        "name": "Main Library",
+        "library": {
+          "$ref": "https://ils.rero.ch/api/libraries/lib-1"
+        },
+        "allow_request": true,
+        "send_notification": true,
+        "notification_email": "library@example.com",
+        "is_online": false,
+        "is_pickup": true,
+        "pickup_name": "Main Pickup Location",
+        "restrict_pickup_to": [
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-2"
+          },
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-3"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['restrict_pickup_to']:\n    {'title': 'Restrict pickup to',\n     'description': 'Select locations where items linked to the current '\n                    'location could be requested.',\n     'type': 'array',\n     'minItems': 1,\n     '_uniqueItems': True,\n     'items': {'type': 'object',\n               'title': 'Location',\n               'properties': {'$ref': {'title': 'Location URI',\n                                       'type': 'string',\n                                       'pattern': '^https://ils.rero.ch/api/locations/.*?$',\n                                       'form': {'remoteOptions': {'type': 'locations',\n                                                                  'query': 'is_pickup:true',\n                                                                  'labelField': 'pickup_name'}}}}},\n     'form': {'wrappers': ['toggle-switch'],\n              'templateOptions': {'label': '',\n                                  'tog.. (772 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/locations/location-v0.0.1.json",
+        "pid": "loc-1",
+        "code": "LOC-1",
+        "name": "Main Library",
+        "library": {
+          "$ref": "https://ils.rero.ch/api/libraries/lib-1"
+        },
+        "allow_request": true,
+        "send_notification": true,
+        "notification_email": "library@example.com",
+        "is_online": false,
+        "is_pickup": true,
+        "pickup_name": "Main Pickup Location",
+        "restrict_pickup_to": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"libraryexample.com\" is not a \"email\"",
+      "python_error": "'libraryexample.com' is not a 'email'\n\nFailed validating 'format' in schema['properties']['notification_email']:\n    {'title': 'Notification email',\n     'description': 'Specify a generic email address used for '\n                    'notification.',\n     'type': 'string',\n     'format': 'email',\n     'pattern': '^\\\\w+([\\\\.-]?\\\\w+)*@\\\\w+([\\\\.-]?\\\\w+)*(\\\\.\\\\w{2,})+$',\n     'minLength': 6,\n     'form': {'hideExpression': 'model.allow_request === false || '\n                                'model.send_notification === false',\n              'expressionProperties': {'templateOptions.required': 'model.send_notification '\n                                                                   '=== '\n                                                                   'true '\n                                                                   '&& '\n                                                                   'model.allow_request '\n                                                                   '=== '\n                 .. (641 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/locations/location-v0.0.1.json",
+        "pid": "loc-1",
+        "code": "LOC-1",
+        "name": "Main Library",
+        "library": {
+          "$ref": "https://ils.rero.ch/api/libraries/lib-1"
+        },
+        "allow_request": true,
+        "send_notification": true,
+        "notification_email": "libraryexample.com",
+        "is_online": false,
+        "is_pickup": true,
+        "pickup_name": "Main Pickup Location",
+        "restrict_pickup_to": [
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-2"
+          },
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-3"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"library#example.com\" is not a \"email\"",
+      "python_error": "'library#example.com' is not a 'email'\n\nFailed validating 'format' in schema['properties']['notification_email']:\n    {'title': 'Notification email',\n     'description': 'Specify a generic email address used for '\n                    'notification.',\n     'type': 'string',\n     'format': 'email',\n     'pattern': '^\\\\w+([\\\\.-]?\\\\w+)*@\\\\w+([\\\\.-]?\\\\w+)*(\\\\.\\\\w{2,})+$',\n     'minLength': 6,\n     'form': {'hideExpression': 'model.allow_request === false || '\n                                'model.send_notification === false',\n              'expressionProperties': {'templateOptions.required': 'model.send_notification '\n                                                                   '=== '\n                                                                   'true '\n                                                                   '&& '\n                                                                   'model.allow_request '\n                                                                   '=== '\n                .. (643 more)",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/locations/location-v0.0.1.json",
+        "pid": "loc-1",
+        "code": "LOC-1",
+        "name": "Main Library",
+        "library": {
+          "$ref": "https://ils.rero.ch/api/libraries/lib-1"
+        },
+        "allow_request": true,
+        "send_notification": true,
+        "notification_email": "library#example.com",
+        "is_online": false,
+        "is_pickup": true,
+        "pickup_name": "Main Pickup Location",
+        "restrict_pickup_to": [
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-2"
+          },
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-3"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'title': 'Name',\n     'description': 'Name of the location.',\n     'type': 'string',\n     'minLength': 1,\n     'form': {'focus': True}}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/locations/location-v0.0.1.json",
+        "pid": "loc-1",
+        "code": "LOC-1",
+        "name": "",
+        "library": {
+          "$ref": "https://ils.rero.ch/api/libraries/lib-1"
+        },
+        "allow_request": true,
+        "send_notification": true,
+        "notification_email": "library@example.com",
+        "is_online": false,
+        "is_pickup": true,
+        "pickup_name": "Main Pickup Location",
+        "restrict_pickup_to": [
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-2"
+          },
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-3"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'title': 'Name',\n     'description': 'Name of the location.',\n     'type': 'string',\n     'minLength': 1,\n     'form': {'focus': True}}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "$schema": "https://ils.rero.ch/schemas/locations/location-v0.0.1.json",
+        "pid": "loc-1",
+        "code": "LOC-1",
+        "name": "",
+        "library": {
+          "$ref": "https://ils.rero.ch/api/libraries/lib-1"
+        },
+        "allow_request": true,
+        "send_notification": true,
+        "notification_email": "library@example.com",
+        "is_online": false,
+        "is_pickup": true,
+        "pickup_name": "",
+        "restrict_pickup_to": [
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-2"
+          },
+          {
+            "$ref": "https://ils.rero.ch/api/locations/loc-2"
+          }
+        ]
+      }
+    }
+  ]
+}

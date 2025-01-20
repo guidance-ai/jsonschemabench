@@ -1,0 +1,274 @@
+{
+  "description": "sample Github_easy/o65381.json",
+  "meta": {
+    "full_size": 694,
+    "stripped_size": 403,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "@minmaxNumber",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxItems",
+      "minItems",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Single athlete's performance in a single track event",
+    "description": "A single athlete's performance in a single track event.",
+    "type": "object",
+    "properties": {
+      "event": {
+        "description": "Standard event type short name",
+        "enum": [
+          "60",
+          "60H",
+          "100",
+          "110H",
+          "200",
+          "200H",
+          "400",
+          "400H",
+          "800",
+          "1500",
+          "mile",
+          "3000",
+          "3000SC",
+          "5000",
+          "10000"
+        ]
+      },
+      "performance": {
+        "description": "Time taken to complete event",
+        "type": [
+          "number",
+          "string"
+        ],
+        "minimum": 0,
+        "minLength": 1
+      },
+      "laps": {
+        "description": "Ordered list of lap times, or 'null' if missing",
+        "type": "array",
+        "items": {
+          "type": [
+            "null",
+            "number",
+            "string"
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 25
+      }
+    },
+    "required": [
+      "event",
+      "performance"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "event": "100",
+        "performance": 10.5,
+        "laps": [
+          2.1,
+          3.2,
+          5.2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    ''",
+      "data": {
+        "event": "100",
+        "performance": "",
+        "laps": [
+          2.1,
+          3.2,
+          5.2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['laps']:\n    {'description': \"Ordered list of lap times, or 'null' if missing\",\n     'type': 'array',\n     'items': {'type': ['null', 'number', 'string']},\n     'minItems': 1,\n     'maxItems': 25}\n\nOn instance['laps']:\n    []",
+      "data": {
+        "event": "100",
+        "performance": 10.5,
+        "laps": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"number\", \"string\"",
+      "python_error": "True is not of type 'number', 'string'\n\nFailed validating 'type' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    True",
+      "data": {
+        "event": "100",
+        "performance": true,
+        "laps": [
+          2.1,
+          3.2,
+          5.2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1.5 is less than the minimum of 0",
+      "python_error": "-1.5 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    -1.5",
+      "data": {
+        "event": "100",
+        "performance": -1.5,
+        "laps": [
+          2.1,
+          3.2,
+          5.2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"100m\" is not one of [\"60\",\"60H\",\"100\",\"110H\",\"200\",\"200H\",\"400\",\"400H\",\"800\",\"1500\",\"mile\",\"3000\",\"3000SC\",\"5000\",\"10000\"]",
+      "python_error": "'100m' is not one of ['60', '60H', '100', '110H', '200', '200H', '400', '400H', '800', '1500', 'mile', '3000', '3000SC', '5000', '10000']\n\nFailed validating 'enum' in schema['properties']['event']:\n    {'description': 'Standard event type short name',\n     'enum': ['60',\n              '60H',\n              '100',\n              '110H',\n              '200',\n              '200H',\n              '400',\n              '400H',\n              '800',\n              '1500',\n              'mile',\n              '3000',\n              '3000SC',\n              '5000',\n              '10000']}\n\nOn instance['event']:\n    '100m'",
+      "data": {
+        "event": "100m",
+        "performance": 10.5,
+        "laps": [
+          2.1,
+          3.2,
+          5.2
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    -1",
+      "data": {
+        "event": "100",
+        "performance": -1,
+        "laps": [
+          2.1,
+          3.2,
+          5.2
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "event": "100",
+        "performance": 10.23,
+        "laps": [
+          2.15,
+          2.11,
+          2.1,
+          3.87
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-0.01 is less than the minimum of 0",
+      "python_error": "-0.01 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    -0.01",
+      "data": {
+        "event": "100",
+        "performance": -0.01,
+        "laps": [
+          2.15,
+          2.11,
+          2.1,
+          3.87
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"number\", \"string\"",
+      "python_error": "True is not of type 'number', 'string'\n\nFailed validating 'type' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    True",
+      "data": {
+        "event": "100",
+        "performance": true,
+        "laps": [
+          2.15,
+          2.11,
+          2.1,
+          3.87
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['laps']:\n    {'description': \"Ordered list of lap times, or 'null' if missing\",\n     'type': 'array',\n     'items': {'type': ['null', 'number', 'string']},\n     'minItems': 1,\n     'maxItems': 25}\n\nOn instance['laps']:\n    []",
+      "data": {
+        "event": "100",
+        "performance": 10.23,
+        "laps": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    ''",
+      "data": {
+        "event": "100",
+        "performance": "",
+        "laps": [
+          2.15,
+          2.11,
+          2.1,
+          3.87
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['performance']:\n    {'description': 'Time taken to complete event',\n     'type': ['number', 'string'],\n     'minimum': 0,\n     'minLength': 1}\n\nOn instance['performance']:\n    -1",
+      "data": {
+        "event": "100",
+        "performance": -1,
+        "laps": [
+          2.15,
+          2.11,
+          2.1,
+          3.87
+        ]
+      }
+    }
+  ]
+}

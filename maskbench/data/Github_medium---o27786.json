@@ -1,0 +1,524 @@
+{
+  "description": "sample Github_medium/o27786.json",
+  "meta": {
+    "full_size": 1166,
+    "stripped_size": 1059,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "anyOf",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "VRT to CVSS v3 Mapping",
+    "description": "Mapping from the Vulnerability Rating Taxonomy to CVSS v3",
+    "definitions": {
+      "MappingMetadata": {
+        "type": "object",
+        "properties": {
+          "default": {
+            "$ref": "#/definitions/CVSSv3"
+          }
+        },
+        "required": [
+          "default"
+        ]
+      },
+      "VRTid": {
+        "type": "string",
+        "pattern": "^[a-z_]*$"
+      },
+      "CVSSv3": {
+        "type": "string",
+        "pattern": "^AV:[NALP]/AC:[LH]/PR:[NLH]/UI:[NR]/S:[UC]/C:[NLH]/I:[NLH]/A:[NLH]$"
+      },
+      "Mapping": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/VRTid"
+          },
+          "cvss_v3": {
+            "$ref": "#/definitions/CVSSv3"
+          }
+        },
+        "required": [
+          "id",
+          "cvss_v3"
+        ],
+        "additionalProperties": false
+      },
+      "MappingParent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/VRTid"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/MappingParent"
+                },
+                {
+                  "$ref": "#/definitions/Mapping"
+                }
+              ]
+            }
+          },
+          "cvss_v3": {
+            "$ref": "#/definitions/CVSSv3"
+          }
+        },
+        "required": [
+          "id",
+          "children"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "type": "object",
+    "required": [
+      "metadata",
+      "content"
+    ],
+    "properties": {
+      "metadata": {
+        "$ref": "#/definitions/MappingMetadata"
+      },
+      "content": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/MappingParent"
+            },
+            {
+              "$ref": "#/definitions/Mapping"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "vulnerability_remote",
+                "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              {
+                "id": "vulnerability_local",
+                "children": [
+                  {
+                    "id": "vulnerability_local_privilege_escalation",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "weakness",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"vulnerability_remote\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local\",\"children\":[{\"id\":\"vulnerability_local_privilege_escalation\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local_denial_of_service\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\"},{\"id\":\"vulnerability_local_denial_of_service_2\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\",\"children\":[]}]}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'weakness_2', 'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L', 'children': []} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][2]:\n    {'id': 'weakness_2',\n     'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L',\n     'children': []}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "vulnerability_remote",
+                "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              {
+                "id": "vulnerability_local",
+                "children": [
+                  {
+                    "id": "vulnerability_local_privilege_escalation",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service_2",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "weakness",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          },
+          {
+            "id": "weakness_2",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "children": []
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability1\",\"children\":[{\"id\":\"vulnerability_remote\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local\",\"children\":[{\"id\":\"vulnerability_local_privilege_escalation\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local_denial_of_service\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\"}]}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'weakness1', 'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['content']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['content'][1]:\n    {'id': 'weakness1', 'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L'}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "content": [
+          {
+            "id": "vulnerability1",
+            "children": [
+              {
+                "id": "vulnerability_remote",
+                "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              {
+                "id": "vulnerability_local",
+                "children": [
+                  {
+                    "id": "vulnerability_local_privilege_escalation",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "weakness1",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"vulnerability_remote\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local\",\"children\":[{\"id\":\"vulnerability_local_privilege_escalation\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local_denial_of_service\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\",\"extra\":\"property\"}]}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vulnerability_local_denial_of_service', 'cvss_v3': 'AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L', 'extra': 'property'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][1]:\n    {'id': 'vulnerability_local_denial_of_service',\n     'cvss_v3': 'AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L',\n     'extra': 'property'}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "vulnerability_remote",
+                "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              {
+                "id": "vulnerability_local",
+                "children": [
+                  {
+                    "id": "vulnerability_local_privilege_escalation",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+                    "extra": "property"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "weakness",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"vulnerability_remote\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/Extra\"},{\"id\":\"vulnerability_local\",\"children\":[{\"id\":\"vulnerability_local_privilege_escalation\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local_denial_of_service\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\"}]}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vulnerability_remote', 'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/Extra'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][0]:\n    {'id': 'vulnerability_remote',\n     'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/Extra'}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "vulnerability_remote",
+                "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/Extra"
+              },
+              {
+                "id": "vulnerability_local",
+                "children": [
+                  {
+                    "id": "vulnerability_local_privilege_escalation",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "weakness",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"vulnerability_remote\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local\",\"children\":[{\"id\":\"vulnerability_local_privilege_escalation\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local_denial_of_service\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\"}]},{\"id\":\"vulnerability_local_denial_of_service_2\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\"}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vulnerability_local_denial_of_service_2', 'cvss_v3': 'AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][2]:\n    {'id': 'vulnerability_local_denial_of_service_2',\n     'cvss_v3': 'AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L'}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "vulnerability_remote",
+                "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              {
+                "id": "vulnerability_local",
+                "children": [
+                  {
+                    "id": "vulnerability_local_privilege_escalation",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
+                  }
+                ]
+              },
+              {
+                "id": "vulnerability_local_denial_of_service_2",
+                "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
+              }
+            ]
+          },
+          {
+            "id": "weakness",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"vulnerability\",\"children\":[{\"id\":\"vulnerability_remote\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local\",\"children\":[{\"id\":\"vulnerability_local_privilege_escalation\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"vulnerability_local_denial_of_service\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L\",\"extra_property\":\"extra_value\"}]}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'vulnerability_local_denial_of_service', 'cvss_v3': 'AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L', 'extra_property': 'extra_value'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][1]:\n    {'id': 'vulnerability_local_denial_of_service',\n     'cvss_v3': 'AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L',\n     'extra_property': 'extra_value'}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        "content": [
+          {
+            "id": "vulnerability",
+            "children": [
+              {
+                "id": "vulnerability_remote",
+                "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+              },
+              {
+                "id": "vulnerability_local",
+                "children": [
+                  {
+                    "id": "vulnerability_local_privilege_escalation",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "vulnerability_local_denial_of_service",
+                    "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+                    "extra_property": "extra_value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "weakness",
+            "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
+        },
+        "content": [
+          {
+            "id": "network",
+            "children": [
+              {
+                "id": "network_remote",
+                "children": [
+                  {
+                    "id": "network_remote_unauthenticated",
+                    "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "network_remote_authenticated",
+                    "cvss_v3": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  }
+                ]
+              },
+              {
+                "id": "network_local",
+                "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+              }
+            ]
+          },
+          {
+            "id": "local",
+            "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"network\",\"children\":[{\"id\":\"network_remote\",\"children\":[{\"id\":\"network_remote_unauthenticated\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H invalid\"},{\"id\":\"network_remote_authenticated\",\"cvss_v3\":\"AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"}]},{\"id\":\"network_local\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'network_remote_unauthenticated', 'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H invalid'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][0]:\n    {'id': 'network_remote_unauthenticated',\n     'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H invalid'}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
+        },
+        "content": [
+          {
+            "id": "network",
+            "children": [
+              {
+                "id": "network_remote",
+                "children": [
+                  {
+                    "id": "network_remote_unauthenticated",
+                    "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H invalid"
+                  },
+                  {
+                    "id": "network_remote_authenticated",
+                    "cvss_v3": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  }
+                ]
+              },
+              {
+                "id": "network_local",
+                "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+              }
+            ]
+          },
+          {
+            "id": "local",
+            "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"network\",\"children\":[{\"id\":\"network_remote\",\"children\":[{\"id\":\"network_remote_unauthenticated\",\"cvss_v3\":\"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\"},{\"id\":\"network_remote_authenticated\",\"cvss_v3\":\"AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"}],\"additionalProperty\":\"Invalid\"},{\"id\":\"network_local\",\"cvss_v3\":\"AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H\"}]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': 'network_remote', 'children': [{'id': 'network_remote_unauthenticated', 'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H'}, {'id': 'network_remote_authenticated', 'cvss_v3': 'AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H'}], 'additionalProperty': 'Invalid'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]['properties']['children']['items']:\n    {'anyOf': [{'$ref': '#/definitions/MappingParent'},\n               {'$ref': '#/definitions/Mapping'}]}\n\nOn instance['children'][0]:\n    {'id': 'network_remote',\n     'children': [{'id': 'network_remote_unauthenticated',\n                   'cvss_v3': 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H'},\n                  {'id': 'network_remote_authenticated',\n                   'cvss_v3': 'AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H'}],\n     'additionalProperty': 'Invalid'}",
+      "data": {
+        "metadata": {
+          "default": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
+        },
+        "content": [
+          {
+            "id": "network",
+            "children": [
+              {
+                "id": "network_remote",
+                "children": [
+                  {
+                    "id": "network_remote_unauthenticated",
+                    "cvss_v3": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                  },
+                  {
+                    "id": "network_remote_authenticated",
+                    "cvss_v3": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  }
+                ],
+                "additionalProperty": "Invalid"
+              },
+              {
+                "id": "network_local",
+                "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+              }
+            ]
+          },
+          {
+            "id": "local",
+            "cvss_v3": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+          }
+        ]
+      }
+    }
+  ]
+}

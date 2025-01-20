@@ -1,0 +1,275 @@
+{
+  "description": "sample Github_medium/o79851.json",
+  "meta": {
+    "full_size": 2766,
+    "stripped_size": 1088,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "rndpwd config",
+    "description": "JSON schema for rndpwd configuration",
+    "type": "object",
+    "properties": {
+      "remoteConfigProvider": {
+        "description": "Remote configuration source (if any)",
+        "type": "string",
+        "default": "",
+        "enum": [
+          "",
+          "consul",
+          "etcd"
+        ]
+      },
+      "remoteConfigEndpoint": {
+        "description": "Remote configuration URL (ip:port)",
+        "type": "string",
+        "default": ""
+      },
+      "remoteConfigPath": {
+        "description": "Remote configuration path in which to search for the configuration file (e.g. '/config/rndpwd')",
+        "type": "string",
+        "default": ""
+      },
+      "remoteConfigSecretKeyring": {
+        "description": "Path to the openpgp secret keyring used to decrypt the remote configuration data (e.g. '/etc/rndpwd/configkey.gpg'); if empty a non secure connection will be used instead",
+        "type": "string",
+        "default": ""
+      },
+      "log": {
+        "description": "Logging settings",
+        "type": "object",
+        "properties": {
+          "level": {
+            "description": "Defines the default log level",
+            "type": "string",
+            "default": "DEBUG",
+            "enum": [
+              "EMERGENCY",
+              "ALERT",
+              "CRITICAL",
+              "ERROR",
+              "WARNING",
+              "NOTICE",
+              "INFO",
+              "DEBUG"
+            ]
+          },
+          "network": {
+            "description": "(OPTIONAL) Network type used by the Syslog",
+            "type": "string",
+            "default": "",
+            "enum": [
+              "",
+              "udp",
+              "tcp"
+            ]
+          },
+          "address": {
+            "description": "(OPTIONAL) Network address of the Syslog daemon (ip:port) or just (:port)",
+            "type": "string",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "network",
+          "address"
+        ]
+      },
+      "stats": {
+        "description": "StatsD is used to collect usage metrics",
+        "type": "object",
+        "properties": {
+          "prefix": {
+            "description": "StatsD client's string prefix that will be used in every bucket name",
+            "type": "string",
+            "default": "rndpwd"
+          },
+          "network": {
+            "description": "Network type used by the StatsD client",
+            "type": "string",
+            "default": "udp",
+            "enum": [
+              "udp",
+              "tcp"
+            ]
+          },
+          "address": {
+            "description": "Network address of the StatsD daemon (ip:port) or just (:port)",
+            "type": "string",
+            "default": ":8125"
+          },
+          "flush_period": {
+            "description": "Sets how often (in milliseconds) the StatsD client's buffer is flushed. When 0 the buffer is only flushed when it is full",
+            "type": "integer",
+            "default": 100,
+            "minimum": 0,
+            "maximum": 1000
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "prefix",
+          "network",
+          "address",
+          "flush_period"
+        ]
+      },
+      "serverAddress": {
+        "description": "Internal HTTP address (ip:port) or just (:port)",
+        "type": "string",
+        "default": ":8017"
+      },
+      "charset": {
+        "description": "String containing the valid characters for a password",
+        "type": "string",
+        "default": "!#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz~"
+      },
+      "length": {
+        "description": "Length of each password (number of characters or bytes)",
+        "type": "integer",
+        "default": 32
+      },
+      "quantity": {
+        "description": "Number of passwords to return",
+        "type": "integer",
+        "default": 10
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "log",
+      "stats",
+      "serverAddress",
+      "charset",
+      "length",
+      "quantity"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "remoteConfigProvider": "consul",
+        "remoteConfigEndpoint": "localhost:8500",
+        "remoteConfigPath": "/config/rndpwd",
+        "remoteConfigSecretKeyring": "/etc/rndpwd/configkey.gpg",
+        "log": {
+          "level": "INFO",
+          "network": "udp",
+          "address": "localhost:514"
+        },
+        "stats": {
+          "prefix": "rndpwd",
+          "network": "udp",
+          "address": "localhost:8125",
+          "flush_period": 100
+        },
+        "serverAddress": ":8017",
+        "charset": "!#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz~",
+        "length": 32,
+        "quantity": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "1001 is greater than the maximum of 1000",
+      "python_error": "1001 is greater than the maximum of 1000\n\nFailed validating 'maximum' in schema['properties']['stats']['properties']['flush_period']:\n    {'description': \"Sets how often (in milliseconds) the StatsD client's \"\n                    'buffer is flushed. When 0 the buffer is only flushed '\n                    'when it is full',\n     'type': 'integer',\n     'default': 100,\n     'minimum': 0,\n     'maximum': 1000}\n\nOn instance['stats']['flush_period']:\n    1001",
+      "data": {
+        "remoteConfigProvider": "consul",
+        "remoteConfigEndpoint": "localhost:8500",
+        "remoteConfigPath": "/config/rndpwd",
+        "remoteConfigSecretKeyring": "/etc/rndpwd/configkey.gpg",
+        "log": {
+          "level": "INFO",
+          "network": "udp",
+          "address": "localhost:514"
+        },
+        "stats": {
+          "prefix": "rndpwd",
+          "network": "udp",
+          "address": "localhost:8125",
+          "flush_period": 1001
+        },
+        "serverAddress": ":8017",
+        "charset": "!#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz~",
+        "length": 32,
+        "quantity": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1500 is greater than the maximum of 1000",
+      "python_error": "1500 is greater than the maximum of 1000\n\nFailed validating 'maximum' in schema['properties']['stats']['properties']['flush_period']:\n    {'description': \"Sets how often (in milliseconds) the StatsD client's \"\n                    'buffer is flushed. When 0 the buffer is only flushed '\n                    'when it is full',\n     'type': 'integer',\n     'default': 100,\n     'minimum': 0,\n     'maximum': 1000}\n\nOn instance['stats']['flush_period']:\n    1500",
+      "data": {
+        "remoteConfigProvider": "consul",
+        "remoteConfigEndpoint": "localhost:8500",
+        "remoteConfigPath": "/config/rndpwd",
+        "remoteConfigSecretKeyring": "/etc/rndpwd/configkey.gpg",
+        "log": {
+          "level": "INFO",
+          "network": "udp",
+          "address": "localhost:514"
+        },
+        "stats": {
+          "prefix": "rndpwd",
+          "network": "udp",
+          "address": "localhost:8125",
+          "flush_period": 1500
+        },
+        "serverAddress": ":8017",
+        "charset": "!#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz~",
+        "length": 32,
+        "quantity": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['stats']['properties']['flush_period']:\n    {'description': \"Sets how often (in milliseconds) the StatsD client's \"\n                    'buffer is flushed. When 0 the buffer is only flushed '\n                    'when it is full',\n     'type': 'integer',\n     'default': 100,\n     'minimum': 0,\n     'maximum': 1000}\n\nOn instance['stats']['flush_period']:\n    -1",
+      "data": {
+        "remoteConfigProvider": "consul",
+        "remoteConfigEndpoint": "localhost:8500",
+        "remoteConfigPath": "/config/rndpwd",
+        "remoteConfigSecretKeyring": "/etc/rndpwd/configkey.gpg",
+        "log": {
+          "level": "INFO",
+          "network": "udp",
+          "address": "localhost:514"
+        },
+        "stats": {
+          "prefix": "rndpwd",
+          "network": "udp",
+          "address": "localhost:8125",
+          "flush_period": -1
+        },
+        "serverAddress": ":8017",
+        "charset": "!#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz~",
+        "length": 32,
+        "quantity": 10
+      }
+    }
+  ]
+}

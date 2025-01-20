@@ -1,0 +1,293 @@
+{
+  "description": "sample Github_medium/o9784.json",
+  "meta": {
+    "full_size": 782,
+    "stripped_size": 782,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxItems",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "deviceIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Fa-f\\d]{24}$"
+        },
+        "maxItems": 1000
+      },
+      "deviceTags": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          "additionalProperties": false
+        },
+        "maxItems": 100
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 32767
+      },
+      "filterType": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "all",
+              "whitelist",
+              "blacklist"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "none"
+            ]
+          }
+        ]
+      },
+      "pubTopics": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "subTopics": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "deviceIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba98"
+        ],
+        "deviceTags": [
+          {
+            "key": "device-type",
+            "value": "sensor"
+          },
+          {
+            "key": "location",
+            "value": "building-1"
+          }
+        ],
+        "description": "Example device filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "devices/+/temperature",
+          "devices/+/humidity"
+        ],
+        "subTopics": [
+          "devices/+/status",
+          "devices/+/alarms"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "deviceIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "deviceTags": [
+          {
+            "key": "device-type",
+            "value": "sensor"
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ],
+        "description": "Example device filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "devices/sensors/temperature",
+          "devices/sensors/humidity"
+        ],
+        "subTopics": [
+          "devices/commands",
+          "devices/config"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1234567890abcdef1234567\" does not match \"^[A-Fa-f\\d]{24}$\"",
+      "python_error": "-1 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['deviceIds']['items']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['deviceIds'][1]:\n    -1",
+      "data": {
+        "deviceIds": [
+          "1234567890abcdef1234567",
+          -1,
+          "fedcba9876543210fedcba98"
+        ],
+        "deviceTags": [
+          {
+            "key": "device-type",
+            "value": "sensor"
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ],
+        "description": "Example device filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "devices/sensors/temperature",
+          "devices/sensors/humidity"
+        ],
+        "subTopics": [
+          "devices/commands",
+          "devices/config"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('none' was unexpected)",
+      "python_error": "Additional properties are not allowed ('none' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'deviceIds': {'type': 'array',\n                                  'items': {'type': 'string',\n                                            'pattern': '^[A-Fa-f\\\\d]{24}$'},\n                                  'maxItems': 1000},\n                    'deviceTags': {'type': 'array',\n                                   'items': {'type': 'object',\n                                             'properties': {'key': {'type': 'string',\n                                                                    'pattern': '^[0-9a-zA-Z_-]{1,255}$'},\n                                                            'value': {'type': 'string',\n                                                                      'minLength': 1,\n                                                                      'maxLength': 255}},\n             .. (1562 more)",
+      "data": {
+        "deviceIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "deviceTags": [
+          {
+            "key": "device-type",
+            "value": "sensor"
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ],
+        "description": "Example device filter",
+        "filterType": "all",
+        "none": "xyz",
+        "pubTopics": [
+          "devices/sensors/temperature",
+          "devices/sensors/humidity"
+        ],
+        "subTopics": [
+          "devices/commands",
+          "devices/config"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['pubTopics']['items']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 1024}\n\nOn instance['pubTopics'][0]:\n    ''",
+      "data": {
+        "deviceIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "deviceTags": [
+          {
+            "key": "device-type",
+            "value": ""
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ],
+        "description": "Example device filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "",
+          "devices/sensors/humidity"
+        ],
+        "subTopics": [
+          "devices/commands",
+          "devices/config"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"1234567890abcdef1234567890\" does not match \"^[A-Fa-f\\d]{24}$\"",
+      "python_error": "Additional properties are not allowed ('invalidProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'deviceIds': {'type': 'array',\n                                  'items': {'type': 'string',\n                                            'pattern': '^[A-Fa-f\\\\d]{24}$'},\n                                  'maxItems': 1000},\n                    'deviceTags': {'type': 'array',\n                                   'items': {'type': 'object',\n                                             'properties': {'key': {'type': 'string',\n                                                                    'pattern': '^[0-9a-zA-Z_-]{1,255}$'},\n                                                            'value': {'type': 'string',\n                                                                      'minLength': 1,\n                                                                      'maxLength': 255}},\n  .. (1615 more)",
+      "data": {
+        "deviceIds": [
+          "1234567890abcdef1234567890",
+          "fedcba9876543210fedcba98"
+        ],
+        "deviceTags": [
+          {
+            "key": "device-type",
+            "value": "sensor"
+          },
+          {
+            "key": "location",
+            "value": "New York"
+          }
+        ],
+        "description": "Example device filter",
+        "filterType": "whitelist",
+        "pubTopics": [
+          "devices/sensors/temperature",
+          "devices/sensors/humidity"
+        ],
+        "subTopics": [
+          "devices/commands",
+          "devices/config"
+        ],
+        "invalidProperty": "Invalid"
+      }
+    }
+  ]
+}

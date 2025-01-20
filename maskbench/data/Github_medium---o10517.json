@@ -1,0 +1,570 @@
+{
+  "description": "sample Github_medium/o10517.json",
+  "meta": {
+    "full_size": 1931,
+    "stripped_size": 1788,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "definitions": {
+      "Items": {
+        "additionalProperties": false,
+        "properties": {
+          "item": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "USPrice": {
+                  "type": "number"
+                },
+                "comment": {
+                  "$ref": "#/definitions/comment"
+                },
+                "item": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "USPrice": {
+                        "type": "number"
+                      },
+                      "comment": {
+                        "$ref": "#/definitions/comment"
+                      },
+                      "partNum": {
+                        "$ref": "#/definitions/SKU"
+                      },
+                      "productName": {
+                        "type": "string"
+                      },
+                      "quantity": {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      "shipDate": {
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "productName",
+                      "quantity",
+                      "USPrice",
+                      "partNum"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "partNum": {
+                  "$ref": "#/definitions/SKU"
+                },
+                "productName": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "shipDate": {
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "productName",
+                "quantity",
+                "USPrice",
+                "partNum"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PurchaseOrderType": {
+        "additionalProperties": false,
+        "properties": {
+          "billTo": {
+            "$ref": "#/definitions/USAddress"
+          },
+          "comment": {
+            "$ref": "#/definitions/comment"
+          },
+          "items": {
+            "$ref": "#/definitions/Items"
+          },
+          "orderDate": {
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$",
+            "type": "string"
+          },
+          "shipTo": {
+            "$ref": "#/definitions/USAddress"
+          }
+        },
+        "required": [
+          "shipTo",
+          "billTo",
+          "items"
+        ],
+        "type": "object"
+      },
+      "SKU": {
+        "pattern": "\\d{3}-[A-Z]{2}",
+        "type": "string"
+      },
+      "USAddress": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "enum": [
+              "US"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "zip": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "street",
+          "city",
+          "state",
+          "zip"
+        ],
+        "type": "object"
+      },
+      "comment": {
+        "type": "string"
+      }
+    },
+    "description": "Purchase order schema for Example.com.\n     Copyright 2000 Example.com. All rights reserved.",
+    "properties": {
+      "purchaseOrder": {
+        "$ref": "#/definitions/PurchaseOrderType"
+      }
+    },
+    "required": [
+      "purchaseOrder"
+    ],
+    "title": "test/purchaseorder.xsd",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "US",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for this order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123-AB",
+                "productName": "Product A",
+                "quantity": 2,
+                "shipDate": "2022-01-01T00:00:00"
+              },
+              {
+                "USPrice": 5.99,
+                "comment": "This is a comment for the second item",
+                "partNum": "456-CD",
+                "productName": "Product B",
+                "quantity": 1,
+                "shipDate": "2022-01-15T00:00:00"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123A\" does not match \"\\d{3}-[A-Z]{2}\"",
+      "python_error": "'123A' does not match '\\\\d{3}-[A-Z]{2}'\n\nFailed validating 'pattern' in schema['properties']['purchaseOrder']['properties']['items']['properties']['item']['items']['properties']['partNum']:\n    {'pattern': '\\\\d{3}-[A-Z]{2}', 'type': 'string'}\n\nOn instance['purchaseOrder']['items']['item'][0]['partNum']:\n    '123A'",
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "US",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for this order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123A",
+                "productName": "Product A",
+                "quantity": 2,
+                "shipDate": "2022-01-01T00:00:00"
+              },
+              {
+                "USPrice": 5.99,
+                "comment": "This is a comment for the second item",
+                "partNum": "456-CD",
+                "productName": "Product B",
+                "quantity": 1,
+                "shipDate": "2022-01-15T00:00:00"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['purchaseOrder']['properties']['items']['properties']['item']['items']['properties']['quantity']:\n    {'minimum': 1, 'type': 'integer'}\n\nOn instance['purchaseOrder']['items']['item'][0]['quantity']:\n    0",
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "US",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for this order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123-AB",
+                "productName": "Product A",
+                "quantity": 0,
+                "shipDate": "2022-01-01T00:00:00"
+              },
+              {
+                "USPrice": 5.99,
+                "comment": "This is a comment for the second item",
+                "partNum": "456-CD",
+                "productName": "Product B",
+                "quantity": 1,
+                "shipDate": "2022-01-15T00:00:00"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"789\" does not match \"\\d{3}-[A-Z]{2}\"",
+      "python_error": "'789' does not match '\\\\d{3}-[A-Z]{2}'\n\nFailed validating 'pattern' in schema['properties']['purchaseOrder']['properties']['items']['properties']['item']['items']['properties']['partNum']:\n    {'pattern': '\\\\d{3}-[A-Z]{2}', 'type': 'string'}\n\nOn instance['purchaseOrder']['items']['item'][2]['partNum']:\n    '789'",
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "US",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for this order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123-AB",
+                "productName": "Product A",
+                "quantity": 2,
+                "shipDate": "2022-01-01T00:00:00"
+              },
+              {
+                "USPrice": 5.99,
+                "comment": "This is a comment for the second item",
+                "partNum": "456-CD",
+                "productName": "Product B",
+                "quantity": 1,
+                "shipDate": "2022-01-15T00:00:00"
+              },
+              {
+                "USPrice": 7.99,
+                "comment": "This is a comment for the third item",
+                "partNum": "789",
+                "productName": "Product C",
+                "quantity": 1,
+                "shipDate": "2022-01-15T00:00:00"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "US",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123-AB",
+                "productName": "Product A",
+                "quantity": 2,
+                "shipDate": "2022-01-01T00:00:00"
+              },
+              {
+                "USPrice": 5.99,
+                "comment": "This is a comment for the second item",
+                "partNum": "456-CD",
+                "productName": "Product B",
+                "quantity": 3,
+                "shipDate": "2022-01-15T00:00:00"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['purchaseOrder']['properties']['items']['properties']['item']['items']['properties']['quantity']:\n    {'minimum': 1, 'type': 'integer'}\n\nOn instance['purchaseOrder']['items']['item'][0]['quantity']:\n    0",
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "US",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123-AB",
+                "productName": "Product A",
+                "quantity": 0,
+                "shipDate": "2022-01-01T00:00:00"
+              },
+              {
+                "USPrice": 5.99,
+                "comment": "This is a comment for the second item",
+                "partNum": "456-CD",
+                "productName": "Product B",
+                "quantity": 3,
+                "shipDate": "2022-01-15T00:00:00"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"20220101\" does not match \"^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$\"",
+      "python_error": "'20220101' does not match '^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$'\n\nFailed validating 'pattern' in schema['properties']['purchaseOrder']['properties']['items']['properties']['item']['items']['properties']['shipDate']:\n    {'pattern': '^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$', 'type': 'string'}\n\nOn instance['purchaseOrder']['items']['item'][0]['shipDate']:\n    '20220101'",
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "US",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123-AB",
+                "productName": "Product A",
+                "quantity": 2,
+                "shipDate": "20220101"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"Canada\" is not one of [\"US\"]",
+      "python_error": "'Canada' is not one of ['US']\n\nFailed validating 'enum' in schema['properties']['purchaseOrder']['properties']['billTo']['properties']['country']:\n    {'enum': ['US'], 'type': 'string'}\n\nOn instance['purchaseOrder']['billTo']['country']:\n    'Canada'",
+      "data": {
+        "purchaseOrder": {
+          "billTo": {
+            "city": "Anytown",
+            "country": "Canada",
+            "name": "John Doe",
+            "state": "CA",
+            "street": "123 Maple Street",
+            "zip": 12345
+          },
+          "comment": "Special instructions for order",
+          "items": {
+            "item": [
+              {
+                "USPrice": 10.99,
+                "comment": "This is a comment for the first item",
+                "partNum": "123-AB",
+                "productName": "Product A",
+                "quantity": 0,
+                "shipDate": "2022-01-01T00:00:00"
+              },
+              {
+                "USPrice": 5.99,
+                "comment": "This is a comment for the second item",
+                "partNum": "456-CD",
+                "productName": "Product B",
+                "quantity": 3,
+                "shipDate": "2022-01-15T00:00:00"
+              }
+            ]
+          },
+          "orderDate": "2022-01-01T00:00:00",
+          "shipTo": {
+            "city": "Othertown",
+            "country": "US",
+            "name": "Jane Doe",
+            "state": "NY",
+            "street": "456 Elm Street",
+            "zip": 67890
+          }
+        }
+      }
+    }
+  ]
+}

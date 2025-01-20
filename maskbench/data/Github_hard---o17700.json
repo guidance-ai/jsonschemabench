@@ -1,0 +1,789 @@
+{
+  "description": "sample Github_hard/o17700.json",
+  "meta": {
+    "full_size": 4032,
+    "stripped_size": 3918,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxItems",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "schema for Sync pings, documentation avaliable in toolkit/components/telemetry/docs/sync-ping.rst",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "version",
+      "syncs",
+      "why",
+      "uid"
+    ],
+    "properties": {
+      "version": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "discarded": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "why": {
+        "enum": [
+          "shutdown",
+          "schedule",
+          "idchange"
+        ]
+      },
+      "uid": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{32}$"
+      },
+      "deviceID": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "syncs": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "$ref": "#/definitions/payload"
+        }
+      },
+      "events": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "$ref": "#/definitions/event"
+        }
+      }
+    },
+    "definitions": {
+      "payload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "when",
+          "took"
+        ],
+        "properties": {
+          "didLogin": {
+            "type": "boolean"
+          },
+          "when": {
+            "type": "integer"
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/device"
+            }
+          },
+          "status": {
+            "type": "object",
+            "anyOf": [
+              {
+                "required": [
+                  "sync"
+                ]
+              },
+              {
+                "required": [
+                  "service"
+                ]
+              }
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "sync": {
+                "type": "string"
+              },
+              "service": {
+                "type": "string"
+              }
+            }
+          },
+          "why": {
+            "enum": [
+              "startup",
+              "schedule",
+              "score",
+              "user",
+              "tabs"
+            ]
+          },
+          "took": {
+            "type": "integer",
+            "minimum": -1
+          },
+          "failureReason": {
+            "$ref": "#/definitions/error"
+          },
+          "engines": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/definitions/engine"
+            }
+          }
+        }
+      },
+      "device": {
+        "required": [
+          "os",
+          "id",
+          "version"
+        ],
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "os": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "engine": {
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "failureReason": {
+            "$ref": "#/definitions/error"
+          },
+          "name": {
+            "enum": [
+              "addons",
+              "bookmarks",
+              "clients",
+              "forms",
+              "history",
+              "passwords",
+              "prefs",
+              "tabs"
+            ]
+          },
+          "took": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string"
+          },
+          "incoming": {
+            "type": "object",
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "applied"
+                ]
+              },
+              {
+                "required": [
+                  "failed"
+                ]
+              },
+              {
+                "required": [
+                  "newFailed"
+                ]
+              },
+              {
+                "required": [
+                  "reconciled"
+                ]
+              }
+            ],
+            "properties": {
+              "applied": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "failed": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "newFailed": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "reconciled": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          },
+          "outgoing": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/definitions/outgoingBatch"
+            }
+          },
+          "validation": {
+            "type": "object",
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "checked"
+                ]
+              },
+              {
+                "required": [
+                  "failureReason"
+                ]
+              }
+            ],
+            "properties": {
+              "checked": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "failureReason": {
+                "$ref": "#/definitions/error"
+              },
+              "took": {
+                "type": "integer"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "problems": {
+                "type": "array",
+                "minItems": 1,
+                "$ref": "#/definitions/validationProblem"
+              }
+            }
+          }
+        }
+      },
+      "outgoingBatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "sent"
+            ]
+          },
+          {
+            "required": [
+              "failed"
+            ]
+          }
+        ],
+        "properties": {
+          "sent": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "event": {
+        "type": "array",
+        "minItems": 4,
+        "maxItems": 6
+      },
+      "error": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/httpError"
+          },
+          {
+            "$ref": "#/definitions/nsError"
+          },
+          {
+            "$ref": "#/definitions/shutdownError"
+          },
+          {
+            "$ref": "#/definitions/authError"
+          },
+          {
+            "$ref": "#/definitions/otherError"
+          },
+          {
+            "$ref": "#/definitions/unexpectedError"
+          },
+          {
+            "$ref": "#/definitions/sqlError"
+          }
+        ]
+      },
+      "httpError": {
+        "required": [
+          "name",
+          "code"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "httperror"
+            ]
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "nsError": {
+        "required": [
+          "name",
+          "code"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "nserror"
+            ]
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "shutdownError": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "shutdownerror"
+            ]
+          }
+        }
+      },
+      "authError": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "autherror"
+            ]
+          },
+          "from": {
+            "enum": [
+              "tokenserver",
+              "fxaccounts",
+              "hawkclient"
+            ]
+          }
+        }
+      },
+      "otherError": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "othererror"
+            ]
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "unexpectedError": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "unexpectederror"
+            ]
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "sqlError": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "sqlerror"
+            ]
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "validationProblem": {
+        "required": [
+          "name",
+          "count"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": 1,
+        "syncs": [
+          {
+            "when": 1643723400,
+            "took": 1000,
+            "why": "startup",
+            "status": {
+              "sync": "success"
+            },
+            "engines": [
+              {
+                "name": "bookmarks",
+                "took": 100,
+                "status": "success",
+                "incoming": {
+                  "applied": 10
+                },
+                "outgoing": [
+                  {
+                    "sent": 10
+                  }
+                ],
+                "validation": {
+                  "checked": 10
+                }
+              },
+              {
+                "name": "history",
+                "took": 200,
+                "status": "success",
+                "incoming": {
+                  "applied": 20
+                },
+                "outgoing": [
+                  {
+                    "sent": 20
+                  }
+                ],
+                "validation": {
+                  "checked": 20
+                }
+              }
+            ]
+          }
+        ],
+        "why": "shutdown",
+        "uid": "0123456789abcdef0123456789abcdef",
+        "deviceID": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "discarded": 1,
+        "events": [
+          [
+            "event1",
+            "event2",
+            "event3",
+            "event4"
+          ]
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"0123456789abcdef0123456789abcf\" does not match \"^[0-9a-f]{32}$\"",
+      "python_error": "Additional properties are not allowed ('devices' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'schema for Sync pings, documentation avaliable in '\n                    'toolkit/components/telemetry/docs/sync-ping.rst',\n     'type': 'object',\n     'additionalProperties': False,\n     'required': ['version', 'syncs', 'why', 'uid'],\n     'properties': {'version': {'type': 'integer', 'minimum': 0},\n                    'discarded': {'type': 'integer', 'minimum': 1},\n                    'why': {'enum': ['shutdown', 'schedule', 'idchange']},\n                    'uid': {'type': 'string', 'pattern': '^[0-9a-f]{32}$'},\n                    'deviceID': {'type': 'string',\n                                 'pattern': '^[0-9a-f]{64}$'},\n                    'syncs': {'type': 'array',\n                              'minItems': 1,\n                              'items': {'$ref': '#/definitions/payload'}},\n                    'even.. (11005 more)",
+      "data": {
+        "version": 1,
+        "syncs": [
+          {
+            "when": 1643723400,
+            "took": 1000,
+            "why": "startup",
+            "status": {
+              "sync": "success"
+            },
+            "engines": [
+              {
+                "name": "bookmarks",
+                "took": 100,
+                "status": "success",
+                "incoming": {
+                  "applied": 10
+                },
+                "outgoing": [
+                  {
+                    "sent": 10
+                  }
+                ],
+                "validation": {
+                  "checked": 10
+                }
+              },
+              {
+                "name": "history",
+                "took": 200,
+                "status": "success",
+                "incoming": {
+                  "applied": 20
+                },
+                "outgoing": [
+                  {
+                    "sent": 20
+                  }
+                ],
+                "validation": {
+                  "checked": 20
+                }
+              }
+            ]
+          }
+        ],
+        "why": "shutdown",
+        "uid": "0123456789abcdef0123456789abcf",
+        "devices": [
+          {
+            "id": "0123456789abcdef0123456789abcdef",
+            "os": "windows",
+            "version": "10"
+          }
+        ],
+        "deviceID": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "discarded": 1,
+        "events": [
+          [
+            "event1",
+            "event2",
+            "event3",
+            "event4"
+          ]
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "'why' is a required property\n\nFailed validating 'required' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'schema for Sync pings, documentation avaliable in '\n                    'toolkit/components/telemetry/docs/sync-ping.rst',\n     'type': 'object',\n     'additionalProperties': False,\n     'required': ['version', 'syncs', 'why', 'uid'],\n     'properties': {'version': {'type': 'integer', 'minimum': 0},\n                    'discarded': {'type': 'integer', 'minimum': 1},\n                    'why': {'enum': ['shutdown', 'schedule', 'idchange']},\n                    'uid': {'type': 'string', 'pattern': '^[0-9a-f]{32}$'},\n                    'deviceID': {'type': 'string',\n                                 'pattern': '^[0-9a-f]{64}$'},\n                    'syncs': {'type': 'array',\n                              'minItems': 1,\n                              'items': {'$ref': '#/definitions/payload'}},\n                    'events': {'type': 'array',\n                         .. (10733 more)",
+      "data": {
+        "version": 1,
+        "syncs": [
+          {
+            "when": 1643723400,
+            "took": 1000,
+            "why": "startup",
+            "status": {
+              "sync": "success"
+            },
+            "engines": [
+              {
+                "name": "bookmarks",
+                "took": 0,
+                "Minimum of 'took' is 1 according to the schema, but I'm using 0 here": "status",
+                "success": "incoming",
+                "applied": 10
+              },
+              "outgoing",
+              {
+                "sent": 10
+              }
+            ],
+            "validation": {
+              "checked": 10
+            }
+          },
+          {
+            "name": "history",
+            "took": 200,
+            "status": "success",
+            "incoming": {
+              "applied": 0,
+              "Minimum of 'applied' is 1 according to the schema, but I'm using 0 here": "outgoing",
+              "sent": 20
+            },
+            "validation": {
+              "checked": 10
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[\"event1\",\"event2\"] has less than 4 items",
+      "python_error": "['event1', 'event2'] is too short\n\nFailed validating 'minItems' in schema['properties']['events']['items']:\n    {'type': 'array', 'minItems': 4, 'maxItems': 6}\n\nOn instance['events'][0]:\n    ['event1', 'event2']",
+      "data": {
+        "version": 1,
+        "syncs": [
+          {
+            "when": 1643723400,
+            "took": 1000,
+            "why": "startup",
+            "status": {
+              "sync": "success"
+            },
+            "engines": [
+              {
+                "name": "bookmarks",
+                "took": 100,
+                "status": "success",
+                "incoming": {
+                  "applied": 10
+                },
+                "outgoing": [
+                  {
+                    "sent": 10
+                  }
+                ],
+                "validation": {
+                  "checked": 10
+                }
+              },
+              {
+                "name": "history",
+                "took": 200,
+                "status": "success",
+                "incoming": {
+                  "applied": 20
+                },
+                "outgoing": [
+                  {
+                    "sent": 20
+                  }
+                ],
+                "validation": {
+                  "checked": 20
+                }
+              }
+            ]
+          }
+        ],
+        "why": "shutdown",
+        "uid": "0123456789abcdef0123456789abcdef",
+        "deviceID": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "discarded": 1,
+        "events": [
+          [
+            "event1",
+            "event2"
+          ]
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['version']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['version']:\n    -1",
+      "data": {
+        "version": -1,
+        "syncs": [
+          {
+            "when": 1643723400,
+            "took": 1000,
+            "why": "startup",
+            "status": {
+              "sync": "success"
+            },
+            "engines": [
+              {
+                "name": "bookmarks",
+                "took": 100,
+                "status": "success",
+                "incoming": {
+                  "applied": 10
+                },
+                "outgoing": [
+                  {
+                    "sent": 10
+                  }
+                ],
+                "validation": {
+                  "checked": 10
+                }
+              },
+              {
+                "name": "history",
+                "took": 200,
+                "status": "success",
+                "incoming": {
+                  "applied": 20
+                },
+                "outgoing": [
+                  {
+                    "sent": 20
+                  }
+                ],
+                "validation": {
+                  "checked": 20
+                }
+              }
+            ]
+          }
+        ],
+        "why": "shutdown",
+        "uid": "notavaliduid",
+        "deviceID": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "discarded": 1,
+        "events": [
+          [
+            "event1",
+            "event2",
+            "event3",
+            "event4",
+            "event5",
+            "event6",
+            "event7"
+          ]
+        ]
+      }
+    }
+  ]
+}

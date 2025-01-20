@@ -1,0 +1,303 @@
+{
+  "description": "sample Github_medium/o46813.json",
+  "meta": {
+    "full_size": 1497,
+    "stripped_size": 635,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "humio": {
+        "properties": {
+          "agents": {
+            "default": "all",
+            "description": "Agents to deploy on all cluster agents. Comma (,) separated list of \"filebeat\", \"metricbeat\" or simply \"all\"",
+            "type": "string"
+          },
+          "containerMetricsEnabled": {
+            "description": "Enabled pulling container metrics from DC/OS",
+            "type": "boolean"
+          },
+          "dataspace": {
+            "description": "Name of Humio dataspace",
+            "type": "string"
+          },
+          "dcosAuthenticationToken": {
+            "description": "DC/OS authentication token",
+            "type": "string"
+          },
+          "globalFields": {
+            "description": "key:value list of global fields added to all events, separated by a semicolon (;). I.e. \"environment:production; owner: Ben\"",
+            "type": "string"
+          },
+          "host": {
+            "default": "https://cloud.humio.com:443",
+            "description": "Humio url. i.e. https://cloud.humio.com:443",
+            "type": "string"
+          },
+          "ingestToken": {
+            "description": "Humio ingest token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "dataspace",
+          "ingestToken",
+          "agents"
+        ],
+        "type": "object"
+      },
+      "node": {
+        "properties": {
+          "cpus": {
+            "default": 0.1,
+            "description": "CPU shares to allocate to each Filebeat instance.",
+            "minimum": 0.1,
+            "type": "number"
+          },
+          "datadir": {
+            "default": "/var/humio/data",
+            "description": "Path of directory",
+            "type": "string"
+          },
+          "mem": {
+            "default": 512.0,
+            "description": "Memory (MB) to allocate to each Filebeat task.",
+            "minimum": 128.0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem",
+          "datadir"
+        ],
+        "type": "object"
+      },
+      "service": {
+        "properties": {
+          "name": {
+            "default": "humio-agent",
+            "description": "Name for this Humio application",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "humio": {
+          "agents": "all",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-ingest-token"
+        },
+        "node": {
+          "cpus": 0.1,
+          "datadir": "/var/humio/data",
+          "mem": 512.0
+        },
+        "service": {
+          "name": "humio-agent"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.01 is less than the minimum of 0.1",
+      "python_error": "0.01 is less than the minimum of 0.1\n\nFailed validating 'minimum' in schema['properties']['node']['properties']['cpus']:\n    {'default': 0.1,\n     'description': 'CPU shares to allocate to each Filebeat instance.',\n     'minimum': 0.1,\n     'type': 'number'}\n\nOn instance['node']['cpus']:\n    0.01",
+      "data": {
+        "humio": {
+          "agents": "all",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-ingest-token"
+        },
+        "node": {
+          "cpus": 0.01,
+          "datadir": "/var/humio/data",
+          "mem": 128.0
+        },
+        "service": {
+          "name": "humio-agent"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.01 is less than the minimum of 0.1",
+      "python_error": "'mem' is a required property\n\nFailed validating 'required' in schema['properties']['node']:\n    {'properties': {'cpus': {'default': 0.1,\n                             'description': 'CPU shares to allocate to '\n                                            'each Filebeat instance.',\n                             'minimum': 0.1,\n                             'type': 'number'},\n                    'datadir': {'default': '/var/humio/data',\n                                'description': 'Path of directory',\n                                'type': 'string'},\n                    'mem': {'default': 512.0,\n                            'description': 'Memory (MB) to allocate to '\n                                           'each Filebeat task.',\n                            'minimum': 128.0,\n                            'type': 'number'}},\n     'required': ['cpus', 'mem', 'datadir'],\n     'type': 'object'}\n\nOn instance['node']:\n    {'cpus': 0.01,\n     'minimum cpus is 0.1': 'datadir',\n     '/var/humio/data': 'mem',\n     'Not a number': 'service'}",
+      "data": {
+        "humio": {
+          "agents": "all",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-ingest-token"
+        },
+        "node": {
+          "cpus": 0.01,
+          "minimum cpus is 0.1": "datadir",
+          "/var/humio/data": "mem",
+          "Not a number": "service"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.01 is less than the minimum of 0.1",
+      "python_error": "0.01 is less than the minimum of 0.1\n\nFailed validating 'minimum' in schema['properties']['node']['properties']['cpus']:\n    {'default': 0.1,\n     'description': 'CPU shares to allocate to each Filebeat instance.',\n     'minimum': 0.1,\n     'type': 'number'}\n\nOn instance['node']['cpus']:\n    0.01",
+      "data": {
+        "humio": {
+          "agents": "all",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-ingest-token"
+        },
+        "node": {
+          "cpus": 0.01,
+          "datadir": "/var/humio/data",
+          "mem": 512.0
+        },
+        "service": {
+          "name": "humio-agent"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.01 is less than the minimum of 0.1",
+      "python_error": "'datadir' is a required property\n\nFailed validating 'required' in schema['properties']['node']:\n    {'properties': {'cpus': {'default': 0.1,\n                             'description': 'CPU shares to allocate to '\n                                            'each Filebeat instance.',\n                             'minimum': 0.1,\n                             'type': 'number'},\n                    'datadir': {'default': '/var/humio/data',\n                                'description': 'Path of directory',\n                                'type': 'string'},\n                    'mem': {'default': 512.0,\n                            'description': 'Memory (MB) to allocate to '\n                                           'each Filebeat task.',\n                            'minimum': 128.0,\n                            'type': 'number'}},\n     'required': ['cpus', 'mem', 'datadir'],\n     'type': 'object'}\n\nOn instance['node']:\n    {'cpus': 0.01,\n     'minimum cpus is 0.1': 'datadir',\n     '/var/humio/data': 'key and value are swapped',\n     'mem': 512.0}",
+      "data": {
+        "humio": {
+          "agents": "all",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-ingest-token"
+        },
+        "node": {
+          "cpus": 0.01,
+          "minimum cpus is 0.1": "datadir",
+          "/var/humio/data": "key and value are swapped",
+          "mem": 512.0
+        },
+        "service": {
+          "name": "humio-agent"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "humio": {
+          "agents": "all",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-humio-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-humio-ingest-token"
+        },
+        "node": {
+          "cpus": 0.1,
+          "datadir": "/var/humio/data",
+          "mem": 512.0
+        },
+        "service": {
+          "name": "humio-agent"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.01 is less than the minimum of 0.1",
+      "python_error": "0.01 is less than the minimum of 0.1\n\nFailed validating 'minimum' in schema['properties']['node']['properties']['cpus']:\n    {'default': 0.1,\n     'description': 'CPU shares to allocate to each Filebeat instance.',\n     'minimum': 0.1,\n     'type': 'number'}\n\nOn instance['node']['cpus']:\n    0.01",
+      "data": {
+        "humio": {
+          "agents": "all",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-humio-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-humio-ingest-token"
+        },
+        "node": {
+          "cpus": 0.01,
+          "datadir": "/var/humio/data",
+          "mem": 512.0
+        },
+        "service": {
+          "name": "humio-agent"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.09 is less than the minimum of 0.1",
+      "python_error": "0.09 is less than the minimum of 0.1\n\nFailed validating 'minimum' in schema['properties']['node']['properties']['cpus']:\n    {'default': 0.1,\n     'description': 'CPU shares to allocate to each Filebeat instance.',\n     'minimum': 0.1,\n     'type': 'number'}\n\nOn instance['node']['cpus']:\n    0.09",
+      "data": {
+        "humio": {
+          "agents": "all, invalid_agent",
+          "containerMetricsEnabled": true,
+          "dataspace": "my-humio-dataspace",
+          "dcosAuthenticationToken": "my-dcos-auth-token",
+          "globalFields": "environment:production; owner: Ben",
+          "host": "https://cloud.humio.com:443",
+          "ingestToken": "my-humio-ingest-token"
+        },
+        "node": {
+          "cpus": 0.09,
+          "datadir": "/var/humio/data",
+          "mem": 512.0
+        },
+        "service": {
+          "name": "humio-agent"
+        }
+      }
+    }
+  ]
+}

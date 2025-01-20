@@ -1,0 +1,150 @@
+{
+  "description": "sample Github_easy/o44020.json",
+  "meta": {
+    "full_size": 482,
+    "stripped_size": 447,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:date-time"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "StartTransactionResponse",
+    "type": "object",
+    "properties": {
+      "idTagInfo": {
+        "type": "object",
+        "properties": {
+          "expiryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "parentIdTag": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Accepted",
+              "Blocked",
+              "Expired",
+              "Invalid",
+              "ConcurrentTx"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "transactionId": {
+        "type": "integer"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "idTagInfo",
+      "transactionId"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "idTagInfo": {
+          "expiryDate": "2024-12-31T23:59:59Z",
+          "parentIdTag": "12345678901234567890",
+          "status": "Accepted"
+        },
+        "transactionId": 12345
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"123456789012345678901\" is longer than 20 characters",
+      "python_error": "'123456789012345678901' is too long\n\nFailed validating 'maxLength' in schema['properties']['idTagInfo']['properties']['parentIdTag']:\n    {'type': 'string', 'maxLength': 20}\n\nOn instance['idTagInfo']['parentIdTag']:\n    '123456789012345678901'",
+      "data": {
+        "idTagInfo": {
+          "expiryDate": "2024-12-31T23:59:59Z",
+          "parentIdTag": "123456789012345678901",
+          "status": "Accepted"
+        },
+        "transactionId": 12345
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid Date\" is not a \"date-time\"",
+      "python_error": "'Invalid Date' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['idTagInfo']['properties']['expiryDate']:\n    {'type': 'string', 'format': 'date-time'}\n\nOn instance['idTagInfo']['expiryDate']:\n    'Invalid Date'",
+      "data": {
+        "idTagInfo": {
+          "expiryDate": "Invalid Date",
+          "parentIdTag": "12345678901234567890",
+          "status": "Accepted"
+        },
+        "transactionId": 12345
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2024-12-31T23:59:61Z\" is not a \"date-time\"",
+      "python_error": "'2024-12-31T23:59:61Z' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['idTagInfo']['properties']['expiryDate']:\n    {'type': 'string', 'format': 'date-time'}\n\nOn instance['idTagInfo']['expiryDate']:\n    '2024-12-31T23:59:61Z'",
+      "data": {
+        "idTagInfo": {
+          "expiryDate": "2024-12-31T23:59:61Z",
+          "parentIdTag": "12345678901234567890",
+          "status": "Accepted"
+        },
+        "transactionId": 12345
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"2024-12-31T23:59:59\" is not a \"date-time\"",
+      "python_error": "'2024-12-31T23:59:59' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['idTagInfo']['properties']['expiryDate']:\n    {'type': 'string', 'format': 'date-time'}\n\nOn instance['idTagInfo']['expiryDate']:\n    '2024-12-31T23:59:59'",
+      "data": {
+        "idTagInfo": {
+          "expiryDate": "2024-12-31T23:59:59",
+          "parentIdTag": "12345678901234567890",
+          "status": "Accepted"
+        },
+        "transactionId": 12345
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"2024-12-31 23:59:59\" is not a \"date-time\"",
+      "python_error": "'Invalid2' is not one of ['Accepted', 'Blocked', 'Expired', 'Invalid', 'ConcurrentTx']\n\nFailed validating 'enum' in schema['properties']['idTagInfo']['properties']['status']:\n    {'type': 'string',\n     'enum': ['Accepted', 'Blocked', 'Expired', 'Invalid', 'ConcurrentTx']}\n\nOn instance['idTagInfo']['status']:\n    'Invalid2'",
+      "data": {
+        "idTagInfo": {
+          "expiryDate": "2024-12-31 23:59:59",
+          "parentIdTag": "12345678901234567890",
+          "status": "Invalid2"
+        },
+        "transactionId": 12345
+      }
+    }
+  ]
+}

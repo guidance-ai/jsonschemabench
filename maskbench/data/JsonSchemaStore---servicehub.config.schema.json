@@ -1,0 +1,269 @@
+{
+  "description": "sample JsonSchemaStore/servicehub.config.schema.json",
+  "meta": {
+    "full_size": 1765,
+    "stripped_size": 832,
+    "features": [
+      "additionalProperties",
+      "items",
+      "patternProperties",
+      "uniqueItems"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://json.schemastore.org/servicehub.config.schema.json",
+    "properties": {
+      "controller": {
+        "type": "object",
+        "description": "Specifies the location of the controller executable and activation parameters.",
+        "required": [
+          "executable"
+        ],
+        "properties": {
+          "contextEnvironmentVariables": {
+            "type": "array",
+            "description": "Array of environment variable names. These variables are mixed-up into hash that determines the location service pipe name. The order is significant.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "executable": {
+            "type": "string"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalEnvironmentVariables": {
+            "type": "object",
+            "description": "An object with properties like \"environment variable name\": \"value\" that describes what environment variables to set for the Hub Controller.",
+            "additionalProperties": false,
+            "patternProperties": {
+              "^[A-Za-z0-9_/\\.]+$": {
+                "type": "string",
+                "description": "The value of the environment variable to set."
+              }
+            }
+          }
+        },
+        "hosts": {
+          "type": "object",
+          "required": [
+            "rootDir"
+          ],
+          "properties": {
+            "rootDir": {
+              "type": "string",
+              "description": "The path to the directory immediately under which are folders that contain *.servicehub.host.json files."
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "required": [
+            "rootDir"
+          ],
+          "properties": {
+            "rootDir": {
+              "type": "string",
+              "description": "The path to the directory immediately under which are folders that contain *.servicehub.service.json files."
+            },
+            "discoveryServices": {
+              "description": "Service names of optional discovery service modules. Controller will use them to locate a service which it cannot find in the services folder.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "required": [
+      "controller",
+      "hosts",
+      "services"
+    ],
+    "title": "Microsoft ServiceHub Configuration",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "controller": {
+          "executable": "C:\\Program Files\\ServiceHub\\ServiceHubController.exe",
+          "args": [
+            "--log-level",
+            "INFO"
+          ],
+          "contextEnvironmentVariables": [
+            "COMPUTERNAME",
+            "USERNAME"
+          ],
+          "additionalEnvironmentVariables": {
+            "SERVICEHUB_CONTROLLER_HOME": "C:\\Program Files\\ServiceHub"
+          }
+        },
+        "hosts": {
+          "rootDir": "C:\\ServiceHub\\hosts"
+        },
+        "services": {
+          "rootDir": "C:\\ServiceHub\\services",
+          "discoveryServices": [
+            "ServiceHub.Discovery.Dns",
+            "ServiceHub.Discovery.Kubernetes"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "controller": {
+          "executable": "/path/to/controller/executable",
+          "args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "contextEnvironmentVariables": [
+            "VARIABLE_1",
+            "VARIABLE_2"
+          ],
+          "additionalEnvironmentVariables": {
+            "VARIABLE_3": "value3",
+            "VARIABLE_4": "value4"
+          }
+        },
+        "hosts": {
+          "rootDir": "/path/to/hosts/root/directory"
+        },
+        "services": {
+          "rootDir": "/path/to/services/root/directory",
+          "discoveryServices": [
+            "discovery-service-1",
+            "discovery-service-2"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('VARIABLE 4' was unexpected)",
+      "python_error": "'VARIABLE 4' does not match any of the regexes: '^[A-Za-z0-9_/\\\\.]+$'\n\nFailed validating 'additionalProperties' in schema['properties']['controller']['properties']['additionalEnvironmentVariables']:\n    {'type': 'object',\n     'description': 'An object with properties like \"environment variable '\n                    'name\": \"value\" that describes what environment '\n                    'variables to set for the Hub Controller.',\n     'additionalProperties': False,\n     'patternProperties': {'^[A-Za-z0-9_/\\\\.]+$': {'type': 'string',\n                                                   'description': 'The '\n                                                                  'value '\n                                                                  'of the '\n                                                                  'environment '\n                                                                  'variable '\n                                                                  'to '\n                                .. (158 more)",
+      "data": {
+        "controller": {
+          "executable": "/path/to/controller/executable",
+          "args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "contextEnvironmentVariables": [
+            "VARIABLE_1",
+            "VARIABLE_2"
+          ],
+          "additionalEnvironmentVariables": {
+            "VARIABLE_3": "value3",
+            "VARIABLE 4": "value4"
+          }
+        },
+        "hosts": {
+          "rootDir": "/path/to/hosts/root/directory"
+        },
+        "services": {
+          "rootDir": "/path/to/services/root/directory",
+          "discoveryServices": [
+            "discovery-service-1",
+            "discovery-service-2"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on uniqueItems keyword",
+      "valid": false,
+      "rust_error": "[\"VARIABLE_1\",\"VARIABLE_2\",\"VARIABLE_2\"] has non-unique elements",
+      "python_error": "['VARIABLE_1', 'VARIABLE_2', 'VARIABLE_2'] has non-unique elements\n\nFailed validating 'uniqueItems' in schema['properties']['controller']['properties']['contextEnvironmentVariables']:\n    {'type': 'array',\n     'description': 'Array of environment variable names. These variables '\n                    'are mixed-up into hash that determines the location '\n                    'service pipe name. The order is significant.',\n     'items': {'type': 'string'},\n     'uniqueItems': True}\n\nOn instance['controller']['contextEnvironmentVariables']:\n    ['VARIABLE_1', 'VARIABLE_2', 'VARIABLE_2']",
+      "data": {
+        "controller": {
+          "executable": "/path/to/controller/executable",
+          "args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "contextEnvironmentVariables": [
+            "VARIABLE_1",
+            "VARIABLE_2",
+            "VARIABLE_2"
+          ],
+          "additionalEnvironmentVariables": {
+            "VARIABLE_3": "value3",
+            "VARIABLE_4": "value4"
+          }
+        },
+        "hosts": {
+          "rootDir": "/path/to/hosts/root/directory"
+        },
+        "services": {
+          "rootDir": "/path/to/services/root/directory",
+          "discoveryServices": [
+            "discovery-service-1",
+            "discovery-service-2"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[\"VARIABLE_1\",\"VARIABLE_1\",\"VARIABLE_2\"] has non-unique elements",
+      "python_error": "['VARIABLE_1', 'VARIABLE_1', 'VARIABLE_2'] has non-unique elements\n\nFailed validating 'uniqueItems' in schema['properties']['controller']['properties']['contextEnvironmentVariables']:\n    {'type': 'array',\n     'description': 'Array of environment variable names. These variables '\n                    'are mixed-up into hash that determines the location '\n                    'service pipe name. The order is significant.',\n     'items': {'type': 'string'},\n     'uniqueItems': True}\n\nOn instance['controller']['contextEnvironmentVariables']:\n    ['VARIABLE_1', 'VARIABLE_1', 'VARIABLE_2']",
+      "data": {
+        "controller": {
+          "executable": "/path/to/controller/executable",
+          "args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "contextEnvironmentVariables": [
+            "VARIABLE_1",
+            "VARIABLE_1",
+            "VARIABLE_2"
+          ],
+          "additionalEnvironmentVariables": {
+            "VARIABLE_3": "value3",
+            "VARIABLE_4": "value4"
+          }
+        },
+        "hosts": {
+          "rootDir": "/path/to/hosts/root/directory"
+        },
+        "services": {
+          "rootDir": "/path/to/services/root/directory",
+          "discoveryServices": [
+            "discovery-service-1",
+            "discovery-service-2"
+          ]
+        }
+      }
+    }
+  ]
+}

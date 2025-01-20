@@ -1,0 +1,311 @@
+{
+  "description": "sample Github_medium/o41730.json",
+  "meta": {
+    "full_size": 1722,
+    "stripped_size": 669,
+    "features": [
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "RoutingEntry",
+    "description": "Okapi proxy routing entry",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "methods": {
+        "description": "List of methods GET, POST,.. * (for all)",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "pathPattern": {
+        "description": "Path pattern match. * matches any path. {x} matches one or more characters but not slash",
+        "type": "string"
+      },
+      "path": {
+        "description": "Path prefix match",
+        "type": "string"
+      },
+      "rewritePath": {
+        "description": "Rewrite path. e.g. have filter rewrite '/*' to '/events/*'",
+        "type": "string"
+      },
+      "phase": {
+        "description": "If given, may be auth, pre or post",
+        "type": "string"
+      },
+      "level": {
+        "description": "Processing level. Default is 50 (handlers)",
+        "type": "string"
+      },
+      "type": {
+        "description": "Proxy handling. One of: request-response, request-only, headers, redirect, system, internal, request-response-1.0. The default is request-response",
+        "type": "string"
+      },
+      "redirectPath": {
+        "description": "If given, path that we internally redirect to",
+        "type": "string"
+      },
+      "unit": {
+        "description": "Delay unit",
+        "type": "string"
+      },
+      "delay": {
+        "description": "Delay between calls",
+        "type": "string"
+      },
+      "permissionsRequired": {
+        "description": "Required permissions for this entry",
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "permissionsDesired": {
+        "description": "Desired permissions for this entry",
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "modulePermissions": {
+        "description": "Module permissions for this entry",
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "delegateCORS": {
+        "description": "Okapi handles CORS by default. Set to true to delegate CORS handling to the module. This only applies to calls made via /_/invoke/tenant/<tid>/<path>",
+        "type": "boolean"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "pathPattern": "/events/*",
+        "path": "/events",
+        "rewritePath": "/events/*",
+        "phase": "pre",
+        "level": "50",
+        "type": "request-response",
+        "redirectPath": "/events/redirect",
+        "unit": "seconds",
+        "delay": "5",
+        "permissionsRequired": [
+          "perm1",
+          "perm2"
+        ],
+        "permissionsDesired": [
+          "perm3",
+          "perm4"
+        ],
+        "modulePermissions": [
+          "perm5",
+          "perm6"
+        ],
+        "delegateCORS": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"perm1\" is not of types \"array\", \"null\"",
+      "python_error": "'perm1' is not of type 'array', 'null'\n\nFailed validating 'type' in schema['properties']['permissionsRequired']:\n    {'description': 'Required permissions for this entry',\n     'type': ['array', 'null'],\n     'items': {'type': 'string'}}\n\nOn instance['permissionsRequired']:\n    'perm1'",
+      "data": {
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "pathPattern": "/events/*",
+        "path": "/events",
+        "rewritePath": "/events/*",
+        "phase": "pre",
+        "level": "50",
+        "type": "request-response",
+        "redirectPath": "/events/redirect",
+        "unit": "seconds",
+        "delay": "5",
+        "permissionsRequired": "perm1",
+        "permissionsDesired": [
+          "perm3",
+          "perm4"
+        ],
+        "modulePermissions": [
+          "perm5",
+          "perm6"
+        ],
+        "delegateCORS": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'RoutingEntry',\n     'description': 'Okapi proxy routing entry',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'methods': {'description': 'List of methods GET, '\n                                               'POST,.. * (for all)',\n                                'type': 'array',\n                                'items': {'type': 'string'}},\n                    'pathPattern': {'description': 'Path pattern match. * '\n                                                   'matches any path. {x} '\n                                                   'matches one or more '\n                                                   'characters but not '\n                                                   'slash',\n                                    'type': 'string'},\n                    'path': {'descrip.. (3893 more)",
+      "data": {
+        "methods": [
+          "GET",
+          "POST",
+          123
+        ],
+        "pathPattern": "/events/*",
+        "path": "/events",
+        "rewritePath": "/events/*",
+        "phase": "pre",
+        "level": "50",
+        "type": "request-response",
+        "redirectPath": "/events/redirect",
+        "unit": "seconds",
+        "delay": "5",
+        "permissionsRequired": [
+          "perm1",
+          "perm2"
+        ],
+        "permissionsDesired": [
+          "perm3",
+          "perm4"
+        ],
+        "modulePermissions": [
+          "perm5",
+          "perm6"
+        ],
+        "delegateCORS": false,
+        "extraProperty": "extraValue"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['type']:\n    {'description': 'Proxy handling. One of: request-response, '\n                    'request-only, headers, redirect, system, internal, '\n                    'request-response-1.0. The default is request-response',\n     'type': 'string'}\n\nOn instance['type']:\n    123",
+      "data": {
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "pathPattern": "/events/*",
+        "path": "/events",
+        "rewritePath": "/events/*",
+        "phase": "pre",
+        "level": "50",
+        "type": 123,
+        "redirectPath": "/events/redirect",
+        "unit": "seconds",
+        "delay": "5",
+        "permissionsRequired": "perm1",
+        "permissionsDesired": [
+          "perm3",
+          "perm4"
+        ],
+        "modulePermissions": [
+          "perm5",
+          "perm6"
+        ],
+        "delegateCORS": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('Extra key introduced before this line, and also valid value is moved after invalid value', 'Invalid type: number instead of array or null', 'Invalid type: number instead of string' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'RoutingEntry',\n     'description': 'Okapi proxy routing entry',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'methods': {'description': 'List of methods GET, '\n                                               'POST,.. * (for all)',\n                                'type': 'array',\n                                'items': {'type': 'string'}},\n                    'pathPattern': {'description': 'Path pattern match. * '\n                                                   'matches any path. {x} '\n                                                   'matches one or more '\n                                                   'charac.. (4247 more)",
+      "data": {
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "pathPattern": "/events/*",
+        "path": "/events",
+        "rewritePath": "/events/*",
+        "phase": "pre",
+        "level": "50",
+        "type": 123,
+        "Invalid type: number instead of string": "redirectPath",
+        "Extra key introduced before this line, and also valid value is moved after invalid value": "permissionsDesired",
+        "redirectPath": "/events/redirect",
+        "unit": "seconds",
+        "delay": "5",
+        "permissionsRequired": 123,
+        "Invalid type: number instead of array or null": "permissionsDesired",
+        "permissionsDesired": [
+          "perm3",
+          "perm4"
+        ],
+        "modulePermissions": [
+          "perm5",
+          "perm6"
+        ],
+        "delegateCORS": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('unknownProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'RoutingEntry',\n     'description': 'Okapi proxy routing entry',\n     'type': 'object',\n     'additionalProperties': False,\n     'properties': {'methods': {'description': 'List of methods GET, '\n                                               'POST,.. * (for all)',\n                                'type': 'array',\n                                'items': {'type': 'string'}},\n                    'pathPattern': {'description': 'Path pattern match. * '\n                                                   'matches any path. {x} '\n                                                   'matches one or more '\n                                                   'characters but not '\n                                                   'slash',\n                                    'type': 'string'},\n                    'path': {'descr.. (3892 more)",
+      "data": {
+        "methods": [
+          "GET",
+          "POST",
+          123
+        ],
+        "pathPattern": "/events/*",
+        "path": "/events",
+        "rewritePath": "/events/*",
+        "phase": "pre",
+        "level": "50",
+        "type": "request-response",
+        "redirectPath": "/events/redirect",
+        "unit": "seconds",
+        "delay": "5",
+        "permissionsRequired": [
+          "perm1",
+          "perm2"
+        ],
+        "permissionsDesired": [
+          "perm3",
+          "perm4"
+        ],
+        "modulePermissions": [
+          "perm5",
+          "perm6"
+        ],
+        "delegateCORS": false,
+        "unknownProperty": "value"
+      }
+    }
+  ]
+}

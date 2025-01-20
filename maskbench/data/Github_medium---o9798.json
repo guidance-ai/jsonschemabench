@@ -1,0 +1,230 @@
+{
+  "description": "sample Github_medium/o9798.json",
+  "meta": {
+    "full_size": 769,
+    "stripped_size": 769,
+    "features": [
+      "@minmaxLength",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "applicationId": {
+        "type": "string",
+        "pattern": "^[A-Fa-f\\d]{24}$"
+      },
+      "deviceId": {
+        "type": "string",
+        "pattern": "^[A-Fa-f\\d]{24}$"
+      },
+      "deviceClass": {
+        "type": "string",
+        "enum": [
+          "standalone",
+          "gateway",
+          "peripheral",
+          "floating",
+          "edgeCompute",
+          "system"
+        ]
+      },
+      "token": {
+        "type": "string",
+        "minLength": 1
+      },
+      "ownerType": {
+        "type": "string",
+        "enum": [
+          "user",
+          "organization"
+        ]
+      },
+      "filterType": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "all",
+              "whitelist",
+              "blacklist"
+            ]
+          },
+          {
+            "type": "string",
+            "enum": [
+              "none"
+            ]
+          }
+        ]
+      },
+      "pubTopics": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "subTopics": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    },
+    "required": [
+      "applicationId",
+      "deviceId",
+      "deviceClass",
+      "token"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "applicationId": "1234567890abcdef12345678",
+        "deviceId": "fedcba9876543210fedcba98",
+        "deviceClass": "standalone",
+        "token": "my_token",
+        "ownerType": "user",
+        "filterType": "all",
+        "pubTopics": [
+          "topic1",
+          "topic2",
+          "topic3"
+        ],
+        "subTopics": [
+          "topic4",
+          "topic5",
+          "topic6"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "applicationId": "5f3759df514c4e35b214726e",
+        "deviceId": "5f3759df514c4e35b214726e",
+        "deviceClass": "standalone",
+        "token": "exampleToken",
+        "ownerType": "user",
+        "filterType": "all",
+        "pubTopics": [
+          "topic1",
+          "topic2"
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"5f3759df514c4e35b214726\" does not match \"^[A-Fa-f\\d]{24}$\"",
+      "python_error": "'5f3759df514c4e35b214726' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['applicationId']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['applicationId']:\n    '5f3759df514c4e35b214726'",
+      "data": {
+        "applicationId": "5f3759df514c4e35b214726",
+        "deviceId": "5f3759df514c4e35b214726e",
+        "deviceClass": "standalone",
+        "token": "exampleToken",
+        "ownerType": "user",
+        "filterType": "all",
+        "pubTopics": [
+          "topic1",
+          "topic2"
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "\"noneAndAll\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'noneAndAll' is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['filterType']:\n    {'oneOf': [{'type': 'string',\n                'enum': ['all', 'whitelist', 'blacklist']},\n               {'type': 'string', 'enum': ['none']}]}\n\nOn instance['filterType']:\n    'noneAndAll'",
+      "data": {
+        "applicationId": "5f3759df514c4e35b214726e",
+        "deviceId": "5f3759df514c4e35b214726e",
+        "deviceClass": "standalone",
+        "token": "exampleToken",
+        "ownerType": "user",
+        "filterType": "noneAndAll",
+        "Invalid by design, this should actually validate as invalid if oneOf is implemented correctly": "pubTopics",
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['token']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['token']:\n    ''",
+      "data": {
+        "applicationId": "5f3759df514c4e35b214726e",
+        "deviceId": "5f3759df514c4e35b214726e",
+        "deviceClass": "standalone",
+        "token": "",
+        "ownerType": "user",
+        "filterType": "all",
+        "pubTopics": [
+          "",
+          "topic2"
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"5f3759df514c4e35b214726\" does not match \"^[A-Fa-f\\d]{24}$\"",
+      "python_error": "'5f3759df514c4e35b214726' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['deviceId']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['deviceId']:\n    '5f3759df514c4e35b214726'",
+      "data": {
+        "applicationId": "5f3759df514c4e35b214726",
+        "deviceId": "5f3759df514c4e35b214726",
+        "deviceClass": "standalone",
+        "token": "exampleToken",
+        "ownerType": "user",
+        "filterType": "all",
+        "pubTopics": [
+          "topic1",
+          ""
+        ],
+        "subTopics": [
+          "topic3",
+          "topic4"
+        ]
+      }
+    }
+  ]
+}

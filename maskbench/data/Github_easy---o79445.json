@@ -1,0 +1,90 @@
+{
+  "description": "sample Github_easy/o79445.json",
+  "meta": {
+    "full_size": 273,
+    "stripped_size": 273,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "format",
+      "format:uri",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "httpUri": {
+        "type": "string",
+        "allOf": [
+          {
+            "format": "uri"
+          },
+          {
+            "pattern": "^https?://"
+          }
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "uri": {
+        "$ref": "#/definitions/httpUri"
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example",
+        "uri": "https://www.example.com"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example Name",
+        "uri": "https://www.example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"htp://www.example.com\" does not match \"^https?://\"",
+      "python_error": "'htp://www.example.com' does not match '^https?://'\n\nFailed validating 'pattern' in schema['properties']['uri']['allOf'][1]:\n    {'pattern': '^https?://'}\n\nOn instance['uri']:\n    'htp://www.example.com'",
+      "data": {
+        "name": "Example Name",
+        "uri": "htp://www.example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'definitions': {'httpUri': {'type': 'string',\n                                 'allOf': [{'format': 'uri'},\n                                           {'pattern': '^https?://'}]}},\n     'type': 'object',\n     'properties': {'name': {'type': 'string'},\n                    'uri': {'$ref': '#/definitions/httpUri'}},\n     'additionalProperties': False}\n\nOn instance:\n    {'name': 'Example Name',\n     'uri': 'http://www.example.com/path?query=param#fragment',\n     'extra': 'Invalid property'}",
+      "data": {
+        "name": "Example Name",
+        "uri": "http://www.example.com/path?query=param#fragment",
+        "extra": "Invalid property"
+      }
+    }
+  ]
+}

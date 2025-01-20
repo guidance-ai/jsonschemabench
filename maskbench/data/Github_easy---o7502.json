@@ -1,0 +1,339 @@
+{
+  "description": "sample Github_easy/o7502.json",
+  "meta": {
+    "full_size": 797,
+    "stripped_size": 321,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "maxItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": {
+      "description": "An additional property.",
+      "properties": {
+        "primitive": {
+          "description": "A primitive value.",
+          "title": "Primitive",
+          "type": "number"
+        }
+      },
+      "title": "Optional",
+      "type": "object"
+    },
+    "properties": {
+      "arr": {
+        "description": "An array of different items.",
+        "items": {
+          "anyOf": [
+            {
+              "description": "A nested object.",
+              "properties": {
+                "item1": {
+                  "description": "A required property.",
+                  "title": "Item1",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "item1"
+              ],
+              "title": "Obj",
+              "type": "object"
+            },
+            {
+              "description": "A numeric value.",
+              "title": "Num",
+              "type": "number"
+            }
+          ],
+          "description": "An array item.",
+          "title": "Item"
+        },
+        "maxItems": 3,
+        "title": "Arr",
+        "type": "array"
+      },
+      "obj": {
+        "additionalProperties": {
+          "description": "An optional value.",
+          "title": "Key",
+          "type": "string"
+        },
+        "description": "An object with optional props.",
+        "title": "Obj",
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          123,
+          {
+            "item1": "another string value"
+          }
+        ],
+        "obj": {
+          "key1": "optional string value",
+          "key2": "another optional string value"
+        },
+        "additionalProp1": {
+          "primitive": 456
+        },
+        "additionalProp2": {
+          "primitive": 789
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[{\"item1\":\"string value\"},123,{\"item1\":\"another string value\"},{\"item1\":\"yet another string value\",\"item2\":\"extra property\"}] has more than 3 items",
+      "python_error": "[{'item1': 'string value'}, 123, {'item1': 'another string value'}, {'item1': 'yet another string value', 'item2': 'extra property'}] is too long\n\nFailed validating 'maxItems' in schema['properties']['arr']:\n    {'description': 'An array of different items.',\n     'items': {'anyOf': [{'description': 'A nested object.',\n                          'properties': {'item1': {'description': 'A '\n                                                                  'required '\n                                                                  'property.',\n                                                   'title': 'Item1',\n                                                   'type': 'string'}},\n                          'required': ['item1'],\n                          'title': 'Obj',\n                          'type': 'object'},\n                         {'description': 'A numeric value.',\n                          'title': 'Num',\n                          'type': 'number'}],\n               'description': 'An array item.',\n  .. (267 more)",
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          123,
+          {
+            "item1": "another string value"
+          },
+          {
+            "item1": "yet another string value",
+            "item2": "extra property"
+          }
+        ],
+        "obj": {
+          "key1": "optional string value",
+          "key2": "another optional string value"
+        },
+        "additionalProp1": {
+          "primitive": 456
+        },
+        "additionalProp2": {
+          "primitive": 789
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxItems keyword",
+      "valid": false,
+      "rust_error": "[{\"item1\":\"string value\"},123,{\"item1\":\"another string value\"},456,789] has more than 3 items",
+      "python_error": "[{'item1': 'string value'}, 123, {'item1': 'another string value'}, 456, 789] is too long\n\nFailed validating 'maxItems' in schema['properties']['arr']:\n    {'description': 'An array of different items.',\n     'items': {'anyOf': [{'description': 'A nested object.',\n                          'properties': {'item1': {'description': 'A '\n                                                                  'required '\n                                                                  'property.',\n                                                   'title': 'Item1',\n                                                   'type': 'string'}},\n                          'required': ['item1'],\n                          'title': 'Obj',\n                          'type': 'object'},\n                         {'description': 'A numeric value.',\n                          'title': 'Num',\n                          'type': 'number'}],\n               'description': 'An array item.',\n               'title': 'Item'},\n     'maxItems': 3,\n     .. (160 more)",
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          123,
+          {
+            "item1": "another string value"
+          },
+          456,
+          789
+        ],
+        "obj": {
+          "key1": "optional string value",
+          "key2": "another optional string value"
+        },
+        "additionalProp1": {
+          "primitive": 456
+        },
+        "additionalProp2": {
+          "primitive": 789
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[{\"item1\":\"string value\"},123,{\"item1\":\"another string value\"},456] has more than 3 items",
+      "python_error": "[{'item1': 'string value'}, 123, {'item1': 'another string value'}, 456] is too long\n\nFailed validating 'maxItems' in schema['properties']['arr']:\n    {'description': 'An array of different items.',\n     'items': {'anyOf': [{'description': 'A nested object.',\n                          'properties': {'item1': {'description': 'A '\n                                                                  'required '\n                                                                  'property.',\n                                                   'title': 'Item1',\n                                                   'type': 'string'}},\n                          'required': ['item1'],\n                          'title': 'Obj',\n                          'type': 'object'},\n                         {'description': 'A numeric value.',\n                          'title': 'Num',\n                          'type': 'number'}],\n               'description': 'An array item.',\n               'title': 'Item'},\n     'maxItems': 3,\n     'titl.. (130 more)",
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          123,
+          {
+            "item1": "another string value"
+          },
+          456
+        ],
+        "obj": {
+          "key1": "optional string value",
+          "key2": "another optional string value"
+        },
+        "additionalProp1": {
+          "primitive": 456
+        },
+        "additionalProp2": {
+          "primitive": 789
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[{\"item1\":\"string value\"},123,{\"item1\":\"another string value\"},456] has more than 3 items",
+      "python_error": "[{'item1': 'string value'}, 123, {'item1': 'another string value'}, 456] is too long\n\nFailed validating 'maxItems' in schema['properties']['arr']:\n    {'description': 'An array of different items.',\n     'items': {'anyOf': [{'description': 'A nested object.',\n                          'properties': {'item1': {'description': 'A '\n                                                                  'required '\n                                                                  'property.',\n                                                   'title': 'Item1',\n                                                   'type': 'string'}},\n                          'required': ['item1'],\n                          'title': 'Obj',\n                          'type': 'object'},\n                         {'description': 'A numeric value.',\n                          'title': 'Num',\n                          'type': 'number'}],\n               'description': 'An array item.',\n               'title': 'Item'},\n     'maxItems': 3,\n     'titl.. (130 more)",
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          123,
+          {
+            "item1": "another string value"
+          },
+          456
+        ],
+        "obj": {
+          "key1": "optional string value",
+          "key2": 123
+        },
+        "additionalProp1": {
+          "primitive": "not a number"
+        },
+        "additionalProp2": {
+          "primitive": 789
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          10,
+          {
+            "item1": "another string value"
+          }
+        ],
+        "obj": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "additionalProp1": {
+          "primitive": 20
+        },
+        "additionalProp2": {
+          "primitive": 30
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['obj']['additionalProperties']:\n    {'description': 'An optional value.', 'title': 'Key', 'type': 'string'}\n\nOn instance['obj']['key2']:\n    123",
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          10,
+          {
+            "item1": "another string value"
+          }
+        ],
+        "obj": {
+          "key1": "value1",
+          "key2": 123
+        },
+        "additionalProp1": {
+          "primitive": 20,
+          "nonPrimitive": "invalid"
+        },
+        "additionalProp2": {
+          "primitive": 30
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxItems keyword",
+      "valid": false,
+      "rust_error": "\"invalid item\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[{'item1': 'string value'}, 10, {'item1': 'another string value'}, {'item1': 'yet another string value'}, 'invalid item'] is too long\n\nFailed validating 'maxItems' in schema['properties']['arr']:\n    {'description': 'An array of different items.',\n     'items': {'anyOf': [{'description': 'A nested object.',\n                          'properties': {'item1': {'description': 'A '\n                                                                  'required '\n                                                                  'property.',\n                                                   'title': 'Item1',\n                                                   'type': 'string'}},\n                          'required': ['item1'],\n                          'title': 'Obj',\n                          'type': 'object'},\n                         {'description': 'A numeric value.',\n                          'title': 'Num',\n                          'type': 'number'}],\n               'description': 'An array item.',\n              .. (248 more)",
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          10,
+          {
+            "item1": "another string value"
+          },
+          {
+            "item1": "yet another string value"
+          },
+          "invalid item"
+        ],
+        "obj": {
+          "key1": "value1",
+          "key2": "value2"
+        },
+        "additionalProp1": {
+          "primitive": 20
+        },
+        "additionalProp2": {
+          "primitive": 30
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[{\"item1\":\"string value\"},10,{\"item1\":\"another string value\"},{\"item1\":\"extra value\"}] has more than 3 items",
+      "python_error": "[{'item1': 'string value'}, 10, {'item1': 'another string value'}, {'item1': 'extra value'}] is too long\n\nFailed validating 'maxItems' in schema['properties']['arr']:\n    {'description': 'An array of different items.',\n     'items': {'anyOf': [{'description': 'A nested object.',\n                          'properties': {'item1': {'description': 'A '\n                                                                  'required '\n                                                                  'property.',\n                                                   'title': 'Item1',\n                                                   'type': 'string'}},\n                          'required': ['item1'],\n                          'title': 'Obj',\n                          'type': 'object'},\n                         {'description': 'A numeric value.',\n                          'title': 'Num',\n                          'type': 'number'}],\n               'description': 'An array item.',\n               'title': 'Item'},\n     'maxI.. (185 more)",
+      "data": {
+        "arr": [
+          {
+            "item1": "string value"
+          },
+          10,
+          {
+            "item1": "another string value"
+          },
+          {
+            "item1": "extra value"
+          }
+        ],
+        "obj": {
+          "key1": 123,
+          "key2": "value2"
+        },
+        "additionalProp1": {
+          "primitive": "not a number"
+        },
+        "additionalProp2": {
+          "primitive": 30
+        }
+      }
+    }
+  ]
+}

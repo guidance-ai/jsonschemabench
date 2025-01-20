@@ -1,0 +1,361 @@
+{
+  "description": "sample Github_medium/o90807.json",
+  "meta": {
+    "full_size": 3037,
+    "stripped_size": 890,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "networking": {
+        "description": "OpenLDAP networking configuration properties",
+        "properties": {
+          "external_access": {
+            "description": "Enable access from outside the cluster through Marathon-LB.\nNOTE: this connection is unencrypted.",
+            "properties": {
+              "enable": {
+                "default": false,
+                "description": "Enable or disable creating a VIP for external access through a public node running Marathon-LB.",
+                "type": "boolean"
+              },
+              "external_port": {
+                "default": 10389,
+                "description": "For external access, port number to be used for clear communication in the external Marathon-LB load balancer",
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "port": {
+            "default": 389,
+            "description": "Port number to be used for clear communication internally to the cluster.",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "openldap": {
+        "description": "OpenLDAP service configuration properties",
+        "properties": {
+          "additional_modules": {
+            "description": "Comma-separated list of modules to load.",
+            "type": "string"
+          },
+          "additional_schemas": {
+            "description": "Loads additional schemas provided in the slapd package.",
+            "type": "string"
+          },
+          "admin_password": {
+            "default": "admin",
+            "description": "Administrator password. Defaults to 'admin'.",
+            "type": "string"
+          },
+          "config_password": {
+            "default": "password",
+            "description": "Allows password protected access to the dn=config branch. This helps to reconfigure the server without interruption. Defaults to 'password'",
+            "type": "string"
+          },
+          "cpus": {
+            "default": 0.3,
+            "description": "CPU shares to allocate to each OpenLDAP node.",
+            "minimum": 0.3,
+            "type": "number"
+          },
+          "domain": {
+            "default": "example.org",
+            "description": "LDAP domain. Defaults to example.org",
+            "type": "string"
+          },
+          "force_reconfigure": {
+            "default": false,
+            "description": "Reconfigure the service after the image has been initialized.",
+            "type": "boolean"
+          },
+          "mem": {
+            "default": 128.0,
+            "description": "Memory to allocate to each OpenLDAP node.",
+            "minimum": 128.0,
+            "type": "number"
+          },
+          "organization": {
+            "default": "example",
+            "description": "Organization name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem"
+        ],
+        "type": "object"
+      },
+      "service": {
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "name": {
+            "default": "openldap",
+            "description": "Name of this service instance.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "storage": {
+        "description": "OpenLDAP storage configuration properties",
+        "properties": {
+          "host_volume": {
+            "default": "/tmp",
+            "description": "The location of a volume on the host to be used for persisting OpenLDAP data. The final location will be derived from this value plus the name set in `name` (e.g. `/mnt/host_volume/openldap`). Note that this path must be the same on all DCOS agents.",
+            "type": "string"
+          },
+          "persistence": {
+            "description": "Enable persistent storage.",
+            "properties": {
+              "enable": {
+                "default": false,
+                "description": "Enable or disable data persistence.",
+                "type": "boolean"
+              },
+              "ldap_volume_size": {
+                "default": 256,
+                "description": "Size in MBs of the volume to be created for the LDAP database",
+                "type": "number"
+              },
+              "slapd_volume_size": {
+                "default": 64,
+                "description": "Size in MBs of the volume to be created for internal storage of the SLAPD daemon.",
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 10390
+          },
+          "port": 389
+        },
+        "openldap": {
+          "additional_modules": "",
+          "additional_schemas": "",
+          "admin_password": "admin123",
+          "config_password": "password123",
+          "cpus": 0.5,
+          "domain": "example.com",
+          "force_reconfigure": false,
+          "mem": 256.0,
+          "organization": "example"
+        },
+        "service": {
+          "name": "openldap-service"
+        },
+        "storage": {
+          "host_volume": "/mnt/data",
+          "persistence": {
+            "enable": true,
+            "ldap_volume_size": 512,
+            "slapd_volume_size": 128
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "64.0 is less than the minimum of 128.0\n\nFailed validating 'minimum' in schema['properties']['openldap']['properties']['mem']:\n    {'default': 128.0,\n     'description': 'Memory to allocate to each OpenLDAP node.',\n     'minimum': 128.0,\n     'type': 'number'}\n\nOn instance['openldap']['mem']:\n    64.0",
+      "data": {
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 10390
+          },
+          "port": 389
+        },
+        "openldap": {
+          "additional_modules": "",
+          "additional_schemas": "",
+          "admin_password": "admin123",
+          "config_password": "password123",
+          "cpus": 0.2,
+          "domain": "example.com",
+          "force_reconfigure": false,
+          "mem": 64.0,
+          "organization": "example"
+        },
+        "service": {
+          "name": "openldap-service"
+        },
+        "storage": {
+          "host_volume": "/mnt/data",
+          "persistence": {
+            "enable": true,
+            "ldap_volume_size": 512,
+            "slapd_volume_size": 128
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"389\" is not of type \"number\"",
+      "python_error": "64.0 is less than the minimum of 128.0\n\nFailed validating 'minimum' in schema['properties']['openldap']['properties']['mem']:\n    {'default': 128.0,\n     'description': 'Memory to allocate to each OpenLDAP node.',\n     'minimum': 128.0,\n     'type': 'number'}\n\nOn instance['openldap']['mem']:\n    64.0",
+      "data": {
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 10390
+          },
+          "port": "389"
+        },
+        "openldap": {
+          "additional_modules": "",
+          "additional_schemas": "",
+          "admin_password": "admin123",
+          "config_password": "password123",
+          "cpus": 0.2,
+          "mem": 64.0,
+          "domain": "example.com",
+          "force_reconfigure": false,
+          "organization": "example"
+        },
+        "service": {
+          "name": "openldap-service"
+        },
+        "storage": {
+          "host_volume": "/mnt/data",
+          "persistence": {
+            "enable": true,
+            "ldap_volume_size": 512,
+            "slapd_volume_size": 128
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "'mem' is a required property\n\nFailed validating 'required' in schema['properties']['openldap']:\n    {'description': 'OpenLDAP service configuration properties',\n     'properties': {'additional_modules': {'description': 'Comma-separated '\n                                                          'list of modules '\n                                                          'to load.',\n                                           'type': 'string'},\n                    'additional_schemas': {'description': 'Loads '\n                                                          'additional '\n                                                          'schemas '\n                                                          'provided in the '\n                                                          'slapd package.',\n                                           'type': 'string'},\n                    'admin_password': {'default': 'admin',\n                                       'description': 'Administrator '\n                        .. (3082 more)",
+      "data": {
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 10390
+          },
+          "port": 389
+        },
+        "openldap": {
+          "additional_modules": "",
+          "additional_schemas": "",
+          "admin_password": "admin123",
+          "config_password": "password123",
+          "cpus": 0.2,
+          "Invalid: cpus should be at least 0.3": "domain",
+          "Invalid: domain should be a string": "force_reconfigure",
+          "Invalid: force_reconfigure should be a boolean": "mem",
+          "Invalid: mem should be at least 128.0": "organization",
+          "Invalid: organization should be a string": "service",
+          "Invalid: service should be an object": "storage",
+          "Invalid: storage should be an object": "openldap"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 10390
+          },
+          "port": 389
+        },
+        "openldap": {
+          "additional_modules": "memberof,refint",
+          "additional_schemas": "cosine,inetorgperson",
+          "admin_password": "myadminpassword",
+          "config_password": "myconfigpassword",
+          "cpus": 0.5,
+          "domain": "mydomain.org",
+          "force_reconfigure": true,
+          "mem": 256.0,
+          "organization": "My Organization"
+        },
+        "service": {
+          "name": "myopenldap"
+        },
+        "storage": {
+          "host_volume": "/mnt/data",
+          "persistence": {
+            "enable": true,
+            "ldap_volume_size": 512,
+            "slapd_volume_size": 128
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "0.2 is less than the minimum of 0.3\n\nFailed validating 'minimum' in schema['properties']['openldap']['properties']['cpus']:\n    {'default': 0.3,\n     'description': 'CPU shares to allocate to each OpenLDAP node.',\n     'minimum': 0.3,\n     'type': 'number'}\n\nOn instance['openldap']['cpus']:\n    0.2",
+      "data": {
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 10390
+          },
+          "port": 389
+        },
+        "openldap": {
+          "additional_modules": "memberof,refint",
+          "additional_schemas": "cosine,inetorgperson",
+          "admin_password": "myadminpassword",
+          "config_password": "myconfigpassword",
+          "cpus": 0.2,
+          "domain": "mydomain.org",
+          "force_reconfigure": true,
+          "mem": 256.0,
+          "organization": "My Organization"
+        },
+        "service": {
+          "name": "myopenldap"
+        },
+        "storage": {
+          "host_volume": "/mnt/data",
+          "persistence": {
+            "enable": true,
+            "ldap_volume_size": 512,
+            "slapd_volume_size": 128
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,345 @@
+{
+  "description": "sample Github_medium/o60880.json",
+  "meta": {
+    "full_size": 933,
+    "stripped_size": 933,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://mindsnacks.github.io/Zinc/schemas/v1/manifest.json#",
+    "type": "object",
+    "required": [
+      "catalog",
+      "bundle",
+      "version",
+      "files"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "format": {
+        "type": "string",
+        "pattern": "1"
+      },
+      "catalog": {
+        "type": "string",
+        "minLength": 1
+      },
+      "bundle": {
+        "type": "string",
+        "minLength": 1
+      },
+      "version": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "flavors": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "files": {
+        "type": "object",
+        "patternProperties": {
+          ".+": {
+            "type": "object",
+            "required": [
+              "sha",
+              "formats"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "sha": {
+                "type": "string",
+                "pattern": "[0-9a-f]{40}"
+              },
+              "formats": {
+                "type": "object",
+                "additionalProperties": false,
+                "patternProperties": {
+                  "^(gz|raw)$": {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "flavors": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "format": "1",
+        "catalog": "example_catalog",
+        "bundle": "example_bundle",
+        "version": 1,
+        "flavors": [
+          "flavor1",
+          "flavor2"
+        ],
+        "files": {
+          "file1": {
+            "sha": "0123456789abcdef0123456789abcdef01234567",
+            "formats": {
+              "gz": {
+                "size": 100
+              },
+              "raw": {
+                "size": 200
+              }
+            },
+            "flavors": [
+              "flavor1"
+            ]
+          },
+          "file2": {
+            "sha": "fedcba9876543210fedcba9876543210fedcba98",
+            "formats": {
+              "gz": {
+                "size": 300
+              },
+              "raw": {
+                "size": 400
+              }
+            },
+            "flavors": [
+              "flavor2"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "format": "1",
+        "catalog": "my_catalog",
+        "bundle": "my_bundle",
+        "version": 1,
+        "flavors": [
+          "flavor1",
+          "flavor2"
+        ],
+        "files": {
+          "file1": {
+            "sha": "0123456789abcdef0123456789abcdef01234567",
+            "formats": {
+              "gz": {
+                "size": 100
+              },
+              "raw": {
+                "size": 200
+              }
+            },
+            "flavors": [
+              "flavor1"
+            ]
+          },
+          "file2": {
+            "sha": "fedcba9876543210fedcba9876543210fedcba98",
+            "formats": {
+              "gz": {
+                "size": 300
+              },
+              "raw": {
+                "size": 400
+              }
+            },
+            "flavors": [
+              "flavor2"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['version']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['version']:\n    0",
+      "data": {
+        "format": "1",
+        "catalog": "my_catalog",
+        "bundle": "my_bundle",
+        "version": 0,
+        "flavors": [
+          "flavor1",
+          "flavor2"
+        ],
+        "files": {
+          "file1": {
+            "sha": "0123456789abcdef0123456789abcdef01234567",
+            "formats": {
+              "gz": {
+                "size": 100
+              },
+              "raw": {
+                "size": 200
+              }
+            },
+            "flavors": [
+              "flavor1"
+            ]
+          },
+          "file2": {
+            "sha": "fedcba9876543210fedcba9876543210fedcba98",
+            "formats": {
+              "gz": {
+                "size": 300
+              },
+              "raw": {
+                "size": 400
+              }
+            },
+            "flavors": [
+              "flavor2"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('invalid' was unexpected)",
+      "python_error": "'invalid' does not match any of the regexes: '^(gz|raw)$'\n\nFailed validating 'additionalProperties' in schema['properties']['files']['patternProperties']['.+']['properties']['formats']:\n    {'type': 'object',\n     'additionalProperties': False,\n     'patternProperties': {'^(gz|raw)$': {'type': 'object',\n                                          'properties': {'size': {'type': 'integer',\n                                                                  'minimum': 0}},\n                                          'required': ['size'],\n                                          'additionalProperties': False}}}\n\nOn instance['files']['file1']['formats']:\n    {'gz': {'size': 100}, 'raw': {'size': 200}, 'invalid': {'size': 300}}",
+      "data": {
+        "format": "1",
+        "catalog": "my_catalog",
+        "bundle": "my_bundle",
+        "version": 1,
+        "flavors": [
+          "flavor1",
+          "flavor2"
+        ],
+        "files": {
+          "file1": {
+            "sha": "0123456789abcdef0123456789abcdef01234567",
+            "formats": {
+              "gz": {
+                "size": 100
+              },
+              "raw": {
+                "size": 200
+              },
+              "invalid": {
+                "size": 300
+              }
+            },
+            "flavors": [
+              "flavor1"
+            ]
+          },
+          "file2": {
+            "sha": "fedcba9876543210fedcba9876543210fedcba98",
+            "formats": {
+              "gz": {
+                "size": 400
+              },
+              "raw": {
+                "size": 500
+              }
+            },
+            "flavors": [
+              "flavor2"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "Additional properties are not allowed ('unknownProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'id': 'http://mindsnacks.github.io/Zinc/schemas/v1/manifest.json#',\n     'type': 'object',\n     'required': ['catalog', 'bundle', 'version', 'files'],\n     'additionalProperties': False,\n     'properties': {'format': {'type': 'string', 'pattern': '1'},\n                    'catalog': {'type': 'string', 'minLength': 1},\n                    'bundle': {'type': 'string', 'minLength': 1},\n                    'version': {'type': 'integer', 'minimum': 1},\n                    'flavors': {'type': 'array',\n                                'items': {'type': 'string',\n                                          'minLength': 1}},\n                    'files': {'type': 'object',\n                              'patternProperties': {'.+': {'type': 'object',\n                                                           'required': ['sha',\n         .. (2509 more)",
+      "data": {
+        "format": "1",
+        "catalog": "",
+        "bundle": "my_bundle",
+        "version": 1,
+        "flavors": [
+          "flavor1",
+          "flavor2"
+        ],
+        "files": {
+          "file1": {
+            "sha": "0123456789abcdef0123456789abcdef0123456",
+            "Invalid SHA value (39 characters instead of 40)": "formats",
+            "formats": {
+              "gz": {
+                "size": 100
+              },
+              "raw": {
+                "size": 200
+              }
+            },
+            "flavors": [
+              "flavor1"
+            ]
+          },
+          "file2": {
+            "sha": "fedcba9876543210fedcba9876543210fedcba98",
+            "formats": {
+              "gz": {
+                "size": 300
+              },
+              "raw": {
+                "size": -1
+              }
+            }
+          },
+          "Invalid size (negative integer)": "flavors",
+          "flavors": [
+            "flavor2"
+          ]
+        },
+        "unknownProperty": "unknownValue"
+      }
+    }
+  ]
+}

@@ -1,0 +1,403 @@
+{
+  "description": "sample Github_medium/o65012.json",
+  "meta": {
+    "full_size": 1990,
+    "stripped_size": 1990,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "filter": {
+        "$ref": "#/definitions/bool"
+      }
+    },
+    "additionalProperties": false,
+    "definitions": {
+      "field": {
+        "type": "string"
+      },
+      "value": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "array",
+          "object"
+        ]
+      },
+      "range": {
+        "type": "array"
+      },
+      "filter_type": {
+        "type": "string",
+        "enum": [
+          "bool",
+          "match",
+          "in",
+          "exist",
+          "compare"
+        ]
+      },
+      "filters_allowed": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/basic_filter"
+          },
+          {
+            "$ref": "#/definitions/exist"
+          },
+          {
+            "$ref": "#/definitions/bool"
+          },
+          {
+            "$ref": "#/definitions/compare"
+          }
+        ]
+      },
+      "basic_filter": {
+        "type": "object",
+        "properties": {
+          "filter_type": {
+            "$ref": "#/definitions/filter_type"
+          },
+          "field": {
+            "$ref": "#/definitions/field"
+          },
+          "value": {
+            "$ref": "#/definitions/value"
+          },
+          "range": {
+            "$ref": "#/definitions/range"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "field",
+              "value",
+              "filter_type"
+            ]
+          },
+          {
+            "required": [
+              "field",
+              "range",
+              "filter_type"
+            ]
+          }
+        ],
+        "additionalProperties": false
+      },
+      "exist": {
+        "type": "object",
+        "properties": {
+          "filter_type": {
+            "$ref": "#/definitions/filter_type"
+          },
+          "field": {
+            "$ref": "#/definitions/field"
+          }
+        },
+        "required": [
+          "field",
+          "filter_type"
+        ],
+        "additionalProperties": false
+      },
+      "compare": {
+        "type": "object",
+        "properties": {
+          "filter_type": {
+            "$ref": "#/definitions/filter_type"
+          },
+          "field1": {
+            "$ref": "#/definitions/field"
+          },
+          "field2": {
+            "$ref": "#/definitions/field"
+          },
+          "constant": {
+            "$ref": "#/definitions/constant"
+          },
+          "comparison_operator": {
+            "$ref": "#/definitions/comparison_operator"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "field1",
+              "field2",
+              "comparison_operator",
+              "filter_type"
+            ]
+          },
+          {
+            "required": [
+              "field1",
+              "constant",
+              "comparison_operator",
+              "filter_type"
+            ]
+          }
+        ],
+        "additionalProperties": false
+      },
+      "constant": {
+        "type": [
+          "string",
+          "number"
+        ]
+      },
+      "comparison_operator": {
+        "type": "string",
+        "enum": [
+          "lt",
+          "gt",
+          "lte",
+          "gte",
+          "eq"
+        ]
+      },
+      "bool": {
+        "type": "object",
+        "properties": {
+          "filter_type": {
+            "$ref": "#/definitions/filter_type"
+          },
+          "must": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/filters_allowed"
+            }
+          },
+          "must_not": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/filters_allowed"
+            }
+          },
+          "should": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/filters_allowed"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "filter": {
+          "filter_type": "bool",
+          "must": [
+            {
+              "filter_type": "match",
+              "field": "name",
+              "value": "John"
+            },
+            {
+              "filter_type": "in",
+              "field": "age",
+              "value": [
+                25,
+                30,
+                35
+              ]
+            }
+          ],
+          "must_not": [
+            {
+              "filter_type": "exist",
+              "field": "address"
+            }
+          ],
+          "should": [
+            {
+              "filter_type": "compare",
+              "field1": "salary",
+              "constant": 50000,
+              "comparison_operator": "gt"
+            },
+            {
+              "filter_type": "compare",
+              "field1": "experience",
+              "field2": "years",
+              "comparison_operator": "eq"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "filter": {
+          "filter_type": "bool",
+          "must": [
+            {
+              "filter_type": "match",
+              "field": "name",
+              "value": "John"
+            },
+            {
+              "filter_type": "exist",
+              "field": "age"
+            }
+          ],
+          "must_not": [
+            {
+              "filter_type": "compare",
+              "field1": "age",
+              "constant": 30,
+              "comparison_operator": "lt"
+            }
+          ],
+          "should": [
+            {
+              "filter_type": "in",
+              "field": "city",
+              "value": [
+                "New York",
+                "Los Angeles"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"filter_type\":\"compare\",\"field1\":\"age\",\"constant\":null,\"comparison_operator\":\"lt\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not of type 'string', 'number'\n\nFailed validating 'type' in schema[3]['properties']['constant']:\n    {'type': ['string', 'number']}\n\nOn instance['constant']:\n    None",
+      "data": {
+        "filter": {
+          "filter_type": "bool",
+          "must": [
+            {
+              "filter_type": "match",
+              "field": "name",
+              "value": "John"
+            },
+            {
+              "filter_type": "exist",
+              "field": "age"
+            }
+          ],
+          "must_not": [
+            {
+              "filter_type": "compare",
+              "field1": "age",
+              "constant": null,
+              "comparison_operator": "lt"
+            }
+          ],
+          "should": [
+            {
+              "filter_type": "in",
+              "field": "city",
+              "value": [
+                "New York",
+                "Los Angeles"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"filter_type\":\"compare\",\"field1\":\"age\",\"constant\":30,\"comparison_operator\":\"lt\",\"field2\":\"another_field\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'filter_type': 'compare', 'field1': 'age', 'constant': 30, 'comparison_operator': 'lt', 'field2': 'another_field'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['filter']['properties']['must']['items']:\n    {'oneOf': [{'$ref': '#/definitions/basic_filter'},\n               {'$ref': '#/definitions/exist'},\n               {'$ref': '#/definitions/bool'},\n               {'$ref': '#/definitions/compare'}]}\n\nOn instance['filter']['must'][0]:\n    {'filter_type': 'compare',\n     'field1': 'age',\n     'constant': 30,\n     'comparison_operator': 'lt',\n     'field2': 'another_field'}",
+      "data": {
+        "filter": {
+          "filter_type": "bool",
+          "must": [
+            {
+              "filter_type": "compare",
+              "field1": "age",
+              "constant": 30,
+              "comparison_operator": "lt",
+              "field2": "another_field"
+            }
+          ],
+          "must_not": [],
+          "should": []
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"filter_type\":\"match\",\"field\":\"name\",\"value\":\"John\",\"range\":[]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra_key' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'filter': {'$ref': '#/definitions/bool'}},\n     'additionalProperties': False,\n     'definitions': {'field': {'type': 'string'},\n                     'value': {'type': ['string',\n                                        'number',\n                                        'boolean',\n                                        'array',\n                                        'object']},\n                     'range': {'type': 'array'},\n                     'filter_type': {'type': 'string',\n                                     'enum': ['bool',\n                                              'match',\n                                              'in',\n                                              'exist',\n                                              'compare']},\n                     'filters_allowed': {'.. (4721 more)",
+      "data": {
+        "filter": {
+          "filter_type": "bool",
+          "must": [
+            {
+              "filter_type": "match",
+              "field": "name",
+              "value": "John",
+              "range": []
+            },
+            {
+              "filter_type": "exist",
+              "field": "age"
+            }
+          ],
+          "must_not": [
+            {
+              "filter_type": "compare",
+              "field1": "age",
+              "constant": 30,
+              "comparison_operator": "lt"
+            }
+          ],
+          "should": [
+            {
+              "filter_type": "in",
+              "field": "city",
+              "value": [
+                "New York",
+                "Los Angeles"
+              ]
+            }
+          ]
+        },
+        "extra_key": "extra_value"
+      }
+    }
+  ]
+}

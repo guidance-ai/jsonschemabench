@@ -1,0 +1,281 @@
+{
+  "description": "sample JsonSchemaStore/github-funding.json",
+  "meta": {
+    "full_size": 2270,
+    "stripped_size": 1224,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "format",
+      "format:uri-reference",
+      "items",
+      "oneOf",
+      "pattern",
+      "uniqueItems"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "properties",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$comment": "https://docs.github.com/en/github/administering-a-repository/displaying-a-sponsor-button-in-your-repository",
+    "$id": "https://json.schemastore.org/github-funding.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "github_username": {
+        "type": "string",
+        "maxLength": 39,
+        "pattern": "^[a-zA-Z0-9](-?[a-zA-Z0-9])*$",
+        "examples": [
+          "SampleUserName"
+        ]
+      },
+      "nullable_string": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "description": "You can add a sponsor button in your repository to increase the visibility of funding options for your open source project.",
+    "properties": {
+      "community_bridge": {
+        "title": "CommunityBridge",
+        "description": "Project name on CommunityBridge.",
+        "$ref": "#/definitions/nullable_string",
+        "minLength": 1
+      },
+      "github": {
+        "title": "GitHub Sponsors",
+        "description": "Username or usernames on GitHub.",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/github_username"
+          },
+          {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/definitions/github_username"
+            }
+          }
+        ]
+      },
+      "issuehunt": {
+        "title": "IssueHunt",
+        "description": "Username on IssueHunt.",
+        "$ref": "#/definitions/nullable_string",
+        "minLength": 1
+      },
+      "ko_fi": {
+        "title": "Ko-fi",
+        "description": "Username on Ko-fi.",
+        "$ref": "#/definitions/nullable_string",
+        "minLength": 1
+      },
+      "liberapay": {
+        "title": "Liberapay",
+        "description": "Username on Liberapay.",
+        "$ref": "#/definitions/nullable_string",
+        "minLength": 1
+      },
+      "open_collective": {
+        "title": "Open Collective",
+        "description": "Username on Open Collective.",
+        "$ref": "#/definitions/nullable_string",
+        "minLength": 1
+      },
+      "otechie": {
+        "title": "Otechie",
+        "description": "Username on Otechie.",
+        "$ref": "#/definitions/nullable_string",
+        "minLength": 1
+      },
+      "patreon": {
+        "title": "Patreon",
+        "description": "Username on Pateron.",
+        "$ref": "#/definitions/nullable_string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "tidelift": {
+        "title": "Tidelift",
+        "description": "Platform and package on Tidelift.",
+        "$ref": "#/definitions/nullable_string",
+        "pattern": "^(npm|pypi|rubygems|maven|packagist|nuget)/.+$"
+      },
+      "custom": {
+        "title": "Custom URL",
+        "description": "Link or links where funding is accepted on external locations.",
+        "type": [
+          "string",
+          "array",
+          "null"
+        ],
+        "format": "uri-reference",
+        "items": {
+          "title": "Link",
+          "description": "Link to an external location.",
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "uniqueItems": true
+      }
+    },
+    "title": "GitHub Funding",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "github": "SampleUserName",
+        "patreon": "SamplePatreonUserName",
+        "custom": [
+          "https://example.com/donate",
+          "https://example.com/support"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "github": "SampleUserName",
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": [
+          "https://example.com/donate",
+          "https://example.com/sponsor"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Sample-UserName-\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'Sample-UserName-' does not match '^[a-zA-Z0-9](-?[a-zA-Z0-9])*$'\n\nFailed validating 'pattern' in schema[0]:\n    {'type': 'string',\n     'maxLength': 39,\n     'pattern': '^[a-zA-Z0-9](-?[a-zA-Z0-9])*$',\n     'examples': ['SampleUserName']}\n\nOn instance:\n    'Sample-UserName-'",
+      "data": {
+        "github": "Sample-UserName-",
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": [
+          "https://example.com/donate",
+          "https://example.com/sponsor"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "[\"SampleUserName\",\"SampleUserName\"] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "['SampleUserName', 'SampleUserName'] has non-unique elements\n\nFailed validating 'uniqueItems' in schema[1]:\n    {'type': 'array',\n     'minItems': 1,\n     'uniqueItems': True,\n     'items': {'$ref': '#/definitions/github_username'}}\n\nOn instance:\n    ['SampleUserName', 'SampleUserName']",
+      "data": {
+        "github": [
+          "SampleUserName",
+          "SampleUserName"
+        ],
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": [
+          "https://example.com/donate",
+          "https://example.com/sponsor"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "42 is not of types \"array\", \"null\", \"string\"",
+      "python_error": "42 is not of type 'string', 'array', 'null'\n\nFailed validating 'type' in schema['properties']['custom']:\n    {'title': 'Custom URL',\n     'description': 'Link or links where funding is accepted on external '\n                    'locations.',\n     'type': ['string', 'array', 'null'],\n     'format': 'uri-reference',\n     'items': {'title': 'Link',\n               'description': 'Link to an external location.',\n               'type': 'string',\n               'format': 'uri-reference'},\n     'uniqueItems': True}\n\nOn instance['custom']:\n    42",
+      "data": {
+        "github": "SampleUserName",
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": 42
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('invalid_key' was unexpected)",
+      "python_error": "Additional properties are not allowed ('invalid_key' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$comment': 'https://docs.github.com/en/github/administering-a-repository/displaying-a-sponsor-button-in-your-repository',\n     '$id': 'https://json.schemastore.org/github-funding.json',\n     '$schema': 'http://json-schema.org/draft-07/schema#',\n     'additionalProperties': False,\n     'definitions': {'github_username': {'type': 'string',\n                                         'maxLength': 39,\n                                         'pattern': '^[a-zA-Z0-9](-?[a-zA-Z0-9])*$',\n                                         'examples': ['SampleUserName']},\n                     'nullable_string': {'type': ['string', 'null']}},\n     'description': 'You can add a sponsor button in your repository to '\n                    'increase the visibility of funding options for your '\n                    'open source project.',\n     'properties': {'community_bridge': {'title': 'CommunityBridge',\n      .. (3998 more)",
+      "data": {
+        "github": "SampleUserName",
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": [
+          "https://example.com/donate",
+          "invalid_url",
+          "ftp://example.com/sponsor"
+        ],
+        "invalid_key": "Test"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on uniqueItems keyword",
+      "valid": false,
+      "rust_error": "[\"https://example.com/donate\",\"https://example.com/donate\"] has non-unique elements",
+      "python_error": "['https://example.com/donate', 'https://example.com/donate'] has non-unique elements\n\nFailed validating 'uniqueItems' in schema['properties']['custom']:\n    {'title': 'Custom URL',\n     'description': 'Link or links where funding is accepted on external '\n                    'locations.',\n     'type': ['string', 'array', 'null'],\n     'format': 'uri-reference',\n     'items': {'title': 'Link',\n               'description': 'Link to an external location.',\n               'type': 'string',\n               'format': 'uri-reference'},\n     'uniqueItems': True}\n\nOn instance['custom']:\n    ['https://example.com/donate', 'https://example.com/donate']",
+      "data": {
+        "github": "SampleUserName",
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": [
+          "https://example.com/donate",
+          "https://example.com/donate"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema[1]:\n    {'type': 'array',\n     'minItems': 1,\n     'uniqueItems': True,\n     'items': {'$ref': '#/definitions/github_username'}}\n\nOn instance:\n    []",
+      "data": {
+        "github": [],
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": [
+          "https://example.com/donate",
+          "https://example.com/sponsor"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"Sample-UserName-\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'Sample-UserName-' does not match '^[a-zA-Z0-9](-?[a-zA-Z0-9])*$'\n\nFailed validating 'pattern' in schema[0]:\n    {'type': 'string',\n     'maxLength': 39,\n     'pattern': '^[a-zA-Z0-9](-?[a-zA-Z0-9])*$',\n     'examples': ['SampleUserName']}\n\nOn instance:\n    'Sample-UserName-'",
+      "data": {
+        "github": "Sample-UserName-",
+        "patreon": "SamplePatreonUsername",
+        "ko_fi": "SampleKoFiUsername",
+        "custom": [
+          "https://example.com/donate",
+          "https://example.com/sponsor",
+          "https://example.com/donate"
+        ]
+      }
+    }
+  ]
+}

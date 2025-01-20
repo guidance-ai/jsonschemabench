@@ -1,0 +1,227 @@
+{
+  "description": "sample Kubernetes/kb_627_Normalized.json",
+  "meta": {
+    "full_size": 1675,
+    "stripped_size": 666,
+    "features": [
+      "$ref",
+      "items"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_NodeSelectorRequirement": {
+        "description": "A node selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+        "properties": {
+          "key": {
+            "description": "The label key that the selector applies to.",
+            "type": "string"
+          },
+          "operator": {
+            "description": "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.",
+            "type": "string"
+          },
+          "values": {
+            "description": "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. This array is replaced during a strategic merge patch.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "operator"
+        ],
+        "type": "object"
+      }
+    },
+    "description": "A null or empty node selector term matches no objects. The requirements of them are ANDed. The TopologySelectorTerm type implements a subset of the NodeSelectorTerm.",
+    "properties": {
+      "matchExpressions": {
+        "description": "A list of node selector requirements by node's labels.",
+        "items": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_NodeSelectorRequirement"
+        },
+        "type": [
+          "array",
+          "null"
+        ]
+      },
+      "matchFields": {
+        "description": "A list of node selector requirements by node's fields.",
+        "items": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_NodeSelectorRequirement"
+        },
+        "type": [
+          "array",
+          "null"
+        ]
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "matchExpressions": [
+          {
+            "key": "node-role.kubernetes.io/control-plane",
+            "operator": "Exists",
+            "values": []
+          },
+          {
+            "key": "node-role.kubernetes.io/worker",
+            "operator": "NotIn",
+            "values": [
+              "true"
+            ]
+          }
+        ],
+        "matchFields": [
+          {
+            "key": "metadata.name",
+            "operator": "In",
+            "values": [
+              "node1",
+              "node2"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"string\" is not of types \"array\", \"null\"",
+      "python_error": "'string' is not of type 'array', 'null'\n\nFailed validating 'type' in schema['properties']['matchExpressions']:\n    {'description': \"A list of node selector requirements by node's \"\n                    'labels.',\n     'items': {'$ref': '#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_NodeSelectorRequirement'},\n     'type': ['array', 'null']}\n\nOn instance['matchExpressions']:\n    'string'",
+      "data": {
+        "matchExpressions": "string",
+        "matchFields": [
+          {
+            "key": "metadata.name",
+            "operator": "In",
+            "values": [
+              "node1",
+              "node2"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"array\", \"null\"",
+      "python_error": "123 is not of type 'array', 'null'\n\nFailed validating 'type' in schema['properties']['matchFields']:\n    {'description': \"A list of node selector requirements by node's \"\n                    'fields.',\n     'items': {'$ref': '#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_NodeSelectorRequirement'},\n     'type': ['array', 'null']}\n\nOn instance['matchFields']:\n    123",
+      "data": {
+        "matchExpressions": [
+          {
+            "key": "node-role.kubernetes.io/control-plane",
+            "operator": "Exists",
+            "values": []
+          },
+          {
+            "key": "node-role.kubernetes.io/worker",
+            "operator": "NotIn",
+            "values": [
+              "true"
+            ]
+          }
+        ],
+        "matchFields": 123
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['matchFields']['items']['properties']['values']['items']:\n    {'type': 'string'}\n\nOn instance['matchFields'][0]['values'][1]:\n    123",
+      "data": {
+        "matchExpressions": [
+          {
+            "key": "node-role.kubernetes.io/control-plane",
+            "operator": "Gt",
+            "values": []
+          }
+        ],
+        "matchFields": [
+          {
+            "key": "metadata.name",
+            "operator": "In",
+            "values": [
+              "node1",
+              123
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "matchExpressions": [
+          {
+            "key": "kubernetes.io/hostname",
+            "operator": "In",
+            "values": [
+              "node1",
+              "node2"
+            ]
+          },
+          {
+            "key": "beta.kubernetes.io/os",
+            "operator": "Exists",
+            "values": []
+          },
+          {
+            "key": "beta.kubernetes.io/arch",
+            "operator": "NotIn",
+            "values": [
+              "arm64",
+              "ppc64le"
+            ]
+          }
+        ],
+        "matchFields": [
+          {
+            "key": "metadata.name",
+            "operator": "In",
+            "values": [
+              "node1",
+              "node2"
+            ]
+          },
+          {
+            "key": "spec.nodeName",
+            "operator": "Exists",
+            "values": []
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "42 is not of types \"array\", \"null\"",
+      "python_error": "42 is not of type 'array', 'null'\n\nFailed validating 'type' in schema['properties']['matchExpressions']:\n    {'description': \"A list of node selector requirements by node's \"\n                    'labels.',\n     'items': {'$ref': '#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_NodeSelectorRequirement'},\n     'type': ['array', 'null']}\n\nOn instance['matchExpressions']:\n    42",
+      "data": {
+        "matchExpressions": 42
+      }
+    }
+  ]
+}

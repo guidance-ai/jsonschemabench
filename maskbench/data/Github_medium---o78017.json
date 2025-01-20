@@ -1,0 +1,261 @@
+{
+  "description": "sample Github_medium/o78017.json",
+  "meta": {
+    "full_size": 764,
+    "stripped_size": 741,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "required": [
+      "person",
+      "password",
+      "password_again",
+      "orientation"
+    ],
+    "type": "object",
+    "definitions": {
+      "person": {
+        "type": "object",
+        "required": [
+          "first_name",
+          "last_name",
+          "address"
+        ],
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "last_name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "address": {
+            "$ref": "#/definitions/address"
+          }
+        }
+      },
+      "address": {
+        "type": "object",
+        "required": [
+          "street",
+          "street_number",
+          "city",
+          "country"
+        ],
+        "properties": {
+          "street": {
+            "type": "string"
+          },
+          "street_number": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "properties": {
+      "person": {
+        "$ref": "#/definitions/person"
+      },
+      "password": {
+        "type": "string"
+      },
+      "orientation": {
+        "type": "string",
+        "default": "horizontal",
+        "enum": [
+          "vertical"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "person": {
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "123",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "orientation": "vertical",
+        "password_again": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"J\" is shorter than 2 characters",
+      "python_error": "'J' is too short\n\nFailed validating 'minLength' in schema['properties']['person']['properties']['first_name']:\n    {'type': 'string', 'minLength': 2}\n\nOn instance['person']['first_name']:\n    'J'",
+      "data": {
+        "person": {
+          "first_name": "J",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "123",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "orientation": "vertical",
+        "password_again": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123abc\" does not match \"^[0-9]+$\"",
+      "python_error": "'123abc' does not match '^[0-9]+$'\n\nFailed validating 'pattern' in schema['properties']['person']['properties']['address']['properties']['street_number']:\n    {'type': 'string', 'pattern': '^[0-9]+$'}\n\nOn instance['person']['address']['street_number']:\n    '123abc'",
+      "data": {
+        "person": {
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "123abc",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "orientation": "vertical",
+        "password_again": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 2 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['person']['properties']['first_name']:\n    {'type': 'string', 'minLength': 2}\n\nOn instance['person']['first_name']:\n    'a'",
+      "data": {
+        "person": {
+          "first_name": "a",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "123",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "orientation": "vertical",
+        "password_again": "password123"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "person": {
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "123",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "orientation": "vertical",
+        "password_again": "password123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"J\" is shorter than 2 characters",
+      "python_error": "'J' is too short\n\nFailed validating 'minLength' in schema['properties']['person']['properties']['first_name']:\n    {'type': 'string', 'minLength': 2}\n\nOn instance['person']['first_name']:\n    'J'",
+      "data": {
+        "person": {
+          "first_name": "J",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "abc",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "password_again": "password123",
+        "orientation": "vertical"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 2 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['person']['properties']['first_name']:\n    {'type': 'string', 'minLength': 2}\n\nOn instance['person']['first_name']:\n    'a'",
+      "data": {
+        "person": {
+          "first_name": "a",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "123",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "password_again": "password123",
+        "orientation": "vertical"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"J\" is shorter than 2 characters",
+      "python_error": "'J' is too short\n\nFailed validating 'minLength' in schema['properties']['person']['properties']['first_name']:\n    {'type': 'string', 'minLength': 2}\n\nOn instance['person']['first_name']:\n    'J'",
+      "data": {
+        "person": {
+          "first_name": "J",
+          "last_name": "Doe",
+          "address": {
+            "street": "Main Street",
+            "street_number": "abc",
+            "city": "New York",
+            "country": "USA"
+          }
+        },
+        "password": "password123",
+        "password_again": "password123",
+        "orientation": "vertical"
+      }
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "description": "sample Github_easy/o79443.json",
+  "meta": {
+    "full_size": 338,
+    "stripped_size": 338,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "format",
+      "format:uri",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "httpUri": {
+        "type": "string",
+        "allOf": [
+          {
+            "format": "uri"
+          },
+          {
+            "pattern": "^https?://"
+          }
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "uri": {
+        "$ref": "#/definitions/httpUri"
+      },
+      "index": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "required": [
+      "name",
+      "uri"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example",
+        "uri": "https://www.example.com",
+        "index": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['index']:\n    {'type': 'integer', 'minimum': 0}\n\nOn instance['index']:\n    -1",
+      "data": {
+        "name": "Example",
+        "uri": "https://www.example.com",
+        "index": -1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"ftp://www.example.com\" does not match \"^https?://\"",
+      "python_error": "'ftp://www.example.com' does not match '^https?://'\n\nFailed validating 'pattern' in schema['properties']['uri']['allOf'][1]:\n    {'pattern': '^https?://'}\n\nOn instance['uri']:\n    'ftp://www.example.com'",
+      "data": {
+        "name": "Example",
+        "uri": "ftp://www.example.com",
+        "index": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a uri\" is not a \"uri\"",
+      "python_error": "'not a uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['uri']['allOf'][0]:\n    {'format': 'uri'}\n\nOn instance['uri']:\n    'not a uri'",
+      "data": {
+        "name": "Example",
+        "uri": "not a uri",
+        "index": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ftp://www.example.com\" does not match \"^https?://\"",
+      "python_error": "'ftp://www.example.com' does not match '^https?://'\n\nFailed validating 'pattern' in schema['properties']['uri']['allOf'][1]:\n    {'pattern': '^https?://'}\n\nOn instance['uri']:\n    'ftp://www.example.com'",
+      "data": {
+        "name": "Example",
+        "uri": "ftp://www.example.com",
+        "index": 1
+      }
+    }
+  ]
+}

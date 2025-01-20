@@ -1,0 +1,120 @@
+{
+  "description": "sample Github_easy/o17393.json",
+  "meta": {
+    "full_size": 760,
+    "stripped_size": 424,
+    "features": [
+      "@minmaxLength",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "later definded parameters provided for a CBSD",
+    "type": "object",
+    "properties": {
+      "groupingParam": {
+        "description": "Container for information about a CBSD membership group.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "groupType",
+            "groupId"
+          ],
+          "properties": {
+            "groupType": {
+              "enum": [
+                "INTERFERENCE_COORDINATION"
+              ],
+              "description": "Type of the group"
+            },
+            "groupId": {
+              "type": "string",
+              "maxLength": 128,
+              "description": "ID of the group"
+            }
+          }
+        }
+      },
+      "airInterface": {
+        "type": "object",
+        "description": "Air interface parameter for a CBSD",
+        "required": [
+          "radioTechnology"
+        ],
+        "properties": {
+          "radioTechnology": {
+            "enum": [
+              "E_UTRA",
+              "CAMBIUM_NETWORKS"
+            ],
+            "description": "Which PHY radio technology is used by the device in the 3.5GHz band"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "groupingParam": [
+          {
+            "groupType": "INTERFERENCE_COORDINATION",
+            "groupId": "group-123"
+          }
+        ],
+        "airInterface": {
+          "radioTechnology": "E_UTRA"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a-very-long-group-id-that-exceeds-the-maximum-allowed-length-of-128-characters-and-this-is-just-the-beginning-of-the-id-and-it-keeps-going-and-going-and-going\" is longer than 128 characters",
+      "python_error": "'a-very-long-group-id-that-exceeds-the-maximum-allowed-length-of-128-characters-and-this-is-just-the-beginning-of-the-id-and-it-keeps-going-and-going-and-going' is too long\n\nFailed validating 'maxLength' in schema['properties']['groupingParam']['items']['properties']['groupId']:\n    {'type': 'string', 'maxLength': 128, 'description': 'ID of the group'}\n\nOn instance['groupingParam'][0]['groupId']:\n    'a-very-long-group-id-that-exceeds-the-maximum-allowed-length-of-128-characters-and-this-is-just-the-beginning-of-the-id-and-it-keeps-going-and-going-and-going'",
+      "data": {
+        "groupingParam": [
+          {
+            "groupType": "INTERFERENCE_COORDINATION",
+            "groupId": "a-very-long-group-id-that-exceeds-the-maximum-allowed-length-of-128-characters-and-this-is-just-the-beginning-of-the-id-and-it-keeps-going-and-going-and-going"
+          }
+        ],
+        "airInterface": {
+          "radioTechnology": "E_UTRA"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"INVALID_GROUP_TYPE\" is not one of [\"INTERFERENCE_COORDINATION\"]",
+      "python_error": "'INVALID_GROUP_TYPE' is not one of ['INTERFERENCE_COORDINATION']\n\nFailed validating 'enum' in schema['properties']['groupingParam']['items']['properties']['groupType']:\n    {'enum': ['INTERFERENCE_COORDINATION'],\n     'description': 'Type of the group'}\n\nOn instance['groupingParam'][0]['groupType']:\n    'INVALID_GROUP_TYPE'",
+      "data": {
+        "groupingParam": [
+          {
+            "groupType": "INVALID_GROUP_TYPE",
+            "groupId": "group-123"
+          }
+        ],
+        "airInterface": {
+          "radioTechnology": "E_UTRA"
+        }
+      }
+    }
+  ]
+}

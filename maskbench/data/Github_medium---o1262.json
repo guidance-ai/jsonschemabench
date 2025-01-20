@@ -1,0 +1,375 @@
+{
+  "description": "sample Github_medium/o1262.json",
+  "meta": {
+    "full_size": 889,
+    "stripped_size": 617,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxItems",
+      "maxLength",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Space Monkey",
+    "description": "Like a monkey, ready to be shot into space",
+    "type": "object",
+    "properties": {
+      "id": {
+        "description": "Unique identifier",
+        "type": "integer",
+        "minimum": 1
+      },
+      "firstName": {
+        "description": "First name",
+        "type": "string",
+        "maxLength": 10
+      },
+      "lastName": {
+        "description": "Last name",
+        "type": "string",
+        "maxLength": 10
+      },
+      "isAlive": {
+        "description": "Is alive?",
+        "type": "boolean"
+      },
+      "age": {
+        "type": "number",
+        "minimum": 0
+      },
+      "projects": {
+        "description": "Projects involved in",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "maxItems": 3,
+        "_uniqueItems": true
+      },
+      "attributes": {
+        "type": "object",
+        "properties": {
+          "isReal": {
+            "type": "boolean"
+          },
+          "episodes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 15
+            },
+            "_uniqueItems": true
+          }
+        },
+        "required": [
+          "isReal"
+        ]
+      }
+    },
+    "required": [
+      "id",
+      "firstName",
+      "lastName",
+      "isAlive",
+      "age"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "id": 1,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Space Expedition",
+          "Galaxy Research"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"JohnDoeJohnDoe\" is longer than 10 characters",
+      "python_error": "'JohnDoeJohnDoe' is too long\n\nFailed validating 'maxLength' in schema['properties']['firstName']:\n    {'description': 'First name', 'type': 'string', 'maxLength': 10}\n\nOn instance['firstName']:\n    'JohnDoeJohnDoe'",
+      "data": {
+        "id": 1,
+        "firstName": "JohnDoeJohnDoe",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Space Expedition",
+          "Galaxy Research"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel Galactic"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[\"Space Expedition\",\"Galaxy Research\",\"Space Expedition 2\",\"Galaxy Research 2\"] has more than 3 items",
+      "python_error": "['Space Expedition', 'Galaxy Research', 'Space Expedition 2', 'Galaxy Research 2'] is too long\n\nFailed validating 'maxItems' in schema['properties']['projects']:\n    {'description': 'Projects involved in',\n     'type': 'array',\n     'items': {'type': 'string'},\n     'minItems': 1,\n     'maxItems': 3,\n     '_uniqueItems': True}\n\nOn instance['projects']:\n    ['Space Expedition',\n     'Galaxy Research',\n     'Space Expedition 2',\n     'Galaxy Research 2']",
+      "data": {
+        "id": 1,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Space Expedition",
+          "Galaxy Research",
+          "Space Expedition 2",
+          "Galaxy Research 2"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['id']:\n    {'description': 'Unique identifier', 'type': 'integer', 'minimum': 1}\n\nOn instance['id']:\n    0",
+      "data": {
+        "id": 0,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": -1,
+        "projects": [
+          "Space Expedition",
+          "Galaxy Research"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": -1,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['projects']:\n    {'description': 'Projects involved in',\n     'type': 'array',\n     'items': {'type': 'string'},\n     'minItems': 1,\n     'maxItems': 3,\n     '_uniqueItems': True}\n\nOn instance['projects']:\n    []",
+      "data": {
+        "id": 1,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['id']:\n    {'description': 'Unique identifier', 'type': 'integer', 'minimum': 1}\n\nOn instance['id']:\n    0",
+      "data": {
+        "id": 0,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Space Expedition",
+          "Galaxy Research"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"JohnDoeIsVeryLongName\" is longer than 10 characters",
+      "python_error": "'JohnDoeIsVeryLongName' is too long\n\nFailed validating 'maxLength' in schema['properties']['firstName']:\n    {'description': 'First name', 'type': 'string', 'maxLength': 10}\n\nOn instance['firstName']:\n    'JohnDoeIsVeryLongName'",
+      "data": {
+        "id": 1,
+        "firstName": "JohnDoeIsVeryLongName",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Space Expedition",
+          "Galaxy Research"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "['Space Expedition', 'Galaxy Research', 'Space Station', 'Galaxy Research'] is too long\n\nFailed validating 'maxItems' in schema['properties']['projects']:\n    {'description': 'Projects involved in',\n     'type': 'array',\n     'items': {'type': 'string'},\n     'minItems': 1,\n     'maxItems': 3,\n     '_uniqueItems': True}\n\nOn instance['projects']:\n    ['Space Expedition',\n     'Galaxy Research',\n     'Space Station',\n     'Galaxy Research']",
+      "data": {
+        "id": 0,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Space Expedition",
+          "Galaxy Research",
+          "Space Station",
+          "Galaxy Research"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "Space Monkey",
+            "Galactic Travel",
+            "Space Monkey"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": 1,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Project Alpha",
+          "Project Beta"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "JD",
+            "Johnnie"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['id']:\n    {'description': 'Unique identifier', 'type': 'integer', 'minimum': 1}\n\nOn instance['id']:\n    0",
+      "data": {
+        "id": 0,
+        "firstName": "John",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": -1,
+        "projects": [
+          "Project Alpha",
+          "Project Beta"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": -1,
+          "aliases": [
+            "JD",
+            "Johnnie"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"JohnDoeIsAReallyLongFirstName\" is longer than 10 characters",
+      "python_error": "'JohnDoeIsAReallyLongFirstName' is too long\n\nFailed validating 'maxLength' in schema['properties']['firstName']:\n    {'description': 'First name', 'type': 'string', 'maxLength': 10}\n\nOn instance['firstName']:\n    'JohnDoeIsAReallyLongFirstName'",
+      "data": {
+        "id": 1,
+        "firstName": "JohnDoeIsAReallyLongFirstName",
+        "lastName": "Doe",
+        "isAlive": true,
+        "age": 30,
+        "projects": [
+          "Project Alpha",
+          "Project Beta"
+        ],
+        "attributes": {
+          "isReal": true,
+          "episodes": 10,
+          "aliases": [
+            "JD",
+            "JohnnieIsAReallyLongAlias"
+          ]
+        }
+      }
+    }
+  ]
+}

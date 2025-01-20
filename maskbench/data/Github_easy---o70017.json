@@ -1,0 +1,154 @@
+{
+  "description": "sample Github_easy/o70017.json",
+  "meta": {
+    "full_size": 572,
+    "stripped_size": 261,
+    "features": [
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "disabled": {
+        "type": "boolean",
+        "description": "If true then the extraction of classes from WAR files is disabled altogether.",
+        "default": false
+      },
+      "scan": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "archive": {
+              "type": "string",
+              "description": "The regex of the name of the archive to match."
+            },
+            "prefixes": {
+              "type": "array",
+              "description": "The list of path prefixes to compose the \"JAR view\" from.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "default": [
+          {
+            "archive": ".*",
+            "prefixes": [
+              "/WEB-INF/classes/"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "disabled": false,
+        "scan": [
+          {
+            "archive": "my-archive-.*\\.war",
+            "prefixes": [
+              "/WEB-INF/classes/",
+              "/META-INF/classes/"
+            ]
+          },
+          {
+            "archive": "another-archive-.*\\.jar",
+            "prefixes": [
+              "/com/company/classes/"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"true\" is not of type \"boolean\"",
+      "python_error": "'true' is not of type 'boolean'\n\nFailed validating 'type' in schema['properties']['disabled']:\n    {'type': 'boolean',\n     'description': 'If true then the extraction of classes from WAR files '\n                    'is disabled altogether.',\n     'default': False}\n\nOn instance['disabled']:\n    'true'",
+      "data": {
+        "disabled": "true",
+        "scan": [
+          {
+            "archive": "my-archive-.*\\.war",
+            "prefixes": [
+              "/WEB-INF/classes/",
+              "/META-INF/classes/"
+            ]
+          },
+          {
+            "archive": "another-archive-.*\\.jar",
+            "prefixes": [
+              "/com/company/classes/"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['scan']['items']['properties']['prefixes']['items']:\n    {'type': 'string'}\n\nOn instance['scan'][0]['prefixes'][2]:\n    12345",
+      "data": {
+        "disabled": false,
+        "scan": [
+          {
+            "archive": "my-archive-.*\\.war",
+            "prefixes": [
+              "/WEB-INF/classes/",
+              "/META-INF/classes/",
+              12345
+            ]
+          },
+          {
+            "archive": "another-archive-.*\\.jar",
+            "prefixes": [
+              "/com/company/classes/"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"maybe\" is not of type \"boolean\"",
+      "python_error": "'maybe' is not of type 'boolean'\n\nFailed validating 'type' in schema['properties']['disabled']:\n    {'type': 'boolean',\n     'description': 'If true then the extraction of classes from WAR files '\n                    'is disabled altogether.',\n     'default': False}\n\nOn instance['disabled']:\n    'maybe'",
+      "data": {
+        "disabled": "maybe",
+        "scan": [
+          {
+            "archive": 123,
+            "prefixes": [
+              "/WEB-INF/classes/",
+              "/META-INF/classes/"
+            ]
+          },
+          {
+            "archive": "another-archive-.*\\.jar",
+            "prefixes": {
+              "/com/company/classes/": "invalid"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,534 @@
+{
+  "description": "sample Github_medium/o12456.json",
+  "meta": {
+    "full_size": 2849,
+    "stripped_size": 1544,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxItems",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "coordinates": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          }
+        }
+      },
+      "affineTransform": {
+        "description": "A 3x3 row-major matrix describing an affine transform to apply to the labwareOffset and calibrationPoint coordinates of the module (in certain circumstances, e.g. per slot)",
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "description": "Module specification",
+    "type": "object",
+    "required": [
+      "$otSharedSchema",
+      "moduleType",
+      "model",
+      "labwareOffset",
+      "dimensions",
+      "calibrationPoint",
+      "displayName",
+      "quirks",
+      "slotTransforms",
+      "compatibleWith"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "$otSharedSchema": {
+        "type": "string",
+        "description": "The path to a valid Opentrons shared schema relative to the shared-data directory, without its extension. For instance, #/module/schemas/2 is a reference to this schema."
+      },
+      "moduleType": {
+        "enum": [
+          "temperatureModuleType",
+          "magneticModuleType",
+          "thermocyclerModuleType"
+        ],
+        "type": "string"
+      },
+      "model": {
+        "type": "string",
+        "pattern": "^(temperatureModule|magneticModule|thermocyclerModule)V[0-9]+$"
+      },
+      "labwareOffset": {
+        "$ref": "#/definitions/coordinates"
+      },
+      "dimensions": {
+        "type": "object",
+        "required": [
+          "bareOverallHeight",
+          "overLabwareHeight"
+        ],
+        "properties": {
+          "bareOverallHeight": {
+            "type": "number"
+          },
+          "overLabwareHeight": {
+            "type": "number"
+          },
+          "lidHeight": {
+            "type": "number"
+          }
+        }
+      },
+      "calibrationPoint": {
+        "$ref": "#/definitions/coordinates"
+      },
+      "displayName": {
+        "type": "string"
+      },
+      "quirks": {
+        "type": "array",
+        "description": "List of quirks for a given module",
+        "items": {
+          "type": "string"
+        }
+      },
+      "slotTransforms": {
+        "type": "object",
+        "description": "Per-deckmap sets of per-slot transforms, properties should be ids of decks such as \"ot2_standard\". Transforms for a deck not explicitly listed are the identity.",
+        "patternProperties": {
+          ".*": {
+            "type": "object",
+            "patternProperties:": {
+              "^([1-9]|10|11)$": {
+                "type": "object",
+                "description": "Holds 2-D affine transforms that should be applied to top level keys plus the special property $image for applying to images images. If any top level key has no corresponding entry, it is an identity transform. If the transform applies to an entity specifying a 3D position, it should be applied only to the x and y.",
+                "patternProperties": {
+                  ".*": {
+                    "type": "object",
+                    "description": "The keys identify transforms that apply to different sections of the module definition. Most will be top level keys of the module def (for instance, \"labwareOffset\") but there may also be additional meta keys for values that are not in the def",
+                    "patternProperties": {
+                      ".*": {
+                        "$ref": "#/definitions/affineTransform"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "compatibleWith": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "description": "A compatible module model (e.g. temperatureModuleV1)"
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$otSharedSchema": "#/module/schemas/2",
+        "moduleType": "temperatureModuleType",
+        "model": "temperatureModuleV1",
+        "labwareOffset": {
+          "x": 10.0,
+          "y": 20.0,
+          "z": 30.0
+        },
+        "dimensions": {
+          "bareOverallHeight": 50.0,
+          "overLabwareHeight": 10.0,
+          "lidHeight": 5.0
+        },
+        "calibrationPoint": {
+          "x": 40.0,
+          "y": 50.0,
+          "z": 60.0
+        },
+        "displayName": "Temperature Module V1",
+        "quirks": [
+          "quirk1",
+          "quirk2"
+        ],
+        "slotTransforms": {
+          "ot2_standard": {
+            "1": {
+              "labwareOffset": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "calibrationPoint": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "2": {
+              "labwareOffset": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "calibrationPoint": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          }
+        },
+        "compatibleWith": [
+          "temperatureModuleV1",
+          "temperatureModuleV2"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$otSharedSchema": "#/module/schemas/2",
+        "moduleType": "temperatureModuleType",
+        "model": "temperatureModuleV1",
+        "labwareOffset": {
+          "x": 10.0,
+          "y": 20.0,
+          "z": 30.0
+        },
+        "dimensions": {
+          "bareOverallHeight": 50.0,
+          "overLabwareHeight": 60.0,
+          "lidHeight": 10.0
+        },
+        "calibrationPoint": {
+          "x": 40.0,
+          "y": 50.0,
+          "z": 60.0
+        },
+        "displayName": "Temperature Module",
+        "quirks": [
+          "quirk1",
+          "quirk2"
+        ],
+        "slotTransforms": {
+          "ot2_standard": {
+            "1": {
+              "labwareOffset": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "calibrationPoint": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "2": {
+              "labwareOffset": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "calibrationPoint": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          }
+        },
+        "compatibleWith": [
+          "temperatureModuleV1",
+          "temperatureModuleV2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"10.0\" is not of type \"number\"",
+      "python_error": "Additional properties are not allowed (\" labwareOffset's x-coordinate should be of type number, but changed to string\" was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['labwareOffset']:\n    {'type': 'object',\n     'additionalProperties': False,\n     'required': ['x', 'y'],\n     'properties': {'x': {'type': 'number'},\n                    'y': {'type': 'number'},\n                    'z': {'type': 'number'}}}\n\nOn instance['labwareOffset']:\n    {'x': '10.0',\n     \" labwareOffset's x-coordinate should be of type number, but changed to string\": 'y',\n     'y': '20.0',\n     'z': '30.0'}",
+      "data": {
+        "$otSharedSchema": "#/module/schemas/2",
+        "moduleType": "temperatureModuleType",
+        "model": "temperatureModuleV1",
+        "labwareOffset": {
+          "x": "10.0",
+          " labwareOffset's x-coordinate should be of type number, but changed to string": "y",
+          "y": "20.0",
+          "z": "30.0"
+        },
+        "dimensions": {
+          "bareOverallHeight": 50.0,
+          "overLabwareHeight": 60.0,
+          "lidHeight": 10.0
+        },
+        "calibrationPoint": {
+          "x": 40.0,
+          "y": 50.0,
+          "z": 60.0
+        },
+        "displayName": "Temperature Module",
+        "quirks": [
+          "quirk1",
+          "quirk2"
+        ],
+        "slotTransforms": {
+          "ot2_standard": {
+            "1": {
+              "labwareOffset": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              ],
+              "calibrationPoint": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "2": {
+              "labwareOffset": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "calibrationPoint": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "ot3_standard": {
+            "12": {
+              "labwareOffset": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "calibrationPoint": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          }
+        },
+        "compatibleWith": [
+          "temperatureModuleV1",
+          2,
+          " compatibleWith should be an array of strings, but changed one to integer"
+        ]
+      }
+    }
+  ]
+}

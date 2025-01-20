@@ -1,0 +1,89 @@
+{
+  "description": "sample Glaiveai2K/find_restaurants_ca892923.json",
+  "meta": {
+    "full_size": 441,
+    "stripped_size": 227,
+    "features": [
+      "@minmaxInteger",
+      "enum"
+    ],
+    "raw_features": [
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "cuisine": {
+        "description": "The type of cuisine the user is interested in",
+        "type": "string"
+      },
+      "location": {
+        "description": "The location to search for restaurants",
+        "type": "string"
+      },
+      "price_range": {
+        "description": "The price range of restaurants",
+        "enum": [
+          "$",
+          "$$",
+          "$$$",
+          "$$$$"
+        ],
+        "type": "string"
+      },
+      "rating": {
+        "description": "The minimum rating of restaurants",
+        "maximum": 5,
+        "minimum": 0,
+        "type": "number"
+      }
+    },
+    "required": [
+      "location"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "cuisine": "Italian",
+        "location": "New York",
+        "price_range": "$$$",
+        "rating": 3.5
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "6 is greater than the maximum of 5",
+      "python_error": "6 is greater than the maximum of 5\n\nFailed validating 'maximum' in schema['properties']['rating']:\n    {'description': 'The minimum rating of restaurants',\n     'maximum': 5,\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['rating']:\n    6",
+      "data": {
+        "cuisine": "Italian",
+        "location": "New York",
+        "price_range": "$$$",
+        "rating": 6
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"$$$$$\" is not one of [\"$\",\"$$\",\"$$$\",\"$$$$\"]",
+      "python_error": "6 is greater than the maximum of 5\n\nFailed validating 'maximum' in schema['properties']['rating']:\n    {'description': 'The minimum rating of restaurants',\n     'maximum': 5,\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['rating']:\n    6",
+      "data": {
+        "location": "New York",
+        "cuisine": "Italian",
+        "price_range": "$$$$$",
+        "rating": 6
+      }
+    }
+  ]
+}

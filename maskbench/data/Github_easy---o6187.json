@@ -1,0 +1,174 @@
+{
+  "description": "sample Github_easy/o6187.json",
+  "meta": {
+    "full_size": 590,
+    "stripped_size": 479,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "type": "object",
+    "properties": {
+      "resultPath": {
+        "type": "string",
+        "title": "Result Path",
+        "minLength": 1
+      },
+      "deviceTags": {
+        "title": "Device Tags",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "title": "Device Tag Pair",
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "minLength": 1
+        }
+      },
+      "deviceIds": {
+        "title": "Device IDs",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "title": "Device ID"
+        }
+      }
+    },
+    "allOf": [
+      {
+        "required": [
+          "resultPath"
+        ]
+      },
+      {
+        "anyOf": [
+          {
+            "required": [
+              "deviceTags"
+            ]
+          },
+          {
+            "required": [
+              "deviceIds"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "resultPath": "/path/to/results",
+        "deviceTags": [
+          {
+            "key": "tag1",
+            "value": "value1"
+          },
+          {
+            "key": "tag2",
+            "value": "value2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"resultPath\" is a required property",
+      "python_error": "'resultPath' is a required property\n\nFailed validating 'required' in schema['allOf'][0]:\n    {'required': ['resultPath']}\n\nOn instance:\n    {'deviceTags': [{'key': 'tag1', 'value': 'value1'},\n                    {'key': 'tag2', 'value': 'value2'}]}",
+      "data": {
+        "deviceTags": [
+          {
+            "key": "tag1",
+            "value": "value1"
+          },
+          {
+            "key": "tag2",
+            "value": "value2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"resultPath\":\"/path/to/results\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'resultPath': '/path/to/results'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['allOf'][1]:\n    {'anyOf': [{'required': ['deviceTags']}, {'required': ['deviceIds']}]}\n\nOn instance:\n    {'resultPath': '/path/to/results'}",
+      "data": {
+        "resultPath": "/path/to/results"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['deviceTags']:\n    {'title': 'Device Tags',\n     'type': 'array',\n     'minItems': 1,\n     'items': {'title': 'Device Tag Pair',\n               'type': 'object',\n               'properties': {'key': {'type': 'string'},\n                              'value': {'type': 'string'}},\n               'minLength': 1}}\n\nOn instance['deviceTags']:\n    []",
+      "data": {
+        "resultPath": "/path/to/results",
+        "deviceTags": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['resultPath']:\n    {'type': 'string', 'title': 'Result Path', 'minLength': 1}\n\nOn instance['resultPath']:\n    ''",
+      "data": {
+        "resultPath": "",
+        "deviceTags": [
+          {
+            "key": "tag1",
+            "value": "value1"
+          },
+          {
+            "key": "tag2",
+            "value": "value2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['deviceTags']:\n    {'title': 'Device Tags',\n     'type': 'array',\n     'minItems': 1,\n     'items': {'title': 'Device Tag Pair',\n               'type': 'object',\n               'properties': {'key': {'type': 'string'},\n                              'value': {'type': 'string'}},\n               'minLength': 1}}\n\nOn instance['deviceTags']:\n    []",
+      "data": {
+        "resultPath": "/path/to/results",
+        "deviceTags": [],
+        "deviceIds": []
+      }
+    }
+  ]
+}

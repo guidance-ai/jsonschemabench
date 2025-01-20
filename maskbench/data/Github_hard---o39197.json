@@ -1,0 +1,379 @@
+{
+  "description": "sample Github_hard/o39197.json",
+  "meta": {
+    "full_size": 2366,
+    "stripped_size": 1493,
+    "features": [
+      "additionalProperties",
+      "format",
+      "format:ipv4",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "fabric info",
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "fabric_fq_name",
+      "management_subnets",
+      "device_auth",
+      "node_profiles"
+    ],
+    "properties": {
+      "fabric_fq_name": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "fabric_display_name": {
+        "type": "string"
+      },
+      "management_subnets": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "description": "List of the management network subnets for the fabric",
+          "additionalProperties": false,
+          "required": [
+            "cidr"
+          ],
+          "properties": {
+            "cidr": {
+              "type": "string",
+              "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+            },
+            "gateway": {
+              "type": "string",
+              "format": "ipv4"
+            }
+          }
+        }
+      },
+      "loopback_subnets": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "description": "List of the subnet prefixes that fabric device loopback ips can be allocated.",
+          "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+        }
+      },
+      "fabric_subnets": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "description": "List of the subnet prefixes that could be carved out for the p2p networks between fabric devices.",
+          "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+        }
+      },
+      "fabric_asn_pool": {
+        "type": "array",
+        "items": {
+          "title": "eBGP ASN Pool for fabric underlay network",
+          "type": "object",
+          "description": "List of the ASN pools that could be used to configure the eBGP peers for the IP fabric",
+          "properties": {
+            "asn_min": {
+              "type": "integer"
+            },
+            "asn_max": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "asn_min",
+            "asn_max"
+          ]
+        }
+      },
+      "overlay_ibgp_asn": {
+        "type": "integer",
+        "title": "iBGP ASN for Contrail overlay network",
+        "default": 64512
+      },
+      "device_auth": {
+        "title": "Device Auth",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "username",
+            "password"
+          ],
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "node_profiles": {
+        "type": "array",
+        "items": {
+          "title": "Node profile",
+          "type": "object",
+          "description": "List of node profiles to be used by the fabric.",
+          "additionalProperties": false,
+          "properties": {
+            "node_profile_name": {
+              "type": "string"
+            },
+            "serial_nums": {
+              "type": "array",
+              "description": "Optional list of serial numbers of fabric devices that we want to associate with this node profile.",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "node_profile_name"
+          ]
+        }
+      },
+      "device_count": {
+        "title": "Number of fabric devices",
+        "type": "integer",
+        "description": "Total number of devices in the fabric that needs to be zero-touch provisioned"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "fabric_fq_name": [
+          "default-domain",
+          "default-project",
+          "fabric"
+        ],
+        "fabric_display_name": "My Fabric",
+        "management_subnets": [
+          {
+            "cidr": "10.1.1.0/24",
+            "gateway": "10.1.1.1"
+          },
+          {
+            "cidr": "10.1.2.0/24",
+            "gateway": "10.1.2.1"
+          }
+        ],
+        "loopback_subnets": [
+          "10.2.1.0/24",
+          "10.2.2.0/24"
+        ],
+        "fabric_subnets": [
+          "10.3.1.0/24",
+          "10.3.2.0/24"
+        ],
+        "fabric_asn_pool": [
+          {
+            "asn_min": 64510,
+            "asn_max": 64520
+          }
+        ],
+        "overlay_ibgp_asn": 64512,
+        "device_auth": [
+          {
+            "username": "admin",
+            "password": "password123"
+          }
+        ],
+        "node_profiles": [
+          {
+            "node_profile_name": "profile1",
+            "serial_nums": [
+              "SN12345",
+              "SN67890"
+            ]
+          },
+          {
+            "node_profile_name": "profile2"
+          }
+        ],
+        "device_count": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"10.2.1.0/256\" does not match \"^([0-9]{1,3}\\.){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$\"",
+      "python_error": "'10.2.1.0/256' does not match '^([0-9]{1,3}\\\\.){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$'\n\nFailed validating 'pattern' in schema['properties']['loopback_subnets']['items']:\n    {'type': 'string',\n     'description': 'List of the subnet prefixes that fabric device '\n                    'loopback ips can be allocated.',\n     'pattern': '^([0-9]{1,3}\\\\.){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$'}\n\nOn instance['loopback_subnets'][0]:\n    '10.2.1.0/256'",
+      "data": {
+        "fabric_fq_name": [
+          "default-domain",
+          "default-project",
+          "fabric"
+        ],
+        "fabric_display_name": "My Fabric",
+        "management_subnets": [
+          {
+            "cidr": "256.1.1.0/24",
+            "gateway": "10.1.1.1"
+          },
+          {
+            "cidr": "10.1.2.0/24",
+            "gateway": "10.1.2.1"
+          }
+        ],
+        "loopback_subnets": [
+          "10.2.1.0/256",
+          "10.2.2.0/24"
+        ],
+        "fabric_subnets": [
+          "10.3.1.0/24",
+          "10.3.2.0/24"
+        ],
+        "fabric_asn_pool": [
+          {
+            "asn_min": 64510,
+            "asn_max": 64520
+          }
+        ],
+        "overlay_ibgp_asn": 64512,
+        "device_auth": [
+          {
+            "username": "admin",
+            "password": "password123"
+          }
+        ],
+        "node_profiles": [
+          {
+            "node_profile_name": "profile1",
+            "serial_nums": [
+              "SN12345",
+              "SN67890"
+            ]
+          },
+          {
+            "node_profile_name": "profile2"
+          }
+        ],
+        "device_count": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"256.1.1.1\" is not a \"ipv4\"",
+      "python_error": "'loopback_subnets' is not of type 'object'\n\nFailed validating 'type' in schema['properties']['management_subnets']['items']:\n    {'type': 'object',\n     'description': 'List of the management network subnets for the fabric',\n     'additionalProperties': False,\n     'required': ['cidr'],\n     'properties': {'cidr': {'type': 'string',\n                             'pattern': '^([0-9]{1,3}\\\\.){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$'},\n                    'gateway': {'type': 'string', 'format': 'ipv4'}}}\n\nOn instance['management_subnets'][1]:\n    'loopback_subnets'",
+      "data": {
+        "fabric_fq_name": [
+          "default-domain",
+          "default-project",
+          "fabric"
+        ],
+        "fabric_display_name": "My Fabric",
+        "management_subnets": [
+          {
+            "cidr": "10.1.1.0/24",
+            "gateway": "256.1.1.1"
+          },
+          "loopback_subnets"
+        ],
+        "fabric_subnets": [
+          "10.3.1.0/24",
+          "10.3.2.0/24"
+        ],
+        "fabric_asn_pool": [
+          {
+            "asn_min": 64510,
+            "asn_max": 64520
+          }
+        ],
+        "overlay_ibgp_asn": 64512,
+        "device_auth": [
+          {
+            "username": "admin",
+            "password": "password123"
+          }
+        ],
+        "node_profiles": [
+          {
+            "node_profile_name": "profile1",
+            "serial_nums": [
+              "SN12345",
+              "SN67890"
+            ]
+          },
+          {
+            "node_profile_name": "profile2"
+          }
+        ],
+        "device_count": 10
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"256.1.2.1\" is not a \"ipv4\"",
+      "python_error": "Additional properties are not allowed ('extra_key' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'title': 'fabric info',\n     '$schema': 'http://json-schema.org/draft-06/schema#',\n     'type': 'object',\n     'additionalProperties': False,\n     'required': ['fabric_fq_name',\n                  'management_subnets',\n                  'device_auth',\n                  'node_profiles'],\n     'properties': {'fabric_fq_name': {'type': 'array',\n                                       'items': {'type': 'string'}},\n                    'fabric_display_name': {'type': 'string'},\n                    'management_subnets': {'type': 'array',\n                                           'items': {'type': 'object',\n                                                     'description': 'List '\n                                                                    'of '\n                                                                    'the '\n                                                                    .. (9924 more)",
+      "data": {
+        "fabric_fq_name": [
+          "default-domain",
+          "default-project",
+          ""
+        ],
+        "fabric_display_name": "My Fabric",
+        "management_subnets": [
+          {
+            "cidr": "10.1.1.0/24",
+            "gateway": "10.1.1.1"
+          },
+          {
+            "cidr": "10.1.2.0/24",
+            "gateway": "256.1.2.1"
+          },
+          "loopback_subnets"
+        ],
+        "fabric_subnets": "10.3.1.0/24",
+        "fabric_asn_pool": [
+          {
+            "asn_min": 64510,
+            "asn_max": 64509
+          }
+        ],
+        "overlay_ibgp_asn": "64512",
+        "device_auth": [
+          {
+            "username": "",
+            "password": "password123"
+          }
+        ],
+        "node_profiles": [
+          {
+            "node_profile_name": "profile1",
+            "serial_nums": [
+              "SN12345",
+              ""
+            ]
+          },
+          {
+            "node_profile_name": ""
+          }
+        ],
+        "device_count": "10",
+        "extra_key": "extra_value"
+      }
+    }
+  ]
+}

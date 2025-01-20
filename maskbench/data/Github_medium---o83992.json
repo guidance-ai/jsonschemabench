@@ -1,0 +1,218 @@
+{
+  "description": "sample Github_medium/o83992.json",
+  "meta": {
+    "full_size": 1081,
+    "stripped_size": 914,
+    "features": [
+      "$ref",
+      "format",
+      "format:date-time",
+      "items"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "s3": {
+        "description": "The s3 element contains the bucket & key data",
+        "properties": {
+          "awsRegion": {
+            "type": "string"
+          },
+          "bucket": {
+            "properties": {
+              "arn": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "eventSource": {
+            "type": "string"
+          },
+          "eventTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "object": {
+            "properties": {
+              "eTag": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "sequencer": {
+                "type": "string"
+              },
+              "size": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "bucket",
+          "object"
+        ],
+        "type": "object"
+      },
+      "s3event": {
+        "description": "The s3 event",
+        "properties": {
+          "awsRegion": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "eventSource": {
+            "type": "string"
+          },
+          "eventTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "s3": {
+            "$ref": "#/definitions/s3"
+          }
+        },
+        "required": [
+          "awsRegion",
+          "eventSource",
+          "eventName",
+          "eventTime",
+          "s3"
+        ],
+        "type": "object"
+      }
+    },
+    "description": "Schema for an S3 event notification for Lambda. Incomplete.",
+    "properties": {
+      "Records": {
+        "items": {
+          "$ref": "#/definitions/s3event"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "Records"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "Records": [
+          {
+            "awsRegion": "us-east-1",
+            "eventName": "ObjectCreated:Put",
+            "eventSource": "aws:s3",
+            "eventTime": "2022-01-01T12:00:00.000Z",
+            "s3": {
+              "awsRegion": "us-east-1",
+              "bucket": {
+                "arn": "arn:aws:s3:::my-bucket",
+                "name": "my-bucket"
+              },
+              "eventName": "ObjectCreated:Put",
+              "eventSource": "aws:s3",
+              "eventTime": "2022-01-01T12:00:00.000Z",
+              "object": {
+                "eTag": "1234567890abcdef",
+                "key": "path/to/object.txt",
+                "sequencer": "0055778901234567890123456789012345678901234567890123",
+                "size": 1024
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-01-01T24:00:00.000Z\" is not a \"date-time\"",
+      "python_error": "'2022-01-01T24:00:00.000Z' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['Records']['items']['properties']['eventTime']:\n    {'format': 'date-time', 'type': 'string'}\n\nOn instance['Records'][0]['eventTime']:\n    '2022-01-01T24:00:00.000Z'",
+      "data": {
+        "Records": [
+          {
+            "awsRegion": "us-east-1",
+            "eventName": "ObjectCreated:Put",
+            "eventSource": "aws:s3",
+            "eventTime": "2022-01-01T24:00:00.000Z",
+            "s3": {
+              "bucket": {
+                "name": "my-bucket",
+                "arn": "arn:aws:s3:::my-bucket"
+              },
+              "object": {
+                "key": "path/to/object.txt",
+                "size": 1024,
+                "eTag": "1234567890abcdef",
+                "sequencer": "0055778901234567890123456789012345678901234567890123"
+              },
+              "eventName": "ObjectCreated:Put",
+              "eventSource": "aws:s3",
+              "eventTime": "2022-01-01T12:00:00.000Z",
+              "awsRegion": "us-east-1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"2022-01-01T12:00:00.000\" is not a \"date-time\"",
+      "python_error": "'2022-01-01T12:00:00.000' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['Records']['items']['properties']['eventTime']:\n    {'format': 'date-time', 'type': 'string'}\n\nOn instance['Records'][0]['eventTime']:\n    '2022-01-01T12:00:00.000'",
+      "data": {
+        "Records": [
+          {
+            "awsRegion": "us-east-1",
+            "eventName": "ObjectCreated:Put",
+            "eventSource": "aws:s3",
+            "eventTime": "2022-01-01T12:00:00.000",
+            "s3": {
+              "bucket": {
+                "name": "my-bucket",
+                "arn": "arn:aws:s3:::my-bucket"
+              },
+              "object": {
+                "key": "path/to/object.txt",
+                "size": 1024,
+                "eTag": "1234567890abcdef",
+                "sequencer": "0055778901234567890123456789012345678901234567890123"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

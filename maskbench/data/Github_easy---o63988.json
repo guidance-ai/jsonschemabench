@@ -1,0 +1,118 @@
+{
+  "description": "sample Github_easy/o63988.json",
+  "meta": {
+    "full_size": 417,
+    "stripped_size": 392,
+    "features": [
+      "$ref",
+      "additionalProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "numA": {
+        "type": "number",
+        "default": 0
+      },
+      "hasDeepRef": {
+        "type": "object",
+        "properties": {
+          "numA": {
+            "$ref": "#/definitions/numA"
+          }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "string": {
+        "type": "string",
+        "default": ""
+      },
+      "object": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "numA": {
+            "$ref": "#/definitions/numA"
+          },
+          "hasDeepRef": {
+            "$ref": "#/definitions/hasDeepRef"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "string": "Hello, World!",
+        "object": {
+          "numA": 10,
+          "hasDeepRef": {
+            "numA": 20
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ten\" is not of type \"number\"",
+      "python_error": "'ten' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['object']['properties']['numA']:\n    {'type': 'number', 'default': 0}\n\nOn instance['object']['numA']:\n    'ten'",
+      "data": {
+        "string": "Hello, World!",
+        "object": {
+          "numA": "ten",
+          "hasDeepRef": {
+            "numA": 20
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"twenty\" is not of type \"number\"",
+      "python_error": "'twenty' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['object']['properties']['hasDeepRef']['properties']['numA']:\n    {'type': 'number', 'default': 0}\n\nOn instance['object']['hasDeepRef']['numA']:\n    'twenty'",
+      "data": {
+        "string": "Hello, World!",
+        "object": {
+          "numA": 10,
+          "hasDeepRef": {
+            "numA": "twenty"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"twenty\" is not of type \"number\"",
+      "python_error": "Additional properties are not allowed ('additionalProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['object']:\n    {'type': 'object',\n     'additionalProperties': False,\n     'properties': {'numA': {'$ref': '#/definitions/numA'},\n                    'hasDeepRef': {'$ref': '#/definitions/hasDeepRef'}}}\n\nOn instance['object']:\n    {'numA': 10,\n     'hasDeepRef': {'numA': 'twenty'},\n     'additionalProperty': True}",
+      "data": {
+        "string": "Hello, World!",
+        "object": {
+          "numA": 10,
+          "hasDeepRef": {
+            "numA": "twenty"
+          },
+          "additionalProperty": true
+        }
+      }
+    }
+  ]
+}

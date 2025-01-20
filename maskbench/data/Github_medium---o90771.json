@@ -1,0 +1,230 @@
+{
+  "description": "sample Github_medium/o90771.json",
+  "meta": {
+    "full_size": 1780,
+    "stripped_size": 535,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "networking": {
+        "description": "Networking-related configuration properties for Minio on DC/OS.",
+        "properties": {
+          "https-redirect": {
+            "default": false,
+            "description": "Whether Marathon-lb should redirect HTTP traffic to HTTPS.",
+            "type": "boolean"
+          },
+          "public-agent": {
+            "description": "The IP address of the public agent configure for integration with Marathon-lb.Remove the leading http:// and the trailing / from the IP. ",
+            "type": "string"
+          }
+        },
+        "required": [
+          "public-agent"
+        ],
+        "type": "object"
+      },
+      "service": {
+        "description": "Minio DC/OS service properties",
+        "properties": {
+          "cpus": {
+            "default": 1,
+            "description": "CPU shares to allocate to each service instance.",
+            "minimum": 0.5,
+            "type": "number"
+          },
+          "mem": {
+            "default": 2048,
+            "description": "Memory to allocate to each service instance.",
+            "minimum": 2048,
+            "type": "number"
+          },
+          "name": {
+            "default": "minio",
+            "description": "Name of this service instance",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "cpus",
+          "mem"
+        ],
+        "type": "object"
+      },
+      "storage": {
+        "description": "Storage configuration for Minio's application and config on DC/OS",
+        "properties": {
+          "persistent-volume": {
+            "description": "Persistent volumes configuration (local volumes) are created on the machine with the hostname specified and Marathon will attempt to re-launch the task on the same machine. Note that if the machine is lost, your data may also be lost.",
+            "properties": {
+              "host-volume": {
+                "default": "export",
+                "description": "The location of a volume on the host to be used to persist Minio configuration and data.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "pinned-hostname": {
+            "description": "An optional DC/OS agent hostname to run this Minio instance on (e.g. 10.0.0.1). If this is not specified then the task may relaunch on another node than the one it originally ran on.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "persistent-volume"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "networking": {
+          "public-agent": "192.168.1.100",
+          "https-redirect ": true
+        },
+        "service": {
+          "cpus": 1,
+          "mem": 2048,
+          "name": "minio"
+        },
+        "storage": {
+          "persistent-volume": {
+            "host-volume": "export"
+          },
+          "pinned-hostname": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "192.168 is not of type \"string\"",
+      "python_error": "10.0 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['storage']['properties']['pinned-hostname']:\n    {'description': 'An optional DC/OS agent hostname to run this Minio '\n                    'instance on (e.g. 10.0.0.1). If this is not specified '\n                    'then the task may relaunch on another node than the '\n                    'one it originally ran on.',\n     'type': 'string'}\n\nOn instance['storage']['pinned-hostname']:\n    10.0",
+      "data": {
+        "networking": {
+          "public-agent": 192.168,
+          "https-redirect": true
+        },
+        "service": {
+          "cpus": 0.2,
+          "mem": 2048,
+          "name": "minio"
+        },
+        "storage": {
+          "persistent-volume": {
+            "host-volume": "export"
+          },
+          "pinned-hostname": 10.0
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "0.4 is less than the minimum of 0.5\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to each service instance.',\n     'minimum': 0.5,\n     'type': 'number'}\n\nOn instance['service']['cpus']:\n    0.4",
+      "data": {
+        "networking": {
+          "https-redirect": true,
+          "public-agent": "192.168.1.100"
+        },
+        "service": {
+          "cpus": 0.4,
+          "mem": 2048,
+          "name": "minio"
+        },
+        "storage": {
+          "persistent-volume": {
+            "host-volume": "export"
+          },
+          "pinned-hostname": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"boolean\"",
+      "python_error": "10.0 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['storage']['properties']['pinned-hostname']:\n    {'description': 'An optional DC/OS agent hostname to run this Minio '\n                    'instance on (e.g. 10.0.0.1). If this is not specified '\n                    'then the task may relaunch on another node than the '\n                    'one it originally ran on.',\n     'type': 'string'}\n\nOn instance['storage']['pinned-hostname']:\n    10.0",
+      "data": {
+        "networking": {
+          "public-agent": "192.168.1.100",
+          "https-redirect": null
+        },
+        "service": {
+          "cpus": 0.4,
+          "mem": 2048,
+          "name": "minio"
+        },
+        "storage": {
+          "persistent-volume": {
+            "host-volume": "export"
+          },
+          "pinned-hostname": 10.0
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "networking": {
+          "https-redirect": true,
+          "public-agent": "192.168.1.100"
+        },
+        "service": {
+          "cpus": 2,
+          "mem": 4096,
+          "name": "minio-service"
+        },
+        "storage": {
+          "persistent-volume": {
+            "host-volume": "minio-data"
+          },
+          "pinned-hostname": "agent-1"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "0.4 is less than the minimum of 0.5\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to each service instance.',\n     'minimum': 0.5,\n     'type': 'number'}\n\nOn instance['service']['cpus']:\n    0.4",
+      "data": {
+        "networking": {
+          "https-redirect": true,
+          "public-agent": "192.168.1.100"
+        },
+        "service": {
+          "cpus": 0.4,
+          "mem": 2048,
+          "name": "minio-service"
+        },
+        "storage": {
+          "persistent-volume": {
+            "host-volume": "minio-data"
+          },
+          "pinned-hostname": "agent-1"
+        }
+      }
+    }
+  ]
+}

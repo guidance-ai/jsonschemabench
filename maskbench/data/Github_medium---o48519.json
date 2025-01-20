@@ -1,0 +1,485 @@
+{
+  "description": "sample Github_medium/o48519.json",
+  "meta": {
+    "full_size": 2047,
+    "stripped_size": 824,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "definitions",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "axis": {
+        "description": "Defines an axis of the image",
+        "properties": {
+          "Label": {
+            "description": "What to call this dimension.",
+            "type": "string"
+          },
+          "Resolution": {
+            "description": "The length of a voxel in this dimension.",
+            "minimum": 0,
+            "type": "number"
+          },
+          "Size": {
+            "description": "The span of the image (i.e., the number of voxels) in this dimension.",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "Units": {
+            "description": "The units of length of a voxel in this dimension.",
+            "enum": [
+              "nanometers",
+              "micrometers",
+              "millimeters",
+              ""
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "Label",
+          "Resolution",
+          "Units",
+          "Size"
+        ],
+        "type": "object"
+      },
+      "channel": {
+        "description": "Describes the value type for a channel of data",
+        "properties": {
+          "DataType": {
+            "description": "The fixed-size data type for the value.",
+            "enum": [
+              "uint8",
+              "int8",
+              "uint16",
+              "int16",
+              "uint32",
+              "int32",
+              "uint64",
+              "int64",
+              "float32",
+              "float64"
+            ],
+            "type": "string"
+          },
+          "Label": {
+            "description": "The name of this value.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "DataType"
+        ],
+        "type": "object"
+      }
+    },
+    "description": "Supplies the meta data necessary to interpret N-dimensional image data returned by DVID",
+    "properties": {
+      "Axes": {
+        "description": "Specifies the dimensions of the image. Order of the axes within the list specifies the ordering of the data. The first object in the list corresponds to the dimension whose index varies most rapidly as we move through the data bytes. The second object in the list corresponds to the 2nd most rapidly changing index, and so on.",
+        "items": {
+          "$ref": "#/definitions/axis"
+        },
+        "minItems": 1,
+        "type": "array",
+        "_uniqueItems": true
+      },
+      "Properties": {
+        "description": "Properties for datatype instance",
+        "properties": {
+          "Values": {
+            "description": "Specifies the interleaved values within one voxel of the n-D array. For example, a RGBA image would have four values, one for each of the colors and a fourth for the alpha channel.",
+            "items": {
+              "$ref": "#/definitions/channel"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "Values"
+        ],
+        "type": "object"
+      },
+      "version": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "Axes",
+      "Properties"
+    ],
+    "title": "N-dimensional Image Data",
+    "type": "object",
+    "version": "0.01"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "Axes": [
+          {
+            "Label": "X",
+            "Resolution": 1.0,
+            "Size": 512,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Y",
+            "Resolution": 1.0,
+            "Size": 512,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Z",
+            "Resolution": 2.0,
+            "Size": 256,
+            "Units": "micrometers"
+          }
+        ],
+        "Properties": {
+          "Values": [
+            {
+              "DataType": "uint8",
+              "Label": "Red"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Green"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Blue"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Alpha"
+            }
+          ]
+        },
+        "version": "0.01"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['Axes']:\n    {'description': 'Specifies the dimensions of the image. Order of the '\n                    'axes within the list specifies the ordering of the '\n                    'data. The first object in the list corresponds to the '\n                    'dimension whose index varies most rapidly as we move '\n                    'through the data bytes. The second object in the list '\n                    'corresponds to the 2nd most rapidly changing index, '\n                    'and so on.',\n     'items': {'$ref': '#/definitions/axis'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['Axes']:\n    []",
+      "data": {
+        "Axes": [],
+        "Properties": {
+          "Values": [
+            {
+              "DataType": "uint8",
+              "Label": "Red"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Green"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Blue"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Alpha"
+            }
+          ]
+        },
+        "version": "0.01"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "-1.0 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['Axes']['items']['properties']['Resolution']:\n    {'description': 'The length of a voxel in this dimension.',\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['Axes'][0]['Resolution']:\n    -1.0",
+      "data": {
+        "Axes": [
+          {
+            "Label": "X",
+            "Resolution": -1.0,
+            "Size": 512,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Y",
+            "Resolution": 1.0,
+            "Size": 512,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Z",
+            "Resolution": 2.0,
+            "Size": 256,
+            "Units": "micrometers"
+          }
+        ],
+        "Properties": {
+          "Values": [
+            {
+              "DataType": "uint8",
+              "Label": "Red"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Green"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Blue"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Alpha"
+            }
+          ]
+        },
+        "version": "0.01"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "'Size' is a required property\n\nFailed validating 'required' in schema['properties']['Axes']['items']:\n    {'description': 'Defines an axis of the image',\n     'properties': {'Label': {'description': 'What to call this dimension.',\n                              'type': 'string'},\n                    'Resolution': {'description': 'The length of a voxel '\n                                                  'in this dimension.',\n                                   'minimum': 0,\n                                   'type': 'number'},\n                    'Size': {'description': 'The span of the image (i.e., '\n                                            'the number of voxels) in this '\n                                            'dimension.',\n                             'minimum': 0,\n                             'type': 'integer'},\n                    'Units': {'description': 'The units of length of a '\n                                             'voxel in this dimension.',\n                              'enum': ['nanom.. (462 more)",
+      "data": {
+        "Axes": [
+          {
+            "Label": "X",
+            "Resolution": -1.0,
+            "Invalid: Resolution should be greater than or equal to 0": "Size",
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Y",
+            "Resolution": 1.0,
+            "Size": 512,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Z",
+            "Resolution": 2.0,
+            "Size": 256,
+            "Units": "micrometers"
+          }
+        ],
+        "Properties": {
+          "Values": [
+            {
+              "DataType": "uint8",
+              "Label": "Red"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Green"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Blue"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Alpha"
+            }
+          ]
+        },
+        "version": "0.01"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "'Properties' is a required property\n\nFailed validating 'required' in schema:\n    {'definitions': {'axis': {'description': 'Defines an axis of the image',\n                              'properties': {'Label': {'description': 'What '\n                                                                      'to '\n                                                                      'call '\n                                                                      'this '\n                                                                      'dimension.',\n                                                       'type': 'string'},\n                                             'Resolution': {'description': 'The '\n                                                                           'length '\n                                                                           'of '\n                                                                           'a '\n                                                                          .. (10916 more)",
+      "data": {
+        "Axes": [
+          {
+            "Label": "X",
+            "Resolution": -1.0,
+            "Invalid: Resolution should be greater than or equal to 0": "Size",
+            "Invalid: Size is required": "Units",
+            "Invalid: Units is required": {
+              "Label": "Y",
+              "Resolution": 1.0,
+              "Size": 512,
+              "Units": "micrometers"
+            },
+            "Invalid: Duplicate axis label": {
+              "Label": "X",
+              "Resolution": 2.0,
+              "Size": 256,
+              "Units": "micrometers"
+            }
+          },
+          "Properties",
+          "Invalid: Properties is required",
+          "version",
+          "Invalid: version should be a string",
+          "Invalid: Additional property not allowed"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "Axes": [
+          {
+            "Label": "X",
+            "Resolution": 1.0,
+            "Size": 256,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Y",
+            "Resolution": 1.0,
+            "Size": 256,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Z",
+            "Resolution": 2.0,
+            "Size": 128,
+            "Units": "micrometers"
+          }
+        ],
+        "Properties": {
+          "Values": [
+            {
+              "DataType": "uint8",
+              "Label": "Red"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Green"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Blue"
+            }
+          ]
+        },
+        "version": "0.01"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "-1.0 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['Axes']['items']['properties']['Resolution']:\n    {'description': 'The length of a voxel in this dimension.',\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['Axes'][0]['Resolution']:\n    -1.0",
+      "data": {
+        "Axes": [
+          {
+            "Label": "X",
+            "Resolution": -1.0,
+            "Size": 256,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Y",
+            "Resolution": 1.0,
+            "Size": 256,
+            "Units": "micrometers"
+          },
+          {
+            "Label": "Z",
+            "Resolution": 2.0,
+            "Size": 128,
+            "Units": "micrometers"
+          }
+        ],
+        "Properties": {
+          "Values": [
+            {
+              "DataType": "uint8",
+              "Label": "Red"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Green"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Blue"
+            }
+          ]
+        },
+        "version": "0.01"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['Axes']:\n    {'description': 'Specifies the dimensions of the image. Order of the '\n                    'axes within the list specifies the ordering of the '\n                    'data. The first object in the list corresponds to the '\n                    'dimension whose index varies most rapidly as we move '\n                    'through the data bytes. The second object in the list '\n                    'corresponds to the 2nd most rapidly changing index, '\n                    'and so on.',\n     'items': {'$ref': '#/definitions/axis'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['Axes']:\n    []",
+      "data": {
+        "Axes": [],
+        "Properties": {
+          "Values": [
+            {
+              "DataType": "uint8",
+              "Label": "Red"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Green"
+            },
+            {
+              "DataType": "uint8",
+              "Label": "Blue"
+            }
+          ]
+        },
+        "version": "0.01"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "'Properties' is a required property\n\nFailed validating 'required' in schema:\n    {'definitions': {'axis': {'description': 'Defines an axis of the image',\n                              'properties': {'Label': {'description': 'What '\n                                                                      'to '\n                                                                      'call '\n                                                                      'this '\n                                                                      'dimension.',\n                                                       'type': 'string'},\n                                             'Resolution': {'description': 'The '\n                                                                           'length '\n                                                                           'of '\n                                                                           'a '\n                                                                          .. (10632 more)",
+      "data": {
+        "Axes": [
+          {
+            "Label": "X",
+            "Resolution": -1.0,
+            "Invalid: Resolution should be a non-negative number": "Size",
+            "Missing required property Size": {
+              "Label": "Y",
+              "Resolution": 1.0,
+              "Size": 256,
+              "Units": "micrometers"
+            },
+            "Wrong type: 'number' instead of object": 123.45
+          },
+          "Properties",
+          "Missing required property Properties.Values",
+          "version",
+          "Invalid type: 'integer' instead of string"
+        ]
+      }
+    }
+  ]
+}

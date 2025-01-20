@@ -1,0 +1,377 @@
+{
+  "description": "sample Github_medium/o80822.json",
+  "meta": {
+    "full_size": 2229,
+    "stripped_size": 954,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "description": "Claim provided by a claimant.",
+    "properties": {
+      "arguments": {
+        "description": "Arguments supporting the certainty of the claim",
+        "properties": {
+          "actor": {
+            "description": "Person who assessed the certainty",
+            "title": "Actor",
+            "type": "string"
+          },
+          "human": {
+            "description": "The claim was done by a human (1) or an algorithm (1)",
+            "enum": [
+              0,
+              1
+            ],
+            "title": "Human made",
+            "type": "number"
+          },
+          "role": {
+            "description": "Role of the actor (e.g. Cataloguer)",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "title": "Optional arguments",
+        "type": "object"
+      },
+      "certainty": {
+        "description": "Certainty of the claim. It must be a value between 0 and 1.0, being 1.0 a confident claim",
+        "maximum": 1,
+        "minLength": 1,
+        "minimum": 0,
+        "title": "Certainty",
+        "type": "number"
+      },
+      "claimant": {
+        "description": "Short name of the claimant that was used during the subscription (e.g. CERN)",
+        "minLength": 1,
+        "title": "Claimant",
+        "type": "string"
+      },
+      "created": {
+        "_format": "date-time",
+        "description": "Datetime in which the claim was created",
+        "minLength": 1,
+        "title": "Creation datetime",
+        "type": "string"
+      },
+      "object": {
+        "additionalProperties": false,
+        "description": "Object of the claim predicate",
+        "properties": {
+          "type": {
+            "description": "Type of persistent identifier (e.g. INSPIRE_RECORD_ID)",
+            "minLength": 1,
+            "title": "Identifier type",
+            "type": "string"
+          },
+          "value": {
+            "description": "Actual value of the identifier",
+            "minLength": 1,
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "title": "Object",
+        "type": "object"
+      },
+      "predicate": {
+        "description": "Type of relation between the subject and the object",
+        "enum": [
+          "is_same_as",
+          "is_variant_of",
+          "is_author_of",
+          "is_contributor_to",
+          "is_erratum_of"
+        ],
+        "title": "Predicate",
+        "type": "string"
+      },
+      "subject": {
+        "additionalProperties": false,
+        "description": "Subject of the claim predicate",
+        "properties": {
+          "type": {
+            "description": "Type of persistent identifier (e.g. INSPIRE_RECORD_ID)",
+            "minLength": 1,
+            "title": "Identifier type",
+            "type": "string"
+          },
+          "value": {
+            "description": "Actual value of the identifier",
+            "minLength": 1,
+            "title": "Identifier value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "title": "Subject",
+        "type": "object"
+      }
+    },
+    "required": [
+      "claimant",
+      "subject",
+      "predicate",
+      "object",
+      "certainty",
+      "created"
+    ],
+    "title": "Claim data",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 0.8,
+        "claimant": "CERN",
+        "created": "2022-01-01T12:00:00Z",
+        "object": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "0987654321"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['created']:\n    {'_format': 'date-time',\n     'description': 'Datetime in which the claim was created',\n     'minLength': 1,\n     'title': 'Creation datetime',\n     'type': 'string'}\n\nOn instance['created']:\n    ''",
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 0.8,
+        "claimant": "",
+        "created": "",
+        "object": {
+          "type": "",
+          "value": ""
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "",
+          "value": ""
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "1.1 is greater than the maximum of 1",
+      "python_error": "1.1 is greater than the maximum of 1\n\nFailed validating 'maximum' in schema['properties']['certainty']:\n    {'description': 'Certainty of the claim. It must be a value between 0 '\n                    'and 1.0, being 1.0 a confident claim',\n     'maximum': 1,\n     'minLength': 1,\n     'minimum': 0,\n     'title': 'Certainty',\n     'type': 'number'}\n\nOn instance['certainty']:\n    1.1",
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 1.1,
+        "claimant": "CERN",
+        "created": "2022-01-01T12:00:00Z",
+        "object": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "0987654321"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "2 is not one of [0,1]",
+      "python_error": "Additional properties are not allowed (\"Invalid date-time format, should be 'date-time'\", \"Invalid value for 'certainty' field, should be between 0 and 1.0\", \"Invalid value for 'predicate' field, should be one of the enum values\", \"Missing colon after 'claimant'\", \"Missing colon after 'object'\", \"Missing colon after 'subject'\" were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'description': 'Claim provided by a claimant.',\n     'properties': {'arguments': {'description': 'Arguments supporting the '\n                                                 'certainty of the claim',\n                                  'properties': {'actor': {'description': 'Person '\n                                                                          'who '\n                                                                          'assessed '\n                                                                          .. (8995 more)",
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 2,
+          "Invalid value for 'human' field, should be 0 or 1": "role",
+          "Missing colon after 'role'": "Cataloguer"
+        },
+        "certainty": 1.1,
+        "Invalid value for 'certainty' field, should be between 0 and 1.0": "claimant",
+        "Missing colon after 'claimant'": "CERN",
+        "created": "2022-01-01T12:00:00",
+        "Invalid date-time format, should be 'date-time'": "object",
+        "Missing colon after 'object'": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "1234567890"
+        },
+        "predicate": "is_similar_to",
+        "Invalid value for 'predicate' field, should be one of the enum values": "subject",
+        "Missing colon after 'subject'": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "0987654321"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['claimant']:\n    {'description': 'Short name of the claimant that was used during the '\n                    'subscription (e.g. CERN)',\n     'minLength': 1,\n     'title': 'Claimant',\n     'type': 'string'}\n\nOn instance['claimant']:\n    ''",
+      "data": {
+        "arguments": {
+          "actor": "",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 0.8,
+        "claimant": "",
+        "created": "2022-01-01T12:00:00Z",
+        "object": {
+          "type": "",
+          "value": "1234567890"
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "",
+          "value": "0987654321"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 0.9,
+        "claimant": "CERN",
+        "created": "2022-01-01T12:00:00Z",
+        "object": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "987654321"
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "123456789"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "1.1 is greater than the maximum of 1",
+      "python_error": "1.1 is greater than the maximum of 1\n\nFailed validating 'maximum' in schema['properties']['certainty']:\n    {'description': 'Certainty of the claim. It must be a value between 0 '\n                    'and 1.0, being 1.0 a confident claim',\n     'maximum': 1,\n     'minLength': 1,\n     'minimum': 0,\n     'title': 'Certainty',\n     'type': 'number'}\n\nOn instance['certainty']:\n    1.1",
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 1.1,
+        "claimant": "CERN",
+        "created": "2022-01-01T12:00:00Z",
+        "object": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "987654321"
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "123456789"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['claimant']:\n    {'description': 'Short name of the claimant that was used during the '\n                    'subscription (e.g. CERN)',\n     'minLength': 1,\n     'title': 'Claimant',\n     'type': 'string'}\n\nOn instance['claimant']:\n    ''",
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 0.9,
+        "claimant": "",
+        "created": "2022-01-01T12:00:00Z",
+        "object": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "987654321"
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "987654321"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1.1 is greater than the maximum of 1",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['claimant']:\n    {'description': 'Short name of the claimant that was used during the '\n                    'subscription (e.g. CERN)',\n     'minLength': 1,\n     'title': 'Claimant',\n     'type': 'string'}\n\nOn instance['claimant']:\n    ''",
+      "data": {
+        "arguments": {
+          "actor": "John Doe",
+          "human": 1,
+          "role": "Cataloguer"
+        },
+        "certainty": 1.1,
+        "claimant": "",
+        "created": "2022-01-01T12:00:00Z",
+        "object": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "987654321"
+        },
+        "predicate": "is_same_as",
+        "subject": {
+          "type": "INSPIRE_RECORD_ID",
+          "value": "123456789"
+        }
+      }
+    }
+  ]
+}

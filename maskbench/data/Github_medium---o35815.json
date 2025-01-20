@@ -1,0 +1,287 @@
+{
+  "description": "sample Github_medium/o35815.json",
+  "meta": {
+    "full_size": 1243,
+    "stripped_size": 1011,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@siblingKeys",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "anyOf": [
+      {
+        "$ref": "#/definitions/coreSchema"
+      },
+      {
+        "items": {
+          "$ref": "#/definitions/coreSchema"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    ],
+    "definitions": {
+      "coreSchema": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/vibrationChild_schema"
+          },
+          {
+            "$ref": "#/definitions/vibrationParent_schema"
+          }
+        ]
+      },
+      "numArray": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "vibrationChild_schema": {
+        "description": "schema for a single vibration measurement",
+        "properties": {
+          "measurementDate": {
+            "_format": "date-time",
+            "type": "string"
+          },
+          "statistics": {
+            "default": {
+              "rms": [
+                1,
+                1
+              ]
+            },
+            "properties": {
+              "kurtosis": {
+                "$ref": "#/definitions/numArray"
+              },
+              "mean": {
+                "$ref": "#/definitions/numArray"
+              },
+              "rms": {
+                "$ref": "#/definitions/numArray"
+              },
+              "skewness": {
+                "$ref": "#/definitions/numArray"
+              },
+              "std": {
+                "$ref": "#/definitions/numArray"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "measurementDate",
+          "additionalMeasurements"
+        ],
+        "type": "object"
+      },
+      "vibrationParent_schema": {
+        "description": "schema for a series of vibration measurements",
+        "properties": {
+          "documentClass": {
+            "enum": [
+              "parentOfChunks"
+            ],
+            "type": "string"
+          },
+          "trackedFlag": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "documentClass",
+          "nominalFreq",
+          "trackedFlag"
+        ],
+        "type": "object"
+      }
+    },
+    "description": "container schema for all Metadata from streamsapi"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "measurementDate": "2022-01-01T12:00:00Z",
+        "statistics": {
+          "kurtosis": [
+            1.2,
+            1.3
+          ],
+          "mean": [
+            2.1,
+            2.2
+          ],
+          "rms": [
+            1.1,
+            1.2
+          ],
+          "skewness": [
+            0.5,
+            0.6
+          ],
+          "std": [
+            0.7,
+            0.8
+          ]
+        },
+        "id": "child-1",
+        "parentId": "parent-1",
+        "additionalMeasurements": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"measurementDate\":\"2022-01-01T12:00:00Z\",\"statistics\":{\"kurtosis\":[],\"mean\":[2.1,2.2],\"rms\":[1.1,1.2],\"skewness\":[0.5,0.6],\"std\":[0.7,0.8]},\"id\":\"child-1\",\"parentId\":\"parent-1\",\"additionalMeasurements\":{}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema[0]['properties']['statistics']['properties']['kurtosis']:\n    {'items': {'type': 'number'}, 'minItems': 1, 'type': 'array'}\n\nOn instance['statistics']['kurtosis']:\n    []",
+      "data": {
+        "measurementDate": "2022-01-01T12:00:00Z",
+        "statistics": {
+          "kurtosis": [],
+          "mean": [
+            2.1,
+            2.2
+          ],
+          "rms": [
+            1.1,
+            1.2
+          ],
+          "skewness": [
+            0.5,
+            0.6
+          ],
+          "std": [
+            0.7,
+            0.8
+          ]
+        },
+        "id": "child-1",
+        "parentId": "parent-1",
+        "additionalMeasurements": {}
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "measurementDate": "2022-01-01T12:00:00Z",
+        "statistics": {
+          "kurtosis": [
+            1.2,
+            1.8
+          ],
+          "mean": [
+            1.1,
+            1.9
+          ],
+          "rms": [
+            1.5,
+            2.5
+          ],
+          "skewness": [
+            1.3,
+            1.7
+          ],
+          "std": [
+            1.4,
+            1.6
+          ]
+        },
+        "id": "12345",
+        "parentId": "67890",
+        "additionalMeasurements": "some additional measurements"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"12345\",\"parentId\":\"67890\",\"measurementDate\":\"2022-01-01T12:00:00Z\",\"additionalMeasurements\":\"some additional measurements\",\"statistics\":{\"rms\":[],\"kurtosis\":[1.2,1.8],\"mean\":[1.1,1.9],\"skewness\":[1.3,1.7],\"std\":[1.4,1.6]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema[0]['properties']['statistics']['properties']['rms']:\n    {'items': {'type': 'number'}, 'minItems': 1, 'type': 'array'}\n\nOn instance['statistics']['rms']:\n    []",
+      "data": {
+        "id": "12345",
+        "parentId": "67890",
+        "measurementDate": "2022-01-01T12:00:00Z",
+        "additionalMeasurements": "some additional measurements",
+        "statistics": {
+          "rms": [],
+          "kurtosis": [
+            1.2,
+            1.8
+          ],
+          "mean": [
+            1.1,
+            1.9
+          ],
+          "skewness": [
+            1.3,
+            1.7
+          ],
+          "std": [
+            1.4,
+            1.6
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"12345\",\"parentId\":\"67890\",\"measurementDate\":\"2022-01-01 12:00:00\",\"statistics\":{\"kurtosis\":[1.2,1.8],\"mean\":[1.1,1.9],\"rms\":[1.5,2.5],\"skewness\":[1.3,1.7],\"std\":[1.4,1.6]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'id': '12345', 'parentId': '67890', 'measurementDate': '2022-01-01 12:00:00', 'statistics': {'rms': [1.5, 2.5], 'kurtosis': [1.2, 1.8], 'mean': [1.1, 1.9], 'skewness': [1.3, 1.7], 'std': [1.4, 1.6]}} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]:\n    {'anyOf': [{'$ref': '#/definitions/vibrationChild_schema'},\n               {'$ref': '#/definitions/vibrationParent_schema'}]}\n\nOn instance:\n    {'id': '12345',\n     'parentId': '67890',\n     'measurementDate': '2022-01-01 12:00:00',\n     'statistics': {'rms': [1.5, 2.5],\n                    'kurtosis': [1.2, 1.8],\n                    'mean': [1.1, 1.9],\n                    'skewness': [1.3, 1.7],\n                    'std': [1.4, 1.6]}}",
+      "data": {
+        "id": "12345",
+        "parentId": "67890",
+        "measurementDate": "2022-01-01 12:00:00",
+        "statistics": {
+          "kurtosis": [
+            1.2,
+            1.8
+          ],
+          "mean": [
+            1.1,
+            1.9
+          ],
+          "rms": [
+            1.5,
+            2.5
+          ],
+          "skewness": [
+            1.3,
+            1.7
+          ],
+          "std": [
+            1.4,
+            1.6
+          ]
+        }
+      }
+    }
+  ]
+}

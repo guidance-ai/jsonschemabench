@@ -1,0 +1,135 @@
+{
+  "description": "sample Kubernetes/kb_440_Normalized.json",
+  "meta": {
+    "full_size": 1639,
+    "stripped_size": 766,
+    "features": [
+      "$ref",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_TypedLocalObjectReference": {
+        "description": "TypedLocalObjectReference contains enough information to let you locate the typed referenced object inside the same namespace.",
+        "properties": {
+          "apiGroup": {
+            "description": "APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Kind is the type of resource being referenced",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name is the name of resource being referenced",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name"
+        ],
+        "type": "object"
+      },
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_util_intstr_IntOrString": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "description": "IngressBackend describes all endpoints for a given service and port.",
+    "properties": {
+      "resource": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_TypedLocalObjectReference",
+        "description": "Resource is an ObjectRef to another Kubernetes resource in the namespace of the Ingress object. If resource is specified, serviceName and servicePort must not be specified."
+      },
+      "serviceName": {
+        "description": "Specifies the name of the referenced service.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "servicePort": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_util_intstr_IntOrString",
+        "description": "Specifies the port of the referenced service."
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "resource": {
+          "apiGroup": "apps",
+          "kind": "Deployment",
+          "name": "example-deployment"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['serviceName']:\n    {'description': 'Specifies the name of the referenced service.',\n     'type': ['string', 'null']}\n\nOn instance['serviceName']:\n    123",
+      "data": {
+        "resource": {
+          "apiGroup": "apps",
+          "kind": "Deployment",
+          "name": "example-deployment"
+        },
+        "serviceName": 123,
+        "servicePort": "example"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"object\",\"value\":null} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'object', 'value': None} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['servicePort']:\n    {'oneOf': [{'type': 'string'}, {'type': 'integer'}]}\n\nOn instance['servicePort']:\n    {'type': 'object', 'value': None}",
+      "data": {
+        "resource": {
+          "apiGroup": "apps",
+          "kind": "Deployment",
+          "name": "example-deployment"
+        },
+        "servicePort": {
+          "type": "object",
+          "value": null
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['resource']['properties']['kind']:\n    {'description': 'Kind is the type of resource being referenced',\n     'type': 'string'}\n\nOn instance['resource']['kind']:\n    123",
+      "data": {
+        "resource": {
+          "apiGroup": "apps",
+          "kind": 123,
+          "name": "example-deployment"
+        }
+      }
+    }
+  ]
+}

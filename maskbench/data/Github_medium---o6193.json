@@ -1,0 +1,358 @@
+{
+  "description": "sample Github_medium/o6193.json",
+  "meta": {
+    "full_size": 868,
+    "stripped_size": 868,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 32767
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          "required": [
+            "key",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "attributes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+            },
+            "dataType": {
+              "type": "string",
+              "enum": [
+                "string",
+                "number",
+                "gps",
+                "boolean"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "dataType"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "deviceClass": {
+        "type": "string",
+        "enum": [
+          "standalone",
+          "master",
+          "owned",
+          "floating",
+          "virtual"
+        ]
+      },
+      "masterId": {
+        "type": "string",
+        "pattern": "^[A-Fa-f\\d]{24}$"
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "Example Device",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "example-tag",
+            "value": "example-value"
+          },
+          {
+            "key": "another-tag",
+            "value": "another-value"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "example-attribute",
+            "dataType": "string"
+          },
+          {
+            "name": "another-attribute",
+            "dataType": "number"
+          }
+        ],
+        "deviceClass": "standalone",
+        "masterId": "1234567890abcdef12345678"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"example-tag!\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'1234567890abcdef123456789' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['masterId']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['masterId']:\n    '1234567890abcdef123456789'",
+      "data": {
+        "name": "Example Device",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "example-tag!",
+            "value": "example-value"
+          },
+          {
+            "key": "another-tag",
+            "value": "another-value"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "example-attribute",
+            "dataType": "string"
+          },
+          {
+            "name": "another-attribute!",
+            "dataType": "number"
+          }
+        ],
+        "deviceClass": "standalone",
+        "masterId": "1234567890abcdef123456789"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"example-tag!\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'example-tag!' does not match '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'pattern' in schema['properties']['tags']['items']['properties']['key']:\n    {'type': 'string', 'pattern': '^[0-9a-zA-Z_-]{1,255}$'}\n\nOn instance['tags'][0]['key']:\n    'example-tag!'",
+      "data": {
+        "name": "Example Device",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "example-tag!",
+            "value": "example-value"
+          },
+          {
+            "key": "another-tag",
+            "value": "another-value"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "example-attribute",
+            "dataType": "string"
+          },
+          {
+            "name": "another-attribute",
+            "dataType": "number"
+          }
+        ],
+        "deviceClass": "standalone",
+        "masterId": "1234567890abcdef12345678"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "example-tag",
+            "value": "example-value"
+          },
+          {
+            "key": "another-tag",
+            "value": "another-value"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "example-attribute",
+            "dataType": "string"
+          },
+          {
+            "name": "another-attribute",
+            "dataType": "number"
+          }
+        ],
+        "deviceClass": "standalone",
+        "masterId": "1234567890abcdef12345678"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example Device",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "tag-key-1",
+            "value": "tag-value-1"
+          },
+          {
+            "key": "tag-key-2",
+            "value": "tag-value-2"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "attribute-name-1",
+            "dataType": "string"
+          },
+          {
+            "name": "attribute-name-2",
+            "dataType": "number"
+          }
+        ],
+        "deviceClass": "standalone",
+        "masterId": "1234567890abcdef12345678"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"tag-key-1!\" does not match \"^[0-9a-zA-Z_-]{1,255}$\"",
+      "python_error": "'1234567890abcdef1234567' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['masterId']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['masterId']:\n    '1234567890abcdef1234567'",
+      "data": {
+        "name": "Example Device",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "tag-key-1!",
+            "value": "tag-value-1"
+          },
+          {
+            "key": "tag-key-2",
+            "value": "tag-value-2"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "attribute-name-1",
+            "dataType": "string"
+          },
+          {
+            "name": "attribute-name-2!",
+            "dataType": "number"
+          }
+        ],
+        "deviceClass": "standalone",
+        "masterId": "1234567890abcdef1234567"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['name']:\n    ''",
+      "data": {
+        "name": "",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "tag-key-1",
+            "value": "tag-value-1"
+          },
+          {
+            "key": "tag-key-2",
+            "value": "tag-value-2"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "attribute-name-1",
+            "dataType": "string"
+          },
+          {
+            "name": "attribute-name-2",
+            "dataType": "number"
+          }
+        ],
+        "deviceClass": "standalone",
+        "masterId": "1234567890abcdef12345678"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'1234567890abcdef123456789' does not match '^[A-Fa-f\\\\d]{24}$'\n\nFailed validating 'pattern' in schema['properties']['masterId']:\n    {'type': 'string', 'pattern': '^[A-Fa-f\\\\d]{24}$'}\n\nOn instance['masterId']:\n    '1234567890abcdef123456789'",
+      "data": {
+        "name": "Example Device",
+        "description": "This is an example device.",
+        "tags": [
+          {
+            "key": "tag-key-1",
+            "value": ""
+          },
+          {
+            "key": "tag-key-2",
+            "value": "tag-value-2"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "attribute-name-1",
+            "dataType": "string"
+          },
+          {
+            "name": "attribute-name-2",
+            "dataType": "invalid"
+          }
+        ],
+        "deviceClass": "unknown",
+        "masterId": "1234567890abcdef123456789"
+      }
+    }
+  ]
+}

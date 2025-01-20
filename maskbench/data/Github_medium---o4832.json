@@ -1,0 +1,301 @@
+{
+  "description": "sample Github_medium/o4832.json",
+  "meta": {
+    "full_size": 569,
+    "stripped_size": 440,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "format",
+      "format:uri",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Attributes",
+    "description": "USI submittable attributes schema.",
+    "type": "object",
+    "properties": {
+      "attributes": {
+        "description": "Attributes for describing a submittable.",
+        "type": "object",
+        "properties": {},
+        "patternProperties": {
+          "^.*$": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "units": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "terms": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "value"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "attributes": {
+          "temperature": [
+            {
+              "value": "25",
+              "units": "Celsius",
+              "terms": [
+                {
+                  "url": "https://example.com/temperature-definition"
+                }
+              ]
+            },
+            {
+              "value": "77",
+              "units": "Fahrenheit"
+            }
+          ],
+          "humidity": [
+            {
+              "value": "60",
+              "units": "percent",
+              "terms": [
+                {
+                  "url": "https://example.com/humidity-definition"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "attributes": {
+          "height": [
+            {
+              "value": "175",
+              "units": "cm",
+              "terms": [
+                {
+                  "url": "https://example.com/height-definition"
+                }
+              ]
+            }
+          ],
+          "weight": [
+            {
+              "value": "70",
+              "units": "kg",
+              "terms": [
+                {
+                  "url": "https://example.com/weight-definition"
+                }
+              ]
+            }
+          ],
+          "age": [
+            {
+              "value": "30",
+              "units": "years"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "\"value\" is a required property",
+      "python_error": "'value' is a required property\n\nFailed validating 'required' in schema['properties']['attributes']['patternProperties']['^.*$']['items']:\n    {'properties': {'value': {'type': 'string', 'minLength': 1},\n                    'units': {'type': 'string', 'minLength': 1},\n                    'terms': {'type': 'array',\n                              'items': {'type': 'object',\n                                        'properties': {'url': {'type': 'string',\n                                                               'format': 'uri'}},\n                                        'required': ['url']}}},\n     'required': ['value']}\n\nOn instance['attributes']['age'][0]:\n    {'units': 'years'}",
+      "data": {
+        "attributes": {
+          "height": [
+            {
+              "value": "175",
+              "units": "cm",
+              "terms": [
+                {
+                  "url": "https://example.com/height-definition"
+                }
+              ]
+            }
+          ],
+          "weight": [
+            {
+              "value": "70",
+              "units": "kg",
+              "terms": [
+                {
+                  "url": "https://example.com/weight-definition"
+                }
+              ]
+            }
+          ],
+          "age": [
+            {
+              "units": "years"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid-url\" is not a \"uri\"",
+      "python_error": "'invalid-url' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['attributes']['patternProperties']['^.*$']['items']['properties']['terms']['items']['properties']['url']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['attributes']['height'][0]['terms'][0]['url']:\n    'invalid-url'",
+      "data": {
+        "attributes": {
+          "height": [
+            {
+              "value": "175",
+              "units": "cm",
+              "terms": [
+                {
+                  "url": "invalid-url"
+                }
+              ]
+            }
+          ],
+          "weight": [
+            {
+              "value": "70",
+              "units": "kg",
+              "terms": [
+                {
+                  "url": "https://example.com/weight-definition"
+                }
+              ]
+            }
+          ],
+          "age": [
+            {
+              "value": "30",
+              "units": "years"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['attributes']['patternProperties']['^.*$']['items']['properties']['units']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['attributes']['weight'][0]['units']:\n    ''",
+      "data": {
+        "attributes": {
+          "height": [
+            {
+              "value": "",
+              "units": "cm",
+              "terms": [
+                {
+                  "url": "https://example.com/height-definition"
+                }
+              ]
+            }
+          ],
+          "weight": [
+            {
+              "value": "70",
+              "units": "",
+              "terms": [
+                {
+                  "url": "https://example.com/weight-definition"
+                }
+              ]
+            }
+          ],
+          "age": [
+            {
+              "value": "30",
+              "units": "years"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'value' is a required property\n\nFailed validating 'required' in schema['properties']['attributes']['patternProperties']['^.*$']['items']:\n    {'properties': {'value': {'type': 'string', 'minLength': 1},\n                    'units': {'type': 'string', 'minLength': 1},\n                    'terms': {'type': 'array',\n                              'items': {'type': 'object',\n                                        'properties': {'url': {'type': 'string',\n                                                               'format': 'uri'}},\n                                        'required': ['url']}}},\n     'required': ['value']}\n\nOn instance['attributes']['age'][1]:\n    {'terms': []}",
+      "data": {
+        "attributes": {
+          "height": [
+            {
+              "value": "",
+              "units": "cm",
+              "terms": [
+                {
+                  "url": "https://example.com/height-definition"
+                }
+              ]
+            }
+          ],
+          "weight": [
+            {
+              "value": "70",
+              "units": "",
+              "terms": [
+                {
+                  "url": "https://example.com/weight-definition"
+                }
+              ]
+            }
+          ],
+          "age": [
+            {
+              "value": "30",
+              "units": "years"
+            },
+            {
+              "terms": []
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,452 @@
+{
+  "description": "sample Github_medium/o72203.json",
+  "meta": {
+    "full_size": 3578,
+    "stripped_size": 1999,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "dependencies",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "title": "Metric",
+    "description": "User metrics establish how aggregate functions can be used to update a custom user field with respect to an event.",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "title": "Identifier",
+        "description": "A unique identifier for this metric. This should be an ObjectId."
+      },
+      "customFieldKey": {
+        "type": "string",
+        "title": "Custom Field",
+        "description": "The name of the custom field associated with this metric. "
+      },
+      "aggregateId": {
+        "type": "string",
+        "title": "Aggregate Identifier",
+        "description": "An unique identifier for the aggregate operation to perform.",
+        "enum": [
+          "SUM",
+          "COUNT",
+          "FIRST_SEEN",
+          "FIRST_VALUE",
+          "LAST_VALUE",
+          "THROTTLED_LAST_NUMERIC_VALUE"
+        ]
+      },
+      "dateTriggeredWindow": {
+        "type": "string",
+        "title": "Date Triggered Window",
+        "description": "An ISO 8601 interval. The aggregate operation will only be performed between this window."
+      },
+      "eventKey": {
+        "type": "string",
+        "title": "Event Key",
+        "description": "The event that will be aggregated by this metric."
+      },
+      "fieldsFilters": {
+        "type": "array",
+        "title": "Metric Fields Filters",
+        "description": "The aggregate operation will only be performed for events matching these filters",
+        "items": {
+          "$ref": "#/definitions/filter"
+        }
+      },
+      "filter": {
+        "type": "string",
+        "title": "Filter",
+        "description": "A JSONata expression which will filter out non-matching events"
+      }
+    },
+    "required": [
+      "id",
+      "customFieldKey",
+      "aggregateId",
+      "eventKey"
+    ],
+    "dependencies": {
+      "aggregateId": {
+        "oneOf": [
+          {
+            "properties": {
+              "aggregateId": {
+                "enum": [
+                  "SUM"
+                ]
+              },
+              "aggregateRules": {
+                "$ref": "#/definitions/singleFieldAggregate"
+              }
+            }
+          },
+          {
+            "properties": {
+              "aggregateId": {
+                "enum": [
+                  "COUNT"
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "aggregateId": {
+                "enum": [
+                  "FIRST_SEEN"
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "aggregateId": {
+                "enum": [
+                  "FIRST_VALUE"
+                ]
+              },
+              "aggregateRules": {
+                "$ref": "#/definitions/singleFieldAggregate"
+              }
+            }
+          },
+          {
+            "properties": {
+              "aggregateId": {
+                "enum": [
+                  "LAST_VALUE"
+                ]
+              },
+              "aggregateRules": {
+                "$ref": "#/definitions/singleFieldAggregate"
+              }
+            }
+          },
+          {
+            "properties": {
+              "aggregateId": {
+                "enum": [
+                  "THROTTLED_LAST_NUMERIC_VALUE"
+                ]
+              },
+              "aggregateRules": {
+                "type": "object",
+                "properties": {
+                  "fieldName": {
+                    "$ref": "#/definitions/fieldName"
+                  },
+                  "diff": {
+                    "type": "string",
+                    "title": "Throttle Interval",
+                    "description": "The minimum interval time that can elapse between recording the value of field name. Default is milliseconds per hour."
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "fieldName"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "definitions": {
+      "singleFieldAggregate": {
+        "type": "object",
+        "properties": {
+          "fieldName": {
+            "$ref": "#/definitions/fieldName"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "fieldName"
+        ]
+      },
+      "fieldName": {
+        "type": "string",
+        "title": "Field Name",
+        "description": "The field on which this aggregate will be performed."
+      },
+      "filter": {
+        "type": "object",
+        "title": "Filter",
+        "description": "Aggregate operator filter",
+        "properties": {
+          "operator": {
+            "type": "string",
+            "title": "Operator",
+            "description": "The operator that will be used in applying the filter",
+            "enum": [
+              "eq",
+              "gt",
+              "gte",
+              "lt",
+              "lte",
+              "exists",
+              "or"
+            ]
+          }
+        },
+        "required": [
+          "operator"
+        ],
+        "dependencies": {
+          "operator": {
+            "oneOf": [
+              {
+                "properties": {
+                  "operator": {
+                    "enum": [
+                      "or"
+                    ]
+                  },
+                  "value": {
+                    "type": "array",
+                    "title": "OR Filters",
+                    "description": "Filters provided will be evaluated using the OR conditional.",
+                    "items": {
+                      "$ref": "#/definitions/filter"
+                    }
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "properties": {
+                  "operator": {
+                    "enum": [
+                      "eq",
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "exists"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "title": "Field Name",
+                    "description": "The filter operator will be applied to this event field"
+                  },
+                  "value": {
+                    "type": [
+                      "string",
+                      "integer",
+                      "boolean"
+                    ],
+                    "title": "Field Value",
+                    "description": "The value the filter operator will match on"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "operator",
+                  "value"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "62a4e8d4f5b3a4c5d6e7f8a9",
+        "customFieldKey": "myCustomField",
+        "aggregateId": "SUM",
+        "dateTriggeredWindow": "P1D",
+        "eventKey": "myEvent",
+        "fieldsFilters": [
+          {
+            "operator": "eq",
+            "field": "myField",
+            "value": "myValue"
+          },
+          {
+            "operator": "or",
+            "value": [
+              {
+                "operator": "gt",
+                "field": "myOtherField",
+                "value": 10
+              },
+              {
+                "operator": "lt",
+                "field": "myOtherField",
+                "value": 20
+              }
+            ]
+          }
+        ],
+        "filter": "($event.myField = 'myValue')",
+        "aggregateRules": {
+          "fieldName": "myField"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "5f9f1a7b9c9d9c9d9c9d9c9d",
+        "customFieldKey": "myCustomField",
+        "aggregateId": "SUM",
+        "dateTriggeredWindow": "2022-01-01T00:00:00Z/2022-01-31T23:59:59Z",
+        "eventKey": "myEvent",
+        "fieldsFilters": [
+          {
+            "operator": "eq",
+            "field": "myField",
+            "value": "myValue"
+          },
+          {
+            "operator": "or",
+            "value": [
+              {
+                "operator": "gt",
+                "field": "myOtherField",
+                "value": 10
+              },
+              {
+                "operator": "lt",
+                "field": "myOtherField",
+                "value": 20
+              }
+            ]
+          }
+        ],
+        "filter": "($event.myField = 'myValue') and ($event.myOtherField > 10)",
+        "aggregateRules": {
+          "fieldName": "myField"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"operator\":\"or\",\"value\":[{\"operator\":\"gt\",\"field\":\"myOtherField\",\"value\":null},{\"operator\":\"lt\",\"field\":\"myOtherField\",\"value\":20}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'gt' is not one of ['or']\n\nFailed validating 'enum' in schema[0]['properties']['operator']:\n    {'enum': ['or']}\n\nOn instance['operator']:\n    'gt'",
+      "data": {
+        "id": "5f9f1a7b9c9d9c9d9c9d9c9d",
+        "customFieldKey": "myCustomField",
+        "aggregateId": "SUM",
+        "dateTriggeredWindow": "2022-01-01T00:00:00Z/2022-01-31T23:59:59Z",
+        "eventKey": "myEvent",
+        "fieldsFilters": [
+          {
+            "operator": "or",
+            "value": [
+              {
+                "operator": "gt",
+                "field": "myOtherField",
+                "value": null
+              },
+              {
+                "operator": "lt",
+                "field": "myOtherField",
+                "value": 20
+              }
+            ]
+          }
+        ],
+        "filter": "($event.myField = 'myValue') and ($event.myOtherField > 10)",
+        "aggregateRules": {
+          "fieldName": "myField"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"5f9f1a7b9c9d9c9d9c9d9c9d\",\"customFieldKey\":\"myCustomField\",\"aggregateId\":\"SUM\",\"dateTriggeredWindow\":\"2022-01-01T00:00:00Z/2022-01-31T23:59:59Z\",\"eventKey\":\"myEvent\",\"fieldsFilters\":[{\"operator\":\"eq\",\"field\":\"myField\",\"value\":\"myValue\"},{\"operator\":\"or\",\"value\":[{\"operator\":\"gt\",\"field\":\"myOtherField\",\"value\":10},{\"operator\":\"lt\",\"field\":\"myOtherField\",\"value\":20}]}],\"filter\":\"($event.myField = 'myValue') and ($event.myOtherField > 10)\",\"aggregateRules\":{\"fieldName\":\"myField\",\"extraField\":\"Invalid\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'id': '5f9f1a7b9c9d9c9d9c9d9c9d', 'customFieldKey': 'myCustomField', 'aggregateId': 'SUM', 'dateTriggeredWindow': '2022-01-01T00:00:00Z/2022-01-31T23:59:59Z', 'eventKey': 'myEvent', 'fieldsFilters': [{'operator': 'eq', 'field': 'myField', 'value': 'myValue'}, {'operator': 'or', 'value': [{'operator': 'gt', 'field': 'myOtherField', 'value': 10}, {'operator': 'lt', 'field': 'myOtherField', 'value': 20}]}], 'filter': \"($event.myField = 'myValue') and ($event.myOtherField > 10)\", 'aggregateRules': {'fieldName': 'myField', 'extraField': 'Invalid'}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['dependencies']['aggregateId']:\n    {'oneOf': [{'properties': {'aggregateId': {'enum': ['SUM']},\n                               'aggregateRules': {'$ref': '#/definitions/singleFieldAggregate'}}},\n               {'properties': {'aggregateId': {'enum': ['COUNT']}}},\n               {'properties': {'aggregateId': {'enum': ['FIRST_SEEN']}}},\n               {'properties': {'aggregateId': {'enum'.. (3766 more)",
+      "data": {
+        "id": "5f9f1a7b9c9d9c9d9c9d9c9d",
+        "customFieldKey": "myCustomField",
+        "aggregateId": "SUM",
+        "dateTriggeredWindow": "2022-01-01T00:00:00Z/2022-01-31T23:59:59Z",
+        "eventKey": "myEvent",
+        "fieldsFilters": [
+          {
+            "operator": "eq",
+            "field": "myField",
+            "value": "myValue"
+          },
+          {
+            "operator": "or",
+            "value": [
+              {
+                "operator": "gt",
+                "field": "myOtherField",
+                "value": 10
+              },
+              {
+                "operator": "lt",
+                "field": "myOtherField",
+                "value": 20
+              }
+            ]
+          }
+        ],
+        "filter": "($event.myField = 'myValue') and ($event.myOtherField > 10)",
+        "aggregateRules": {
+          "fieldName": "myField",
+          "extraField": "Invalid"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1 is not of type \"string\"",
+      "python_error": "1 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['id']:\n    {'type': 'string',\n     'title': 'Identifier',\n     'description': 'A unique identifier for this metric. This should be '\n                    'an ObjectId.'}\n\nOn instance['id']:\n    1",
+      "data": {
+        "id": 1,
+        "customFieldKey": "myCustomField",
+        "aggregateId": "SUM",
+        "dateTriggeredWindow": "2022-01-01T00:00:00Z/2022-01-31T23:59:59Z",
+        "eventKey": "myEvent",
+        "fieldsFilters": [
+          {
+            "operator": "invalidOperator",
+            "field": "myField",
+            "value": "myValue"
+          }
+        ],
+        "filter": "($event.myField = 'myValue') and ($event.myOtherField > 10)",
+        "aggregateRules": {
+          "fieldName": "myField"
+        }
+      }
+    }
+  ]
+}

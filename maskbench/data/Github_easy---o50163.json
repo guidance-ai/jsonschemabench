@@ -1,0 +1,93 @@
+{
+  "description": "sample Github_easy/o50163.json",
+  "meta": {
+    "full_size": 291,
+    "stripped_size": 238,
+    "features": [
+      "@minmaxLength",
+      "format",
+      "format:uri"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "User",
+    "description": "Chat user JSON schema",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 12
+      },
+      "avatar": {
+        "type": "string",
+        "format": "uri"
+      },
+      "role": {
+        "type": "string"
+      },
+      "isConnected": {
+        "type": "boolean"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "JohnDoe",
+        "avatar": "https://example.com/avatar.jpg",
+        "role": "admin",
+        "isConnected": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a uri\" is not a \"uri\"",
+      "python_error": "'not a uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['avatar']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['avatar']:\n    'not a uri'",
+      "data": {
+        "name": "JohnDoe",
+        "avatar": "not a uri",
+        "role": "admin",
+        "isConnected": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"ab\" is shorter than 3 characters",
+      "python_error": "'ab' is too short\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 12}\n\nOn instance['name']:\n    'ab'",
+      "data": {
+        "name": "ab",
+        "avatar": "https://example.com/avatar.jpg",
+        "role": "admin",
+        "isConnected": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ab\" is shorter than 3 characters",
+      "python_error": "'ab' is too short\n\nFailed validating 'minLength' in schema['properties']['name']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 12}\n\nOn instance['name']:\n    'ab'",
+      "data": {
+        "name": "ab",
+        "avatar": "https://example.com/avatar.jpg",
+        "role": "admin",
+        "isConnected": true
+      }
+    }
+  ]
+}

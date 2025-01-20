@@ -1,0 +1,181 @@
+{
+  "description": "sample Github_medium/o13945.json",
+  "meta": {
+    "full_size": 501,
+    "stripped_size": 501,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "entities": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "nanoentities": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "name": {
+        "type": "string"
+      },
+      "relations": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "destination": {
+              "type": "string"
+            },
+            "origin": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "AGGREGATION",
+                "COMPOSITION",
+                "INHERITANCE"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "Example Entity",
+        "relations": [
+          {
+            "origin": "Entity A",
+            "type": "AGGREGATION"
+          },
+          {
+            "origin": "Entity B",
+            "type": "COMPOSITION"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['relations']['items']:\n    {'additionalProperties': False,\n     'properties': {'destination': {'type': 'string'},\n                    'origin': {'type': 'string'},\n                    'type': {'enum': ['AGGREGATION',\n                                      'COMPOSITION',\n                                      'INHERITANCE'],\n                             'type': 'string'}},\n     'type': 'object'}\n\nOn instance['relations'][0]:\n    {'origin': 'Entity A',\n     'type': 'AGGREGATION',\n     'extraProperty': 'Invalid'}",
+      "data": {
+        "name": "Example Entity",
+        "relations": [
+          {
+            "origin": "Entity A",
+            "type": "AGGREGATION",
+            "extraProperty": "Invalid"
+          },
+          {
+            "origin": "Entity B",
+            "type": "COMPOSITION"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "entities": [
+          {
+            "name": "Entity 1",
+            "nanoentities": [
+              "Nanoentity 1",
+              "Nanoentity 2"
+            ]
+          },
+          {
+            "name": "Entity 2",
+            "nanoentities": [
+              "Nanoentity 3",
+              "Nanoentity 4"
+            ]
+          }
+        ],
+        "name": "Example Entity",
+        "relations": [
+          {
+            "destination": "Entity 2",
+            "origin": "Entity 1",
+            "type": "AGGREGATION"
+          },
+          {
+            "destination": "Entity 1",
+            "origin": "Entity 2",
+            "type": "COMPOSITION"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "5 is not of type \"string\"",
+      "python_error": "'WRONG_TYPE' is not one of ['AGGREGATION', 'COMPOSITION', 'INHERITANCE']\n\nFailed validating 'enum' in schema['properties']['relations']['items']['properties']['type']:\n    {'enum': ['AGGREGATION', 'COMPOSITION', 'INHERITANCE'],\n     'type': 'string'}\n\nOn instance['relations'][1]['type']:\n    'WRONG_TYPE'",
+      "data": {
+        "name": "Example Entity",
+        "entities": [
+          {
+            "name": "Entity 1",
+            "nanoentities": [
+              "Nanoentity 1",
+              "Nanoentity 2"
+            ]
+          },
+          {
+            "name": "Entity 2",
+            "nanoentities": [
+              "Nanoentity 3",
+              5
+            ]
+          }
+        ],
+        "relations": [
+          {
+            "origin": "Entity 1",
+            "destination": "Entity 2",
+            "type": "AGGREGATION"
+          },
+          {
+            "origin": "Entity 2",
+            "destination": "Entity 1",
+            "type": "WRONG_TYPE"
+          }
+        ]
+      }
+    }
+  ]
+}

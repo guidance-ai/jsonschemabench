@@ -1,0 +1,108 @@
+{
+  "description": "sample Github_easy/o51165.json",
+  "meta": {
+    "full_size": 841,
+    "stripped_size": 460,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "format",
+      "format:uri",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "JSON schema for the tested configuration files",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "additionalProperties": true,
+    "definitions": {
+      "includeDefinition": {
+        "properties": {
+          "include": {
+            "description": "Specifies a list of glob patterns that match files to be included in compilation.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      },
+      "excludeDefinition": {
+        "properties": {
+          "exclude": {
+            "description": "Specifies a list globs that need to be excluded from compilation. The 'exclude' property only affects the files included via the 'include' property",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "properties": {
+      "tests": {
+        "description": "The directory where the codelytics rules live",
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/definitions/includeDefinition"
+          },
+          {
+            "$ref": "#/definitions/excludeDefinition"
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "tests": {
+          "include": [
+            "file:///path/to/file1.js",
+            "file:///path/to/file2.js"
+          ],
+          "exclude": [
+            "file:///path/to/exclude/file1.js",
+            "file:///path/to/exclude/file2.js"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"include\":[\"file:///path/to/file1.js\",12345],\"exclude\":[\"file:///path/to/exclude/file1.js\",true]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "True is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['exclude']['items']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['exclude'][1]:\n    True",
+      "data": {
+        "tests": {
+          "include": [
+            "file:///path/to/file1.js",
+            12345
+          ],
+          "exclude": [
+            "file:///path/to/exclude/file1.js",
+            true
+          ]
+        }
+      }
+    }
+  ]
+}

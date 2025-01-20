@@ -1,0 +1,266 @@
+{
+  "description": "sample Github_medium/o73927.json",
+  "meta": {
+    "full_size": 846,
+    "stripped_size": 750,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": true,
+    "definitions": {
+      "link": {
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "properties": {
+            "$ref": "#/definitions/property"
+          },
+          "rel": {
+            "type": "string"
+          },
+          "template": {
+            "_format": "uri",
+            "type": "string"
+          },
+          "titles": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "properties": {
+              "default": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "property": {
+        "additionalProperties": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "type": "object"
+      }
+    },
+    "properties": {
+      "aliases": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "expires": {
+        "_format": "date-time",
+        "type": "string"
+      },
+      "links": {
+        "items": {
+          "$ref": "#/definitions/link"
+        },
+        "type": "array"
+      },
+      "properties": {
+        "$ref": "#/definitions/property"
+      },
+      "subject": {
+        "_format": "uri",
+        "type": "string"
+      }
+    },
+    "required": [
+      "subject"
+    ],
+    "title": "JSON schema for host-meta files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "subject": "https://example.com",
+        "expires ": "2024-12-31T23:59:59Z",
+        "aliases ": [
+          "https://example.net",
+          "https://example.io"
+        ],
+        "links ": [
+          {
+            "href": "https://example.com/rel",
+            "rel": "self",
+            "type": "application/json",
+            "template": "https://example.com/{rel}",
+            "titles": {
+              "default": "Example Link"
+            }
+          },
+          {
+            "href": "https://example.com/rel2",
+            "rel": "alternate",
+            "type": "application/xml",
+            "template": "https://example.com/{rel2}",
+            "titles": {
+              "default": "Example Link 2",
+              "en": "English Title"
+            }
+          }
+        ],
+        "properties ": {
+          "key1": "value1",
+          "key2": null,
+          "key3": "value3"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "aliases": [
+          "example",
+          "example.net"
+        ],
+        "expires": "2024-12-31T23:59:59Z",
+        "links": [
+          {
+            "href": "https://example.com/host-meta",
+            "properties": {
+              "key": "value"
+            },
+            "rel": "self",
+            "template": "https://example.com/host-meta?{?query}",
+            "titles": {
+              "default": "Host-meta for example.com"
+            },
+            "type": "application/json"
+          },
+          {
+            "href": "https://example.com/host-meta.xml",
+            "rel": "alternate",
+            "template": "https://example.com/host-meta.xml?{?query}",
+            "titles": {
+              "default": "Host-meta for example.com (XML)"
+            },
+            "type": "application/xml"
+          }
+        ],
+        "properties": {
+          "key1": "value1",
+          "key2": null
+        },
+        "subject": "https://example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'null', 'string'\n\nFailed validating 'type' in schema['properties']['properties']['additionalProperties']:\n    {'type': ['null', 'string']}\n\nOn instance['properties']['key1']:\n    123",
+      "data": {
+        "subject": "https://example.com",
+        "expires": "2024-12-31T23:59:59Z",
+        "aliases": [
+          "example",
+          "example.net"
+        ],
+        "links": [
+          {
+            "rel": "self",
+            "href": "https://example.com/host-meta",
+            "type": "application/json",
+            "template": "https://example.com/host-meta?{?query}",
+            "titles": {
+              "default": "Host-meta for example.com"
+            },
+            "properties": {
+              "key": 123
+            }
+          },
+          {
+            "rel": "alternate",
+            "href": "https://example.com/host-meta.xml",
+            "type": "application/xml",
+            "template": "https://example.com/host-meta.xml?{?query}",
+            "titles": {
+              "default": "Host-meta for example.com (XML)"
+            }
+          }
+        ],
+        "properties": {
+          "key1": 123,
+          "key2": null
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"object\"",
+      "python_error": "[1, 2] is not of type 'null', 'string'\n\nFailed validating 'type' in schema['properties']['properties']['additionalProperties']:\n    {'type': ['null', 'string']}\n\nOn instance['properties']['key2']:\n    [1, 2]",
+      "data": {
+        "subject": "https://example.com",
+        "expires": "2024-12-31 23:59:59",
+        "aliases": [
+          "example",
+          "example.net"
+        ],
+        "links": [
+          {
+            "href": "https://example.com/host-meta",
+            "properties": {
+              "key": "value"
+            },
+            "rel": "self",
+            "template": "https://example.com/host-meta?{?query}",
+            "titles": {
+              "default": "Host-meta for example.com"
+            },
+            "type": "application/json"
+          },
+          {
+            "rel": "alternate",
+            "href": "https://example.com/host-meta.xml",
+            "type": "application/xml",
+            "template": "https://example.com/host-meta.xml?{?query}",
+            "titles": "Not an object",
+            "properties": 123
+          }
+        ],
+        "properties": {
+          "key1": "value1",
+          "key2": [
+            1,
+            2
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,444 @@
+{
+  "description": "sample Github_medium/o65677.json",
+  "meta": {
+    "full_size": 1671,
+    "stripped_size": 1486,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "openrtb-v1_0-schema-bid_response",
+    "description": "json schema for an openrtb v1.0 bid response (http://openrtb.googlecode.com/files/OpenRTB%20Mobile%20RTB%20API%20-%201.0.pdf)",
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "$ref": "#/definitions/string_40"
+      },
+      "bidid": {
+        "$ref": "#/definitions/string_40"
+      },
+      "nbr": {
+        "$ref": "#/definitions/no_bid_reason"
+      },
+      "cur": {
+        "$ref": "#/definitions/currency"
+      },
+      "units": {
+        "$ref": "#/definitions/price_units"
+      },
+      "seatbid": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/seatbid"
+        }
+      }
+    },
+    "definitions": {
+      "seatbid": {
+        "type": "object",
+        "required": [
+          "bid"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "seat": {
+            "$ref": "#/definitions/string_40"
+          },
+          "group": {
+            "$ref": "#/definitions/boolean_int"
+          },
+          "bid": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/bid"
+            }
+          }
+        }
+      },
+      "bid": {
+        "type": "object",
+        "required": [
+          "impid",
+          "price"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "impid": {
+            "$ref": "#/definitions/string_40"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "adid": {
+            "$ref": "#/definitions/string_40"
+          },
+          "nurl": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "adm": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "adomain": {
+            "type": "string"
+          },
+          "iurl": {
+            "type": "string"
+          },
+          "cid": {
+            "type": "string"
+          },
+          "crid": {
+            "type": "string"
+          },
+          "attr": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/creative_attribute"
+            }
+          }
+        }
+      },
+      "creative_attribute": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 14
+      },
+      "price_units": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2
+      },
+      "no_bid_reason": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 3
+      },
+      "boolean_int": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "currency": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 4
+      },
+      "string_40": {
+        "type": "string",
+        "maxLength": 40
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "USD",
+        "seatbid": [
+          {
+            "seat": "seat123",
+            "group": 0,
+            "bid": [
+              {
+                "impid": "imp123",
+                "price": 1.23,
+                "adid": "ad123",
+                "nurl": "http://example.com/win",
+                "adm": "<html><body>Example Ad</body></html>",
+                "adomain": "example.com",
+                "iurl": "http://example.com/image",
+                "cid": "campaign123",
+                "crid": "creative123",
+                "attr": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"US\" is shorter than 3 characters",
+      "python_error": "'US' is too short\n\nFailed validating 'minLength' in schema['properties']['cur']:\n    {'type': 'string', 'minLength': 3, 'maxLength': 4}\n\nOn instance['cur']:\n    'US'",
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "US",
+        "seatbid": [
+          {
+            "seat": "seat123",
+            "group": 0,
+            "bid": [
+              {
+                "impid": "imp123",
+                "price": 1.23,
+                "adid": "ad123",
+                "nurl": "http://example.com/win",
+                "adm": "<html><body>Example Ad</body></html>",
+                "adomain": "example.com",
+                "iurl": "http://example.com/image",
+                "cid": "campaign123",
+                "crid": "creative123",
+                "attr": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1.23 is less than the minimum of 0",
+      "python_error": "-1.23 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['seatbid']['items']['properties']['bid']['items']['properties']['price']:\n    {'type': 'number', 'minimum': 0}\n\nOn instance['seatbid'][0]['bid'][0]['price']:\n    -1.23",
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "USD",
+        "seatbid": [
+          {
+            "seat": "seat123",
+            "group": 0,
+            "bid": [
+              {
+                "impid": "imp123",
+                "price": -1.23,
+                "adid": "ad123",
+                "nurl": "http://example.com/win",
+                "adm": "<html><body>Example Ad</body></html>",
+                "adomain": "example.com",
+                "iurl": "http://example.com/image",
+                "cid": "campaign123",
+                "crid": "creative123",
+                "attr": [
+                  1,
+                  2,
+                  15
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "-1.23 is less than the minimum of 0",
+      "python_error": "Additional properties are not allowed (\"key should be 'adid' instead of ':'\", 'price is less than minimum 0' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['seatbid']['items']['properties']['bid']['items']:\n    {'type': 'object',\n     'required': ['impid', 'price'],\n     'additionalProperties': False,\n     'properties': {'impid': {'$ref': '#/definitions/string_40'},\n                    'price': {'type': 'number', 'minimum': 0},\n                    'adid': {'$ref': '#/definitions/string_40'},\n                    'nurl': {'type': 'string', 'maxLength': 256},\n                    'adm': {'type': 'string', 'maxLength': 1024},\n                    'adomain': {'type': 'string'},\n                    'iurl': {'type': 'string'},\n                    'cid': {'type': 'string'},\n                    'crid': {'type': 'string'},\n                    'attr': {'type': 'array',\n                             'items': {'$ref': '#/definitions/creative_attribute'}}}}\n\nOn instance['seatbid'][0]['bid'].. (425 more)",
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "USD",
+        "seatbid": [
+          {
+            "seat": "seat123",
+            "group": 0,
+            "bid": [
+              {
+                "impid": "imp123",
+                "price": -1.23,
+                "price is less than minimum 0": "adid",
+                "key should be 'adid' instead of ':'": "ad123",
+                "nurl": "http://example.com/win",
+                "adm": "<html><body>Example Ad</body></html>",
+                "adomain": "example.com",
+                "iurl": "http://example.com/image",
+                "cid": "campaign123",
+                "crid": "creative123",
+                "attr": [
+                  1,
+                  2,
+                  15,
+                  "attr should be between 1 and 14"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"bid\" is a required property",
+      "python_error": "'bid' is a required property\n\nFailed validating 'required' in schema['properties']['seatbid']['items']:\n    {'type': 'object',\n     'required': ['bid'],\n     'additionalProperties': False,\n     'properties': {'seat': {'$ref': '#/definitions/string_40'},\n                    'group': {'$ref': '#/definitions/boolean_int'},\n                    'bid': {'type': 'array',\n                            'items': {'$ref': '#/definitions/bid'}}}}\n\nOn instance['seatbid'][0]:\n    {'seat': 'seat123',\n     'group': 2,\n     'Invalid: group should be either 0 or 1': 'bid',\n     \"Invalid: property name should be 'bid', not ':bid'\": [{'impid': 'imp123',\n                                                             'price': -1.23,\n                                                             'Invalid: price should be greater than or equal to 0': 'adid',\n                                                             \"Invalid: property name should be 'adid', not ':adid'\": 'nurl',\n                                                          .. (2808 more)",
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "USD",
+        "seatbid": [
+          {
+            "seat": "seat123",
+            "group": 2,
+            "Invalid: group should be either 0 or 1": "bid",
+            "Invalid: property name should be 'bid', not ':bid'": [
+              {
+                "impid": "imp123",
+                "price": -1.23,
+                "Invalid: price should be greater than or equal to 0": "adid",
+                "Invalid: property name should be 'adid', not ':adid'": "nurl",
+                "Invalid: property name should be 'nurl', not ':nurl'": "adm",
+                "Invalid: property name should be 'adm', not ':adm'": "adomain",
+                "Invalid: property name should be 'adomain', not ':adomain'": "iurl",
+                "Invalid: property name should be 'iurl', not ':iurl'": "cid",
+                "Invalid: property name should be 'cid', not ':cid'": "crid",
+                "Invalid: property name should be 'crid', not ':crid'": "attr",
+                "Invalid: property name should be 'attr', not ':attr'": [
+                  15,
+                  "Invalid: creative attribute should be between 1 and 14"
+                ],
+                "nurl": "http://example.com/win",
+                "adm": "<html><body>Example Ad</body></html>",
+                "adomain": "example.com",
+                "iurl": "http://example.com/image",
+                "cid": "campaign123",
+                "crid": "creative123",
+                "attr": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "USD",
+        "seatbid": [
+          {
+            "seat": "seat123",
+            "group": 1,
+            "bid": [
+              {
+                "impid": "imp123",
+                "price": 1.23,
+                "adid": "ad123",
+                "nurl": "http://example.com/win",
+                "adm": "<html>ad content</html>",
+                "adomain": "example.com",
+                "iurl": "http://example.com/image",
+                "cid": "campaign123",
+                "crid": "creative123",
+                "attr": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"U\" is shorter than 3 characters",
+      "python_error": "Additional properties are not allowed ('USD' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'openrtb-v1_0-schema-bid_response',\n     'description': 'json schema for an openrtb v1.0 bid response '\n                    '(http://openrtb.googlecode.com/files/OpenRTB%20Mobile%20RTB%20API%20-%201.0.pdf)',\n     'type': 'object',\n     'required': ['id'],\n     'additionalProperties': False,\n     'properties': {'id': {'$ref': '#/definitions/string_40'},\n                    'bidid': {'$ref': '#/definitions/string_40'},\n                    'nbr': {'$ref': '#/definitions/no_bid_reason'},\n                    'cur': {'$ref': '#/definitions/currency'},\n                    'units': {'$ref': '#/definitions/price_units'},\n                    'seatbid': {'type': 'array',\n                                'items': {'$ref': '#/definitions/seatbid'}}},\n     'definitions': {'seatbid': {'type': 'object',\n                                 'requi.. (2656 more)",
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "U",
+        "USD": "USD"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "15 is greater than the maximum of 14",
+      "python_error": "Additional properties are not allowed ('bogus' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'openrtb-v1_0-schema-bid_response',\n     'description': 'json schema for an openrtb v1.0 bid response '\n                    '(http://openrtb.googlecode.com/files/OpenRTB%20Mobile%20RTB%20API%20-%201.0.pdf)',\n     'type': 'object',\n     'required': ['id'],\n     'additionalProperties': False,\n     'properties': {'id': {'$ref': '#/definitions/string_40'},\n                    'bidid': {'$ref': '#/definitions/string_40'},\n                    'nbr': {'$ref': '#/definitions/no_bid_reason'},\n                    'cur': {'$ref': '#/definitions/currency'},\n                    'units': {'$ref': '#/definitions/price_units'},\n                    'seatbid': {'type': 'array',\n                                'items': {'$ref': '#/definitions/seatbid'}}},\n     'definitions': {'seatbid': {'type': 'object',\n                                 'req.. (3776 more)",
+      "data": {
+        "id": "1234567890",
+        "bidid": "bid123",
+        "cur": "USD",
+        "seatbid": [
+          {
+            "bid": [
+              {
+                "impid": "imp123",
+                "price": 1.23,
+                "adid": "ad123",
+                "nurl": "http://example.com/win",
+                "adm": "<html>ad content</html>",
+                "adomain": "example.com",
+                "iurl": "http://example.com/image",
+                "cid": "campaign123",
+                "crid": "creative123",
+                "attr": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15
+                ]
+              }
+            ]
+          }
+        ],
+        "nbr": 5,
+        "units": 5,
+        "bogus": "bogus"
+      }
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "description": "sample Github_easy/o10013.json",
+  "meta": {
+    "full_size": 750,
+    "stripped_size": 681,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "oneOf": [
+      {
+        "properties": {
+          "grantType": {
+            "enum": [
+              "authorization_code"
+            ]
+          },
+          "responseType": {
+            "enum": [
+              "code"
+            ]
+          }
+        },
+        "required": [
+          "grantType",
+          "responseType"
+        ]
+      },
+      {
+        "properties": {
+          "grantType": {
+            "enum": [
+              "client_credentials"
+            ]
+          },
+          "responseType": {
+            "enum": [
+              "token"
+            ]
+          }
+        },
+        "required": [
+          "grantType",
+          "responseType"
+        ]
+      }
+    ],
+    "properties": {
+      "clientId": {
+        "minLength": 30,
+        "type": "string"
+      },
+      "grantType": {
+        "type": "string"
+      },
+      "redirectUris": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "responseType": {
+        "type": "string"
+      },
+      "scopes": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "secret": {
+        "minLength": 30,
+        "type": "string"
+      },
+      "userId": {
+        "description": "MongoDB object ID for the user",
+        "maxLength": 12,
+        "minLength": 12,
+        "pattern": "[0-9a-fA-F]+",
+        "type": "string"
+      }
+    },
+    "title": "OAuthClient",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "clientId": "abcdefghijklmnopqrstuvwxyz012345",
+        "grantType": "authorization_code",
+        "redirectUris": [
+          "https://example.com/callback",
+          "https://example.net/callback"
+        ],
+        "responseType": "code",
+        "scopes": [
+          "read",
+          "write"
+        ],
+        "secret": "abcdefghijklmnopqrstuvwxyz012345",
+        "userId": "0123456789ab"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "clientId": "abcdefghijklmnopqrstuvwxyz012345",
+        "grantType": "authorization_code",
+        "redirectUris": [
+          "https://example.com/callback"
+        ],
+        "responseType": "code",
+        "scopes": [
+          "read",
+          "write"
+        ],
+        "userId": "0123456789ab"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"0123456789abc\" is longer than 12 characters",
+      "python_error": "'0123456789abc' is too long\n\nFailed validating 'maxLength' in schema['properties']['userId']:\n    {'description': 'MongoDB object ID for the user',\n     'maxLength': 12,\n     'minLength': 12,\n     'pattern': '[0-9a-fA-F]+',\n     'type': 'string'}\n\nOn instance['userId']:\n    '0123456789abc'",
+      "data": {
+        "clientId": "abcdefghijklmnopqrstuvwxyz012345",
+        "grantType": "authorization_code",
+        "redirectUris": [
+          "https://example.com/callback"
+        ],
+        "responseType": "code",
+        "scopes": [
+          "read",
+          "write"
+        ],
+        "userId": "0123456789abc"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"clientId\":\"abcdefghijklmnopqrstuvwxyz012345\",\"grantType\":\"authorization_code\",\"redirectUris\":[\"https://example.com/callback\"],\"responseType\":\"token\",\"scopes\":[\"read\",\"write\"],\"userId\":\"0123456789ab\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'authorization_code' is not one of ['client_credentials']\n\nFailed validating 'enum' in schema[1]['properties']['grantType']:\n    {'enum': ['client_credentials']}\n\nOn instance['grantType']:\n    'authorization_code'",
+      "data": {
+        "clientId": "abcdefghijklmnopqrstuvwxyz012345",
+        "grantType": "authorization_code",
+        "redirectUris": [
+          "https://example.com/callback"
+        ],
+        "responseType": "token",
+        "scopes": [
+          "read",
+          "write"
+        ],
+        "userId": "0123456789ab"
+      }
+    }
+  ]
+}

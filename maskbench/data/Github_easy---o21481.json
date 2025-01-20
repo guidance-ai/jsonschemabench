@@ -1,0 +1,187 @@
+{
+  "description": "sample Github_easy/o21481.json",
+  "meta": {
+    "full_size": 507,
+    "stripped_size": 464,
+    "features": [
+      "additionalProperties",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "dimensions": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "filters": {
+        "oneOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "frequency": {
+        "type": "string"
+      },
+      "id": {
+        "pattern": "^[a-z0-9:]+$",
+        "type": "string"
+      },
+      "maxResults": {
+        "type": "integer"
+      },
+      "metrics": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "segment": {
+        "type": "string"
+      },
+      "sort": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "metrics"
+    ],
+    "title": "Google Analytics Collector Query",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dimensions": [
+          "ga:browser",
+          "ga:country"
+        ],
+        "filters": [
+          "ga:browser==Firefox",
+          "ga:country==United States"
+        ],
+        "frequency": "daily",
+        "id": "1234567890:ga:1234567890",
+        "maxResults": 1000,
+        "metrics": [
+          "ga:users",
+          "ga:sessions"
+        ],
+        "segment": "gaid::-1",
+        "sort": [
+          "-ga:users",
+          "-ga:sessions"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dimensions": [
+          "ga:browser",
+          "ga:city"
+        ],
+        "filters": [
+          "ga:country==United States",
+          "ga:medium==organic"
+        ],
+        "frequency": "daily",
+        "id": "ga:123456789",
+        "maxResults": 1000,
+        "metrics": [
+          "ga:users",
+          "ga:sessions"
+        ],
+        "segment": "gaid::-1",
+        "sort": [
+          "-ga:users",
+          "ga:sessions"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"ga:123456789!\" does not match \"^[a-z0-9:]+$\"",
+      "python_error": "'ga:123456789!' does not match '^[a-z0-9:]+$'\n\nFailed validating 'pattern' in schema['properties']['id']:\n    {'pattern': '^[a-z0-9:]+$', 'type': 'string'}\n\nOn instance['id']:\n    'ga:123456789!'",
+      "data": {
+        "dimensions": [
+          "ga:browser",
+          "ga:city"
+        ],
+        "filters": [
+          "ga:country==United States",
+          "ga:medium==organic"
+        ],
+        "frequency": "daily",
+        "id": "ga:123456789!",
+        "maxResults": 1000,
+        "metrics": [
+          "ga:users",
+          "ga:sessions"
+        ],
+        "segment": "gaid::-1",
+        "sort": [
+          "-ga:users",
+          "ga:sessions"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"filter1\":\"ga:country==United States\",\"filter2\":\"ga:medium==organic\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'filter1': 'ga:country==United States', 'filter2': 'ga:medium==organic'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['filters']:\n    {'oneOf': [{'items': {'type': 'string'}, 'type': 'array'},\n               {'type': 'string'}]}\n\nOn instance['filters']:\n    {'filter1': 'ga:country==United States',\n     'filter2': 'ga:medium==organic'}",
+      "data": {
+        "dimensions": [
+          "ga:browser",
+          "ga:city"
+        ],
+        "filters": {
+          "filter1": "ga:country==United States",
+          "filter2": "ga:medium==organic"
+        },
+        "frequency": "daily",
+        "id": "ga:123456789",
+        "maxResults": 1000,
+        "metrics": [
+          "ga:users",
+          "ga:sessions"
+        ],
+        "segment": "gaid::-1",
+        "sort": [
+          "-ga:users",
+          "ga:sessions"
+        ]
+      }
+    }
+  ]
+}

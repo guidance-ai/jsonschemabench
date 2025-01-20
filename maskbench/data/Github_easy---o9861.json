@@ -1,0 +1,127 @@
+{
+  "description": "sample Github_easy/o9861.json",
+  "meta": {
+    "full_size": 390,
+    "stripped_size": 390,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "state": {
+        "type": "string",
+        "enum": [
+          "new",
+          "acknowledged",
+          "resolved"
+        ]
+      },
+      "comment": {
+        "type": "string",
+        "maxLength": 32767
+      },
+      "data": {},
+      "eventTags": {
+        "type": "object",
+        "patternProperties": {
+          "^[0-9a-zA-Z_-]{1,255}$": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "state": "new",
+        "comment": "This is a comment.",
+        "data": {},
+        "eventTags": {
+          "tag1": "This is a tag value.",
+          "tag2": "Another tag value."
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "state": "new",
+        "comment": "This is a sample comment.",
+        "data": {},
+        "eventTags": {
+          "tag1": "This is the value for tag1",
+          "tag2": "This is the value for tag2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('tag2!: ' was unexpected)",
+      "python_error": "'tag2!: ' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema['properties']['eventTags']:\n    {'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': 'string',\n                                                      'minLength': 1,\n                                                      'maxLength': 255}},\n     'additionalProperties': False}\n\nOn instance['eventTags']:\n    {'tag1': 'This is the value for tag1', 'tag2!: ': ''}",
+      "data": {
+        "state": "new",
+        "comment": "This is a sample comment.",
+        "data": {},
+        "eventTags": {
+          "tag1": "This is the value for tag1",
+          "tag2!: ": ""
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['eventTags']['patternProperties']['^[0-9a-zA-Z_-]{1,255}$']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['eventTags']['tag1']:\n    ''",
+      "data": {
+        "state": "new",
+        "comment": "This is a sample comment.",
+        "data": {},
+        "eventTags": {
+          "tag1": "",
+          "tag2": "This is the value for tag2 with more than 255 characters, this is a test to see if the validator correctly enforces the maxLength constraint for the pattern property"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['eventTags']['patternProperties']['^[0-9a-zA-Z_-]{1,255}$']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['eventTags']['tag2']:\n    ''",
+      "data": {
+        "state": "new",
+        "comment": "This is a sample comment.",
+        "data": {},
+        "eventTags": {
+          "tag1": "This is the value for tag1",
+          "tag2": ""
+        }
+      }
+    }
+  ]
+}

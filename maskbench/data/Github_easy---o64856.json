@@ -1,0 +1,238 @@
+{
+  "description": "sample Github_easy/o64856.json",
+  "meta": {
+    "full_size": 816,
+    "stripped_size": 493,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "allOf",
+      "anyOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "builder": {
+        "allOf": [
+          {
+            "properties": {
+              "description": {
+                "description": "Builder description.",
+                "type": "string"
+              },
+              "schema": {
+                "description": "Schema for builder option validation.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "schema",
+              "description"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "implementation": {
+                    "description": "The next generation builder module.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "implementation"
+                ]
+              },
+              {
+                "properties": {
+                  "class": {
+                    "description": "The builder class module.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "class"
+                ]
+              }
+            ]
+          }
+        ],
+        "description": "Target options for Builders.",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "$schema": {
+        "description": "Link to schema.",
+        "type": "string"
+      },
+      "builders": {
+        "additionalProperties": {
+          "$ref": "#/definitions/builder"
+        },
+        "type": "object"
+      }
+    },
+    "required": [
+      "builders"
+    ],
+    "title": "Builders schema for validating a list of builders.",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "$schema": "https://example.com/builders-schema.json",
+        "builders": {
+          "builder1": {
+            "description": "Builder 1 description.",
+            "schema": "schema1",
+            "implementation": "module1"
+          },
+          "builder2": {
+            "description": "Builder 2 description.",
+            "schema": "schema2",
+            "class": "module2"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"description\":\"Builder 1 description.\",\"schema\":\"schema1\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'description': 'Builder 1 description.', 'schema': 'schema1'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['builders']['additionalProperties']['allOf'][1]:\n    {'anyOf': [{'properties': {'implementation': {'description': 'The next '\n                                                                 'generation '\n                                                                 'builder '\n                                                                 'module.',\n                                                  'type': 'string'}},\n                'required': ['implementation']},\n               {'properties': {'class': {'description': 'The builder class '\n                                                        'module.',\n                                         'type': 'string'}},\n                'required': ['class']}]}\n\nOn instance['builders']['builder1']:\n    {'description': 'Builder 1 description.', 'schema': 'schema1'}",
+      "data": {
+        "$schema": "https://example.com/builders-schema.json",
+        "builders": {
+          "builder1": {
+            "description": "Builder 1 description.",
+            "schema": "schema1"
+          },
+          "builder2": {
+            "description": "Builder 2 description.",
+            "schema": "schema2",
+            "class": "module2"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"description\":\"Builder 2 description.\",\"schema\":\"schema2\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'description': 'Builder 2 description.', 'schema': 'schema2'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['builders']['additionalProperties']['allOf'][1]:\n    {'anyOf': [{'properties': {'implementation': {'description': 'The next '\n                                                                 'generation '\n                                                                 'builder '\n                                                                 'module.',\n                                                  'type': 'string'}},\n                'required': ['implementation']},\n               {'properties': {'class': {'description': 'The builder class '\n                                                        'module.',\n                                         'type': 'string'}},\n                'required': ['class']}]}\n\nOn instance['builders']['builder2']:\n    {'description': 'Builder 2 description.', 'schema': 'schema2'}",
+      "data": {
+        "$schema": "https://example.com/builders-schema.json",
+        "builders": {
+          "builder1": {
+            "description": "Builder 1 description.",
+            "schema": "schema1",
+            "implementation": "module1"
+          },
+          "builder2": {
+            "description": "Builder 2 description.",
+            "schema": "schema2"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"description\":\"Builder 1 description.\",\"schema\":\"schema1\",\"implementation\":123} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[0]['properties']['implementation']:\n    {'description': 'The next generation builder module.', 'type': 'string'}\n\nOn instance['implementation']:\n    123",
+      "data": {
+        "$schema": "https://example.com/builders-schema.json",
+        "builders": {
+          "builder1": {
+            "description": "Builder 1 description.",
+            "schema": "schema1",
+            "implementation": 123
+          },
+          "builder2": {
+            "description": "Builder 2 description.",
+            "schema": "schema2",
+            "class": "module2"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://example.com/builders-schema.json",
+        "builders": {
+          "builder1": {
+            "description": "Builder 1 description.",
+            "schema": "schema1",
+            "implementation": "next-gen-builder-module"
+          },
+          "builder2": {
+            "description": "Builder 2 description.",
+            "schema": "schema2",
+            "class": "builder-class-module"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"description\" is a required property",
+      "python_error": "'description' is a required property\n\nFailed validating 'required' in schema['properties']['builders']['additionalProperties']['allOf'][0]:\n    {'properties': {'description': {'description': 'Builder description.',\n                                    'type': 'string'},\n                    'schema': {'description': 'Schema for builder option '\n                                              'validation.',\n                               'type': 'string'}},\n     'required': ['schema', 'description']}\n\nOn instance['builders']['builder1']:\n    {'schema': 'schema1', 'implementation': 'next-gen-builder-module'}",
+      "data": {
+        "$schema": "https://example.com/builders-schema.json",
+        "builders": {
+          "builder1": {
+            "schema": "schema1",
+            "implementation": "next-gen-builder-module"
+          },
+          "builder2": {
+            "description": "Builder 2 description.",
+            "schema": "schema2",
+            "class": "builder-class-module"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"description\":\"Builder 1 description.\",\"schema\":\"schema1\",\"implementation\":123} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'schema' is a required property\n\nFailed validating 'required' in schema['properties']['builders']['additionalProperties']['allOf'][0]:\n    {'properties': {'description': {'description': 'Builder description.',\n                                    'type': 'string'},\n                    'schema': {'description': 'Schema for builder option '\n                                              'validation.',\n                               'type': 'string'}},\n     'required': ['schema', 'description']}\n\nOn instance['builders']['builder3']:\n    {'description': 'Builder 3 description.'}",
+      "data": {
+        "$schema": "https://example.com/builders-schema.json",
+        "builders": {
+          "builder1": {
+            "description": "Builder 1 description.",
+            "schema": "schema1",
+            "implementation": 123
+          },
+          "builder2": {
+            "description": "Builder 2 description.",
+            "schema": "schema2",
+            "class": "builder-class-module",
+            "extra": "extra property"
+          },
+          "builder3": {
+            "description": "Builder 3 description."
+          }
+        }
+      }
+    }
+  ]
+}

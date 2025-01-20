@@ -1,0 +1,350 @@
+{
+  "description": "sample JsonSchemaStore/aliases.json",
+  "meta": {
+    "full_size": 1845,
+    "stripped_size": 557,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/aliases.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "description": "An alias of the current directory\nhttps://github.com/sebglazebrook/aliases#usage",
+    "patternProperties": {
+      "^[^ ]+$": {
+        "title": "alias",
+        "description": "An alias of the current directory\nhttps://github.com/sebglazebrook/aliases#usage",
+        "type": "object",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "title": "command",
+            "description": "A command of the current alias\nhttps://github.com/sebglazebrook/aliases#usage",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "ls"
+            ]
+          },
+          "confirm": {
+            "title": "confirm",
+            "description": "Whether to confirm a command execution of the current alias\nhttps://github.com/sebglazebrook/aliases#usage",
+            "type": "boolean",
+            "default": false
+          },
+          "confirmation_message": {
+            "title": "confirmation message",
+            "description": "A confirmation message of the current alias\nhttps://github.com/sebglazebrook/aliases#usage",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "Do you want to execute this command?"
+            ]
+          },
+          "conditional": {
+            "title": "conditional",
+            "description": "A conditional of the current alias\nhttps://github.com/sebglazebrook/aliases#usage",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "/bin/true"
+            ]
+          },
+          "backout_seconds": {
+            "title": "backout seconds",
+            "description": "A backout of the current alias\nhttps://github.com/sebglazebrook/aliases#usage",
+            "type": "integer",
+            "minimum": 0
+          },
+          "unit_test": {
+            "title": "conditional",
+            "description": "A unit test of the current alias\nhttps://github.com/sebglazebrook/aliases#usage",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "[ true = true ]"
+            ]
+          },
+          "quiet": {
+            "title": "quiet",
+            "description": "Whether to display a command before execution of the current alias\nhttps://github.com/sebglazebrook/aliases#usage",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "title": "alias",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "my-alias": {
+          "command": "ls -l",
+          "confirm": true,
+          "confirmation_message": "Do you want to execute this command?",
+          "conditional": "/bin/true",
+          "backout_seconds": 10,
+          "unit_test": "[ true = true ]",
+          "quiet": false
+        },
+        "another-alias": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ false = false ]",
+          "quiet": true
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "my-alias": {
+          "command": "ls -l",
+          "confirm": true,
+          "confirmation_message": "Are you sure you want to list the files in the current directory?",
+          "conditional": "/bin/true",
+          "backout_seconds": 5,
+          "unit_test": "[ true = true ]",
+          "quiet": false
+        },
+        "my-other-alias": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['patternProperties']['^[^ ]+$']['properties']['backout_seconds']:\n    {'title': 'backout seconds',\n     'description': 'A backout of the current alias\\n'\n                    'https://github.com/sebglazebrook/aliases#usage',\n     'type': 'integer',\n     'minimum': 0}\n\nOn instance['my-alias']['backout_seconds']:\n    -1",
+      "data": {
+        "my-alias": {
+          "command": "ls -l",
+          "confirm": true,
+          "confirmation_message": "Are you sure you want to list the files in the current directory?",
+          "conditional": "/bin/true",
+          "backout_seconds": -1,
+          "unit_test": "[ true = true ]",
+          "quiet": false
+        },
+        "my-other-alias": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('my alias' was unexpected)",
+      "python_error": "'my alias' does not match any of the regexes: '^[^ ]+$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$id': 'https://json.schemastore.org/aliases.json',\n     '$schema': 'http://json-schema.org/draft-07/schema#',\n     'additionalProperties': False,\n     'description': 'An alias of the current directory\\n'\n                    'https://github.com/sebglazebrook/aliases#usage',\n     'patternProperties': {'^[^ ]+$': {'title': 'alias',\n                                       'description': 'An alias of the '\n                                                      'current directory\\n'\n                                                      'https://github.com/sebglazebrook/aliases#usage',\n                                       'type': 'object',\n                                       'required': ['command'],\n                                       'properties': {'command': {'title': 'command',\n                                                                  'description': 'A '\n                                .. (9900 more)",
+      "data": {
+        "my alias": {
+          "command": "ls -l",
+          "confirm": true,
+          "confirmation_message": "Are you sure you want to list the files in the current directory?",
+          "conditional": "/bin/true",
+          "backout_seconds": 5,
+          "unit_test": "[ true = true ]",
+          "quiet": false
+        },
+        "my-other-alias": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['patternProperties']['^[^ ]+$']['properties']['command']:\n    {'title': 'command',\n     'description': 'A command of the current alias\\n'\n                    'https://github.com/sebglazebrook/aliases#usage',\n     'type': 'string',\n     'minLength': 1,\n     'examples': ['ls']}\n\nOn instance['my-alias']['command']:\n    ''",
+      "data": {
+        "my-alias": {
+          "command": "",
+          "confirm": true,
+          "confirmation_message": "Are you sure you want to list the files in the current directory?",
+          "conditional": "/bin/true",
+          "backout_seconds": 5,
+          "unit_test": "[ true = true ]",
+          "quiet": false
+        },
+        "my-other-alias": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'command' is a required property\n\nFailed validating 'required' in schema['patternProperties']['^[^ ]+$']:\n    {'title': 'alias',\n     'description': 'An alias of the current directory\\n'\n                    'https://github.com/sebglazebrook/aliases#usage',\n     'type': 'object',\n     'required': ['command'],\n     'properties': {'command': {'title': 'command',\n                                'description': 'A command of the current '\n                                               'alias\\n'\n                                               'https://github.com/sebglazebrook/aliases#usage',\n                                'type': 'string',\n                                'minLength': 1,\n                                'examples': ['ls']},\n                    'confirm': {'title': 'confirm',\n                                'description': 'Whether to confirm a '\n                                               'command execution of the '\n                                               'current alias\\n'\n                   .. (3307 more)",
+      "data": {
+        "my-alias": {
+          "command": "",
+          "confirm": true,
+          "confirmation_message": "Are you sure you want to list the files in the current directory?",
+          "conditional": "/bin/true",
+          "backout_seconds": 5,
+          "unit_test": "[ true = true ]",
+          "quiet": false
+        },
+        "my-other-alias": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": -1,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        },
+        "my-alias-that-violates-additional-properties": {
+          "command": "ls -l",
+          "confirm": true,
+          "confirmation_message": "Are you sure you want to list the files in the current directory?",
+          "conditional": "/bin/true",
+          "backout_seconds": 5,
+          "unit_test": "[ true = true ]",
+          "quiet": false,
+          "property-that-does-not-exist": "value"
+        },
+        "my-alias-with-no-command": {
+          "confirm": true,
+          "confirmation_message": "Are you sure you want to list the files in the current directory?",
+          "conditional": "/bin/true",
+          "backout_seconds": 5,
+          "unit_test": "[ true = true ]",
+          "quiet": false
+        },
+        "my-alias-with-backout-seconds-as-string": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": "not a number",
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        },
+        "my-alias-with-confirm-as-string": {
+          "command": "echo Hello World",
+          "confirm": "not a boolean",
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        },
+        "my-alias-with-quiet-as-string": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": "not a boolean"
+        },
+        "my-alias-with-garbage-as-command": {
+          "command": null,
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        },
+        "my-alias-with-garbage-as-unit-test": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": null,
+          "quiet": true
+        },
+        "my-alias-with-garbage-as-conditional": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": null,
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        },
+        "my-alias-with-garbage-as-confirmation_message": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true,
+          "confirmation_message": null
+        },
+        "my-alias-with-empty-string-as-conditional": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true
+        },
+        "my-alias-with-empty-string-as-unit-test": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "",
+          "quiet": true
+        },
+        "my-alias-with-empty-string-as-confirmation_message": {
+          "command": "echo Hello World",
+          "confirm": false,
+          "conditional": "/bin/false",
+          "backout_seconds": 0,
+          "unit_test": "[ true = true ]",
+          "quiet": true,
+          "confirmation_message": ""
+        }
+      }
+    }
+  ]
+}

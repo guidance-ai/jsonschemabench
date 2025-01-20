@@ -1,0 +1,143 @@
+{
+  "description": "sample Snowplow/sp_252_Normalized.json",
+  "meta": {
+    "full_size": 586,
+    "stripped_size": 422,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxProperties",
+      "additionalProperties",
+      "dependencies",
+      "enum"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "minProperties",
+      "minimum",
+      "properties",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "dependencies": {
+      "cost": [
+        "costModel"
+      ]
+    },
+    "description": "Schema for an ad conversion event",
+    "minProperties": 1,
+    "properties": {
+      "action": {
+        "type": "string"
+      },
+      "advertiserId": {
+        "type": "string"
+      },
+      "campaignId": {
+        "type": "string"
+      },
+      "category": {
+        "type": "string"
+      },
+      "conversionId": {
+        "type": "string"
+      },
+      "cost": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "costModel": {
+        "enum": [
+          "cpa",
+          "cpc",
+          "cpm"
+        ]
+      },
+      "initialValue": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "property": {
+        "type": "string"
+      }
+    },
+    "self": {
+      "format": "jsonschema",
+      "name": "ad_conversion",
+      "vendor": "com.snowplowanalytics.snowplow",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "action": "purchase",
+        "advertiserId": "12345",
+        "campaignId": "67890",
+        "category": "electronics",
+        "conversionId": "abcde",
+        "cost": 10.99,
+        "costModel": "cpa",
+        "initialValue": 0,
+        "property": "product_page"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "action": "purchase",
+        "advertiserId": "12345",
+        "campaignId": "67890",
+        "category": "electronics",
+        "conversionId": "abcde",
+        "cost": 10.99,
+        "costModel": "cpa",
+        "initialValue": 9.99,
+        "property": "productA"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1.0 is less than the minimum of 0",
+      "python_error": "-1.0 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['cost']:\n    {'minimum': 0, 'type': 'number'}\n\nOn instance['cost']:\n    -1.0",
+      "data": {
+        "action": "purchase",
+        "advertiserId": "12345",
+        "campaignId": "67890",
+        "category": "electronics",
+        "conversionId": "abcde",
+        "cost": -1.0,
+        "costModel": "cpa",
+        "initialValue": 9.99,
+        "property": "productA"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('additionalProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('additionalProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'dependencies': {'cost': ['costModel']},\n     'description': 'Schema for an ad conversion event',\n     'minProperties': 1,\n     'properties': {'action': {'type': 'string'},\n                    'advertiserId': {'type': 'string'},\n                    'campaignId': {'type': 'string'},\n                    'category': {'type': 'string'},\n                    'conversionId': {'type': 'string'},\n                    'cost': {'minimum': 0, 'type': 'number'},\n                    'costModel': {'enum': ['cpa', 'cpc', 'cpm']},\n                    'initialValue': {'minimum': 0, 'type': 'number'},\n                    'property': {'type': 'string'}},\n     'self': {'format': 'jsonschema',\n              'name': 'ad_conversion',\n              'vendor': 'com.snowplowanalytics.snowplow',\n              'version': '1-0-0'},\n     'type': 'object'}\n\nOn instance:\n    {.. (282 more)",
+      "data": {
+        "action": "purchase",
+        "advertiserId": "12345",
+        "campaignId": "67890",
+        "category": "electronics",
+        "conversionId": "abcde",
+        "cost": 10.99,
+        "costModel": "cpa",
+        "initialValue": 9.99,
+        "property": "productA",
+        "additionalProperty": "someValue"
+      }
+    }
+  ]
+}

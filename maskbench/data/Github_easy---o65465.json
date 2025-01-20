@@ -1,0 +1,339 @@
+{
+  "description": "sample Github_easy/o65465.json",
+  "meta": {
+    "full_size": 1214,
+    "stripped_size": 682,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "anyOf:trivial",
+      "maximum",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "data_type": {
+        "enum": [
+          "share_parcel"
+        ]
+      },
+      "properties": {
+        "type": "object",
+        "required": [
+          "shareholders"
+        ],
+        "properties": {
+          "number_of_shares": {
+            "description": "Number of shares, if known",
+            "type": "integer"
+          },
+          "percentage_of_shares": {
+            "description": "Percentage of shares, if known",
+            "type": "number",
+            "maximum": 100,
+            "minimum": 0
+          },
+          "shareholders": {
+            "description": "Legal persons who own this share parcel",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "name": "person",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "description": "Name of natural person or company",
+                      "type": "string"
+                    },
+                    "jurisdiction": {
+                      "description": "Jurisdiction of registration, if company",
+                      "type": "string"
+                    },
+                    "company_number": {
+                      "description": "Company number, if company and known",
+                      "type": "string"
+                    },
+                    "identifier": {
+                      "description": "Unique identifier of person",
+                      "type": "string"
+                    },
+                    "type": {
+                      "description": "Type of person if known (company or natural person)",
+                      "enum": [
+                        "Company",
+                        "Person"
+                      ]
+                    },
+                    "address": {
+                      "description": "Address given for owner of parcel",
+                      "type": "string"
+                    },
+                    "address_country": {
+                      "description": "Country part of owner's address",
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "required": [
+      "data_type",
+      "properties"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": 50.0,
+          "shareholders": [
+            {
+              "name": "John Doe",
+              "identifier": "1234567890",
+              "type": "Person",
+              "address": "123 Main St",
+              "address_country": "USA"
+            },
+            {
+              "name": "ABC Inc.",
+              "jurisdiction": "USA",
+              "company_number": "123456789",
+              "identifier": "9876543210",
+              "type": "Company",
+              "address": "456 Elm St",
+              "address_country": "USA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['properties']['properties']['shareholders']:\n    {'description': 'Legal persons who own this share parcel',\n     'type': 'array',\n     'minItems': 1,\n     'items': {'anyOf': [{'type': 'object',\n                          'name': 'person',\n                          'required': ['name'],\n                          'properties': {'name': {'description': 'Name of '\n                                                                 'natural '\n                                                                 'person '\n                                                                 'or '\n                                                                 'company',\n                                                  'type': 'string'},\n                                         'jurisdiction': {'description': 'Jurisdiction '\n                                                                         'of '\n                                                  .. (3025 more)",
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": 50.0,
+          "shareholders": []
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-10.0 is less than the minimum of 0",
+      "python_error": "-10.0 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['properties']['properties']['percentage_of_shares']:\n    {'description': 'Percentage of shares, if known',\n     'type': 'number',\n     'maximum': 100,\n     'minimum': 0}\n\nOn instance['properties']['percentage_of_shares']:\n    -10.0",
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": -10.0,
+          "shareholders": [
+            {
+              "name": "John Doe",
+              "identifier": "1234567890",
+              "type": "Person",
+              "address": "123 Main St",
+              "address_country": "USA"
+            },
+            {
+              "name": "ABC Inc.",
+              "jurisdiction": "USA",
+              "company_number": "123456789",
+              "identifier": "9876543210",
+              "type": "Company",
+              "address": "456 Elm St",
+              "address_country": "USA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "150.0 is greater than the maximum of 100",
+      "python_error": "150.0 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['properties']['properties']['percentage_of_shares']:\n    {'description': 'Percentage of shares, if known',\n     'type': 'number',\n     'maximum': 100,\n     'minimum': 0}\n\nOn instance['properties']['percentage_of_shares']:\n    150.0",
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": 150.0,
+          "shareholders": [
+            {
+              "name": "John Doe",
+              "identifier": "1234567890",
+              "type": "Person",
+              "address": "123 Main St",
+              "address_country": "USA"
+            },
+            {
+              "name": "ABC Inc.",
+              "jurisdiction": "USA",
+              "company_number": "123456789",
+              "identifier": "9876543210",
+              "type": "Company",
+              "address": "456 Elm St",
+              "address_country": "USA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"shareholders\" is a required property",
+      "python_error": "'shareholders' is a required property\n\nFailed validating 'required' in schema['properties']['properties']:\n    {'type': 'object',\n     'required': ['shareholders'],\n     'properties': {'number_of_shares': {'description': 'Number of shares, '\n                                                        'if known',\n                                         'type': 'integer'},\n                    'percentage_of_shares': {'description': 'Percentage of '\n                                                            'shares, if '\n                                                            'known',\n                                             'type': 'number',\n                                             'maximum': 100,\n                                             'minimum': 0},\n                    'shareholders': {'description': 'Legal persons who own '\n                                                    'this share parcel',\n                                     'type': 'array',\n                                     'minItem.. (6645 more)",
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": 150.0,
+          "Invalid: percentage_of_shares should be between 0 and 100": "shareholders",
+          "Invalid: should be 'shareholders'": [
+            {
+              "name": "John Doe",
+              "identifier": "1234567890",
+              "type": "Person",
+              "address": "123 Main St",
+              "address_country": "USA"
+            },
+            {
+              "name": "ABC Inc.",
+              "jurisdiction": "USA",
+              "company_number": "123456789",
+              "identifier": "9876543210",
+              "type": "Company",
+              "address": "456 Elm St",
+              "address_country": "USA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": 50.0,
+          "shareholders": [
+            {
+              "name": "John Doe",
+              "identifier": "123456789",
+              "type": "Person",
+              "address": "123 Main St",
+              "address_country": "USA"
+            },
+            {
+              "name": "ABC Corporation",
+              "jurisdiction": "USA",
+              "company_number": "1234567890",
+              "identifier": "987654321",
+              "type": "Company",
+              "address": "456 Elm St",
+              "address_country": "USA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "150.0 is greater than the maximum of 100",
+      "python_error": "150.0 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['properties']['properties']['percentage_of_shares']:\n    {'description': 'Percentage of shares, if known',\n     'type': 'number',\n     'maximum': 100,\n     'minimum': 0}\n\nOn instance['properties']['percentage_of_shares']:\n    150.0",
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": 150.0,
+          "shareholders": [
+            {
+              "name": "John Doe",
+              "identifier": "123456789",
+              "type": "Person",
+              "address": "123 Main St",
+              "address_country": "USA"
+            },
+            {
+              "name": "ABC Corporation",
+              "jurisdiction": "USA",
+              "company_number": "1234567890",
+              "identifier": "987654321",
+              "type": "Company",
+              "address": "456 Elm St",
+              "address_country": "USA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "150.0 is greater than the maximum of 100",
+      "python_error": "150.0 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['properties']['properties']['percentage_of_shares']:\n    {'description': 'Percentage of shares, if known',\n     'type': 'number',\n     'maximum': 100,\n     'minimum': 0}\n\nOn instance['properties']['percentage_of_shares']:\n    150.0",
+      "data": {
+        "data_type": "share_parcel",
+        "properties": {
+          "number_of_shares": 100,
+          "percentage_of_shares": 150.0,
+          "shareholders": [
+            {
+              "identifier": "123456789",
+              "type": "Person",
+              "address": "123 Main St",
+              "address_country": "USA"
+            },
+            {
+              "name": "ABC Corporation",
+              "jurisdiction": "USA",
+              "company_number": "1234567890",
+              "identifier": "987654321",
+              "type": "Company",
+              "address": "456 Elm St",
+              "address_country": "USA"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

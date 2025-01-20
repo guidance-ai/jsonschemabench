@@ -1,0 +1,402 @@
+{
+  "description": "sample Github_medium/o25771.json",
+  "meta": {
+    "full_size": 1256,
+    "stripped_size": 1256,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxLength",
+      "@siblingKeys",
+      "allOf",
+      "anyOf",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "_elements"
+    ],
+    "properties": {
+      "_attributes": {
+        "type": "object",
+        "required": [
+          "extracted",
+          "has_metadata"
+        ],
+        "properties": {
+          "extracted": {
+            "type": "boolean"
+          },
+          "has_metadata": {
+            "type": "boolean"
+          }
+        }
+      },
+      "_elements": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/file"
+            },
+            {
+              "$ref": "#/definitions/file_remote_dir"
+            }
+          ]
+        }
+      }
+    },
+    "definitions": {
+      "file_common": {
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "file": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/file_common"
+          },
+          {
+            "properties": {
+              "user": {
+                "type": "string",
+                "minLength": 1
+              },
+              "group": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/definitions/file_file"
+              },
+              {
+                "$ref": "#/definitions/file_dir"
+              },
+              {
+                "$ref": "#/definitions/file_link"
+              }
+            ]
+          }
+        ]
+      },
+      "file_file": {
+        "properties": {
+          "type": {
+            "enum": [
+              "file"
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mode": {
+            "type": "string",
+            "pattern": "^[0-7]{3,4}$"
+          }
+        }
+      },
+      "file_dir": {
+        "properties": {
+          "type": {
+            "enum": [
+              "dir"
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mode": {
+            "type": "string",
+            "pattern": "^[0-4]?[0-7]{3}$"
+          },
+          "files": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "file_link": {
+        "properties": {
+          "type": {
+            "enum": [
+              "link"
+            ]
+          }
+        }
+      },
+      "file_remote_dir": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/file_common"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "remote_dir"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_attributes": {
+          "extracted": true,
+          "has_metadata": true
+        },
+        "_elements": [
+          {
+            "name": "example.txt",
+            "user": "user1",
+            "group": "group1",
+            "type": "file",
+            "size": 1024,
+            "mode": "644"
+          },
+          {
+            "name": "example_dir",
+            "user": "user2",
+            "group": "group2",
+            "type": "dir",
+            "size": 4096,
+            "mode": "755",
+            "files": 10
+          },
+          {
+            "name": "example_link",
+            "user": "user3",
+            "group": "group3",
+            "type": "link"
+          },
+          {
+            "name": "example_remote_dir",
+            "type": "remote_dir"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_attributes": {
+          "extracted": true,
+          "has_metadata": false
+        },
+        "_elements": [
+          {
+            "name": "example.txt",
+            "user": "user1",
+            "group": "group1",
+            "type": "file",
+            "size": 1024,
+            "mode": "644"
+          },
+          {
+            "name": "example_dir",
+            "user": "user2",
+            "group": "group2",
+            "type": "dir",
+            "size": 0,
+            "mode": "755",
+            "files": 3
+          },
+          {
+            "name": "example_link",
+            "user": "user3",
+            "group": "group3",
+            "type": "link"
+          },
+          {
+            "name": "example_remote_dir",
+            "type": "remote_dir"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"example.txt\",\"type\":\"file\",\"user\":\"user1\",\"group\":\"group1\",\"size\":1024,\"mode\":\"644a\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'file' is not one of ['remote_dir']\n\nFailed validating 'enum' in schema[1]['allOf'][1]['properties']['type']:\n    {'enum': ['remote_dir']}\n\nOn instance['type']:\n    'file'",
+      "data": {
+        "_attributes": {
+          "extracted": true,
+          "has_metadata": false
+        },
+        "_elements": [
+          {
+            "name": "example.txt",
+            "type": "file",
+            "user": "user1",
+            "group": "group1",
+            "size": 1024,
+            "mode": "644a"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"example.txt\",\"type\":\"file\",\"user\":\"user1\",\"group\":\"group1\",\"size\":-1,\"mode\":\"644\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'file' is not one of ['remote_dir']\n\nFailed validating 'enum' in schema[1]['allOf'][1]['properties']['type']:\n    {'enum': ['remote_dir']}\n\nOn instance['type']:\n    'file'",
+      "data": {
+        "_attributes": {
+          "extracted": true,
+          "has_metadata": false
+        },
+        "_elements": [
+          {
+            "name": "example.txt",
+            "type": "file",
+            "user": "user1",
+            "group": "group1",
+            "size": -1,
+            "mode": "644"
+          },
+          {
+            "name": "example_dir",
+            "type": "dir",
+            "user": "user2",
+            "group": "group2",
+            "size": 0,
+            "mode": "755",
+            "files": 3
+          },
+          {
+            "name": "example_link",
+            "type": "link",
+            "user": "user3",
+            "group": "group3"
+          },
+          {
+            "name": "example_remote_dir",
+            "type": "remote_dir"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"example.txt\",\"type\":\"file\",\"user\":\"\",\"group\":\"group1\",\"size\":1024,\"mode\":\"644\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'file' is not one of ['remote_dir']\n\nFailed validating 'enum' in schema[1]['allOf'][1]['properties']['type']:\n    {'enum': ['remote_dir']}\n\nOn instance['type']:\n    'file'",
+      "data": {
+        "_attributes": {
+          "extracted": true,
+          "has_metadata": false
+        },
+        "_elements": [
+          {
+            "name": "example.txt",
+            "type": "file",
+            "user": "",
+            "group": "group1",
+            "size": 1024,
+            "mode": "644"
+          },
+          {
+            "name": "example_dir",
+            "type": "dir",
+            "user": "user2",
+            "group": "group2",
+            "size": 0,
+            "mode": "755",
+            "files": 3
+          },
+          {
+            "name": "example_link",
+            "type": "link",
+            "user": "user3",
+            "group": "group3"
+          },
+          {
+            "name": "example_remote_dir",
+            "type": "remote_dir"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"name\":\"example.txt\",\"type\":\"file\",\"user\":\"\",\"group\":\"group1\",\"size\":1024,\"mode\":\"644\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'dir' is not one of ['remote_dir']\n\nFailed validating 'enum' in schema[1]['allOf'][1]['properties']['type']:\n    {'enum': ['remote_dir']}\n\nOn instance['type']:\n    'dir'",
+      "data": {
+        "_attributes": {
+          "extracted": true,
+          "has_metadata": false
+        },
+        "_elements": [
+          {
+            "name": "example.txt",
+            "type": "file",
+            "user": "",
+            "group": "group1",
+            "size": 1024,
+            "mode": "644"
+          },
+          {
+            "name": "example_dir",
+            "type": "dir",
+            "user": "user2",
+            "group": "group2",
+            "size": -1,
+            "mode": "755",
+            "files": -1
+          },
+          {
+            "name": "example_link",
+            "type": "link",
+            "user": "user3",
+            "group": "group3"
+          },
+          {
+            "name": "example_remote_dir",
+            "type": "remote_dir"
+          }
+        ]
+      }
+    }
+  ]
+}

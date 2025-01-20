@@ -1,0 +1,331 @@
+{
+  "description": "sample Github_medium/o90787.json",
+  "meta": {
+    "full_size": 2763,
+    "stripped_size": 757,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "database": {
+        "description": "MySQL database configuration properties",
+        "properties": {
+          "name": {
+            "default": "defaultdb",
+            "description": "The name of a database to be created on startup.",
+            "type": "string"
+          },
+          "password": {
+            "default": "password",
+            "description": "The password for a user to be created with superuser access to this database only.",
+            "type": "string"
+          },
+          "root_password": {
+            "default": "root",
+            "description": "Specifies the password that will be set for the MySQL root superuser account.",
+            "type": "string"
+          },
+          "username": {
+            "default": "admin",
+            "description": "The username of a user to be created with superuser access to this database only.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "mysql": {
+        "description": "MySQL service configuration properties",
+        "properties": {
+          "cpus": {
+            "default": 0.3,
+            "description": "CPU shares to allocate to each MySQL node.",
+            "minimum": 0.3,
+            "type": "number"
+          },
+          "mem": {
+            "default": 512.0,
+            "description": "Memory to allocate to each MySQL node.",
+            "minimum": 512.0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem"
+        ],
+        "type": "object"
+      },
+      "networking": {
+        "description": "MySQL networking configuration properties",
+        "properties": {
+          "external_access": {
+            "description": "Enable access from outside the cluster through Marathon-LB.\nNOTE: this connection is unencrypted.",
+            "properties": {
+              "enable": {
+                "default": false,
+                "description": "Enable or disable creating a VIP for external access through a public node running Marathon-LB. Defaults to FALSE.",
+                "type": "boolean"
+              },
+              "external_port": {
+                "default": 13306,
+                "description": "For external access, port number to be used for clear communication in the external Marathon-LB load balancer",
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "port": {
+            "default": 3306,
+            "description": "Port number to be used for clear communication internally to the cluster. Currently unused and fixed to be 3306.",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "service": {
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "name": {
+            "default": "mysql",
+            "description": "Name of this service instance",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "storage": {
+        "description": "MySQL storage configuration properties",
+        "properties": {
+          "host_volume": {
+            "default": "/tmp",
+            "description": "The location of a volume on the host to be used for persisting MySQL data. The final location will be derived from this value plus the name set in `name` (e.g. `/mnt/host_volume/mysql`). This can be a mounted NFS drive. Note that this path must be the same on all DC/OS agents.",
+            "type": "string"
+          },
+          "persistence": {
+            "description": "Enable persistent storage.",
+            "properties": {
+              "enable": {
+                "default": false,
+                "description": "Enable or disable persistent storage.",
+                "type": "boolean"
+              },
+              "volume_size": {
+                "default": 256,
+                "description": "If a new volume is to be created, this controls its size in MBs. Defaults to 64MBs",
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "database": {
+          "name": "my_database",
+          "password": "my_password",
+          "root_password": "my_root_password",
+          "username": "my_username"
+        },
+        "mysql": {
+          "cpus": 0.5,
+          "mem": 1024.0
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 13307
+          },
+          "port": 3307
+        },
+        "service": {
+          "name": "my_mysql_service"
+        },
+        "storage": {
+          "host_volume": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_size": 512
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "256.0 is less than the minimum of 512.0\n\nFailed validating 'minimum' in schema['properties']['mysql']['properties']['mem']:\n    {'default': 512.0,\n     'description': 'Memory to allocate to each MySQL node.',\n     'minimum': 512.0,\n     'type': 'number'}\n\nOn instance['mysql']['mem']:\n    256.0",
+      "data": {
+        "database": {
+          "name": "my_database",
+          "password": "my_password",
+          "root_password": "my_root_password",
+          "username": "my_username"
+        },
+        "mysql": {
+          "cpus": 0.2,
+          "mem": 256.0
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 13307
+          },
+          "port": 3307
+        },
+        "service": {
+          "name": "my_mysql_service"
+        },
+        "storage": {
+          "host_volume": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_size": 512
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "'mem' is a required property\n\nFailed validating 'required' in schema['properties']['mysql']:\n    {'description': 'MySQL service configuration properties',\n     'properties': {'cpus': {'default': 0.3,\n                             'description': 'CPU shares to allocate to '\n                                            'each MySQL node.',\n                             'minimum': 0.3,\n                             'type': 'number'},\n                    'mem': {'default': 512.0,\n                            'description': 'Memory to allocate to each '\n                                           'MySQL node.',\n                            'minimum': 512.0,\n                            'type': 'number'}},\n     'required': ['cpus', 'mem'],\n     'type': 'object'}\n\nOn instance['mysql']:\n    {'cpus': 0.2, 'Invalid: cpus should be at least 0.3': 'mem'}",
+      "data": {
+        "database": {
+          "name": "my_database",
+          "password": "my_password",
+          "root_password": "my_root_password",
+          "username": "my_username"
+        },
+        "mysql": {
+          "cpus": 0.2,
+          "Invalid: cpus should be at least 0.3": "mem"
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 13307
+          },
+          "port": 3307
+        },
+        "service": {
+          "name": "my_mysql_service"
+        },
+        "storage": {
+          "host_volume": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_size": 512
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "0.2 is less than the minimum of 0.3\n\nFailed validating 'minimum' in schema['properties']['mysql']['properties']['cpus']:\n    {'default': 0.3,\n     'description': 'CPU shares to allocate to each MySQL node.',\n     'minimum': 0.3,\n     'type': 'number'}\n\nOn instance['mysql']['cpus']:\n    0.2",
+      "data": {
+        "database": {
+          "name": "my_database",
+          "password": "my_password",
+          "root_password": "my_root_password",
+          "username": "my_username"
+        },
+        "mysql": {
+          "cpus": 0.2,
+          "mem": 1024.0
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 13307
+          },
+          "port": 3307
+        },
+        "service": {
+          "name": "my_mysql_service"
+        },
+        "storage": {
+          "host_volume": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_size": 512
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.2 is less than the minimum of 0.3",
+      "python_error": "'mem' is a required property\n\nFailed validating 'required' in schema['properties']['mysql']:\n    {'description': 'MySQL service configuration properties',\n     'properties': {'cpus': {'default': 0.3,\n                             'description': 'CPU shares to allocate to '\n                                            'each MySQL node.',\n                             'minimum': 0.3,\n                             'type': 'number'},\n                    'mem': {'default': 512.0,\n                            'description': 'Memory to allocate to each '\n                                           'MySQL node.',\n                            'minimum': 512.0,\n                            'type': 'number'}},\n     'required': ['cpus', 'mem'],\n     'type': 'object'}\n\nOn instance['mysql']:\n    {'cpus': 0.2, 'minimum cpus is 0.3': 'mem'}",
+      "data": {
+        "database": {
+          "name": "my_database",
+          "password": "my_password",
+          "root_password": "my_root_password",
+          "username": "my_username"
+        },
+        "mysql": {
+          "cpus": 0.2,
+          "minimum cpus is 0.3": "mem"
+        },
+        "mem is required": "networking"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0.1 is less than the minimum of 0.3",
+      "python_error": "0.1 is less than the minimum of 0.3\n\nFailed validating 'minimum' in schema['properties']['mysql']['properties']['cpus']:\n    {'default': 0.3,\n     'description': 'CPU shares to allocate to each MySQL node.',\n     'minimum': 0.3,\n     'type': 'number'}\n\nOn instance['mysql']['cpus']:\n    0.1",
+      "data": {
+        "database": {
+          "name": "my_database",
+          "password": "my_password",
+          "root_password": "my_root_password",
+          "username": "my_username"
+        },
+        "mysql": {
+          "cpus": 0.1,
+          "mem": 512.0
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_port": 13307
+          },
+          "port": 3307
+        },
+        "service": {
+          "name": "my_mysql_service"
+        },
+        "storage": {
+          "host_volume": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_size": 512
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "description": "sample Github_medium/o63935.json",
+  "meta": {
+    "full_size": 1336,
+    "stripped_size": 658,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "http://sport-archive.com/input-schema/output/thumb#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "CT transcode output specification for video thumbnails",
+    "type": "object",
+    "properties": {
+      "output_type": {
+        "type": "string",
+        "value": "THUMB",
+        "description": "Type of the file to output"
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "snapshot",
+          "intervals"
+        ],
+        "description": "Type of thumbnails generation needed"
+      },
+      "output_bucket": {
+        "type": "string",
+        "description": "S3 bucket and path where the thumbnails will be uploaded",
+        "pattern": "^[0-9a-zA-Z\\.\\-_]+$",
+        "minLength": 3,
+        "maxLength": 63
+      },
+      "output_file": {
+        "type": "string",
+        "description": "basename for the thumbnails to generate. We will appen sequence number if the 'interval' mode is selected",
+        "pattern": "^[\\w /-]+\\.[0-9a-zA-Z]+$",
+        "minLength": 1,
+        "maxLength": 1024
+      },
+      "intervals": {
+        "type": "integer",
+        "minValue": 1,
+        "description": "Override default interval in seconds"
+      },
+      "snapshot_sec": {
+        "type": "integer",
+        "minValue": 0,
+        "description": "Time in second in the video where to take the snapshot"
+      },
+      "s3_rrs": {
+        "type": "boolean",
+        "description": "Activate reduced redundancy or not in S3 storage"
+      },
+      "s3_encrypt": {
+        "type": "boolean",
+        "description": "Activate backend storage encryption"
+      },
+      "size": {
+        "type": "string",
+        "pattern": "^[0-9]+x[0-9]+$",
+        "description": "Size of the thumbnails"
+      }
+    },
+    "required": [
+      "size"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "output_type": "THUMB",
+        "mode": "snapshot",
+        "output_bucket": "my-thumbnails-bucket",
+        "output_file": "thumbnail.jpg",
+        "snapshot_sec": 10,
+        "s3_rrs": false,
+        "s3_encrypt": true,
+        "size": "128x128"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"thumbnail\" does not match \"^[\\w /-]+\\.[0-9a-zA-Z]+$\"",
+      "python_error": "'thumbnail' does not match '^[\\\\w /-]+\\\\.[0-9a-zA-Z]+$'\n\nFailed validating 'pattern' in schema['properties']['output_file']:\n    {'type': 'string',\n     'description': 'basename for the thumbnails to generate. We will '\n                    \"appen sequence number if the 'interval' mode is \"\n                    'selected',\n     'pattern': '^[\\\\w /-]+\\\\.[0-9a-zA-Z]+$',\n     'minLength': 1,\n     'maxLength': 1024}\n\nOn instance['output_file']:\n    'thumbnail'",
+      "data": {
+        "output_type": "THUMB",
+        "mode": "snapshot",
+        "output_bucket": "my-thumbnails-bucket",
+        "output_file": "thumbnail",
+        "snapshot_sec": 10,
+        "s3_rrs": false,
+        "s3_encrypt": true,
+        "size": "128x128"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"x\" is shorter than 3 characters",
+      "python_error": "'x' is too short\n\nFailed validating 'minLength' in schema['properties']['output_bucket']:\n    {'type': 'string',\n     'description': 'S3 bucket and path where the thumbnails will be '\n                    'uploaded',\n     'pattern': '^[0-9a-zA-Z\\\\.\\\\-_]+$',\n     'minLength': 3,\n     'maxLength': 63}\n\nOn instance['output_bucket']:\n    'x'",
+      "data": {
+        "output_type": "THUMB",
+        "mode": "snapshot",
+        "output_bucket": "x",
+        "output_file": "thumbnail.jpg",
+        "snapshot_sec": 10,
+        "s3_rrs": false,
+        "s3_encrypt": true,
+        "size": "128x128"
+      }
+    }
+  ]
+}

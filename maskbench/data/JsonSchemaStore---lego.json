@@ -1,0 +1,304 @@
+{
+  "description": "sample JsonSchemaStore/lego.json",
+  "meta": {
+    "full_size": 1357,
+    "stripped_size": 714,
+    "features": [
+      "$ref",
+      "items",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$defs",
+      "$schema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$defs": {
+      "file": {
+        "oneOf": [
+          {
+            "description": "This object or string represents the file format",
+            "type": "string"
+          },
+          {
+            "description": "This object or string represents the file format",
+            "type": "null"
+          },
+          {
+            "$ref": "#/$defs/fileFormat",
+            "description": "This object or string represents the file format"
+          }
+        ]
+      },
+      "fileFormat": {
+        "description": "This object represents a file format",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Name of block file",
+            "type": "string"
+          },
+          "template": {
+            "description": "Path to file template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "https://json.schemastore.org/lego.json",
+    "properties": {
+      "blocks": {
+        "description": "An array of your app's blocks.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The name of the block type",
+              "type": "string"
+            },
+            "path": {
+              "description": "Path relative to root where the block will be stored",
+              "type": "string"
+            },
+            "isFile": {
+              "description": "Is this a file? or a folder? False by default.",
+              "type": "boolean"
+            },
+            "files": {
+              "description": "Files making up the block",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/file"
+              }
+            },
+            "file": {
+              "$ref": "#/$defs/file"
+            }
+          },
+          "required": [
+            "type",
+            "path"
+          ]
+        }
+      },
+      "fileFormats": {
+        "description": "An object mapping file objects to strings",
+        "type": "object",
+        "patternProperties": {
+          ".*": {
+            "$ref": "#/$defs/fileFormat"
+          }
+        }
+      }
+    },
+    "required": [
+      "blocks"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "blocks": [
+          {
+            "type": "block1",
+            "path": "/path/to/block1",
+            "isFile": false,
+            "files": [
+              {
+                "name": "file1",
+                "template": "/path/to/template1"
+              },
+              "file2",
+              null
+            ],
+            "file": {
+              "name": "file3",
+              "template": "/path/to/template3"
+            }
+          },
+          {
+            "type": "block2",
+            "path": "/path/to/block2",
+            "isFile": true,
+            "files": [
+              "file4",
+              null
+            ],
+            "file": "file5"
+          }
+        ],
+        "fileFormats": {
+          "file1": {
+            "name": "file1",
+            "template": "/path/to/template1"
+          },
+          "file2": {
+            "name": "file2",
+            "template": "/path/to/template2"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "blocks": [
+          {
+            "type": "block1",
+            "path": "/path/to/block1",
+            "isFile": true,
+            "files": [
+              "file1.txt",
+              null,
+              {
+                "name": "file3",
+                "template": "/path/to/template3"
+              }
+            ],
+            "file": "block1.txt"
+          },
+          {
+            "type": "block2",
+            "path": "/path/to/block2",
+            "isFile": false,
+            "files": [
+              {
+                "name": "file4",
+                "template": "/path/to/template4"
+              },
+              null,
+              "file5.txt"
+            ],
+            "file": null
+          }
+        ],
+        "fileFormats": {
+          "file1": {
+            "name": "file1",
+            "template": "/path/to/template1"
+          },
+          "file2": {
+            "name": "file2",
+            "template": "/path/to/template2"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['blocks']['items']['properties']['file']:\n    {'oneOf': [{'description': 'This object or string represents the file '\n                               'format',\n                'type': 'string'},\n               {'description': 'This object or string represents the file '\n                               'format',\n                'type': 'null'},\n               {'$ref': '#/$defs/fileFormat',\n                'description': 'This object or string represents the file '\n                               'format'}]}\n\nOn instance['blocks'][0]['file']:\n    123",
+      "data": {
+        "blocks": [
+          {
+            "type": "block1",
+            "path": "/path/to/block1",
+            "isFile": true,
+            "files": [
+              "file1.txt",
+              null,
+              {
+                "name": "file3",
+                "template": "/path/to/template3",
+                "description": "file3 description"
+              }
+            ],
+            "file": 123
+          },
+          {
+            "type": "block2",
+            "path": "/path/to/block2",
+            "isFile": false,
+            "files": [
+              {
+                "name": "file4",
+                "template": "/path/to/template4"
+              },
+              null,
+              "file5.txt"
+            ],
+            "file": null
+          }
+        ],
+        "fileFormats": {
+          "file1": {
+            "name": "file1",
+            "template": "/path/to/template1"
+          },
+          "file2": {
+            "name": "file2",
+            "template": "/path/to/template2"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['blocks']['items']['properties']['file']:\n    {'oneOf': [{'description': 'This object or string represents the file '\n                               'format',\n                'type': 'string'},\n               {'description': 'This object or string represents the file '\n                               'format',\n                'type': 'null'},\n               {'$ref': '#/$defs/fileFormat',\n                'description': 'This object or string represents the file '\n                               'format'}]}\n\nOn instance['blocks'][1]['file']:\n    123",
+      "data": {
+        "blocks": [
+          {
+            "type": "block1",
+            "path": "/path/to/block1",
+            "isFile": true,
+            "files": [
+              "file1.txt",
+              null,
+              {
+                "name": "file3"
+              }
+            ],
+            "file": "block1.txt"
+          },
+          {
+            "type": "block2",
+            "path": "/path/to/block2",
+            "isFile": false,
+            "files": [
+              {
+                "name": "file4",
+                "template": "/path/to/template4"
+              },
+              null,
+              "file5.txt"
+            ],
+            "file": 123
+          }
+        ],
+        "fileFormats": {
+          "file1": {
+            "name": "file1",
+            "template": "/path/to/template1"
+          },
+          "file2": {
+            "name": "file2",
+            "template": "/path/to/template2"
+          }
+        }
+      }
+    }
+  ]
+}

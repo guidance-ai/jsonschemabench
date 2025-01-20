@@ -1,0 +1,196 @@
+{
+  "description": "sample Github_medium/o63941.json",
+  "meta": {
+    "full_size": 1383,
+    "stripped_size": 969,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "http://sport-archive.com/input-schema/workflow#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Schemas for workflow section in main config file",
+    "type": "object",
+    "properties": {
+      "domain": {
+        "description": "SWF domain",
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 64,
+        "pattern": "^[\\w\\.\\- ]+$"
+      },
+      "decisionTaskList": {
+        "description": "Workflow decision tasklist",
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 64,
+        "pattern": "^[\\w\\.\\- ]+$"
+      },
+      "name": {
+        "description": "Workflow name",
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 64
+      },
+      "version": {
+        "description": "Workflow version",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 32,
+        "pattern": "^[\\w\\.\\- ]+$"
+      },
+      "description": {
+        "description": "Workflow description",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "defaultExecutionStartToCloseTimeout": {
+        "description": "Max time from start to close for a workflow",
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 31536000
+      },
+      "defaultTaskStartToCloseTimeout": {
+        "description": "Max time from start to close for a task",
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 31536000
+      },
+      "defaultChildPolicy": {
+        "description": "How to terminated children if workflow is terminated",
+        "type": "string",
+        "enum": [
+          "TERMINATE",
+          "REQUEST_CANCEL",
+          "ABANDON"
+        ]
+      }
+    },
+    "required": [
+      "domain",
+      "decisionTaskList",
+      "name",
+      "version",
+      "description",
+      "defaultExecutionStartToCloseTimeout",
+      "defaultTaskStartToCloseTimeout",
+      "defaultChildPolicy"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "domain": "my-swf-domain",
+        "decisionTaskList": "my-decision-tasklist",
+        "name": "My Workflow",
+        "version": "1.0",
+        "description": "This is a sample workflow",
+        "defaultExecutionStartToCloseTimeout": 3600,
+        "defaultTaskStartToCloseTimeout": 300,
+        "defaultChildPolicy": "TERMINATE"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "domain": "example-domain",
+        "decisionTaskList": "example-decision-task-list",
+        "name": "example-workflow",
+        "version": "1.0",
+        "description": "This is an example workflow",
+        "defaultExecutionStartToCloseTimeout": 3600,
+        "defaultTaskStartToCloseTimeout": 300,
+        "defaultChildPolicy": "TERMINATE"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"!example-domain\" does not match \"^[\\w\\.\\- ]+$\"",
+      "python_error": "'!example-domain' does not match '^[\\\\w\\\\.\\\\- ]+$'\n\nFailed validating 'pattern' in schema['properties']['domain']:\n    {'description': 'SWF domain',\n     'type': 'string',\n     'minLength': 3,\n     'maxLength': 64,\n     'pattern': '^[\\\\w\\\\.\\\\- ]+$'}\n\nOn instance['domain']:\n    '!example-domain'",
+      "data": {
+        "domain": "!example-domain",
+        "decisionTaskList": "example-decision-task-list",
+        "name": "example-workflow",
+        "version": "1.0",
+        "description": "This is an example workflow",
+        "defaultExecutionStartToCloseTimeout": 3600,
+        "defaultTaskStartToCloseTimeout": 300,
+        "defaultChildPolicy": "TERMINATE"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"ex\" is shorter than 3 characters",
+      "python_error": "'ex' is too short\n\nFailed validating 'minLength' in schema['properties']['domain']:\n    {'description': 'SWF domain',\n     'type': 'string',\n     'minLength': 3,\n     'maxLength': 64,\n     'pattern': '^[\\\\w\\\\.\\\\- ]+$'}\n\nOn instance['domain']:\n    'ex'",
+      "data": {
+        "domain": "ex",
+        "decisionTaskList": "example-decision-task-list",
+        "name": "example-workflow",
+        "version": "1.0",
+        "description": "This is an example workflow",
+        "defaultExecutionStartToCloseTimeout": 3600,
+        "defaultTaskStartToCloseTimeout": 300,
+        "defaultChildPolicy": "TERMINATE"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "31536001 is greater than the maximum of 31536000",
+      "python_error": "31536001 is greater than the maximum of 31536000\n\nFailed validating 'maximum' in schema['properties']['defaultExecutionStartToCloseTimeout']:\n    {'description': 'Max time from start to close for a workflow',\n     'type': 'integer',\n     'minimum': 1,\n     'maximum': 31536000}\n\nOn instance['defaultExecutionStartToCloseTimeout']:\n    31536001",
+      "data": {
+        "domain": "example-domain",
+        "decisionTaskList": "example-decision-task-list",
+        "name": "example-workflow",
+        "version": "1.0",
+        "description": "This is an example workflow",
+        "defaultExecutionStartToCloseTimeout": 31536001,
+        "defaultTaskStartToCloseTimeout": 300,
+        "defaultChildPolicy": "TERMINATE"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['domain']:\n    {'description': 'SWF domain',\n     'type': 'string',\n     'minLength': 3,\n     'maxLength': 64,\n     'pattern': '^[\\\\w\\\\.\\\\- ]+$'}\n\nOn instance['domain']:\n    'a'",
+      "data": {
+        "domain": "a",
+        "decisionTaskList": "example-decision-task-list",
+        "name": "example-workflow",
+        "version": "1.0",
+        "description": "This is an example workflow",
+        "defaultExecutionStartToCloseTimeout": 3600,
+        "defaultTaskStartToCloseTimeout": 300,
+        "defaultChildPolicy": "TERMINATE"
+      }
+    }
+  ]
+}

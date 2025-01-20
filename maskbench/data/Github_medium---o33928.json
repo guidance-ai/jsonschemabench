@@ -1,0 +1,266 @@
+{
+  "description": "sample Github_medium/o33928.json",
+  "meta": {
+    "full_size": 2277,
+    "stripped_size": 843,
+    "features": [
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Blockchain Certificates Receipt Schema, Version 1.2",
+    "id": "https://w3id.org/blockcerts/schema/1.2/blockchain-receipt-1.2.json",
+    "description": "Provides evidence of the certificate on the blockchain, using the chainpoint v2 standard",
+    "type": "object",
+    "properties": {
+      "@context": {
+        "type": "string",
+        "pattern": "https://w3id.org/chainpoint/v2",
+        "description": "This should always be chainpoint v2 JSON LD context"
+      },
+      "type": {
+        "type": "string",
+        "pattern": "ChainpointSHA256v2",
+        "description": "type of hash. Currently the only supported hash type is SHA256, with chainpoint type ChainpointSHA256v2."
+      },
+      "targetHash": {
+        "type": "string",
+        "pattern": "[A-Fa-f0-9]{64}",
+        "description": "hash of item being verified. Currently the only supported hash type is SHA256, and the targetHash format is validated accordingly."
+      },
+      "merkleRoot": {
+        "type": "string",
+        "pattern": "[A-Fa-f0-9]{64}",
+        "description": "Merkle root value -- this is anchored to the blockchain. Currently the only supported hash type is SHA256, and merkleRoot format is validated accordingly."
+      },
+      "proof": {
+        "type": "array",
+        "description": "how to walk the Merkle tree from the target item to the Merkle root",
+        "items": {
+          "type": "object",
+          "properties": {
+            "left": {
+              "type": "string",
+              "pattern": "[A-Fa-f0-9]{64}",
+              "description": "value of left neighbor to combine into parent hash. Currently the only supported hash type is SHA256, and this value format is validated accordingly."
+            },
+            "right": {
+              "type": "string",
+              "pattern": "[A-Fa-f0-9]{64}",
+              "description": "value of right neighbor to combine into parent hash. Currently the only supported hash type is SHA256, and this value format is validated accordingly."
+            }
+          }
+        }
+      },
+      "anchors": {
+        "type": "array",
+        "description": "how the proof is anchored to the blockchain",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "pattern": "BTCOpReturn",
+              "description": "type of anchor, e.g. BTCOpReturn. Currently the only supported value is BTCOpReturn."
+            },
+            "sourceId": {
+              "type": "string",
+              "pattern": "[A-Fa-f0-9]{64}",
+              "description": "How to lookup the proof on the blockchain. Currently this is expected to be the (value of the) Bitcoin transaction id, and this value format is validated accordingly"
+            }
+          },
+          "required": [
+            "sourceId"
+          ]
+        }
+      }
+    },
+    "required": [
+      "@context",
+      "targetHash",
+      "merkleRoot",
+      "proof",
+      "anchors"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "@context": "https://w3id.org/chainpoint/v2",
+        "type": "ChainpointSHA256v2",
+        "targetHash": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+        "merkleRoot": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+        "proof": [
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          },
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ],
+        "anchors": [
+          {
+            "type": "BTCOpReturn",
+            "sourceId": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"https://w3id.org/chainpoint/v1\" does not match \"https://w3id.org/chainpoint/v2\"",
+      "python_error": "'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788' does not match '[A-Fa-f0-9]{64}'\n\nFailed validating 'pattern' in schema['properties']['targetHash']:\n    {'type': 'string',\n     'pattern': '[A-Fa-f0-9]{64}',\n     'description': 'hash of item being verified. Currently the only '\n                    'supported hash type is SHA256, and the targetHash '\n                    'format is validated accordingly.'}\n\nOn instance['targetHash']:\n    'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788'",
+      "data": {
+        "@context": "https://w3id.org/chainpoint/v1",
+        "type": "ChainpointSHA256v2",
+        "targetHash": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788",
+        "merkleRoot": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+        "proof": [
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          },
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ],
+        "anchors": [
+          {
+            "type": "BTCOpReturn",
+            "sourceId": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889\" does not match \"[A-Fa-f0-9]{64}\"",
+      "python_error": "'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889' does not match '[A-Fa-f0-9]{64}'\n\nFailed validating 'pattern' in schema['properties']['targetHash']:\n    {'type': 'string',\n     'pattern': '[A-Fa-f0-9]{64}',\n     'description': 'hash of item being verified. Currently the only '\n                    'supported hash type is SHA256, and the targetHash '\n                    'format is validated accordingly.'}\n\nOn instance['targetHash']:\n    'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889'",
+      "data": {
+        "@context": "https://w3id.org/chainpoint/v2",
+        "type": "ChainpointSHA256v2",
+        "targetHash": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889",
+        "merkleRoot": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+        "proof": [
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          },
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ],
+        "anchors": [
+          {
+            "type": "BTCOpReturn",
+            "sourceId": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788\" does not match \"[A-Fa-f0-9]{64}\"",
+      "python_error": "'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788' does not match '[A-Fa-f0-9]{64}'\n\nFailed validating 'pattern' in schema['properties']['targetHash']:\n    {'type': 'string',\n     'pattern': '[A-Fa-f0-9]{64}',\n     'description': 'hash of item being verified. Currently the only '\n                    'supported hash type is SHA256, and the targetHash '\n                    'format is validated accordingly.'}\n\nOn instance['targetHash']:\n    'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788'",
+      "data": {
+        "@context": "https://w3id.org/chainpoint/v2",
+        "type": "ChainpointSHA256v2",
+        "targetHash": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788",
+        "merkleRoot": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+        "proof": [
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          },
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ],
+        "anchors": [
+          {
+            "type": "BTCOpReturn",
+            "sourceId": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889\" does not match \"[A-Fa-f0-9]{64}\"",
+      "python_error": "'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889' does not match '[A-Fa-f0-9]{64}'\n\nFailed validating 'pattern' in schema['properties']['targetHash']:\n    {'type': 'string',\n     'pattern': '[A-Fa-f0-9]{64}',\n     'description': 'hash of item being verified. Currently the only '\n                    'supported hash type is SHA256, and the targetHash '\n                    'format is validated accordingly.'}\n\nOn instance['targetHash']:\n    'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889'",
+      "data": {
+        "@context": "https://w3id.org/chainpoint/v2",
+        "type": "ChainpointSHA256v2",
+        "targetHash": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677889",
+        "merkleRoot": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+        "proof": [
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          },
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ],
+        "anchors": [
+          {
+            "type": "BTCOpReturn",
+            "sourceId": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788\" does not match \"[A-Fa-f0-9]{64}\"",
+      "python_error": "'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788' does not match '[A-Fa-f0-9]{64}'\n\nFailed validating 'pattern' in schema['properties']['targetHash']:\n    {'type': 'string',\n     'pattern': '[A-Fa-f0-9]{64}',\n     'description': 'hash of item being verified. Currently the only '\n                    'supported hash type is SHA256, and the targetHash '\n                    'format is validated accordingly.'}\n\nOn instance['targetHash']:\n    'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788'",
+      "data": {
+        "@context": "https://w3id.org/chainpoint/v2",
+        "type": "ChainpointSHA256v2",
+        "targetHash": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF001122334455667788",
+        "merkleRoot": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+        "proof": [
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          },
+          {
+            "left": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+            "right": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ],
+        "anchors": [
+          {
+            "type": "InvalidOpReturn",
+            "sourceId": "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "description": "sample Kubernetes/kb_832_Normalized.json",
+  "meta": {
+    "full_size": 1538,
+    "stripped_size": 498,
+    "features": [
+      "$ref",
+      "format",
+      "format:int32",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "description": "ResourceMetricStatus indicates the current value of a resource metric known to Kubernetes, as specified in requests and limits, describing each pod in the current scale target (e.g. CPU or memory).  Such metrics are built in to Kubernetes, and have special scaling options on top of those available to normal per-pod metrics using the \"pods\" source.",
+    "properties": {
+      "currentAverageUtilization": {
+        "description": "currentAverageUtilization is the current value of the average of the resource metric across all relevant pods, represented as a percentage of the requested value of the resource for the pods.  It will only be present if `targetAverageValue` was set in the corresponding metric specification.",
+        "format": "int32",
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "currentAverageValue": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity",
+        "description": "currentAverageValue is the current value of the average of the resource metric across all relevant pods, as a raw value (instead of as a percentage of the request), similar to the \"pods\" metric source type. It will always be set, regardless of the corresponding metric specification."
+      },
+      "name": {
+        "description": "name is the name of the resource in question.",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "name",
+      "currentAverageValue"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "currentAverageUtilization": 50,
+        "currentAverageValue": 1000,
+        "name": "cpu"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['currentAverageValue']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['currentAverageValue']:\n    True",
+      "data": {
+        "name": "cpu",
+        "currentAverageValue": true,
+        "currentAverageUtilization": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"a\":1} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'a': 1} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['currentAverageValue']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['currentAverageValue']:\n    {'a': 1}",
+      "data": {
+        "name": "cpu",
+        "currentAverageValue": {
+          "a": 1
+        },
+        "currentAverageUtilization": 50
+      }
+    }
+  ]
+}

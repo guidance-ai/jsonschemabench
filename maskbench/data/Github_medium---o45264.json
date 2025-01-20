@@ -1,0 +1,202 @@
+{
+  "description": "sample Github_medium/o45264.json",
+  "meta": {
+    "full_size": 638,
+    "stripped_size": 591,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "maxItems",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "hook": {
+        "$ref": "#/definitions/hook"
+      },
+      "table_name": {
+        "type": "string"
+      },
+      "record": {
+        "type": "object"
+      },
+      "record_uuid": {
+        "type": "string"
+      },
+      "result": {}
+    },
+    "required": [
+      "hook",
+      "table_name",
+      "record_uuid"
+    ],
+    "definitions": {
+      "hook": {
+        "id": "#hook",
+        "description": "Async jobs for after callbacks",
+        "type": "object",
+        "patternProperties": {
+          "after_[create|update|destroy]": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "run_at": {
+                  "type": "string"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 20
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "hook": {
+          "after_create": [
+            {
+              "name": "send_email",
+              "run_at": "2024-12-07T14:30:00.000Z",
+              "conditions": [
+                "field1 == 'value1'",
+                "field2 == 'value2'"
+              ]
+            },
+            {
+              "name": "send_notification",
+              "run_at": "2024-12-07T14:30:00.000Z",
+              "conditions": [
+                "field3 == 'value3'",
+                "field4 == 'value4'"
+              ]
+            }
+          ],
+          "after_update": [
+            {
+              "name": "update_database",
+              "run_at": "2024-12-07T14:30:00.000Z",
+              "conditions": [
+                "field5 == 'value5'",
+                "field6 == 'value6'"
+              ]
+            }
+          ]
+        },
+        "table_name": "example_table",
+        "record_uuid": "123e4567-e89b-12d3-a456-426614174000",
+        "record": {
+          "field1": "value1",
+          "field2": "value2",
+          "field3": "value3",
+          "field4": "value4",
+          "field5": "value5",
+          "field6": "value6"
+        },
+        "result": {}
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "hook": {
+          "after_create": [
+            {
+              "name": "send_welcome_email",
+              "run_at": "2024-12-07T14:30:00.000Z",
+              "conditions": [
+                "user_email != null"
+              ]
+            },
+            {
+              "name": "create_user_profile",
+              "run_at": "2024-12-07T14:30:00.000Z",
+              "conditions": [
+                "user_name != null"
+              ]
+            }
+          ],
+          "after_update": [
+            {
+              "name": "update_user_profile",
+              "run_at": "2024-12-07T14:30:00.000Z",
+              "conditions": [
+                "user_name != null"
+              ]
+            }
+          ]
+        },
+        "table_name": "users",
+        "record": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john@example.com"
+        },
+        "record_uuid": "123e4567-e89b-12d3-a456-426614174000",
+        "result": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['hook']['patternProperties']['after_[create|update|destroy]']:\n    {'type': 'array',\n     'items': {'type': 'object',\n               'properties': {'name': {'type': 'string'},\n                              'run_at': {'type': 'string'},\n                              'conditions': {'type': 'array',\n                                             'items': {'type': 'string'}}},\n               'required': ['name']},\n     'minItems': 1,\n     'maxItems': 20}\n\nOn instance['hook']['after_destroy']:\n    []",
+      "data": {
+        "hook": {
+          "after_create": [
+            {
+              "name": "send_welcome_email",
+              "run_at": "2024-12-07T14:30:00.000Z",
+              "conditions": [
+                "user_email != null"
+              ]
+            }
+          ],
+          "after_destroy": []
+        },
+        "table_name": "users",
+        "record": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john@example.com"
+        },
+        "record_uuid": "123e4567-e89b-12d3-a456-426614174000",
+        "result": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "description": "sample MCPspec/InitializeResult.json",
+  "meta": {
+    "full_size": 2826,
+    "stripped_size": 1089,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/InitializeResult",
+    "definitions": {
+      "InitializeResult": {
+        "description": "After receiving an initialize request from the client, the server sends this response.",
+        "properties": {
+          "_meta": {
+            "additionalProperties": {},
+            "description": "This result property is reserved by the protocol to allow clients and servers to attach additional metadata to their responses.",
+            "type": "object"
+          },
+          "capabilities": {
+            "$ref": "#/definitions/ServerCapabilities"
+          },
+          "instructions": {
+            "description": "Instructions describing how to use the server and its features.\n\nThis can be used by clients to improve the LLM's understanding of available tools, resources, etc. It can be thought of like a \"hint\" to the model. For example, this information MAY be added to the system prompt.",
+            "type": "string"
+          },
+          "protocolVersion": {
+            "description": "The version of the Model Context Protocol that the server wants to use. This may not match the version that the client requested. If the client cannot support this version, it MUST disconnect.",
+            "type": "string"
+          },
+          "serverInfo": {
+            "$ref": "#/definitions/Implementation"
+          }
+        },
+        "required": [
+          "capabilities",
+          "protocolVersion",
+          "serverInfo"
+        ],
+        "type": "object"
+      },
+      "ServerCapabilities": {
+        "description": "Capabilities that a server may support. Known capabilities are defined here, in this schema, but this is not a closed set: any server can define its own, additional capabilities.",
+        "properties": {
+          "experimental": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "properties": {},
+              "type": "object"
+            },
+            "description": "Experimental, non-standard capabilities that the server supports.",
+            "type": "object"
+          },
+          "logging": {
+            "additionalProperties": true,
+            "description": "Present if the server supports sending log messages to the client.",
+            "properties": {},
+            "type": "object"
+          },
+          "prompts": {
+            "description": "Present if the server offers any prompt templates.",
+            "properties": {
+              "listChanged": {
+                "description": "Whether this server supports notifications for changes to the prompt list.",
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "resources": {
+            "description": "Present if the server offers any resources to read.",
+            "properties": {
+              "listChanged": {
+                "description": "Whether this server supports notifications for changes to the resource list.",
+                "type": "boolean"
+              },
+              "subscribe": {
+                "description": "Whether this server supports subscribing to resource updates.",
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "tools": {
+            "description": "Present if the server offers any tools to call.",
+            "properties": {
+              "listChanged": {
+                "description": "Whether this server supports notifications for changes to the tool list.",
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Implementation": {
+        "description": "Describes the name and version of an MCP implementation.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_meta": {},
+        "capabilities": {
+          "experimental": {},
+          "logging": {},
+          "prompts": {
+            "listChanged": true
+          },
+          "resources": {
+            "listChanged": true,
+            "subscribe": true
+          },
+          "tools": {
+            "listChanged": true
+          }
+        },
+        "instructions": "Instructions describing how to use the server and its features.",
+        "protocolVersion": "1.0.0",
+        "serverInfo": {
+          "name": "My Server",
+          "version": "1.0.0"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "'version' is a required property\n\nFailed validating 'required' in schema['properties']['serverInfo']:\n    {'description': 'Describes the name and version of an MCP '\n                    'implementation.',\n     'properties': {'name': {'type': 'string'},\n                    'version': {'type': 'string'}},\n     'required': ['name', 'version'],\n     'type': 'object'}\n\nOn instance['serverInfo']:\n    {'name': 'My Server'}",
+      "data": {
+        "capabilities": {
+          "experimental": {},
+          "logging": {},
+          "prompts": {
+            "listChanged": true
+          },
+          "resources": {
+            "listChanged": true,
+            "subscribe": true
+          },
+          "tools": {
+            "listChanged": true
+          }
+        },
+        "instructions": 123,
+        "protocolVersion": null,
+        "serverInfo": {
+          "name": "My Server"
+        },
+        "_meta": {}
+      }
+    }
+  ]
+}

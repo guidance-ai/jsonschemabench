@@ -1,0 +1,255 @@
+{
+  "description": "sample Github_hard/o83745.json",
+  "meta": {
+    "full_size": 1247,
+    "stripped_size": 667,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Animation program",
+    "description": "A program describing an animation run",
+    "type": "object",
+    "required": [
+      "resources",
+      "program"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "resources": {
+        "description": "The resources used by this program",
+        "type": "object",
+        "required": [
+          "images"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "images": {
+            "description": "A list of image resources to load",
+            "type": "array",
+            "items": {
+              "description": "A particular image",
+              "type": "object",
+              "required": [
+                "key",
+                "uri",
+                "targetLayer"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "description": "The unique ID of this image",
+                  "type": "string"
+                },
+                "uri": {
+                  "description": "The location where to find this image",
+                  "type": "string"
+                },
+                "targetLayer": {
+                  "description": "The ID of the layer in the view port onto which to draw this image",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "program": {
+        "description": "The program steps",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "description": "A particular step within the program",
+          "required": [
+            "cmd",
+            "args"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "cmd": {
+              "description": "The command to be executed",
+              "type": "string",
+              "enum": [
+                "moveTo",
+                "setTransparency"
+              ]
+            },
+            "args": {
+              "description": "A map of arguments for the command",
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "resources": {
+          "images": [
+            {
+              "key": "image1",
+              "uri": "https://example.com/image1.png",
+              "targetLayer": "layer1"
+            },
+            {
+              "key": "image2",
+              "uri": "https://example.com/image2.png",
+              "targetLayer": "layer2"
+            }
+          ]
+        },
+        "program": [
+          {
+            "cmd": "moveTo",
+            "args": {
+              "subject": "image1",
+              "x": 100,
+              "y": 200,
+              "time": 1000
+            }
+          },
+          {
+            "cmd": "setTransparency",
+            "args": {
+              "subject": "image2",
+              "alpha": 0.5,
+              "time": 500
+            }
+          },
+          {
+            "cmd": "moveTo",
+            "args": {
+              "subject": "image1",
+              "x": 300,
+              "y": 400,
+              "time": 2000
+            }
+          },
+          {
+            "cmd": "setTransparency",
+            "args": {
+              "subject": "image2",
+              "alpha": 0.0,
+              "time": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "resources": {
+          "images": [
+            {
+              "key": "image1",
+              "uri": "https://example.com/image1.png",
+              "targetLayer": "layer1"
+            },
+            {
+              "key": "image2",
+              "uri": "https://example.com/image2.png",
+              "targetLayer": "layer1"
+            }
+          ]
+        },
+        "program": [
+          {
+            "cmd": "moveTo",
+            "args": {
+              "subject": "image1",
+              "x": 100,
+              "y": 200,
+              "time": 500
+            }
+          },
+          {
+            "cmd": "setTransparency",
+            "args": {
+              "subject": "image2",
+              "alpha": 0.5,
+              "time": 1000
+            }
+          },
+          {
+            "cmd": "moveTo",
+            "args": {
+              "subject": "image2",
+              "x": 300,
+              "y": 400,
+              "time": 2000
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"targetLayer\" is a required property",
+      "python_error": "'targetLayer' is a required property\n\nFailed validating 'required' in schema['properties']['resources']['properties']['images']['items']:\n    {'description': 'A particular image',\n     'type': 'object',\n     'required': ['key', 'uri', 'targetLayer'],\n     'additionalProperties': False,\n     'properties': {'key': {'description': 'The unique ID of this image',\n                            'type': 'string'},\n                    'uri': {'description': 'The location where to find '\n                                           'this image',\n                            'type': 'string'},\n                    'targetLayer': {'description': 'The ID of the layer in '\n                                                   'the view port onto '\n                                                   'which to draw this '\n                                                   'image',\n                                    'type': 'string'}}}\n\nOn instance['resources']['images'][1]:\n    {'key': 'image2', 'uri': 'https://example.com/image2.png'}",
+      "data": {
+        "resources": {
+          "images": [
+            {
+              "key": "image1",
+              "uri": "https://example.com/image1.png",
+              "targetLayer": "layer1"
+            },
+            {
+              "key": "image2",
+              "uri": "https://example.com/image2.png"
+            }
+          ]
+        },
+        "program": [
+          {
+            "cmd": "moveTo",
+            "args": {
+              "subject": "image1",
+              "x": 100,
+              "y": 200,
+              "time": 500
+            }
+          },
+          {
+            "cmd": "invalidCmd",
+            "args": {
+              "subject": "image2",
+              "alpha": 0.5,
+              "time": 1000
+            }
+          },
+          {
+            "cmd": "moveTo",
+            "args": {
+              "subject": "image2",
+              "x": 300,
+              "y": 400,
+              "time": 2000
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

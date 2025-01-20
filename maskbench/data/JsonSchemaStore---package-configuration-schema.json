@@ -1,0 +1,335 @@
+{
+  "description": "sample JsonSchemaStore/package-configuration-schema.json",
+  "meta": {
+    "full_size": 1973,
+    "stripped_size": 1579,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "anyOf",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://oss-review-toolkit.org/package-configuration.yml",
+    "title": "ORT package configuration",
+    "description": "The OSS-Review-Toolkit (ORT) provides a possibility to define path excludes and license finding curations for a specific package (dependency) and provenance in a package configuration file. A full list of all available options can be found at https://github.com/oss-review-toolkit/ort/blob/main/docs/config-file-package-configuration-yml.md.",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "license_finding_curations": {
+        "items": {
+          "$ref": "#/definitions/licenseFindingCurations"
+        },
+        "type": "array"
+      },
+      "path_excludes": {
+        "items": {
+          "properties": {
+            "comment": {
+              "type": "string"
+            },
+            "pattern": {
+              "type": "string"
+            },
+            "reason": {
+              "$ref": "#/definitions/pathExcludeReason"
+            }
+          },
+          "required": [
+            "pattern",
+            "reason"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "vcs": {
+        "$ref": "#/definitions/vcsMatcher"
+      },
+      "source_artifact_url": {
+        "type": "string"
+      }
+    },
+    "definitions": {
+      "licenseFindingCurationReason": {
+        "enum": [
+          "CODE",
+          "DATA_OF",
+          "DOCUMENTATION_OF",
+          "INCORRECT",
+          "NOT_DETECTED",
+          "REFERENCE"
+        ]
+      },
+      "licenseFindingCurations": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "concluded_license": {
+            "type": "string"
+          },
+          "detected_license": {
+            "type": "string"
+          },
+          "line_count": {
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/definitions/licenseFindingCurationReason"
+          },
+          "start_lines": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "path",
+          "concluded_license",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "pathExcludeReason": {
+        "enum": [
+          "BUILD_TOOL_OF",
+          "DATA_FILE_OF",
+          "DOCUMENTATION_OF",
+          "EXAMPLE_OF",
+          "OPTIONAL_COMPONENT_OF",
+          "OTHER",
+          "PROVIDED_BY",
+          "TEST_OF",
+          "TEST_TOOL_OF"
+        ]
+      },
+      "vcsMatcher": {
+        "anyOf": [
+          {
+            "required": [
+              "type"
+            ]
+          },
+          {
+            "required": [
+              "url"
+            ]
+          },
+          {
+            "required": [
+              "revision"
+            ]
+          },
+          {
+            "required": [
+              "path"
+            ]
+          }
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "oneOf": [
+      {
+        "required": [
+          "vcs"
+        ]
+      },
+      {
+        "required": [
+          "source_artifact_url"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://oss-review-toolkit.org/package-configuration.yml",
+        "title": "ORT package configuration",
+        "description": "The OSS-Review-Toolkit (ORT) provides a possibility to define path excludes and license finding curations for a specific package (dependency) and provenance in a package configuration file.",
+        "id": "example-package",
+        "vcs": {
+          "type": "git",
+          "url": "https://github.com/example/example.git",
+          "revision": "main",
+          "path": "example"
+        },
+        "license_finding_curations": [
+          {
+            "path": "example/LICENSE",
+            "concluded_license": "MIT",
+            "reason": "CODE",
+            "comment": "This is an example license finding curation",
+            "detected_license": "MIT",
+            "line_count": 10,
+            "start_lines": 1
+          }
+        ],
+        "path_excludes": [
+          {
+            "pattern": "example/build",
+            "reason": "BUILD_TOOL_OF",
+            "comment": "This is an example path exclude"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"a\" is not of type \"integer\"",
+      "python_error": "'a' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['license_finding_curations']['items']['properties']['line_count']:\n    {'type': 'integer'}\n\nOn instance['license_finding_curations'][0]['line_count']:\n    'a'",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://oss-review-toolkit.org/package-configuration.yml",
+        "title": "ORT package configuration",
+        "description": "The OSS-Review-Toolkit (ORT) provides a possibility to define path excludes and license finding curations for a specific package (dependency) and provenance in a package configuration file.",
+        "id": "example-package",
+        "vcs": {
+          "type": "git",
+          "url": "https://github.com/example/example.git",
+          "revision": "main",
+          "path": "example"
+        },
+        "license_finding_curations": [
+          {
+            "path": "example/LICENSE",
+            "concluded_license": "MIT",
+            "reason": "CODE",
+            "comment": "This is an example license finding curation",
+            "detected_license": "MIT",
+            "line_count": "a",
+            "start_lines": 1
+          }
+        ],
+        "path_excludes": [
+          {
+            "pattern": "example/build",
+            "reason": "BUILD_TOOL_OF",
+            "comment": "This is an example path exclude"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"$id\":\"https://oss-review-toolkit.org/package-configuration.yml\",\"title\":\"ORT package configuration\",\"description\":\"The OSS-Review-Toolkit (ORT) provides a possibility to define path excludes and license finding curations for a specific package (dependency) and provenance in a package configuration file.\",\"id\":\"example-package\",\"vcs\":{\"type\":\"git\",\"url\":\"https://github.com/example/example.git\",\"revision\":\"main\",\"path\":\"example\"},\"source_artifact_url\":\"https://example.com/source-artifact\",\"license_finding_curations\":[{\"path\":\"example/LICENSE\",\"concluded_license\":\"MIT\",\"reason\":\"CODE\",\"comment\":\"This is an example license finding curation\",\"detected_license\":\"MIT\",\"line_count\":10,\"start_lines\":1}],\"path_excludes\":[{\"pattern\":\"example/build\",\"reason\":\"BUILD_TOOL_OF\",\"comment\":\"This is an example path exclude\"}]} is valid under more than one of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'$schema': 'http://json-schema.org/draft-07/schema#', '$id': 'https://oss-review-toolkit.org/package-configuration.yml', 'title': 'ORT package configuration', 'description': 'The OSS-Review-Toolkit (ORT) provides a possibility to define path excludes and license finding curations for a specific package (dependency) and provenance in a package configuration file.', 'id': 'example-package', 'vcs': {'type': 'git', 'url': 'https://github.com/example/example.git', 'revision': 'main', 'path': 'example'}, 'source_artifact_url': 'https://example.com/source-artifact', 'license_finding_curations': [{'path': 'example/LICENSE', 'concluded_license': 'MIT', 'reason': 'CODE', 'comment': 'This is an example license finding curation', 'detected_license': 'MIT', 'line_count': 10, 'start_lines': 1}], 'path_excludes': [{'pattern': 'example/build', 'reason': 'BUILD_TOOL_OF', 'comment': 'This is an example path exclude'}]} is valid under each of {'required': ['source_artifact_url']}, {'required': ['vcs']}\n\nFailed validating 'oneO.. (5986 more)",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://oss-review-toolkit.org/package-configuration.yml",
+        "title": "ORT package configuration",
+        "description": "The OSS-Review-Toolkit (ORT) provides a possibility to define path excludes and license finding curations for a specific package (dependency) and provenance in a package configuration file.",
+        "id": "example-package",
+        "vcs": {
+          "type": "git",
+          "url": "https://github.com/example/example.git",
+          "revision": "main",
+          "path": "example"
+        },
+        "source_artifact_url": "https://example.com/source-artifact",
+        "license_finding_curations": [
+          {
+            "path": "example/LICENSE",
+            "concluded_license": "MIT",
+            "reason": "CODE",
+            "comment": "This is an example license finding curation",
+            "detected_license": "MIT",
+            "line_count": 10,
+            "start_lines": 1
+          }
+        ],
+        "path_excludes": [
+          {
+            "pattern": "example/build",
+            "reason": "BUILD_TOOL_OF",
+            "comment": "This is an example path exclude"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"INVALID\" is not one of [\"CODE\",\"DATA_OF\",\"DOCUMENTATION_OF\",\"INCORRECT\",\"NOT_DETECTED\",\"REFERENCE\"]",
+      "python_error": "'INVALID' is not one of ['BUILD_TOOL_OF', 'DATA_FILE_OF', 'DOCUMENTATION_OF', 'EXAMPLE_OF', 'OPTIONAL_COMPONENT_OF', 'OTHER', 'PROVIDED_BY', 'TEST_OF', 'TEST_TOOL_OF']\n\nFailed validating 'enum' in schema['properties']['path_excludes']['items']['properties']['reason']:\n    {'enum': ['BUILD_TOOL_OF',\n              'DATA_FILE_OF',\n              'DOCUMENTATION_OF',\n              'EXAMPLE_OF',\n              'OPTIONAL_COMPONENT_OF',\n              'OTHER',\n              'PROVIDED_BY',\n              'TEST_OF',\n              'TEST_TOOL_OF']}\n\nOn instance['path_excludes'][0]['reason']:\n    'INVALID'",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://oss-review-toolkit.org/package-configuration.yml",
+        "title": "ORT package configuration",
+        "description": "The OSS-Review-Toolkit (ORT) provides a possibility to define path excludes and license finding curations for a specific package (dependency) and provenance in a package configuration file.",
+        "id": "",
+        "vcs": {
+          "type": "git",
+          "url": "https://github.com/example/example.git",
+          "revision": "main",
+          "path": "example"
+        },
+        "license_finding_curations": [
+          {
+            "path": "example/LICENSE",
+            "concluded_license": "MIT",
+            "reason": "INVALID",
+            "comment": "This is an example license finding curation",
+            "detected_license": "MIT",
+            "line_count": 10,
+            "start_lines": 1
+          }
+        ],
+        "path_excludes": [
+          {
+            "pattern": "example/build",
+            "reason": "INVALID",
+            "comment": "This is an example path exclude"
+          }
+        ]
+      }
+    }
+  ]
+}

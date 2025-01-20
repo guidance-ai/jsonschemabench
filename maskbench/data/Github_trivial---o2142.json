@@ -1,0 +1,83 @@
+{
+  "description": "sample Github_trivial/o2142.json",
+  "meta": {
+    "full_size": 312,
+    "stripped_size": 260,
+    "features": [
+      "@siblingKeys",
+      "anyOf",
+      "not",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "anyOf:trivial",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Verify annotation is of `type` Annotation",
+    "type": "object",
+    "properties": {
+      "type": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^Annotation$"
+          },
+          {
+            "type": "array",
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^Annotation$"
+              }
+            ]
+          }
+        ],
+        "not": {
+          "type": "object"
+        }
+      }
+    },
+    "required": [
+      "type"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "Annotation"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[\"Annotation\",\"Other\"] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "['Annotation', 'Other'] is not of type 'string'\n\nFailed validating 'type' in schema[0]:\n    {'type': 'string', 'pattern': '^Annotation$'}\n\nOn instance:\n    ['Annotation', 'Other']",
+      "data": {
+        "type": [
+          "Annotation",
+          "Other"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"annotation\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'annotation' does not match '^Annotation$'\n\nFailed validating 'pattern' in schema[0]:\n    {'type': 'string', 'pattern': '^Annotation$'}\n\nOn instance:\n    'annotation'",
+      "data": {
+        "type": "annotation"
+      }
+    }
+  ]
+}

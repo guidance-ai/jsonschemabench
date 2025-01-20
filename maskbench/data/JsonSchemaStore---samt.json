@@ -1,0 +1,383 @@
+{
+  "description": "sample JsonSchemaStore/samt.json",
+  "meta": {
+    "full_size": 1865,
+    "stripped_size": 1278,
+    "features": [
+      "additionalProperties",
+      "additionalProperties:object",
+      "const",
+      "format",
+      "format:uri",
+      "format:uri-reference",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/samt.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "description": "Path to the source directory, defaults to ./src",
+        "type": "string",
+        "format": "uri-reference"
+      },
+      "repositories": {
+        "description": "The default repositories to use if no repository is specified for a plugin",
+        "type": "object",
+        "properties": {
+          "maven": {
+            "description": "The url to the maven repository to use, defaults to https://repo.maven.apache.org/maven2",
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      },
+      "plugins": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "description": "A local plugin, should most likely not be used in production",
+              "type": "object",
+              "required": [
+                "type",
+                "path"
+              ],
+              "properties": {
+                "type": {
+                  "const": "local"
+                },
+                "path": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "A maven plugin in POM-like notation, will be downloaded from the provided repository",
+              "type": "object",
+              "required": [
+                "type",
+                "groupId",
+                "artifactId",
+                "version"
+              ],
+              "properties": {
+                "type": {
+                  "const": "maven"
+                },
+                "groupId": {
+                  "type": "string"
+                },
+                "artifactId": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "repository": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "A maven plugin in gradle-like notation, will be downloaded from the provided repository",
+              "type": "object",
+              "required": [
+                "type",
+                "dependency"
+              ],
+              "properties": {
+                "type": {
+                  "const": "gradle"
+                },
+                "dependency": {
+                  "type": "string"
+                },
+                "repository": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "generators": {
+        "description": "Which SAMT generators to use",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "output": {
+              "type": "string",
+              "format": "uri-reference"
+            },
+            "options": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "source": "./src",
+        "repositories": {
+          "maven": "https://repo.maven.apache.org/maven2"
+        },
+        "plugins": [
+          {
+            "type": "local",
+            "path": "./local-plugin"
+          },
+          {
+            "type": "maven",
+            "groupId": "com.example",
+            "artifactId": "example-plugin",
+            "version": "1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          },
+          {
+            "type": "gradle",
+            "dependency": "com.example:example-plugin:1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          }
+        ],
+        "generators": [
+          {
+            "name": "generator1",
+            "output": "./output1",
+            "options": {
+              "option1": "value1",
+              "option2": "value2"
+            }
+          },
+          {
+            "name": "generator2",
+            "output": "./output2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid-uri\" is not a \"uri\"",
+      "python_error": "'invalid-uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['repositories']['properties']['maven']:\n    {'description': 'The url to the maven repository to use, defaults to '\n                    'https://repo.maven.apache.org/maven2',\n     'type': 'string',\n     'format': 'uri'}\n\nOn instance['repositories']['maven']:\n    'invalid-uri'",
+      "data": {
+        "source": "invalid-uri://src",
+        "repositories": {
+          "maven": "invalid-uri"
+        },
+        "plugins": [
+          {
+            "type": "local",
+            "path": "invalid-uri://local-plugin"
+          },
+          {
+            "type": "maven",
+            "groupId": "com.example",
+            "artifactId": "example-plugin",
+            "version": "1.0.0",
+            "repository": "invalid-uri"
+          },
+          {
+            "type": "gradle",
+            "dependency": "com.example:example-plugin:1.0.0",
+            "repository": "invalid-uri"
+          }
+        ],
+        "generators": [
+          {
+            "name": "generator1",
+            "output": "invalid-uri://output1",
+            "options": {
+              "option1": "value1",
+              "option2": "value2"
+            }
+          },
+          {
+            "name": "generator2",
+            "output": "invalid-uri://output2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"local\",\"path\":\"./local-plugin\",\"groupId\":\"com.example\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'local', 'path': './local-plugin', 'groupId': 'com.example'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['plugins']['items']:\n    {'oneOf': [{'description': 'A local plugin, should most likely not be '\n                               'used in production',\n                'type': 'object',\n                'required': ['type', 'path'],\n                'properties': {'type': {'const': 'local'},\n                               'path': {'type': 'string',\n                                        'format': 'uri-reference'}},\n                'additionalProperties': False},\n               {'description': 'A maven plugin in POM-like notation, will '\n                               'be downloaded from the provided repository',\n                'type': 'object',\n                'required': ['type', 'groupId', 'artifactId', 'version'],\n                'properties': {'type': {'const': 'maven'},\n                               'groupId': {'type': 'string'},\n             .. (971 more)",
+      "data": {
+        "source": "./src",
+        "repositories": {
+          "maven": "https://repo.maven.apache.org/maven2"
+        },
+        "plugins": [
+          {
+            "type": "local",
+            "path": "./local-plugin",
+            "groupId": "com.example"
+          },
+          {
+            "type": "maven",
+            "groupId": "com.example",
+            "artifactId": "example-plugin",
+            "version": "1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          },
+          {
+            "type": "gradle",
+            "dependency": "com.example:example-plugin:1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          }
+        ],
+        "generators": [
+          {
+            "name": "generator1",
+            "output": "./output1",
+            "options": {
+              "option1": "value1",
+              "option2": "value2"
+            }
+          },
+          {
+            "name": "generator2",
+            "output": "./output2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra-repository' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra-repository', 'maven2' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['repositories']:\n    {'description': 'The default repositories to use if no repository is '\n                    'specified for a plugin',\n     'type': 'object',\n     'properties': {'maven': {'description': 'The url to the maven '\n                                             'repository to use, defaults '\n                                             'to '\n                                             'https://repo.maven.apache.org/maven2',\n                              'type': 'string',\n                              'format': 'uri'}},\n     'additionalProperties': False}\n\nOn instance['repositories']:\n    {'maven': 'https://repo.maven.apache.org/maven2',\n     'extra-repository': 'https://example.com/repository',\n     'maven2': 'https://repo.maven.apache.org/maven2'}",
+      "data": {
+        "source": "./src",
+        "repositories": {
+          "maven": "https://repo.maven.apache.org/maven2",
+          "extra-repository": "https://example.com/repository",
+          "maven2": "https://repo.maven.apache.org/maven2"
+        },
+        "plugins": [
+          {
+            "type": "local",
+            "path": "./local-plugin"
+          },
+          {
+            "type": "maven",
+            "groupId": "com.example",
+            "artifactId": "example-plugin",
+            "version": "1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          },
+          {
+            "type": "gradle",
+            "dependency": "com.example:example-plugin:1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          }
+        ],
+        "generators": [
+          {
+            "name": "generator1",
+            "output": "./output1",
+            "options": {
+              "option1": "value1",
+              "option2": "value2"
+            }
+          },
+          {
+            "name": "generator2",
+            "output": "./output2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('invalid-repo' was unexpected)",
+      "python_error": "Additional properties are not allowed ('invalid-repo' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['repositories']:\n    {'description': 'The default repositories to use if no repository is '\n                    'specified for a plugin',\n     'type': 'object',\n     'properties': {'maven': {'description': 'The url to the maven '\n                                             'repository to use, defaults '\n                                             'to '\n                                             'https://repo.maven.apache.org/maven2',\n                              'type': 'string',\n                              'format': 'uri'}},\n     'additionalProperties': False}\n\nOn instance['repositories']:\n    {'maven': 'https://repo.maven.apache.org/maven2',\n     'invalid-repo': 'https://example.com'}",
+      "data": {
+        "source": "./src",
+        "repositories": {
+          "maven": "https://repo.maven.apache.org/maven2",
+          "invalid-repo": "https://example.com"
+        },
+        "plugins": [
+          {
+            "type": "local",
+            "path": "./local-plugin"
+          },
+          {
+            "type": "maven",
+            "groupId": "com.example",
+            "artifactId": "example-plugin",
+            "version": "1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2",
+            "invalid-field": "value"
+          },
+          {
+            "type": "gradle",
+            "dependency": "com.example:example-plugin:1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          },
+          {
+            "type": "invalid-type",
+            "dependency": "com.example:example-plugin:1.0.0",
+            "repository": "https://repo.maven.apache.org/maven2"
+          }
+        ],
+        "generators": [
+          {
+            "name": "generator1",
+            "output": "./output1",
+            "options": {
+              "option1": 123,
+              "option2": "value2"
+            }
+          },
+          {
+            "name": "generator2"
+          }
+        ]
+      }
+    }
+  ]
+}

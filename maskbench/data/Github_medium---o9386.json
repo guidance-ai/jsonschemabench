@@ -1,0 +1,402 @@
+{
+  "description": "sample Github_medium/o9386.json",
+  "meta": {
+    "full_size": 1543,
+    "stripped_size": 739,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "additionalProperties:object",
+      "format",
+      "format:topic",
+      "format:topic-map",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "places"
+    ],
+    "properties": {
+      "redirectOn": {
+        "type": "object",
+        "description": "Globally defined redirects for certain edge cases",
+        "properties": {
+          "unknownPlace": {
+            "type": "string",
+            "description": "This place is loaded whenever the requested place doesn't exist."
+          }
+        },
+        "default": {},
+        "additionalProperties": false
+      },
+      "places": {
+        "type": "object",
+        "format": "topic-map",
+        "description": "The places for this flow. Keys (that is, place names) must be valid event topics.",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "patterns": {
+              "type": "array",
+              "description": "Non-empty list of URL patterns to route to this place. If omitted, the place name (prefixed with a slash) is used as the sole pattern.",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            "page": {
+              "type": "string",
+              "description": "The page to render for this place."
+            },
+            "redirectTo": {
+              "type": "string",
+              "description": "The place to redirect to when hitting this place."
+            },
+            "redirectToPath": {
+              "type": "string",
+              "description": "The path to redirect to when hitting this place, including the values for relevant place parameters."
+            },
+            "defaultParameters": {
+              "type": "object",
+              "default": {},
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "boolean",
+                  "null"
+                ]
+              },
+              "description": "Default values for optional (query) parameters."
+            },
+            "targets": {
+              "type": "object",
+              "format": "topic-map",
+              "additionalProperties": {
+                "type": "string",
+                "format": "topic"
+              },
+              "description": "A map of symbolic targets to place-names reachable from this place."
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "places": {
+          "home": {
+            "patterns": [
+              "/",
+              "/home"
+            ],
+            "page": "home.html",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "about": "about",
+              "contact": "contact"
+            }
+          },
+          "about": {
+            "patterns": [
+              "/about"
+            ],
+            "page": "about.html",
+            "redirectTo": "home"
+          },
+          "contact": {
+            "patterns": [
+              "/contact"
+            ],
+            "page": "contact.html",
+            "redirectToPath": "/thanks/{name}"
+          },
+          "thanks": {
+            "patterns": [
+              "/thanks/{name}"
+            ],
+            "page": "thanks.html",
+            "defaultParameters": {
+              "name": "World"
+            }
+          }
+        },
+        "redirectOn": {
+          "unknownPlace": "home"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "redirectOn": {
+          "unknownPlace": "/404"
+        },
+        "places": {
+          "home": {
+            "patterns": [
+              "/",
+              "/home"
+            ],
+            "page": "home.html",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login",
+              "register": "register"
+            }
+          },
+          "login": {
+            "patterns": [
+              "/login"
+            ],
+            "page": "login.html",
+            "redirectTo": "home",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "register": "register"
+            }
+          },
+          "register": {
+            "patterns": [
+              "/register"
+            ],
+            "page": "register.html",
+            "redirectToPath": "/home?lang=en",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['places']['additionalProperties']['properties']['patterns']:\n    {'type': 'array',\n     'description': 'Non-empty list of URL patterns to route to this '\n                    'place. If omitted, the place name (prefixed with a '\n                    'slash) is used as the sole pattern.',\n     'minItems': 1,\n     'items': {'type': 'string'}}\n\nOn instance['places']['home']['patterns']:\n    []",
+      "data": {
+        "redirectOn": {
+          "unknownPlace": "/404"
+        },
+        "places": {
+          "home": {
+            "patterns": [],
+            "page": "home.html",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login",
+              "register": "register"
+            }
+          },
+          "login": {
+            "patterns": [
+              "/login"
+            ],
+            "page": "login.html",
+            "redirectTo": "home",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "register": "register"
+            }
+          },
+          "register": {
+            "patterns": [
+              "/register"
+            ],
+            "page": "register.html",
+            "redirectToPath": "/home?lang=en",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "1 is not of types \"boolean\", \"null\", \"string\"",
+      "python_error": "1 is not of type 'string', 'boolean', 'null'\n\nFailed validating 'type' in schema['properties']['places']['additionalProperties']['properties']['defaultParameters']['additionalProperties']:\n    {'type': ['string', 'boolean', 'null']}\n\nOn instance['places']['home']['defaultParameters']['lang']:\n    1",
+      "data": {
+        "redirectOn": {
+          "unknownPlace": "/404"
+        },
+        "places": {
+          "home": {
+            "patterns": [
+              "/",
+              "/home"
+            ],
+            "page": "home.html",
+            "defaultParameters": {
+              "lang": 1
+            },
+            "targets": {
+              "login": "login",
+              "register": "register"
+            }
+          },
+          "login": {
+            "patterns": [
+              "/login"
+            ],
+            "page": "login.html",
+            "redirectTo": "home",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "register": "register"
+            }
+          },
+          "register": {
+            "patterns": [
+              "/register"
+            ],
+            "page": "register.html",
+            "redirectToPath": "/home?lang=en",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['redirectOn']:\n    {'type': 'object',\n     'description': 'Globally defined redirects for certain edge cases',\n     'properties': {'unknownPlace': {'type': 'string',\n                                     'description': 'This place is loaded '\n                                                    'whenever the '\n                                                    'requested place '\n                                                    \"doesn't exist.\"}},\n     'default': {},\n     'additionalProperties': False}\n\nOn instance['redirectOn']:\n    {'unknownPlace': '/404', 'extraProperty': 'extraValue'}",
+      "data": {
+        "redirectOn": {
+          "unknownPlace": "/404",
+          "extraProperty": "extraValue"
+        },
+        "places": {
+          "home": {
+            "patterns": [
+              "/",
+              "/home"
+            ],
+            "page": "home.html",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login",
+              "register": "register"
+            }
+          },
+          "login": {
+            "patterns": [
+              "/login"
+            ],
+            "page": "login.html",
+            "redirectTo": "home",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "register": "register"
+            }
+          },
+          "register": {
+            "patterns": [
+              "/register"
+            ],
+            "page": "register.html",
+            "redirectToPath": "/home?lang=en",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['places']['additionalProperties']['properties']['redirectTo']:\n    {'type': 'string',\n     'description': 'The place to redirect to when hitting this place.'}\n\nOn instance['places']['login']['redirectTo']:\n    123",
+      "data": {
+        "redirectOn": {
+          "unknownPlace": "/404"
+        },
+        "places": {
+          "home": {
+            "patterns": [
+              "/",
+              "/home"
+            ],
+            "page": "home.html",
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "login": "login",
+              "register": "register"
+            }
+          },
+          "login": {
+            "patterns": [
+              "/login"
+            ],
+            "page": "login.html",
+            "redirectTo": 123,
+            "defaultParameters": {
+              "lang": "en"
+            },
+            "targets": {
+              "register": "register"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

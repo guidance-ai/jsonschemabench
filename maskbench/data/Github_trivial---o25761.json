@@ -1,0 +1,201 @@
+{
+  "description": "sample Github_trivial/o25761.json",
+  "meta": {
+    "full_size": 795,
+    "stripped_size": 795,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "enum",
+      "items",
+      "not",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "_elements"
+    ],
+    "oneOf": [
+      {
+        "properties": {
+          "_attributes": {
+            "type": "object",
+            "required": [
+              "init_system"
+            ],
+            "properties": {
+              "init_system": {
+                "not": {
+                  "enum": [
+                    "upstart"
+                  ]
+                },
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "_elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "state"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "_attributes": {
+            "type": "object",
+            "required": [
+              "init_system"
+            ],
+            "properties": {
+              "init_system": {
+                "enum": [
+                  "upstart"
+                ]
+              }
+            }
+          },
+          "_elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "state",
+                "legacy_sysv"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "legacy_sysv": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_attributes": {
+          "init_system": "systemd"
+        },
+        "_elements": [
+          {
+            "name": "service1",
+            "state": "running"
+          },
+          {
+            "name": "service2",
+            "state": "stopped"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"_attributes\":{\"init_system\":\"upstart\"},\"_elements\":[{\"name\":\"service1\",\"state\":\"running\"},{\"name\":\"service2\",\"state\":\"stopped\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'upstart' should not be valid under {'enum': ['upstart']}\n\nFailed validating 'not' in schema[0]['properties']['_attributes']['properties']['init_system']:\n    {'not': {'enum': ['upstart']}, 'type': 'string', 'minLength': 1}\n\nOn instance['_attributes']['init_system']:\n    'upstart'",
+      "data": {
+        "_attributes": {
+          "init_system": "upstart"
+        },
+        "_elements": [
+          {
+            "name": "service1",
+            "state": "running"
+          },
+          {
+            "name": "service2",
+            "state": "stopped"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"_attributes\":{\"init_system\":\"systemd\"},\"_elements\":[{\"name\":\"\",\"state\":\"running\"},{\"name\":\"service2\",\"state\":\"stopped\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'_attributes': {'init_system': 'systemd'}, '_elements': [{'name': '', 'state': 'running'}, {'name': 'service2', 'state': 'stopped'}]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'required': ['_elements'],\n     'oneOf': [{'properties': {'_attributes': {'type': 'object',\n                                               'required': ['init_system'],\n                                               'properties': {'init_system': {'not': {'enum': ['upstart']},\n                                                                              'type': 'string',\n                                                                              'minLength': 1}}},\n                               '_elements': {'type': 'array',\n                                             'items': {'type': 'object',\n                                                       'required': ['name',\n                                        .. (1722 more)",
+      "data": {
+        "_attributes": {
+          "init_system": "systemd"
+        },
+        "_elements": [
+          {
+            "name": "",
+            "state": "running"
+          },
+          {
+            "name": "service2",
+            "state": "stopped"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"_attributes\":{\"init_system\":\"\"},\"_elements\":[{\"name\":\"\",\"state\":\"running\"},{\"name\":\"service2\",\"state\":\"stopped\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'_attributes': {'init_system': ''}, '_elements': [{'name': '', 'state': 'running'}, {'name': 'service2', 'state': 'stopped'}]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'required': ['_elements'],\n     'oneOf': [{'properties': {'_attributes': {'type': 'object',\n                                               'required': ['init_system'],\n                                               'properties': {'init_system': {'not': {'enum': ['upstart']},\n                                                                              'type': 'string',\n                                                                              'minLength': 1}}},\n                               '_elements': {'type': 'array',\n                                             'items': {'type': 'object',\n                                                       'required': ['name',\n                                               .. (1708 more)",
+      "data": {
+        "_attributes": {
+          "init_system": ""
+        },
+        "_elements": [
+          {
+            "name": "",
+            "state": "running"
+          },
+          {
+            "name": "service2",
+            "state": "stopped"
+          }
+        ]
+      }
+    }
+  ]
+}

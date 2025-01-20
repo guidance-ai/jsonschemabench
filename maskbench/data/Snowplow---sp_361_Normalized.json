@@ -1,0 +1,267 @@
+{
+  "description": "sample Snowplow/sp_361_Normalized.json",
+  "meta": {
+    "full_size": 2063,
+    "stripped_size": 964,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "oneOf"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Snowplow Google BigQuery storage configuration",
+    "properties": {
+      "badRows": {
+        "description": "Google PubSub topic name to sink rows that were couldn't be transformed to TableRow",
+        "maxLength": 255,
+        "minLength": 3,
+        "type": "string"
+      },
+      "datasetId": {
+        "description": "BigQuery dataset id",
+        "type": "string"
+      },
+      "failedInserts": {
+        "description": "Google PubSub topic name to sink rows that were couldn't be inserted into BigQuery (due not existing column or service outage)",
+        "maxLength": 255,
+        "minLength": 3,
+        "type": "string"
+      },
+      "id": {
+        "_format": "uuid",
+        "description": "Machine-readable unique identifier",
+        "type": "string"
+      },
+      "input": {
+        "description": "Google PubSub subscription name with enriched TSV data",
+        "maxLength": 255,
+        "minLength": 3,
+        "type": "string"
+      },
+      "load": {
+        "description": "Loading mode and associated settings",
+        "oneOf": [
+          {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "STREAMING_INSERTS"
+                ]
+              },
+              "retry": {
+                "description": "Whether transient failures should be retried or sent straight to failedInserts topic",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "retry"
+            ]
+          },
+          {
+            "properties": {
+              "frequency": {
+                "description": "Frequency of load jobs, in seconds",
+                "maximum": 86400,
+                "minimum": 100,
+                "type": "integer"
+              },
+              "mode": {
+                "enum": [
+                  "FILE_LOADS"
+                ]
+              }
+            },
+            "required": [
+              "frequency"
+            ]
+          }
+        ],
+        "required": [
+          "mode"
+        ],
+        "type": "object"
+      },
+      "name": {
+        "description": "Human-readable storage target name, used only for logging",
+        "type": "string"
+      },
+      "projectId": {
+        "description": "GCP project id",
+        "type": "string"
+      },
+      "purpose": {
+        "enum": [
+          "ENRICHED_EVENTS"
+        ],
+        "type": "string"
+      },
+      "tableId": {
+        "description": "BigQuery table id",
+        "type": "string"
+      },
+      "typesSubscription": {
+        "description": "Google PubSub subscription name where Mutator gets observed types",
+        "maxLength": 255,
+        "minLength": 3,
+        "type": "string"
+      },
+      "typesTopic": {
+        "description": "Google PubSub topic name for sending observed types",
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "id",
+      "projectId",
+      "input",
+      "datasetId",
+      "tableId",
+      "load",
+      "typesTopic",
+      "badRows",
+      "failedInserts",
+      "typesSubscription",
+      "purpose"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "bigquery_config",
+      "vendor": "com.snowplowanalytics.snowplow.storage",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "badRows": "my-bad-rows-topic",
+        "datasetId": "my-bigquery-dataset",
+        "failedInserts": "my-failed-inserts-topic",
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "input": "my-pubsub-subscription",
+        "load": {
+          "mode": "STREAMING_INSERTS",
+          "retry": true
+        },
+        "name": "Snowplow BigQuery Storage",
+        "projectId": "my-gcp-project",
+        "purpose": "ENRICHED_EVENTS",
+        "tableId": "my-bigquery-table",
+        "typesSubscription": "my-types-subscription",
+        "typesTopic": "my-types-topic"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "badRows": "my-bad-rows-topic",
+        "datasetId": "my-bigquery-dataset",
+        "failedInserts": "my-failed-inserts-topic",
+        "id": "123e4567-e89b-12d3-a456-426655440000",
+        "input": "my-pubsub-subscription",
+        "load": {
+          "mode": "STREAMING_INSERTS",
+          "retry": true
+        },
+        "name": "Snowplow BigQuery Storage",
+        "projectId": "my-gcp-project",
+        "purpose": "ENRICHED_EVENTS",
+        "tableId": "my-bigquery-table",
+        "typesSubscription": "my-types-subscription",
+        "typesTopic": "my-types-topic"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"ab\" is shorter than 3 characters",
+      "python_error": "'ab' is too short\n\nFailed validating 'minLength' in schema['properties']['input']:\n    {'description': 'Google PubSub subscription name with enriched TSV '\n                    'data',\n     'maxLength': 255,\n     'minLength': 3,\n     'type': 'string'}\n\nOn instance['input']:\n    'ab'",
+      "data": {
+        "badRows": "my-bad-rows-topic",
+        "datasetId": "my-bigquery-dataset",
+        "failedInserts": "my-failed-inserts-topic",
+        "id": "123e4567-e89b-12d3-a456-426655440000",
+        "input": "ab",
+        "load": {
+          "mode": "STREAMING_INSERTS",
+          "retry": true
+        },
+        "name": "Snowplow BigQuery Storage",
+        "projectId": "my-gcp-project",
+        "purpose": "ENRICHED_EVENTS",
+        "tableId": "my-bigquery-table",
+        "typesSubscription": "my-types-subscription",
+        "typesTopic": "my-types-topic"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['input']:\n    {'description': 'Google PubSub subscription name with enriched TSV '\n                    'data',\n     'maxLength': 255,\n     'minLength': 3,\n     'type': 'string'}\n\nOn instance['input']:\n    'a'",
+      "data": {
+        "badRows": "my-bad-rows-topic",
+        "datasetId": "my-bigquery-dataset",
+        "failedInserts": "my-failed-inserts-topic",
+        "id": "123e4567-e89b-12d3-a456-426655440000",
+        "input": "a",
+        "load": {
+          "mode": "STREAMING_INSERTS",
+          "retry": true
+        },
+        "name": "Snowplow BigQuery Storage",
+        "projectId": "my-gcp-project",
+        "purpose": "ENRICHED_EVENTS",
+        "tableId": "my-bigquery-table",
+        "typesSubscription": "my-types-subscription",
+        "typesTopic": "my-types-topic"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['input']:\n    {'description': 'Google PubSub subscription name with enriched TSV '\n                    'data',\n     'maxLength': 255,\n     'minLength': 3,\n     'type': 'string'}\n\nOn instance['input']:\n    'a'",
+      "data": {
+        "badRows": "my-bad-rows-topic",
+        "datasetId": "my-bigquery-dataset",
+        "failedInserts": "my-failed-inserts-topic",
+        "id": "123e4567-e89b-12d3-a456-426655440000",
+        "input": "a",
+        "load": {
+          "mode": "STREAMING_INSERTS",
+          "retry": true
+        },
+        "name": "Snowplow BigQuery Storage",
+        "projectId": "my-gcp-project",
+        "purpose": "ENRICHED_EVENTS",
+        "tableId": "my-bigquery-table",
+        "typesSubscription": "my-types-subscription",
+        "typesTopic": "my-types-topic"
+      }
+    }
+  ]
+}

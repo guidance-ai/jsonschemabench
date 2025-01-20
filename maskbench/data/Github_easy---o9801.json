@@ -1,0 +1,184 @@
+{
+  "description": "sample Github_easy/o9801.json",
+  "meta": {
+    "full_size": 389,
+    "stripped_size": 389,
+    "features": [
+      "additionalProperties",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "patternProperties": {
+      "^[0-9a-zA-Z_-]{1,255}$": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "number",
+              "string",
+              "boolean"
+            ]
+          },
+          "time": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "$date": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "$date"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "key1": {
+          "value": 123,
+          "time": "2022-01-01T12:00:00.000Z"
+        },
+        "key2": {
+          "value": "hello",
+          "time": 1643723400
+        },
+        "key3": {
+          "value": true,
+          "time": {
+            "$date": "2022-01-01T12:00:00.000Z"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "key1": {
+          "value": 123,
+          "time": "2022-01-01T00:00:00Z"
+        },
+        "key2": {
+          "value": "hello",
+          "time": 1643723400
+        },
+        "key3": {
+          "value": true,
+          "time": {
+            "$date": "2022-01-01T00:00:00.000Z"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!@#$' was unexpected)",
+      "python_error": "'!@#$' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': 'object',\n                                                      'properties': {'value': {'type': ['number',\n                                                                                        'string',\n                                                                                        'boolean']},\n                                                                     'time': {'oneOf': [{'type': 'string'},\n                                                                                        {'type': 'number'},\n                                                                                        {'type': 'object',\n                                                                                         'properties': {'$date': {'type': 'string'.. (543 more)",
+      "data": {
+        "key1": {
+          "value": 123,
+          "time": "2022-01-01T00:00:00Z"
+        },
+        "key2": {
+          "value": "hello",
+          "time": 1643723400
+        },
+        "key3": {
+          "value": true,
+          "time": {
+            "$date": "2022-01-01T00:00:00.000Z"
+          }
+        },
+        "!@#$": {
+          "value": 456,
+          "time": "2022-01-02T00:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of types \"boolean\", \"number\", \"string\"",
+      "python_error": "None is not of type 'number', 'string', 'boolean'\n\nFailed validating 'type' in schema['patternProperties']['^[0-9a-zA-Z_-]{1,255}$']['properties']['value']:\n    {'type': ['number', 'string', 'boolean']}\n\nOn instance['key1']['value']:\n    None",
+      "data": {
+        "key1": {
+          "value": null,
+          "time": "2022-01-01T00:00:00Z"
+        },
+        "key2": {
+          "value": "hello",
+          "time": 1643723400
+        },
+        "key3": {
+          "value": true,
+          "time": {
+            "$date": "2022-01-01T00:00:00.000Z"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"$date\":\"2022-01-01T00:00:00.000Z\",\"extraKey\":\"extraValue\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not of type 'number', 'string', 'boolean'\n\nFailed validating 'type' in schema['patternProperties']['^[0-9a-zA-Z_-]{1,255}$']['properties']['value']:\n    {'type': ['number', 'string', 'boolean']}\n\nOn instance['key4']['value']:\n    None",
+      "data": {
+        "key1": {
+          "value": 123,
+          "time": "2022-01-01T00:00:00Z",
+          "extraKey": "extraValue"
+        },
+        "key2": {
+          "value": "hello",
+          "time": 1643723400,
+          "extraKey": "extraValue"
+        },
+        "key3": {
+          "value": true,
+          "time": {
+            "$date": "2022-01-01T00:00:00.000Z",
+            "extraKey": "extraValue"
+          }
+        },
+        "key4": {
+          "value": null,
+          "time": "2022-01-01T00:00:00Z"
+        }
+      }
+    }
+  ]
+}

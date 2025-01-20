@@ -1,0 +1,241 @@
+{
+  "description": "sample Github_medium/o79016.json",
+  "meta": {
+    "full_size": 2249,
+    "stripped_size": 918,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "const",
+      "enum",
+      "not",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "AMQP 0-9-1 Channel Binding Object",
+    "description": "This object contains information about the channel representation in AMQP.\nSee https://github.com/asyncapi/bindings/tree/master/amqp#channel-binding-object.",
+    "type": "object",
+    "properties": {
+      "is": {
+        "description": "Defines what type of channel is it. Can be either `queue` or `routingKey` (default).",
+        "type": "string",
+        "enum": [
+          "routingKey",
+          "queue"
+        ],
+        "default": "routingKey"
+      },
+      "exchange": {
+        "$ref": "#/definitions/exchange"
+      },
+      "queue": {
+        "$ref": "#/definitions/queue"
+      },
+      "bindingVersion": {
+        "description": "The version of this binding. If omitted, \"latest\" MUST be assumed.",
+        "type": "string",
+        "enum": [
+          "0.1.0",
+          "latest"
+        ]
+      }
+    },
+    "allOf": [
+      {
+        "description": "Queue and exchange are mutually exclusive.",
+        "not": {
+          "required": [
+            "queue",
+            "exchange"
+          ]
+        }
+      }
+    ],
+    "oneOf": [
+      {
+        "properties": {
+          "is": {
+            "const": "queue"
+          }
+        },
+        "required": [
+          "queue"
+        ]
+      },
+      {
+        "properties": {
+          "is": {
+            "const": "routingKey"
+          }
+        },
+        "required": [
+          "exchange"
+        ]
+      }
+    ],
+    "additionalProperties": false,
+    "definitions": {
+      "exchange": {
+        "description": "When `is`=`routingKey`, this object defines the exchange properties.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the exchange. It MUST NOT exceed 255 characters long.",
+            "type": "string",
+            "maxLength": 255
+          },
+          "type": {
+            "description": "The type of the exchange. Can be either `topic`, `direct`, `fanout`, `default` or `headers`.",
+            "type": "string",
+            "enum": [
+              "topic",
+              "direct",
+              "fanout",
+              "default",
+              "headers"
+            ]
+          },
+          "durable": {
+            "description": "Whether the exchange should survive broker restarts or not.",
+            "type": "boolean"
+          },
+          "autoDelete": {
+            "description": "Whether the exchange should be deleted when the last queue is unbound from it.",
+            "type": "boolean"
+          }
+        }
+      },
+      "queue": {
+        "description": "When `is`=`queue`, this object defines the queue properties.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the queue. It MUST NOT exceed 255 characters long.",
+            "type": "string",
+            "maxLength": 255
+          },
+          "durable": {
+            "description": "Whether the queue should survive broker restarts or not.",
+            "type": "boolean"
+          },
+          "exclusive": {
+            "description": "Whether the queue should be used only by one connection or not.",
+            "type": "boolean"
+          },
+          "autoDelete": {
+            "description": "Whether the queue should be deleted when the last consumer unsubscribes.",
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "is": "routingKey",
+        "bindingVersion": "latest",
+        "exchange": {
+          "name": "my_exchange",
+          "type": "topic",
+          "durable": true,
+          "autoDelete": false
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "is": "routingKey",
+        "exchange": {
+          "name": "my_exchange",
+          "type": "topic",
+          "durable": true,
+          "autoDelete": false
+        },
+        "bindingVersion": "latest"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"required\":[\"queue\",\"exchange\"]} is not allowed for {\"is\":\"routingKey\",\"exchange\":{\"name\":\"my_exchange\",\"type\":\"topic\",\"durable\":true,\"autoDelete\":false},\"queue\":{\"name\":\"my_queue\",\"durable\":true,\"exclusive\":false,\"autoDelete\":false},\"bindingVersion\":\"latest\"}",
+      "python_error": "{'is': 'routingKey', 'exchange': {'name': 'my_exchange', 'type': 'topic', 'durable': True, 'autoDelete': False}, 'queue': {'name': 'my_queue', 'durable': True, 'exclusive': False, 'autoDelete': False}, 'bindingVersion': 'latest'} should not be valid under {'required': ['queue', 'exchange']}\n\nFailed validating 'not' in schema['allOf'][0]:\n    {'description': 'Queue and exchange are mutually exclusive.',\n     'not': {'required': ['queue', 'exchange']}}\n\nOn instance:\n    {'is': 'routingKey',\n     'exchange': {'name': 'my_exchange',\n                  'type': 'topic',\n                  'durable': True,\n                  'autoDelete': False},\n     'queue': {'name': 'my_queue',\n               'durable': True,\n               'exclusive': False,\n               'autoDelete': False},\n     'bindingVersion': 'latest'}",
+      "data": {
+        "is": "routingKey",
+        "exchange": {
+          "name": "my_exchange",
+          "type": "topic",
+          "durable": true,
+          "autoDelete": false
+        },
+        "queue": {
+          "name": "my_queue",
+          "durable": true,
+          "exclusive": false,
+          "autoDelete": false
+        },
+        "bindingVersion": "latest"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"is\":\"queue\",\"exchange\":{\"name\":\"my_exchange\",\"type\":\"topic\",\"durable\":true,\"autoDelete\":false},\"bindingVersion\":\"latest\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'routingKey' was expected\n\nFailed validating 'const' in schema[1]['properties']['is']:\n    {'const': 'routingKey'}\n\nOn instance['is']:\n    'queue'",
+      "data": {
+        "is": "queue",
+        "exchange": {
+          "name": "my_exchange",
+          "type": "topic",
+          "durable": true,
+          "autoDelete": false
+        },
+        "bindingVersion": "latest"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"required\":[\"queue\",\"exchange\"]} is not allowed for {\"is\":\"routingKey\",\"queue\":{\"name\":\"my_queue\",\"durable\":true,\"exclusive\":false,\"autoDelete\":false},\"exchange\":{\"name\":\"my_exchange\",\"type\":\"topic\",\"durable\":true,\"autoDelete\":false},\"bindingVersion\":\"latest\",\"extraProperty\":\"extraValue\"}",
+      "python_error": "{'is': 'routingKey', 'queue': {'name': 'my_queue', 'durable': True, 'exclusive': False, 'autoDelete': False}, 'exchange': {'name': 'my_exchange', 'type': 'topic', 'durable': True, 'autoDelete': False}, 'bindingVersion': 'latest', 'extraProperty': 'extraValue'} should not be valid under {'required': ['queue', 'exchange']}\n\nFailed validating 'not' in schema['allOf'][0]:\n    {'description': 'Queue and exchange are mutually exclusive.',\n     'not': {'required': ['queue', 'exchange']}}\n\nOn instance:\n    {'is': 'routingKey',\n     'queue': {'name': 'my_queue',\n               'durable': True,\n               'exclusive': False,\n               'autoDelete': False},\n     'exchange': {'name': 'my_exchange',\n                  'type': 'topic',\n                  'durable': True,\n                  'autoDelete': False},\n     'bindingVersion': 'latest',\n     'extraProperty': 'extraValue'}",
+      "data": {
+        "is": "routingKey",
+        "queue": {
+          "name": "my_queue",
+          "durable": true,
+          "exclusive": false,
+          "autoDelete": false
+        },
+        "exchange": {
+          "name": "my_exchange",
+          "type": "topic",
+          "durable": true,
+          "autoDelete": false
+        },
+        "bindingVersion": "latest",
+        "extraProperty": "extraValue"
+      }
+    }
+  ]
+}

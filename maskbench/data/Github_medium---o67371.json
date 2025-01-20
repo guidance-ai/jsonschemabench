@@ -1,0 +1,720 @@
+{
+  "description": "sample Github_medium/o67371.json",
+  "meta": {
+    "full_size": 1657,
+    "stripped_size": 1595,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "format",
+      "format:host-name",
+      "format:ipv4",
+      "format:ipv6",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maximum",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "entry": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "definitions": {
+          "diskDevice": {
+            "additionalProperties": false,
+            "properties": {
+              "device": {
+                "pattern": "^/dev/[^/]+(/[^/]+)*$",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "disk"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "device"
+            ]
+          },
+          "diskUUID": {
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "disk"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "label"
+            ]
+          },
+          "nfs": {
+            "additionalProperties": false,
+            "properties": {
+              "remotePath": {
+                "pattern": "^(/[^/]+)+$",
+                "type": "string"
+              },
+              "server": {
+                "anyOf": [
+                  {
+                    "format": "host-name"
+                  },
+                  {
+                    "format": "ipv4"
+                  },
+                  {
+                    "format": "ipv6"
+                  }
+                ],
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "nfs"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "server",
+              "remotePath"
+            ]
+          },
+          "tmpfs": {
+            "additionalProperties": false,
+            "properties": {
+              "sizeInMB": {
+                "maximum": 512,
+                "minimum": 16,
+                "type": "integer"
+              },
+              "type": {
+                "enum": [
+                  "tmpfs"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "sizeInMB"
+            ]
+          }
+        },
+        "description": "schema for an fstab entry",
+        "properties": {
+          "fstype": {
+            "enum": [
+              "ext3",
+              "ext4",
+              "btrfs"
+            ]
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "_uniqueItems": true
+          },
+          "readonly": {
+            "type": "boolean"
+          },
+          "storage": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/entry/definitions/diskDevice"
+              },
+              {
+                "$ref": "#/definitions/entry/definitions/diskUUID"
+              },
+              {
+                "$ref": "#/definitions/entry/definitions/nfs"
+              },
+              {
+                "$ref": "#/definitions/entry/definitions/tmpfs"
+              }
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "storage"
+        ],
+        "type": "object"
+      }
+    },
+    "patternProperties": {
+      "^(/[^/]+)+$": {
+        "$ref": "#/definitions/entry"
+      }
+    },
+    "properties": {
+      "/": {
+        "$ref": "#/definitions/entry"
+      }
+    },
+    "required": [
+      "/"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "192.168.1.100",
+            "remotePath": "/mnt/data"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 256
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"nfs\",\"server\":\"192.168.1.100\",\"remotePath\":\".\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'.' does not match '^(/[^/]+)+$'\n\nFailed validating 'pattern' in schema[2]['properties']['remotePath']:\n    {'pattern': '^(/[^/]+)+$', 'type': 'string'}\n\nOn instance['remotePath']:\n    '.'",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "192.168.1.100",
+            "remotePath": "."
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 256
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"disk\",\"device\":\"/dev/sda1\",\"label\":\"12345678-1234-1234-1234-123456789012\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'disk', 'device': '/dev/sda1', 'label': '12345678-1234-1234-1234-123456789012'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['/']['properties']['storage']:\n    {'oneOf': [{'$ref': '#/definitions/entry/definitions/diskDevice'},\n               {'$ref': '#/definitions/entry/definitions/diskUUID'},\n               {'$ref': '#/definitions/entry/definitions/nfs'},\n               {'$ref': '#/definitions/entry/definitions/tmpfs'}],\n     'type': 'object'}\n\nOn instance['/']['storage']:\n    {'type': 'disk',\n     'device': '/dev/sda1',\n     'label': '12345678-1234-1234-1234-123456789012'}",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "192.168.1.100",
+            "remotePath": "/mnt/data"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 256
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"tmpfs\",\"sizeInMB\":512.5} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'tmpfs', 'sizeInMB': 512.5} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['patternProperties']['^(/[^/]+)+$']['properties']['storage']:\n    {'oneOf': [{'$ref': '#/definitions/entry/definitions/diskDevice'},\n               {'$ref': '#/definitions/entry/definitions/diskUUID'},\n               {'$ref': '#/definitions/entry/definitions/nfs'},\n               {'$ref': '#/definitions/entry/definitions/tmpfs'}],\n     'type': 'object'}\n\nOn instance['/tmp']['storage']:\n    {'type': 'tmpfs', 'sizeInMB': 512.5}",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "192.168.1.100",
+            "remotePath": "/mnt/data"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 512.5
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed (' invalid-key' was unexpected)",
+      "python_error": "' invalid-key' does not match any of the regexes: '^(/[^/]+)+$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'definitions': {'entry': {'$schema': 'http://json-schema.org/draft-04/schema#',\n                               'definitions': {'diskDevice': {'additionalProperties': False,\n                                                              'properties': {'device': {'pattern': '^/dev/[^/]+(/[^/]+)*$',\n                                                                                        'type': 'string'},\n                                                                             'type': {'enum': ['disk']}},\n                                                              'required': ['type',\n                                                                           'device']},\n                                               'diskUUID': {'additionalProperties': False,\n                                    .. (4900 more)",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "192.168.1.100",
+            "remotePath": "/mnt/data"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 256
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        },
+        " invalid-key": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['/']['properties']['options']:\n    {'items': {'type': 'string'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['/']['options']:\n    []",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "192.168.1.100",
+            "remotePath": "/mnt/data"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 256
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"nfs\",\"server\":\"256.1.1.1\",\"Invalid IPv4 address\":\"remotePath\",\"/mnt/data\":\"remotePath\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'nfs', 'server': '256.1.1.1', 'Invalid IPv4 address': 'remotePath', '/mnt/data': 'remotePath'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['patternProperties']['^(/[^/]+)+$']['properties']['storage']:\n    {'oneOf': [{'$ref': '#/definitions/entry/definitions/diskDevice'},\n               {'$ref': '#/definitions/entry/definitions/diskUUID'},\n               {'$ref': '#/definitions/entry/definitions/nfs'},\n               {'$ref': '#/definitions/entry/definitions/tmpfs'}],\n     'type': 'object'}\n\nOn instance['/mnt/data']['storage']:\n    {'type': 'nfs',\n     'server': '256.1.1.1',\n     'Invalid IPv4 address': 'remotePath',\n     '/mnt/data': 'remotePath'}",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "256.1.1.1",
+            "Invalid IPv4 address": "remotePath",
+            "/mnt/data": "remotePath"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 256
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"nfs\",\"server\":\"!@#$%^&*()\",\"<--- invalid server address to detect bug in validator\":\"remotePath: /mnt/data\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'nfs', 'server': '!@#$%^&*()', '<--- invalid server address to detect bug in validator': 'remotePath: /mnt/data'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['patternProperties']['^(/[^/]+)+$']['properties']['storage']:\n    {'oneOf': [{'$ref': '#/definitions/entry/definitions/diskDevice'},\n               {'$ref': '#/definitions/entry/definitions/diskUUID'},\n               {'$ref': '#/definitions/entry/definitions/nfs'},\n               {'$ref': '#/definitions/entry/definitions/tmpfs'}],\n     'type': 'object'}\n\nOn instance['/mnt/data']['storage']:\n    {'type': 'nfs',\n     'server': '!@#$%^&*()',\n     '<--- invalid server address to detect bug in validator': 'remotePath: '\n                                                               '/mnt/data'}",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "!@#$%^&*()",
+            "<--- invalid server address to detect bug in validator": "remotePath: /mnt/data"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 256
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-123456789012"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"nfs\",\"server\":\"192.168.1.100\",\"remotePath\":\"/\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "1024 is greater than the maximum of 512\n\nFailed validating 'maximum' in schema[3]['properties']['sizeInMB']:\n    {'maximum': 512, 'minimum': 16, 'type': 'integer'}\n\nOn instance['sizeInMB']:\n    1024",
+      "data": {
+        "/": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noatime",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "device": "/dev/sda1"
+          }
+        },
+        "/mnt/data": {
+          "fstype": "ext3",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "nfs",
+            "server": "192.168.1.100",
+            "remotePath": "/"
+          }
+        },
+        "/tmp": {
+          "fstype": "btrfs",
+          "options": [
+            "defaults",
+            "noatime"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "tmpfs",
+            "sizeInMB": 1024
+          }
+        },
+        "/boot": {
+          "fstype": "ext4",
+          "options": [
+            "defaults",
+            "noexec"
+          ],
+          "readonly": false,
+          "storage": {
+            "type": "disk",
+            "label": "12345678-1234-1234-1234-12345678901"
+          }
+        }
+      }
+    }
+  ]
+}

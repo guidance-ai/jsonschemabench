@@ -1,0 +1,335 @@
+{
+  "description": "sample Github_easy/o79782.json",
+  "meta": {
+    "full_size": 693,
+    "stripped_size": 434,
+    "features": [
+      "@minmaxLength",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://jvm-bloggers.com/",
+    "type": "object",
+    "properties": {
+      "bloggers": {
+        "type": "array",
+        "_uniqueItems": true,
+        "description": "An array of bloggers' data",
+        "items": {
+          "type": "object",
+          "properties": {
+            "bookmarkableId": {
+              "type": "string",
+              "description": "The unique identifier of the blogger within the file"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Blogger name"
+            },
+            "rss": {
+              "type": "string",
+              "pattern": "^https?://[^ ]+$",
+              "description": "Valid URL to the blogger's RSS feed"
+            },
+            "twitter": {
+              "type": "string",
+              "pattern": "^@(\\w){1,15}$",
+              "description": "Optional blogger's twitter id"
+            }
+          },
+          "required": [
+            "bookmarkableId",
+            "name",
+            "rss"
+          ]
+        }
+      }
+    },
+    "required": [
+      "bloggers"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "John Doe",
+            "rss": "https://example.com/johndoe/rss",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Doe",
+            "rss": "http://example.com/janedoe/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Smith",
+            "rss": "https://example.com/bobsmith/rss",
+            "twitter": "@bobsmith"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"J\" is shorter than 2 characters",
+      "python_error": "'J' is too short\n\nFailed validating 'minLength' in schema['properties']['bloggers']['items']['properties']['name']:\n    {'type': 'string', 'minLength': 2, 'description': 'Blogger name'}\n\nOn instance['bloggers'][0]['name']:\n    'J'",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "J",
+            "rss": "https://example.com/johndoe/rss",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Doe",
+            "rss": "http://example.com/janedoe/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Smith",
+            "rss": "https://example.com/bobsmith/rss",
+            "twitter": "@bobsmith"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid url\" does not match \"^https?://[^ ]+$\"",
+      "python_error": "'@bobsmith1234567890123456' does not match '^@(\\\\w){1,15}$'\n\nFailed validating 'pattern' in schema['properties']['bloggers']['items']['properties']['twitter']:\n    {'type': 'string',\n     'pattern': '^@(\\\\w){1,15}$',\n     'description': \"Optional blogger's twitter id\"}\n\nOn instance['bloggers'][2]['twitter']:\n    '@bobsmith1234567890123456'",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "John Doe",
+            "rss": "invalid url",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Doe",
+            "rss": "http://example.com/janedoe/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Smith",
+            "rss": "https://example.com/bobsmith/rss",
+            "twitter": "@bobsmith1234567890123456"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"https://example.com/johndoe/rss invalid\" does not match \"^https?://[^ ]+$\"",
+      "python_error": "'https://example.com/johndoe/rss invalid' does not match '^https?://[^ ]+$'\n\nFailed validating 'pattern' in schema['properties']['bloggers']['items']['properties']['rss']:\n    {'type': 'string',\n     'pattern': '^https?://[^ ]+$',\n     'description': \"Valid URL to the blogger's RSS feed\"}\n\nOn instance['bloggers'][0]['rss']:\n    'https://example.com/johndoe/rss invalid'",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "John Doe",
+            "rss": "https://example.com/johndoe/rss invalid",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Doe",
+            "rss": "http://example.com/janedoe/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Smith",
+            "rss": "https://example.com/bobsmith/rss",
+            "twitter": "@bobsmith"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 2 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['bloggers']['items']['properties']['name']:\n    {'type': 'string', 'minLength': 2, 'description': 'Blogger name'}\n\nOn instance['bloggers'][0]['name']:\n    'a'",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "a",
+            "rss": "https://example.com/johndoe/rss",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Doe",
+            "rss": "http://example.com/janedoe/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Smith",
+            "rss": "https://example.com/bobsmith/rss",
+            "twitter": "@bobsmith"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"https://example.com/johndoe/rss \" does not match \"^https?://[^ ]+$\"",
+      "python_error": "'https://example.com/johndoe/rss ' does not match '^https?://[^ ]+$'\n\nFailed validating 'pattern' in schema['properties']['bloggers']['items']['properties']['rss']:\n    {'type': 'string',\n     'pattern': '^https?://[^ ]+$',\n     'description': \"Valid URL to the blogger's RSS feed\"}\n\nOn instance['bloggers'][0]['rss']:\n    'https://example.com/johndoe/rss '",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "John Doe",
+            "rss": "https://example.com/johndoe/rss ",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Doe",
+            "rss": "http://example.com/janedoe/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Smith",
+            "rss": "https://example.com/bobsmith/rss",
+            "twitter": "@bobsmith"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "John Doe",
+            "rss": "https://example.com/johndoe/rss",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Smith",
+            "rss": "http://example.com/janesmith/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Johnson",
+            "rss": "https://example.com/bobjohnson/rss",
+            "twitter": "@bobjohnson"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid rss\" does not match \"^https?://[^ ]+$\"",
+      "python_error": "'invalid rss' does not match '^https?://[^ ]+$'\n\nFailed validating 'pattern' in schema['properties']['bloggers']['items']['properties']['rss']:\n    {'type': 'string',\n     'pattern': '^https?://[^ ]+$',\n     'description': \"Valid URL to the blogger's RSS feed\"}\n\nOn instance['bloggers'][0]['rss']:\n    'invalid rss'",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "John Doe",
+            "rss": "invalid rss",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Smith",
+            "rss": "http://example.com/janesmith/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Johnson",
+            "rss": "https://example.com/bobjohnson/rss",
+            "twitter": "@bobjohnson"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 2 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['bloggers']['items']['properties']['name']:\n    {'type': 'string', 'minLength': 2, 'description': 'Blogger name'}\n\nOn instance['bloggers'][0]['name']:\n    'a'",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "a",
+            "rss": "https://example.com/johndoe/rss",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Smith",
+            "rss": "http://example.com/janesmith/rss"
+          },
+          {
+            "bookmarkableId": "blogger3",
+            "name": "Bob Johnson",
+            "rss": "https://example.com/bobjohnson/rss",
+            "twitter": "@bobjohnson"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 2 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['bloggers']['items']['properties']['name']:\n    {'type': 'string', 'minLength': 2, 'description': 'Blogger name'}\n\nOn instance['bloggers'][0]['name']:\n    'a'",
+      "data": {
+        "bloggers": [
+          {
+            "bookmarkableId": "blogger1",
+            "name": "a",
+            "rss": "https://example.com/johndoe/rss",
+            "twitter": "@johndoe"
+          },
+          {
+            "bookmarkableId": "blogger2",
+            "name": "Jane Smith",
+            "rss": "http://example.com/janesmith/rss"
+          },
+          {
+            "bookmarkableId": "blogger1",
+            "name": "Bob Johnson",
+            "rss": "https://example.com/bobjohnson/rss",
+            "twitter": "@bobjohnson"
+          }
+        ]
+      }
+    }
+  ]
+}

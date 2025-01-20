@@ -1,0 +1,166 @@
+{
+  "description": "sample Github_medium/o44203.json",
+  "meta": {
+    "full_size": 1257,
+    "stripped_size": 502,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "enum",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "timestamp": {
+        "description": "the number of seconds since the Unix epoch",
+        "type": "string",
+        "minLength": 10,
+        "maxLength": 10,
+        "pattern": "[0-9]{10,10}"
+      },
+      "status": {
+        "description": "represents the overall status of all messages from the analysis results",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/lgtm"
+          },
+          {
+            "$ref": "#/definitions/fyi"
+          },
+          {
+            "$ref": "#/definitions/nmw"
+          }
+        ]
+      },
+      "url": {
+        "description": "a publicly readable file, which contains JSON formatted analysis results. Those results should conform to the JSON format of the ShipshapeResponse protocol buffer message defined https://github.com/google/shipshape/blob/master/shipshape/proto/shipshape_rpc.proto",
+        "type": "string"
+      },
+      "v": {
+        "type": "integer",
+        "enum": [
+          0
+        ]
+      }
+    },
+    "required": [
+      "timestamp",
+      "url"
+    ],
+    "definitions": {
+      "lgtm": {
+        "title": "Looks Good To Me",
+        "description": "indicates the analysis produced no messages",
+        "type": "string",
+        "enum": [
+          "lgtm"
+        ]
+      },
+      "fyi": {
+        "title": "For your information",
+        "description": "indicates the analysis produced some messages, but none of them indicate errors",
+        "type": "string",
+        "enum": [
+          "fyi"
+        ]
+      },
+      "nmw": {
+        "title": "Needs more work",
+        "description": "indicates the analysis produced at least one message indicating an error",
+        "type": "string",
+        "enum": [
+          "nmw"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "timestamp": "1643723400",
+        "status": "lgtm",
+        "url": "https://example.com/analysis-results.json",
+        "v": 0
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "timestamp": "1643723400",
+        "status": "lgtm",
+        "url": "https://example.com/analysis_results.json",
+        "v": 0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"164372340a\" does not match \"[0-9]{10,10}\"",
+      "python_error": "'164372340a' does not match '[0-9]{10,10}'\n\nFailed validating 'pattern' in schema['properties']['timestamp']:\n    {'description': 'the number of seconds since the Unix epoch',\n     'type': 'string',\n     'minLength': 10,\n     'maxLength': 10,\n     'pattern': '[0-9]{10,10}'}\n\nOn instance['timestamp']:\n    '164372340a'",
+      "data": {
+        "timestamp": "164372340a",
+        "status": "lgtm",
+        "url": "https://example.com/analysis_results.json",
+        "v": 0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "[\"lgtm\",\"fyi\"] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "['lgtm', 'fyi'] is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['status']:\n    {'description': 'represents the overall status of all messages from '\n                    'the analysis results',\n     'oneOf': [{'$ref': '#/definitions/lgtm'},\n               {'$ref': '#/definitions/fyi'},\n               {'$ref': '#/definitions/nmw'}]}\n\nOn instance['status']:\n    ['lgtm', 'fyi']",
+      "data": {
+        "timestamp": "1643723400",
+        "status": [
+          "lgtm",
+          "fyi"
+        ],
+        "url": "https://example.com/analysis_results.json",
+        "v": 0
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"16437234\" is shorter than 10 characters",
+      "python_error": "'16437234' is too short\n\nFailed validating 'minLength' in schema['properties']['timestamp']:\n    {'description': 'the number of seconds since the Unix epoch',\n     'type': 'string',\n     'minLength': 10,\n     'maxLength': 10,\n     'pattern': '[0-9]{10,10}'}\n\nOn instance['timestamp']:\n    '16437234'",
+      "data": {
+        "timestamp": "16437234",
+        "status": "lgtm",
+        "url": "https://example.com/analysis_results.json",
+        "v": 0
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"16437234\" is shorter than 10 characters",
+      "python_error": "'16437234' is too short\n\nFailed validating 'minLength' in schema['properties']['timestamp']:\n    {'description': 'the number of seconds since the Unix epoch',\n     'type': 'string',\n     'minLength': 10,\n     'maxLength': 10,\n     'pattern': '[0-9]{10,10}'}\n\nOn instance['timestamp']:\n    '16437234'",
+      "data": {
+        "timestamp": "16437234",
+        "status": "lgtm",
+        "url": "https://example.com/analysis_results.json",
+        "v": 0
+      }
+    }
+  ]
+}

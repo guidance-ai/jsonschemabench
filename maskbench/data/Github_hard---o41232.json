@@ -1,0 +1,273 @@
+{
+  "description": "sample Github_hard/o41232.json",
+  "meta": {
+    "full_size": 978,
+    "stripped_size": 805,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "@minmaxNumber",
+      "enum",
+      "multipleOf",
+      "multipleOf:10",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "exclusiveMaximum",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "required": [
+      "config",
+      "inputs"
+    ],
+    "type": "object",
+    "properties": {
+      "inputs": {
+        "required": [
+          "dicom",
+          "file"
+        ],
+        "type": "object",
+        "properties": {
+          "dicom": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "dicom"
+                ]
+              }
+            }
+          },
+          "file": {
+            "type": "object",
+            "properties": {}
+          },
+          "text": {
+            "type": "object",
+            "properties": {
+              "size": {
+                "maximum": 100000
+              },
+              "name": {
+                "pattern": "^.*.txt$"
+              }
+            }
+          }
+        }
+      },
+      "config": {
+        "required": [
+          "multiple",
+          "string",
+          "number",
+          "phone",
+          "boolean",
+          "integer",
+          "string2"
+        ],
+        "type": "object",
+        "properties": {
+          "multiple": {
+            "exclusiveMaximum": 100,
+            "default": 20,
+            "multipleOf": 10,
+            "type": "number"
+          },
+          "string": {
+            "default": "Example",
+            "type": "string"
+          },
+          "number": {
+            "default": 3.5,
+            "type": "number"
+          },
+          "phone": {
+            "default": "555-5555",
+            "pattern": "^[0-9]{3}-[0-9]{4}$",
+            "type": "string"
+          },
+          "boolean": {
+            "default": true,
+            "type": "boolean"
+          },
+          "integer": {
+            "default": 7,
+            "type": "integer"
+          },
+          "string2": {
+            "default": "Example 2",
+            "minLength": 2,
+            "type": "string",
+            "maxLength": 15
+          }
+        }
+      }
+    },
+    "title": "Invocation manifest for Flywheel Example Gear"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "inputs": {
+          "dicom": {
+            "type": "dicom"
+          },
+          "file": {},
+          "text": {
+            "size": 50000,
+            "name": "example.txt"
+          }
+        },
+        "config": {
+          "multiple": 30,
+          "string": "Example",
+          "number": 3.5,
+          "phone": "123-4567",
+          "boolean": true,
+          "integer": 7,
+          "string2": "Example 2"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "inputs": {
+          "dicom": {
+            "type": "dicom"
+          },
+          "file": {},
+          "text": {
+            "size": 50000,
+            "name": "example.txt"
+          }
+        },
+        "config": {
+          "multiple": 20,
+          "string": "Example",
+          "number": 3.5,
+          "phone": "555-5555",
+          "boolean": true,
+          "integer": 7,
+          "string2": "Example 2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on multipleOf keyword",
+      "valid": false,
+      "rust_error": "21 is not a multiple of 10",
+      "python_error": "21 is not a multiple of 10\n\nFailed validating 'multipleOf' in schema['properties']['config']['properties']['multiple']:\n    {'exclusiveMaximum': 100,\n     'default': 20,\n     'multipleOf': 10,\n     'type': 'number'}\n\nOn instance['config']['multiple']:\n    21",
+      "data": {
+        "inputs": {
+          "dicom": {
+            "type": "dicom"
+          },
+          "file": {},
+          "text": {
+            "size": 50000,
+            "name": "example.txt"
+          }
+        },
+        "config": {
+          "multiple": 21,
+          "string": "Example",
+          "number": 3.5,
+          "phone": "555-5555",
+          "boolean": true,
+          "integer": 7,
+          "string2": "Example 2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"example\" does not match \"^.*.txt$\"",
+      "python_error": "'1234567890' does not match '^[0-9]{3}-[0-9]{4}$'\n\nFailed validating 'pattern' in schema['properties']['config']['properties']['phone']:\n    {'default': '555-5555',\n     'pattern': '^[0-9]{3}-[0-9]{4}$',\n     'type': 'string'}\n\nOn instance['config']['phone']:\n    '1234567890'",
+      "data": {
+        "inputs": {
+          "dicom": {
+            "type": "dicom"
+          },
+          "file": {},
+          "text": {
+            "size": 50000,
+            "name": "example"
+          }
+        },
+        "config": {
+          "multiple": 20,
+          "string": "Example",
+          "number": 3.5,
+          "phone": "1234567890",
+          "boolean": true,
+          "integer": 7,
+          "string2": "Example 2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"inputs\" is a required property",
+      "python_error": "'inputs' is a required property\n\nFailed validating 'required' in schema:\n    {'$schema': 'http://json-schema.org/draft-07/schema',\n     'required': ['config', 'inputs'],\n     'type': 'object',\n     'properties': {'inputs': {'required': ['dicom', 'file'],\n                               'type': 'object',\n                               'properties': {'dicom': {'type': 'object',\n                                                        'properties': {'type': {'enum': ['dicom']}}},\n                                              'file': {'type': 'object',\n                                                       'properties': {}},\n                                              'text': {'type': 'object',\n                                                       'properties': {'size': {'maximum': 100000},\n                                                                      'name': {'pattern': '^.*.txt$'}}}}},\n                    'config': {'required': ['multiple',\n                                            'string',\n        .. (2170 more)",
+      "data": {
+        "config": {
+          "multiple": 20,
+          "string": "Example",
+          "number": 3.5,
+          "phone": "555-5555",
+          "boolean": true,
+          "integer": 7,
+          "string2": "E"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maximum keyword or exclusiveMaximum keyword",
+      "valid": false,
+      "rust_error": "100 is greater than or equal to the maximum of 100",
+      "python_error": "100 is greater than or equal to the maximum of 100\n\nFailed validating 'exclusiveMaximum' in schema['properties']['config']['properties']['multiple']:\n    {'exclusiveMaximum': 100,\n     'default': 20,\n     'multipleOf': 10,\n     'type': 'number'}\n\nOn instance['config']['multiple']:\n    100",
+      "data": {
+        "inputs": {
+          "dicom": {
+            "type": "dicom"
+          },
+          "file": {},
+          "text": {
+            "size": 50000,
+            "name": "example.txt"
+          }
+        },
+        "config": {
+          "multiple": 100,
+          "string": "Example",
+          "number": 3.5,
+          "phone": "555-5555",
+          "boolean": true,
+          "integer": 7,
+          "string2": "Example 2"
+        }
+      }
+    }
+  ]
+}

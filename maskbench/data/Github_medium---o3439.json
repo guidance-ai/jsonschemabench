@@ -1,0 +1,389 @@
+{
+  "description": "sample Github_medium/o3439.json",
+  "meta": {
+    "full_size": 3311,
+    "stripped_size": 1148,
+    "features": [
+      "$ref",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "AuthConfig": {
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          },
+          "instanceUrl": {
+            "type": "string"
+          },
+          "oAuthHost": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "description": "If using `sfdx-cli` auth, this is the only property needed to authenticate.\nOtherwise, supply additional oAuth parameters",
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "FieldMapping": {
+        "properties": {
+          "apiName": {
+            "description": "The Target SObject API name",
+            "type": "string"
+          },
+          "propName": {
+            "description": "The generated class property name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "apiName",
+          "propName"
+        ],
+        "type": "object"
+      },
+      "SObjectConfig": {
+        "description": "Object used to configure advanced settings on SObject generation",
+        "properties": {
+          "apiName": {
+            "description": "The Target SObject API name",
+            "type": "string"
+          },
+          "autoConvertNames": {
+            "description": "Defaulted to true.  If set to false, names will NOT be auto-coverted to standard javascript conventions",
+            "type": "boolean"
+          },
+          "className": {
+            "description": "The generated class name.  If not set, it will be automatically\nconverted to standard javascript Class convention",
+            "type": "string"
+          },
+          "enforcePicklistValues": {
+            "description": "*Overrides Global Setting*\nThe path to generate files to.\n   If the destination is a folder, it will generate one file per object.\n   If the destination is a `.ts` file, a single file will be generated.\n   If not set, class output will be logged to `stdout`",
+            "enum": [
+              "ALL",
+              "RESTRICTED",
+              false
+            ]
+          },
+          "fieldMappings": {
+            "description": "List of field mappings to override the auto-conversion",
+            "items": {
+              "$ref": "#/definitions/FieldMapping"
+            },
+            "type": "array"
+          },
+          "generatePicklists": {
+            "description": "*Overrides Global Setting*\nMake picklist fields strongly typed to generated enums. `generatePicklists` must also be `true`\n  `ALL`: for all picklist fields, regardless of salesforce enforcement\n  `RESTRICTED`: only on fields where the values are restricted on Salesforce",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "apiName"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "auth": {
+        "$ref": "#/definitions/AuthConfig",
+        "description": "Authentication Method.  Choose one of three:\n- You can either username/password oAuth configuration\n- sfdx configuration (`username` only)\n- `accessToken` & `instanceUrl`\nSee readme for examples."
+      },
+      "enforcePicklistValues": {
+        "description": "Make picklist fields strongly typed to generated enums. `generatePicklists` must also be `true`\n  `ALL`: for all picklist fields, regardless of salesforce enforcement\n  `RESTRICTED`: only on fields where the values are restricted on Salesforce",
+        "enum": [
+          "ALL",
+          "RESTRICTED",
+          false
+        ]
+      },
+      "generatePicklists": {
+        "description": "Flag to generate enums for picklist fields.  Defaulted to false",
+        "type": "boolean"
+      },
+      "outPath": {
+        "description": "The path to generate files to.\n   If the destination is a folder, it will generate one file per object.\n   If the destination is a `.ts` file, a single file will be generated.\n   If not set, class output will be logged to `stdout`",
+        "type": "string"
+      },
+      "sObjects": {
+        "description": "The SObjects to generate classes for.  Can either be a string or an `SObjectConfig` object",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SObjectConfig"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "type": "array"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "auth": {
+          "username": "your_username",
+          "clientId ": "your_client_id",
+          "clientSecret ": "your_client_secret",
+          "instanceUrl ": "https://your_instance_url.my.salesforce.com",
+          "oAuthHost ": "https://login.salesforce.com",
+          "password ": "your_password",
+          "version ": 53
+        },
+        "enforcePicklistValues": "ALL",
+        "generatePicklists": true,
+        "outPath": "./output",
+        "sObjects": [
+          {
+            "apiName": "Account",
+            "autoConvertNames": true,
+            "className": "MyAccount",
+            "enforcePicklistValues": "RESTRICTED",
+            "fieldMappings": [
+              {
+                "apiName": "Name",
+                "propName": "myName"
+              }
+            ],
+            "generatePicklists": true
+          },
+          "Contact"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "12345 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "12345 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['sObjects']['items']:\n    {'anyOf': [{'$ref': '#/definitions/SObjectConfig'}, {'type': 'string'}]}\n\nOn instance['sObjects'][1]:\n    12345",
+      "data": {
+        "auth": {
+          "username": "your_username",
+          "clientId ": "your_client_id",
+          "clientSecret ": "your_client_secret",
+          "instanceUrl ": "https://your_instance_url.my.salesforce.com",
+          "oAuthHost ": "https://login.salesforce.com",
+          "password ": "your_password",
+          "version ": 53
+        },
+        "enforcePicklistValues": "ALL",
+        "generatePicklists": true,
+        "outPath": "./output",
+        "sObjects": [
+          {
+            "apiName": "Account",
+            "autoConvertNames": true,
+            "className": "MyAccount",
+            "enforcePicklistValues": "RESTRICTED",
+            "fieldMappings": [
+              {
+                "apiName": "Name",
+                "propName": "myName"
+              }
+            ],
+            "generatePicklists": true
+          },
+          12345,
+          "Contact"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiName\":\"Account\",\"autoConvertNames\":true,\"className\":\"MyAccount\",\"enforcePicklistValues\":\"RESTRICTED\",\"fieldMappings\":[{\"apiName\":\"Name\",\"propName\":123}],\"generatePicklists\":true} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[0]['properties']['fieldMappings']['items']['properties']['propName']:\n    {'description': 'The generated class property name', 'type': 'string'}\n\nOn instance['fieldMappings'][0]['propName']:\n    123",
+      "data": {
+        "auth": {
+          "username": "your_username",
+          "clientId ": "your_client_id",
+          "clientSecret ": "your_client_secret",
+          "instanceUrl ": "https://your_instance_url.my.salesforce.com",
+          "oAuthHost ": "https://login.salesforce.com",
+          "password ": "your_password",
+          "version ": "53"
+        },
+        "enforcePicklistValues": "ALL",
+        "generatePicklists": true,
+        "outPath": "./output",
+        "sObjects": [
+          {
+            "apiName": "Account",
+            "autoConvertNames": true,
+            "className": "MyAccount",
+            "enforcePicklistValues": "RESTRICTED",
+            "fieldMappings": [
+              {
+                "apiName": "Name",
+                "propName": 123
+              }
+            ],
+            "generatePicklists": true
+          },
+          "Contact"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['sObjects']['items']:\n    {'anyOf': [{'$ref': '#/definitions/SObjectConfig'}, {'type': 'string'}]}\n\nOn instance['sObjects'][2]:\n    123",
+      "data": {
+        "auth": {
+          "username": "your_username",
+          "clientId ": "your_client_id",
+          "clientSecret ": "your_client_secret",
+          "instanceUrl ": "https://your_instance_url.my.salesforce.com",
+          "oAuthHost ": "https://login.salesforce.com",
+          "password ": "your_password",
+          "version ": 53
+        },
+        "enforcePicklistValues": "ALL",
+        "generatePicklists": true,
+        "outPath": "./output",
+        "sObjects": [
+          {
+            "apiName": "Account",
+            "autoConvertNames": true,
+            "className": "MyAccount",
+            "enforcePicklistValues": "RESTRICTED",
+            "fieldMappings": [
+              {
+                "apiName": "Name",
+                "propName": "myName"
+              }
+            ],
+            "generatePicklists": true
+          },
+          {
+            "apiName": "Contact",
+            "autoConvertNames": true,
+            "className": "MyContact",
+            "enforcePicklistValues": "RESTRICTED",
+            "fieldMappings": [
+              {
+                "apiName": "Name",
+                "propName": "myName"
+              }
+            ],
+            "generatePicklists": true
+          },
+          123
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "auth": {
+          "accessToken": "your_access_token",
+          "clientId": "your_client_id",
+          "clientSecret": "your_client_secret",
+          "instanceUrl": "https://your_instance_url.my.salesforce.com",
+          "oAuthHost": "https://login.salesforce.com",
+          "password": "your_password",
+          "username": "your_username",
+          "version": 53
+        },
+        "enforcePicklistValues": "ALL",
+        "generatePicklists": true,
+        "outPath": "./output",
+        "sObjects": [
+          {
+            "apiName": "Account",
+            "autoConvertNames": true,
+            "className": "MyAccount",
+            "enforcePicklistValues": "RESTRICTED",
+            "fieldMappings": [
+              {
+                "apiName": "Name",
+                "propName": "accountName"
+              }
+            ],
+            "generatePicklists": true
+          },
+          "Contact"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"invalidKey\":\"InvalidValue\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'apiName' is a required property\n\nFailed validating 'required' in schema[0]:\n    {'description': 'Object used to configure advanced settings on SObject '\n                    'generation',\n     'properties': {'apiName': {'description': 'The Target SObject API '\n                                               'name',\n                                'type': 'string'},\n                    'autoConvertNames': {'description': 'Defaulted to '\n                                                        'true.  If set to '\n                                                        'false, names will '\n                                                        'NOT be '\n                                                        'auto-coverted to '\n                                                        'standard '\n                                                        'javascript '\n                                                        'conventions',\n                                         'type': 'boolean'},\n                    .. (4461 more)",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "auth": {
+          "accessToken": "your_access_token",
+          "clientId": "your_client_id",
+          "clientSecret": "your_client_secret",
+          "instanceUrl": "https://your_instance_url.my.salesforce.com",
+          "oAuthHost": "https://login.salesforce.com",
+          "password": "your_password",
+          "username": "your_username",
+          "version": 53
+        },
+        "enforcePicklistValues": "ALL",
+        "generatePicklists": true,
+        "outPath": "./output",
+        "sObjects": [
+          {
+            "apiName": "Account",
+            "autoConvertNames": true,
+            "className": "MyAccount",
+            "enforcePicklistValues": "RESTRICTED",
+            "fieldMappings": [
+              {
+                "apiName": "Name",
+                "propName": "accountName"
+              }
+            ],
+            "generatePicklists": true
+          },
+          "Contact",
+          {
+            "invalidKey": "InvalidValue"
+          }
+        ]
+      }
+    }
+  ]
+}

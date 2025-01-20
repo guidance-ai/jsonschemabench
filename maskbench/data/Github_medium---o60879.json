@@ -1,0 +1,268 @@
+{
+  "description": "sample Github_medium/o60879.json",
+  "meta": {
+    "full_size": 581,
+    "stripped_size": 581,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://mindsnacks.github.io/Zinc/schemas/v1/catalog.json#",
+    "type": "object",
+    "required": [
+      "id",
+      "format"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "format": {
+        "type": "string",
+        "pattern": "1"
+      },
+      "bundles": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          ".+": {
+            "type": "object",
+            "properties": {
+              "distributions": {
+                "type": "object",
+                "additionalProperties": false,
+                "patternProperties": {
+                  ".+": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "next_version": {
+        "type": "integer"
+      },
+      "versions": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example-id",
+        "format": "1",
+        "bundles": {
+          "bundle-1": {
+            "distributions": {
+              "dist-1": 1,
+              "dist-2": 2
+            }
+          },
+          "bundle-2": {
+            "distributions": {
+              "dist-3": 3,
+              "dist-4": 4
+            }
+          }
+        },
+        "next_version": 2,
+        "versions": [
+          1
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example-id",
+        "format": "1",
+        "bundles": {
+          "bundle-1": {
+            "distributions": {
+              "dist-1": 10,
+              "dist-2": 20
+            }
+          },
+          "bundle-2": {
+            "distributions": {
+              "dist-3": 30,
+              "dist-4": 40
+            }
+          }
+        },
+        "next_version": 2,
+        "versions": [
+          1
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['versions']['items']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['versions'][0]:\n    0",
+      "data": {
+        "id": "example-id",
+        "format": "1",
+        "bundles": {
+          "bundle-1": {
+            "distributions": {
+              "dist-1": 0,
+              "dist-2": 20
+            }
+          },
+          "bundle-2": {
+            "distributions": {
+              "dist-3": 30,
+              "dist-4": 40
+            }
+          }
+        },
+        "next_version": 2,
+        "versions": [
+          0
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"2\" does not match \"1\"",
+      "python_error": "'2' does not match '1'\n\nFailed validating 'pattern' in schema['properties']['format']:\n    {'type': 'string', 'pattern': '1'}\n\nOn instance['format']:\n    '2'",
+      "data": {
+        "id": "example-id",
+        "format": "2",
+        "bundles": {
+          "bundle-1": {
+            "distributions": {
+              "dist-1": 10,
+              "dist-2": 20
+            }
+          },
+          "bundle-2": {
+            "distributions": {
+              "dist-3": 30,
+              "dist-4": 40
+            }
+          }
+        },
+        "next_version": 2,
+        "versions": [
+          1
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "\"non-integer\" is not of type \"integer\"",
+      "python_error": "'non-integer' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['bundles']['patternProperties']['.+']['properties']['distributions']['patternProperties']['.+']:\n    {'type': 'integer'}\n\nOn instance['bundles']['bundle-1']['distributions']['dist-2']:\n    'non-integer'",
+      "data": {
+        "id": "example-id",
+        "format": "1",
+        "bundles": {
+          "bundle-1": {
+            "distributions": {
+              "dist-1": 10,
+              "dist-2": "non-integer"
+            }
+          },
+          "bundle-2": {
+            "distributions": {
+              "dist-3": 30,
+              "dist-4": 40
+            }
+          }
+        },
+        "next_version": 2,
+        "versions": [
+          1
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['id']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['id']:\n    ''",
+      "data": {
+        "id": "",
+        "format": "1",
+        "bundles": {
+          "bundle-1": {
+            "distributions": {
+              "dist-1": 10,
+              "dist-2": 20
+            }
+          },
+          "bundle-2": {
+            "distributions": {
+              "dist-3": 30,
+              "dist-4": 40
+            }
+          }
+        },
+        "next_version": 2,
+        "versions": [
+          1
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"not an integer\" is not of type \"integer\"",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['versions']['items']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['versions'][1]:\n    0",
+      "data": {
+        "id": "example-id",
+        "format": "1",
+        "bundles": {
+          "bundle-1": {
+            "distributions": {
+              "dist-1": 10,
+              "dist-2": "not an integer"
+            }
+          }
+        },
+        "next_version": 2,
+        "versions": [
+          1,
+          0,
+          1
+        ]
+      }
+    }
+  ]
+}

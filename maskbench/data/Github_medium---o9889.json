@@ -1,0 +1,186 @@
+{
+  "description": "sample Github_medium/o9889.json",
+  "meta": {
+    "full_size": 676,
+    "stripped_size": 636,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxItems",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "email": {
+        "_format": "email",
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "experienceGroupIds": {
+        "items": {
+          "pattern": "^[A-Fa-f\\d]{24}$",
+          "type": "string"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "firstName": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "lastName": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "password": {
+        "maxLength": 2048,
+        "minLength": 8,
+        "type": "string"
+      },
+      "tokenCutoff": {
+        "_format": "date-time",
+        "type": "string"
+      },
+      "userTags": {
+        "additionalProperties": false,
+        "patternProperties": {
+          "^[0-9a-zA-Z_-]{1,255}$": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "required": [
+      "email",
+      "password"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "email": "example@example.com",
+        "experienceGroupIds": [
+          "5f9f1c9c9c9c9c9c9c9c9c9c",
+          "5f9f1c9c9c9c9c9c9c9c9c9d"
+        ],
+        "firstName": "John",
+        "lastName": "Doe",
+        "password": "password123",
+        "tokenCutoff": "2024-12-07T14:30:00.000Z",
+        "userTags": {
+          "tag1": "value1",
+          "tag2": "value2"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "email": "example@example.com",
+        "experienceGroupIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba98"
+        ],
+        "firstName": "John",
+        "lastName": "Doe",
+        "password": "Password123!",
+        "tokenCutoff": "2024-12-07T14:30:00.000Z",
+        "userTags": {
+          "tag1": "value1",
+          "tag2": "value2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"fedcba9876543210fedcba9\" does not match \"^[A-Fa-f\\d]{24}$\"",
+      "python_error": "'!@#$%^&*()' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema['properties']['userTags']:\n    {'additionalProperties': False,\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'maxLength': 255,\n                                                      'minLength': 1,\n                                                      'type': 'string'}},\n     'type': 'object'}\n\nOn instance['userTags']:\n    {'tag1': 'value1', 'tag2': 'value2', '!@#$%^&*()': 'InvalidKey'}",
+      "data": {
+        "email": "example@example.com",
+        "experienceGroupIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba9",
+          "InvalidId"
+        ],
+        "firstName": "John",
+        "lastName": "Doe",
+        "password": "Password123!",
+        "tokenCutoff": "2024-12-07T14:30:00.000Z",
+        "userTags": {
+          "tag1": "value1",
+          "tag2": "value2",
+          "!@#$%^&*()": "InvalidKey"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "7 is not of type \"string\"",
+      "python_error": "7 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['password']:\n    {'maxLength': 2048, 'minLength': 8, 'type': 'string'}\n\nOn instance['password']:\n    7",
+      "data": {
+        "email": "example@example.com",
+        "experienceGroupIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba98"
+        ],
+        "firstName": "John",
+        "lastName": "Doe",
+        "password": 7,
+        "tokenCutoff": "2024-12-07T14:30:00.000Z",
+        "userTags": {
+          "tag1": "",
+          "tag2": "value2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!@#$' was unexpected)",
+      "python_error": "'!@#$' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema['properties']['userTags']:\n    {'additionalProperties': False,\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'maxLength': 255,\n                                                      'minLength': 1,\n                                                      'type': 'string'}},\n     'type': 'object'}\n\nOn instance['userTags']:\n    {'tag1': 'value1', 'tag2': 'value2', '!@#$': 'invalidValue'}",
+      "data": {
+        "email": "example@example.com",
+        "experienceGroupIds": [
+          "0123456789abcdef01234567",
+          "fedcba9876543210fedcba98"
+        ],
+        "firstName": "John",
+        "lastName": "Doe",
+        "password": "Password123!",
+        "tokenCutoff": "2024-12-07T14:30:00.000Z",
+        "userTags": {
+          "tag1": "value1",
+          "tag2": "value2",
+          "!@#$": "invalidValue"
+        }
+      }
+    }
+  ]
+}

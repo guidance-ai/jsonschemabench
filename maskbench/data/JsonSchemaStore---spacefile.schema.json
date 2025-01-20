@@ -1,0 +1,881 @@
+{
+  "description": "sample JsonSchemaStore/spacefile.schema.json",
+  "meta": {
+    "full_size": 4670,
+    "stripped_size": 2338,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "const",
+      "else",
+      "enum",
+      "if",
+      "items",
+      "not",
+      "pattern",
+      "then",
+      "uniqueItems"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxItems",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://deta.space/assets/spacefile.schema.json",
+    "$ref": "#/definitions/spacefile",
+    "definitions": {
+      "spacefile": {
+        "title": "Spacefile",
+        "description": "Space app configuration",
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "v": {
+            "description": "Version number of the Spacefile",
+            "type": "integer",
+            "enum": [
+              0
+            ],
+            "default": 0
+          },
+          "icon": {
+            "description": "Path to an icon image file (PNG or WebP file of 512x512 pixels)",
+            "type": "string"
+          },
+          "app_name": {
+            "description": "Display name of the app",
+            "type": "string",
+            "maxLength": 12
+          },
+          "micros": {
+            "description": "List of Micros in the app",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/definitions/micro"
+            }
+          }
+        },
+        "required": [
+          "v",
+          "micros"
+        ]
+      },
+      "micro": {
+        "title": "Micro",
+        "description": "Micro configuration",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Name of the Micro",
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "src": {
+            "description": "Relative path to the root directory of the Micro",
+            "type": "string"
+          },
+          "engine": {
+            "description": "Runtime engine for the Micro",
+            "type": "string",
+            "enum": [
+              "static",
+              "react",
+              "svelte",
+              "vue",
+              "next",
+              "nuxt",
+              "svelte-kit",
+              "python3.9",
+              "python3.8",
+              "nodejs16",
+              "custom"
+            ]
+          },
+          "primary": {
+            "description": "If the Micro should be the entry point for the app",
+            "type": "boolean",
+            "default": true
+          },
+          "path": {
+            "description": "Path relative to the hostname this Micro should receive requests on",
+            "type": "string"
+          },
+          "serve": {
+            "description": "Directory path relative to the Micro's path that should be served for the static Micro",
+            "type": "string"
+          },
+          "commands": {
+            "description": "Commands to run before packaging the Micro",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "include": {
+            "description": "Files and directories in the Micro's source directory that should be part of the final app package",
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "run": {
+            "description": "Command to start the Micro",
+            "type": "string"
+          },
+          "dev": {
+            "description": "Command to start the Micro in development mode",
+            "type": "string"
+          },
+          "presets": {
+            "$ref": "#/definitions/presets"
+          },
+          "public_routes": {
+            "description": "Routes that will be available publicly",
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "public": {
+            "description": "If the Micro should be available to the public",
+            "type": "boolean",
+            "default": false
+          },
+          "actions": {
+            "description": "Tasks that run on triggers like a schedule",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/definitions/action"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "src",
+          "engine"
+        ],
+        "allOf": [
+          {
+            "$comment": "If engine is static, then serve is required",
+            "if": {
+              "properties": {
+                "engine": {
+                  "const": "static"
+                }
+              },
+              "required": [
+                "engine"
+              ]
+            },
+            "then": {
+              "required": [
+                "serve"
+              ]
+            }
+          },
+          {
+            "$comment": "public and public_routes are mutually exclusive",
+            "not": {
+              "required": [
+                "public",
+                "public_routes"
+              ]
+            }
+          },
+          {
+            "$comment": "If engine is static or static-like, then include is not allowed, otherwise serve is not allowed",
+            "if": {
+              "properties": {
+                "engine": {
+                  "enum": [
+                    "static",
+                    "react",
+                    "vue",
+                    "svelte"
+                  ]
+                }
+              },
+              "required": [
+                "engine"
+              ]
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "include"
+                ]
+              }
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "serve"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "presets": {
+        "title": "Presets",
+        "description": "Presets to use for the Micro",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "env": {
+            "description": "Environment variables that the user can set for a Micro",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/definitions/env"
+            }
+          },
+          "api_keys": {
+            "description": "Enable the use of API keys to access private routes of a Micro",
+            "type": "boolean"
+          }
+        }
+      },
+      "env": {
+        "title": "Env",
+        "description": "Environment variable",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Name of the environment variable",
+            "type": "string"
+          },
+          "description": {
+            "description": "Human readable description",
+            "type": "string"
+          },
+          "default": {
+            "description": "Default value of the environment variable",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "action": {
+        "title": "Action",
+        "description": "Action configuration",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the action (needs to be unique across the app)",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human readable name for the action (needs to be unique across the app)",
+            "type": "string"
+          },
+          "description": {
+            "description": "Human readable description for the action",
+            "type": "string",
+            "maxLength": 142
+          },
+          "trigger": {
+            "description": "Trigger for the action",
+            "type": "string",
+            "enum": [
+              "schedule"
+            ],
+            "default": "schedule"
+          },
+          "default_interval": {
+            "description": "Interval at which the schedule will run",
+            "type": "string"
+          },
+          "path": {
+            "description": "Path of the Micro that will handle the action request",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "trigger",
+          "default_interval"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "serve": "public",
+            "public": true,
+            "actions": [
+              {
+                "id": "my-action",
+                "name": "My Action",
+                "description": "This is my action",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              }
+            ]
+          },
+          {
+            "name": "my-micro-2",
+            "src": "my-micro-2",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro2",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"my-micro!\" does not match \"^[A-Za-z0-9][A-Za-z0-9_-]*$\"",
+      "python_error": "'my-micro!' does not match '^[A-Za-z0-9][A-Za-z0-9_-]*$'\n\nFailed validating 'pattern' in schema['properties']['micros']['items']['properties']['name']:\n    {'description': 'Name of the Micro',\n     'type': 'string',\n     'pattern': '^[A-Za-z0-9][A-Za-z0-9_-]*$'}\n\nOn instance['micros'][0]['name']:\n    'my-micro!'",
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro!",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "serve": "public",
+            "public": true,
+            "actions": [
+              {
+                "id": "my-action",
+                "name": "My Action",
+                "description": "This is my action",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              }
+            ]
+          },
+          {
+            "name": "my-micro-2",
+            "src": "my-micro-2",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro2",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['micros']['items']['properties']['public_routes']['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['micros'][1]['public_routes'][0]:\n    ''",
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "serve": "public",
+            "public": true,
+            "actions": [
+              {
+                "id": "my-action",
+                "name": "My Action",
+                "description": "",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              }
+            ]
+          },
+          {
+            "name": "my-micro-2",
+            "src": "my-micro-2",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro2",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              ""
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[{\"name\":\"my-micro\",\"src\":\"my-micro\",\"engine\":\"static\",\"primary\":true,\"path\":\"/\",\"serve\":\"public\",\"public\":true,\"actions\":[{\"id\":\"my-action\",\"name\":\"My Action\",\"description\":\"This is my action\",\"trigger\":\"schedule\",\"default_interval\":\"0 0 * * *\",\"path\":\"/\"},{\"id\":\"my-action2\",\"name\":\"My Action2\",\"description\":\"This is my action2\",\"trigger\":\"schedule\",\"default_interval\":\"0 0 * * *\",\"path\":\"/\"}]},{\"name\":\"my-micro-2\",\"src\":\"my-micro-2\",\"engine\":\"react\",\"primary\":false,\"path\":\"/micro2\",\"commands\":[\"npm install\"],\"run\":\"npm start\",\"dev\":\"npm run dev\",\"presets\":{\"env\":[{\"name\":\"MY_VAR\",\"description\":\"My environment variable\",\"default\":\"my-value\"}],\"api_keys\":true},\"public_routes\":[\"/public\",\"/public2\"]},{\"name\":\"my-micro-3\",\"src\":\"my-micro-3\",\"engine\":\"react\",\"primary\":false,\"path\":\"/micro3\",\"commands\":[\"npm install\"],\"run\":\"npm start\",\"dev\":\"npm run dev\",\"presets\":{\"env\":[{\"name\":\"MY_VAR\",\"description\":\"My environment variable\",\"default\":\"my-value\"}],\"api_keys\":true},\"public_routes\":[\"/public\",\"/public2\"]},{\"name.. (946 more)",
+      "python_error": "[{'name': 'my-micro', 'src': 'my-micro', 'engine': 'static', 'primary': True, 'path': '/', 'serve': 'public', 'public': True, 'actions': [{'id': 'my-action', 'name': 'My Action', 'description': 'This is my action', 'trigger': 'schedule', 'default_interval': '0 0 * * *', 'path': '/'}, {'id': 'my-action2', 'name': 'My Action2', 'description': 'This is my action2', 'trigger': 'schedule', 'default_interval': '0 0 * * *', 'path': '/'}]}, {'name': 'my-micro-2', 'src': 'my-micro-2', 'engine': 'react', 'primary': False, 'path': '/micro2', 'commands': ['npm install'], 'run': 'npm start', 'dev': 'npm run dev', 'presets': {'env': [{'name': 'MY_VAR', 'description': 'My environment variable', 'default': 'my-value'}], 'api_keys': True}, 'public_routes': ['/public', '/public2']}, {'name': 'my-micro-3', 'src': 'my-micro-3', 'engine': 'react', 'primary': False, 'path': '/micro3', 'commands': ['npm install'], 'run': 'npm start', 'dev': 'npm run dev', 'presets': {'env': [{'name': 'MY_VAR', 'description': 'My environment variabl.. (4407 more)",
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "serve": "public",
+            "public": true,
+            "actions": [
+              {
+                "id": "my-action",
+                "name": "My Action",
+                "description": "This is my action",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              },
+              {
+                "id": "my-action2",
+                "name": "My Action2",
+                "description": "This is my action2",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              }
+            ]
+          },
+          {
+            "name": "my-micro-2",
+            "src": "my-micro-2",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro2",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public",
+              "/public2"
+            ]
+          },
+          {
+            "name": "my-micro-3",
+            "src": "my-micro-3",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro3",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public",
+              "/public2"
+            ]
+          },
+          {
+            "name": "my-micro-4",
+            "src": "my-micro-4",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro4",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public",
+              "/public2"
+            ]
+          },
+          {
+            "name": "my-micro-5",
+            "src": "my-micro-5",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro5",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public",
+              "/public2"
+            ]
+          },
+          {
+            "name": "my-micro-6",
+            "src": "my-micro-6",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro6",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public",
+              "/public2"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"required\":[\"public\",\"public_routes\"]} is not allowed for {\"name\":\"my-micro\",\"src\":\"my-micro\",\"engine\":\"static\",\"primary\":true,\"path\":\"/\",\"serve\":\"public\",\"public\":true,\"public_routes\":[\"/public\"],\"actions\":[{\"id\":\"my-action\",\"name\":\"My Action\",\"description\":\"This is my action\",\"trigger\":\"schedule\",\"default_interval\":\"0 0 * * *\",\"path\":\"/\"}]}",
+      "python_error": "{'name': 'my-micro-2', 'src': 'my-micro-2', 'engine': 'react', 'primary': False, 'path': '/micro2', 'commands': ['npm install'], 'run': 'npm start', 'dev': 'npm run dev', 'presets': {'env': [{'name': 'MY_VAR', 'description': 'My environment variable', 'default': 'my-value'}], 'api_keys': True}, 'include': ['file1'], 'serve': 'public'} should not be valid under {'required': ['include']}\n\nFailed validating 'not' in schema['properties']['micros']['items']['allOf'][2]['then']:\n    {'not': {'required': ['include']}}\n\nOn instance['micros'][1]:\n    {'name': 'my-micro-2',\n     'src': 'my-micro-2',\n     'engine': 'react',\n     'primary': False,\n     'path': '/micro2',\n     'commands': ['npm install'],\n     'run': 'npm start',\n     'dev': 'npm run dev',\n     'presets': {'env': [{'name': 'MY_VAR',\n                          'description': 'My environment variable',\n                          'default': 'my-value'}],\n                 'api_keys': True},\n     'include': ['file1'],\n     'serve': 'public'}",
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "serve": "public",
+            "public": true,
+            "public_routes": [
+              "/public"
+            ],
+            "actions": [
+              {
+                "id": "my-action",
+                "name": "My Action",
+                "description": "This is my action",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              }
+            ]
+          },
+          {
+            "name": "my-micro-2",
+            "src": "my-micro-2",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro2",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "include": [
+              "file1"
+            ],
+            "serve": "public"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on uniqueItems keyword",
+      "valid": false,
+      "rust_error": "[\"/public\",\"/public\"] has non-unique elements",
+      "python_error": "['/public', '/public'] has non-unique elements\n\nFailed validating 'uniqueItems' in schema['properties']['micros']['items']['properties']['public_routes']:\n    {'description': 'Routes that will be available publicly',\n     'type': 'array',\n     'minItems': 1,\n     'uniqueItems': True,\n     'items': {'type': 'string', 'minLength': 1}}\n\nOn instance['micros'][1]['public_routes']:\n    ['/public', '/public']",
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "serve": "public",
+            "public": true,
+            "actions": [
+              {
+                "id": "my-action",
+                "name": "My Action",
+                "description": "This is my action",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              }
+            ]
+          },
+          {
+            "name": "my-micro-2",
+            "src": "my-micro-2",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro2",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public",
+              "/public"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on if keyword or then keyword or else keyword",
+      "valid": false,
+      "rust_error": "\"serve\" is a required property",
+      "python_error": "'serve' is a required property\n\nFailed validating 'required' in schema['properties']['micros']['items']['allOf'][0]['then']:\n    {'required': ['serve']}\n\nOn instance['micros'][0]:\n    {'name': 'my-micro',\n     'src': 'my-micro',\n     'engine': 'static',\n     'primary': True,\n     'path': '/',\n     'include': ['public'],\n     'public': True,\n     'actions': [{'id': 'my-action',\n                  'name': 'My Action',\n                  'description': 'This is my action',\n                  'trigger': 'schedule',\n                  'default_interval': '0 0 * * *',\n                  'path': '/'}]}",
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "include": [
+              "public"
+            ],
+            "public": true,
+            "actions": [
+              {
+                "id": "my-action",
+                "name": "My Action",
+                "description": "This is my action",
+                "trigger": "schedule",
+                "default_interval": "0 0 * * *",
+                "path": "/"
+              }
+            ]
+          },
+          {
+            "name": "my-micro-2",
+            "src": "my-micro-2",
+            "engine": "react",
+            "primary": false,
+            "path": "/micro2",
+            "serve": "public",
+            "commands": [
+              "npm install"
+            ],
+            "run": "npm start",
+            "dev": "npm run dev",
+            "presets": {
+              "env": [
+                {
+                  "name": "MY_VAR",
+                  "description": "My environment variable",
+                  "default": "my-value"
+                }
+              ],
+              "api_keys": true
+            },
+            "public_routes": [
+              "/public"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('<--- This is invalid because 'public' and 'public_routes' are mutually exclusive.' was unexpected)",
+      "python_error": "'serve' is a required property\n\nFailed validating 'required' in schema['properties']['micros']['items']['allOf'][0]['then']:\n    {'required': ['serve']}\n\nOn instance['micros'][0]:\n    {'name': 'my-micro',\n     'src': 'my-micro',\n     'engine': 'static',\n     'primary': True,\n     'path': '/',\n     'public_routes': ['/public'],\n     \"<--- This is invalid because 'public' and 'public_routes' are mutually exclusive.\": 'actions'}",
+      "data": {
+        "v": 0,
+        "icon": "icon.png",
+        "app_name": "My App",
+        "micros": [
+          {
+            "name": "my-micro",
+            "src": "my-micro",
+            "engine": "static",
+            "primary": true,
+            "path": "/",
+            "public_routes": [
+              "/public"
+            ],
+            "<--- This is invalid because 'public' and 'public_routes' are mutually exclusive.": "actions"
+          }
+        ]
+      }
+    }
+  ]
+}

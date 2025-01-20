@@ -1,0 +1,163 @@
+{
+  "description": "sample Github_trivial/o10026.json",
+  "meta": {
+    "full_size": 615,
+    "stripped_size": 566,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "oneOf": [
+      {
+        "additionalProperties": false,
+        "properties": {
+          "expiry": {
+            "default": 360,
+            "maximum": 86400,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "key": {
+            "maxLength": 12,
+            "pattern": "^[a-zA-Z0-9_\\.]+$",
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "key",
+          "value"
+        ]
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "expiry": {
+            "default": 360,
+            "maximum": 86400,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "keyValues": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "maxLength": 12,
+                  "pattern": "^[a-zA-Z0-9_\\.]+$",
+                  "type": "string"
+                },
+                "value": {}
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "keys"
+        ]
+      }
+    ],
+    "title": "PutRequest",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "expiry": 360,
+        "key": "example_key",
+        "value": "example_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"expiry\":360,\"key\":\"example_key!\",\"value\":\"example_value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'example_key!' does not match '^[a-zA-Z0-9_\\\\.]+$'\n\nFailed validating 'pattern' in schema[0]['properties']['key']:\n    {'maxLength': 12, 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'type': 'string'}\n\nOn instance['key']:\n    'example_key!'",
+      "data": {
+        "expiry": 360,
+        "key": "example_key!",
+        "value": "example_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"key\":\"example_key\",\"keyValues\":[{\"key\":\"example_key2\",\"value\":\"example_value2\"}],\"expiry\":360,\"value\":\"example_value\",\"keys\":\"example_key3\",\"otherKey\":\"example_value3\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'key': 'example_key', 'keyValues': [{'key': 'example_key2', 'value': 'example_value2'}], 'expiry': 360, 'value': 'example_value', 'keys': 'example_key3', 'otherKey': 'example_value3'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'oneOf': [{'additionalProperties': False,\n                'properties': {'expiry': {'default': 360,\n                                          'maximum': 86400,\n                                          'minimum': 1,\n                                          'type': 'integer'},\n                               'key': {'maxLength': 12,\n                                       'pattern': '^[a-zA-Z0-9_\\\\.]+$',\n                                       'type': 'string'},\n                               'value': {}},\n                'required': ['key', 'value']},\n               {'additionalProperties': False,\n                'properties': {'expiry': {'default': 360,\n                                          'maximum': 86400,\n                               .. (1169 more)",
+      "data": {
+        "key": "example_key",
+        "keyValues": [
+          {
+            "key": "example_key2",
+            "value": "example_value2"
+          }
+        ],
+        "expiry": 360,
+        "value": "example_value",
+        "keys": "example_key3",
+        "otherKey": "example_value3"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "{\"expiry\":0,\"key\":\"example_key\",\"value\":\"example_value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'key': 'example_key', 'value': 'example_value', 'expiry': 0} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'oneOf': [{'additionalProperties': False,\n                'properties': {'expiry': {'default': 360,\n                                          'maximum': 86400,\n                                          'minimum': 1,\n                                          'type': 'integer'},\n                               'key': {'maxLength': 12,\n                                       'pattern': '^[a-zA-Z0-9_\\\\.]+$',\n                                       'type': 'string'},\n                               'value': {}},\n                'required': ['key', 'value']},\n               {'additionalProperties': False,\n                'properties': {'expiry': {'default': 360,\n                                          'maximum': 86400,\n                                          'minimum': 1,\n                                          'type': 'integer'},\n                               'keyV.. (898 more)",
+      "data": {
+        "expiry": 0,
+        "key": "example_key",
+        "value": "example_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"expiry\":360,\"key\":\"example_key_that_is_too_long_and_exceeds_the_specified_maximum_length\",\"value\":\"example_value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'example_key_that_is_too_long_and_exceeds_the_specified_maximum_length' is too long\n\nFailed validating 'maxLength' in schema[0]['properties']['key']:\n    {'maxLength': 12, 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'type': 'string'}\n\nOn instance['key']:\n    'example_key_that_is_too_long_and_exceeds_the_specified_maximum_length'",
+      "data": {
+        "expiry": 360,
+        "key": "example_key_that_is_too_long_and_exceeds_the_specified_maximum_length",
+        "value": "example_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"expiry\":86401,\"key\":\"example_key\",\"value\":\"example_value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'key': 'example_key', 'value': 'example_value', 'expiry': 86401} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'oneOf': [{'additionalProperties': False,\n                'properties': {'expiry': {'default': 360,\n                                          'maximum': 86400,\n                                          'minimum': 1,\n                                          'type': 'integer'},\n                               'key': {'maxLength': 12,\n                                       'pattern': '^[a-zA-Z0-9_\\\\.]+$',\n                                       'type': 'string'},\n                               'value': {}},\n                'required': ['key', 'value']},\n               {'additionalProperties': False,\n                'properties': {'expiry': {'default': 360,\n                                          'maximum': 86400,\n                                          'minimum': 1,\n                                          'type': 'integer'},\n                               '.. (906 more)",
+      "data": {
+        "expiry": 86401,
+        "key": "example_key",
+        "value": "example_value"
+      }
+    }
+  ]
+}

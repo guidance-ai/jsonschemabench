@@ -1,0 +1,108 @@
+{
+  "description": "sample Glaiveai2K/search_news_702265fd.json",
+  "meta": {
+    "full_size": 491,
+    "stripped_size": 267,
+    "features": [
+      "format",
+      "format:date",
+      "items"
+    ],
+    "raw_features": [
+      "_requiredEmpty",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "date_range": {
+        "properties": {
+          "end_date": {
+            "description": "The end date to filter news articles",
+            "format": "date",
+            "type": "string"
+          },
+          "start_date": {
+            "description": "The start date to filter news articles",
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "keywords": {
+        "description": "The keywords to search for in news articles",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "language": {
+        "description": "The language of news articles to search",
+        "type": "string"
+      }
+    },
+    "required": [],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "date_range": {
+          "end_date": "2022-12-31",
+          "start_date": "2022-01-01"
+        },
+        "keywords": [
+          "politics",
+          "economy",
+          "sports"
+        ],
+        "language": "en"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-02-31\" is not a \"date\"",
+      "python_error": "'2022-02-31' is not a 'date'\n\nFailed validating 'format' in schema['properties']['date_range']['properties']['start_date']:\n    {'description': 'The start date to filter news articles',\n     'format': 'date',\n     'type': 'string'}\n\nOn instance['date_range']['start_date']:\n    '2022-02-31'",
+      "data": {
+        "date_range": {
+          "end_date": "2022-12-31",
+          "start_date": "2022-02-31"
+        },
+        "keywords": [
+          "politics",
+          "economy",
+          "sports"
+        ],
+        "language": "en"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"2022-02-30\" is not a \"date\"",
+      "python_error": "456 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['language']:\n    {'description': 'The language of news articles to search',\n     'type': 'string'}\n\nOn instance['language']:\n    456",
+      "data": {
+        "date_range": {
+          "start_date": "2022-02-30",
+          "Invalid date (February only has 28/29 days)": "end_date",
+          "Missing colon between property name and value": "2022-12-31"
+        },
+        "keywords": [
+          1234567890,
+          "Invalid type, array item should be string"
+        ],
+        "language": 456,
+        "Invalid type, should be string": "en"
+      }
+    }
+  ]
+}

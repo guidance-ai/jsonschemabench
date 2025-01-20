@@ -1,0 +1,138 @@
+{
+  "description": "sample Github_trivial/o66073.json",
+  "meta": {
+    "full_size": 1209,
+    "stripped_size": 589,
+    "features": [
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Object install-if-different property",
+    "description": "This property handles when an object should be installed on target",
+    "oneOf": [
+      {
+        "title": "sha256sum verification type",
+        "description": "Installs if sha256sum doesn't match",
+        "type": "string",
+        "enum": [
+          "sha256sum"
+        ]
+      },
+      {
+        "title": "Known patterns verification type",
+        "description": "Installs if version of know object type is different",
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string",
+            "enum": [
+              "linux-kernel",
+              "u-boot"
+            ]
+          }
+        },
+        "required": [
+          "version",
+          "pattern"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "title": "Custom pattern verification type",
+        "description": "Installs if version of unknow object type is different",
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "object",
+            "properties": {
+              "regexp": {
+                "description": "the pattern to match",
+                "type": "string"
+              },
+              "seek": {
+                "description": "Where to start reading file.",
+                "type": "integer",
+                "default": 0
+              },
+              "buffer-size": {
+                "description": "How much bytes must be read. If -1, until the end.",
+                "type": "integer",
+                "default": -1
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "regexp"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "version",
+          "pattern"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "5.10.0-13-generic",
+        "pattern": "linux-kernel"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "5.10.0",
+        "pattern": "linux-kernel"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"version\":\"5.10.0\",\"pattern\":\"linux-kernel\",\"pattern2\":\"linux-kernel\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'linux-kernel' is not of type 'object'\n\nFailed validating 'type' in schema[2]['properties']['pattern']:\n    {'type': 'object',\n     'properties': {'regexp': {'description': 'the pattern to match',\n                               'type': 'string'},\n                    'seek': {'description': 'Where to start reading file.',\n                             'type': 'integer',\n                             'default': 0},\n                    'buffer-size': {'description': 'How much bytes must be '\n                                                   'read. If -1, until the '\n                                                   'end.',\n                                    'type': 'integer',\n                                    'default': -1}},\n     'additionalProperties': False,\n     'required': ['regexp']}\n\nOn instance['pattern']:\n    'linux-kernel'",
+      "data": {
+        "version": "5.10.0",
+        "pattern": "linux-kernel",
+        "pattern2": "linux-kernel"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"version\":\"5.10.0\",\"pattern\":\"linux-kernel\",\"extraProperty\":\"someValue\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'linux-kernel' is not of type 'object'\n\nFailed validating 'type' in schema[2]['properties']['pattern']:\n    {'type': 'object',\n     'properties': {'regexp': {'description': 'the pattern to match',\n                               'type': 'string'},\n                    'seek': {'description': 'Where to start reading file.',\n                             'type': 'integer',\n                             'default': 0},\n                    'buffer-size': {'description': 'How much bytes must be '\n                                                   'read. If -1, until the '\n                                                   'end.',\n                                    'type': 'integer',\n                                    'default': -1}},\n     'additionalProperties': False,\n     'required': ['regexp']}\n\nOn instance['pattern']:\n    'linux-kernel'",
+      "data": {
+        "version": "5.10.0",
+        "pattern": "linux-kernel",
+        "extraProperty": "someValue"
+      }
+    }
+  ]
+}

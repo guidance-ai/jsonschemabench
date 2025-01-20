@@ -1,0 +1,113 @@
+{
+  "description": "sample MCPspec/JSONRPCRequest.json",
+  "meta": {
+    "full_size": 1092,
+    "stripped_size": 555,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "const"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/JSONRPCRequest",
+    "definitions": {
+      "JSONRPCRequest": {
+        "description": "A request that expects a response.",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/RequestId"
+          },
+          "jsonrpc": {
+            "const": "2.0",
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {},
+            "properties": {
+              "_meta": {
+                "properties": {
+                  "progressToken": {
+                    "$ref": "#/definitions/ProgressToken",
+                    "description": "If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications."
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "jsonrpc",
+          "method"
+        ],
+        "type": "object"
+      },
+      "RequestId": {
+        "description": "A uniquely identifying ID for a request in JSON-RPC.",
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "ProgressToken": {
+        "description": "A progress token, used to associate progress notifications with the original request.",
+        "type": [
+          "string",
+          "integer"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "my_method",
+        "params": {
+          "_meta": {
+            "progressToken": 123
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"2.0\" was expected",
+      "python_error": "'2.0' was expected\n\nFailed validating 'const' in schema['properties']['jsonrpc']:\n    {'const': '2.0', 'type': 'string'}\n\nOn instance['jsonrpc']:\n    '1.9'",
+      "data": {
+        "id": 1,
+        "jsonrpc": "1.9",
+        "method": "my_method",
+        "params": {
+          "_meta": {
+            "progressToken": 123
+          }
+        }
+      }
+    }
+  ]
+}

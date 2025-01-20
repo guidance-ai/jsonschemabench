@@ -1,0 +1,371 @@
+{
+  "description": "sample Github_medium/o81649.json",
+  "meta": {
+    "full_size": 1083,
+    "stripped_size": 635,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "PR Preview Config",
+    "description": "Config file for PR Preview.",
+    "properties": {
+      "type": {
+        "definition": "The spec processor used to render this spec.",
+        "enum": [
+          "bikeshed",
+          "Bikeshed",
+          "BikeShed",
+          "respec",
+          "Respec",
+          "ReSpec",
+          "wattsi",
+          "Wattsi",
+          "html",
+          "HTML"
+        ]
+      },
+      "src_file": {
+        "definition": "Relative path to the source file from the root of the repository",
+        "type": "string",
+        "minLength": 1
+      },
+      "params": {
+        "definition": "parameters for the spec processor",
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "post_processing": {
+        "definition": "Set a post processor.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "definition": "Name of the post-processor",
+            "enum": [
+              "emu-algify",
+              "webidl-grammar"
+            ]
+          },
+          "options": {
+            "definition": "Options object for the post-processor",
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "multipage": {
+        "definition": "Whether the rendered spec is multipage.",
+        "type": "boolean"
+      }
+    },
+    "additionalProperties": true,
+    "required": [
+      "src_file",
+      "type"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "type": "bikeshed",
+        "src_file": "path/to/source/file.html",
+        "params": {
+          "shortName": "My Spec",
+          "group": "My Group",
+          "status": "ED",
+          "version": "1.0",
+          "publishDate": "2022-01-01",
+          "previousPublishDate": "2021-01-01",
+          "previousMaturity": "WD",
+          "edDraftURI": "https://example.com/draft.html"
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "someOption": true,
+            "anotherOption": "some value"
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['src_file']:\n    {'definition': 'Relative path to the source file from the root of the '\n                   'repository',\n     'type': 'string',\n     'minLength': 1}\n\nOn instance['src_file']:\n    ''",
+      "data": {
+        "type": "bikeshed",
+        "src_file": "",
+        "params": {
+          "shortName": "My Spec",
+          "group": "My Group",
+          "status": "ED",
+          "version": "1.0",
+          "publishDate": "2022-01-01",
+          "previousPublishDate": "2021-01-01",
+          "previousMaturity": "WD",
+          "edDraftURI": "https://example.com/draft.html"
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "someOption": true,
+            "anotherOption": "some value"
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[1,2,3] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[1, 2, 3] is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['params']['additionalProperties']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'number'},\n               {'type': 'boolean'},\n               {'type': 'null'}]}\n\nOn instance['params']['invalidParam']:\n    [1, 2, 3]",
+      "data": {
+        "type": "bikeshed",
+        "src_file": "path/to/source/file.html",
+        "params": {
+          "shortName": "My Spec",
+          "group": "My Group",
+          "status": "ED",
+          "version": "1.0",
+          "publishDate": "2022-01-01",
+          "previousPublishDate": "2021-01-01",
+          "previousMaturity": "WD",
+          "edDraftURI": "https://example.com/draft.html",
+          "invalidParam": [
+            1,
+            2,
+            3
+          ]
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "someOption": true,
+            "anotherOption": "some value"
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"nested\":\"object\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'nested': 'object'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['params']['additionalProperties']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'number'},\n               {'type': 'boolean'},\n               {'type': 'null'}]}\n\nOn instance['params']['invalidProperty']:\n    {'nested': 'object'}",
+      "data": {
+        "type": "bikeshed",
+        "src_file": "path/to/source/file.html",
+        "params": {
+          "shortName": "My Spec",
+          "group": "My Group",
+          "status": "ED",
+          "version": "1.0",
+          "publishDate": "2022-01-01",
+          "previousPublishDate": "2021-01-01",
+          "previousMaturity": "WD",
+          "edDraftURI": "https://example.com/draft.html",
+          "invalidProperty": {
+            "nested": "object"
+          }
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "someOption": true,
+            "anotherOption": "some value"
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-type\" is not one of [\"bikeshed\",\"Bikeshed\",\"BikeShed\",\"respec\",\"Respec\",\"ReSpec\",\"wattsi\",\"Wattsi\",\"html\",\"HTML\"]",
+      "python_error": "'invalid-type' is not one of ['bikeshed', 'Bikeshed', 'BikeShed', 'respec', 'Respec', 'ReSpec', 'wattsi', 'Wattsi', 'html', 'HTML']\n\nFailed validating 'enum' in schema['properties']['type']:\n    {'definition': 'The spec processor used to render this spec.',\n     'enum': ['bikeshed',\n              'Bikeshed',\n              'BikeShed',\n              'respec',\n              'Respec',\n              'ReSpec',\n              'wattsi',\n              'Wattsi',\n              'html',\n              'HTML']}\n\nOn instance['type']:\n    'invalid-type'",
+      "data": {
+        "type": "invalid-type",
+        "src_file": "path/to/source/file.html",
+        "params": {
+          "shortName": "My Spec",
+          "group": "My Group",
+          "status": "ED",
+          "version": "1.0",
+          "publishDate": "2022-01-01",
+          "previousPublishDate": "2021-01-01",
+          "previousMaturity": "WD",
+          "edDraftURI": "https://example.com/draft.html"
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "someOption": true,
+            "anotherOption": "some value"
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"nestedInvalidProperty\":\"some value\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'nestedInvalidProperty': 'some value'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['params']['additionalProperties']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'number'},\n               {'type': 'boolean'},\n               {'type': 'null'}]}\n\nOn instance['params']['invalidProperty']:\n    {'nestedInvalidProperty': 'some value'}",
+      "data": {
+        "type": "bikeshed",
+        "src_file": "path/to/source/file.html",
+        "params": {
+          "shortName": "My Spec",
+          "group": "My Group",
+          "status": "ED",
+          "version": "1.0",
+          "publishDate": "2022-01-01",
+          "previousPublishDate": "2021-01-01",
+          "previousMaturity": "WD",
+          "edDraftURI": "https://example.com/draft.html",
+          "invalidProperty": {
+            "nestedInvalidProperty": "some value"
+          }
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "someOption": true,
+            "anotherOption": "some value"
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "bikeshed",
+        "src_file": "path/to/source/file.md",
+        "params": {
+          "show-anchors": true,
+          "dfn": "inline"
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "debug": true
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "[] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[] is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['params']['additionalProperties']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'number'},\n               {'type': 'boolean'},\n               {'type': 'null'}]}\n\nOn instance['params']['invalid-key']:\n    []",
+      "data": {
+        "type": "bikeshed",
+        "src_file": "path/to/source/file.md",
+        "params": {
+          "show-anchors": true,
+          "dfn": "inline",
+          "invalid-key": []
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "debug": true
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['src_file']:\n    {'definition': 'Relative path to the source file from the root of the '\n                   'repository',\n     'type': 'string',\n     'minLength': 1}\n\nOn instance['src_file']:\n    ''",
+      "data": {
+        "type": "bikeshed",
+        "src_file": "",
+        "params": {
+          "show-anchors": true,
+          "dfn": "inline"
+        },
+        "post_processing": {
+          "name": "emu-algify",
+          "options": {
+            "debug": true
+          }
+        },
+        "multipage": false
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1 is not one of [\"bikeshed\",\"Bikeshed\",\"BikeShed\",\"respec\",\"Respec\",\"ReSpec\",\"wattsi\",\"Wattsi\",\"html\",\"HTML\"]",
+      "python_error": "1 is not one of ['bikeshed', 'Bikeshed', 'BikeShed', 'respec', 'Respec', 'ReSpec', 'wattsi', 'Wattsi', 'html', 'HTML']\n\nFailed validating 'enum' in schema['properties']['type']:\n    {'definition': 'The spec processor used to render this spec.',\n     'enum': ['bikeshed',\n              'Bikeshed',\n              'BikeShed',\n              'respec',\n              'Respec',\n              'ReSpec',\n              'wattsi',\n              'Wattsi',\n              'html',\n              'HTML']}\n\nOn instance['type']:\n    1",
+      "data": {
+        "type": 1,
+        "src_file": "",
+        "params": {
+          "show-anchors": 1
+        },
+        "post_processing": {
+          "name": "invalid-algify",
+          "options": {
+            "debug": true
+          }
+        },
+        "multipage": "invalid-boolean",
+        "name": "invalid property",
+        "post_processing2": {
+          "name": "emu-algify"
+        },
+        "type2": "invalid-type"
+      }
+    }
+  ]
+}

@@ -1,0 +1,418 @@
+{
+  "description": "sample Github_easy/o58839.json",
+  "meta": {
+    "full_size": 1106,
+    "stripped_size": 1071,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/marmeladema/Peggy/tree/master/peggy/grammar.json",
+    "title": "Peggy PEG Grammar Schema",
+    "definitions": {
+      "node": {
+        "type": "object",
+        "properties": {
+          "ast": {
+            "type": "string",
+            "enum": [
+              "BUILD",
+              "SKIP",
+              "VOID",
+              "PRUNE"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "RULE",
+              "CALL",
+              "SEQUENCE",
+              "CHOICE",
+              "RANGE",
+              "WILDCARD",
+              "STRING",
+              "STRINGI"
+            ]
+          },
+          "min": {
+            "type": "integer"
+          },
+          "max": {
+            "type": "integer"
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "RULE"
+                ]
+              },
+              "data": {
+                "$ref": "#/definitions/node"
+              }
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "CALL",
+                  "STRING",
+                  "STRINGI"
+                ]
+              },
+              "data": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "RANGE"
+                ]
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "SEQUENCE",
+                  "CHOICE"
+                ]
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "WILDCARD"
+                ]
+              }
+            }
+          }
+        ],
+        "required": [
+          "ast",
+          "type"
+        ]
+      }
+    },
+    "type": "object",
+    "patternProperties": {
+      "^[a-zA-Z0-8_]+$": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "RULE1": {
+          "ast": "BUILD",
+          "type": "RULE",
+          "data": {
+            "ast": "BUILD",
+            "type": "SEQUENCE",
+            "data": [
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": "Hello"
+              },
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": " "
+              },
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": "World"
+              }
+            ]
+          }
+        },
+        "RULE2": {
+          "ast": "BUILD",
+          "type": "CHOICE",
+          "data": [
+            {
+              "ast": "BUILD",
+              "type": "STRING",
+              "data": "Yes"
+            },
+            {
+              "ast": "BUILD",
+              "type": "STRING",
+              "data": "No"
+            }
+          ]
+        },
+        "RULE3": {
+          "ast": "BUILD",
+          "type": "RANGE",
+          "data": [
+            1,
+            5
+          ]
+        },
+        "RULE4": {
+          "ast": "BUILD",
+          "type": "WILDCARD"
+        },
+        "RULE5": {
+          "ast": "BUILD",
+          "type": "CALL",
+          "data": "RULE1"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "rule1": {
+          "ast": "BUILD",
+          "type": "RULE",
+          "data": {
+            "ast": "BUILD",
+            "type": "SEQUENCE",
+            "data": [
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": "hello"
+              },
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": "world"
+              }
+            ]
+          }
+        },
+        "rule2": {
+          "ast": "BUILD",
+          "type": "CHOICE",
+          "data": [
+            {
+              "ast": "BUILD",
+              "type": "STRING",
+              "data": "foo"
+            },
+            {
+              "ast": "BUILD",
+              "type": "STRING",
+              "data": "bar"
+            }
+          ]
+        },
+        "rule3": {
+          "ast": "BUILD",
+          "type": "RANGE",
+          "data": [
+            1,
+            2,
+            3
+          ]
+        },
+        "rule4": {
+          "ast": "BUILD",
+          "type": "WILDCARD"
+        },
+        "rule5": {
+          "ast": "BUILD",
+          "type": "CALL",
+          "data": "rule1"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!invalid-key' was unexpected)",
+      "python_error": "'!invalid-key' does not match any of the regexes: '^[a-zA-Z0-8_]+$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-07/schema#',\n     '$id': 'https://github.com/marmeladema/Peggy/tree/master/peggy/grammar.json',\n     'title': 'Peggy PEG Grammar Schema',\n     'definitions': {'node': {'type': 'object',\n                              'properties': {'ast': {'type': 'string',\n                                                     'enum': ['BUILD',\n                                                              'SKIP',\n                                                              'VOID',\n                                                              'PRUNE']},\n                                             'type': {'type': 'string',\n                                                      'enum': ['RULE',\n                                                               'CALL',\n                                                               'SEQUENCE',\n                           .. (3352 more)",
+      "data": {
+        "rule1": {
+          "ast": "BUILD",
+          "type": "RULE",
+          "data": {
+            "ast": "BUILD",
+            "type": "SEQUENCE",
+            "data": [
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": "hello"
+              },
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": "world"
+              }
+            ]
+          }
+        },
+        "rule2": {
+          "ast": "BUILD",
+          "type": "CHOICE",
+          "data": [
+            {
+              "ast": "BUILD",
+              "type": "STRING",
+              "data": "foo"
+            },
+            {
+              "ast": "BUILD",
+              "type": "STRING",
+              "data": "bar"
+            }
+          ]
+        },
+        "rule3": {
+          "ast": "BUILD",
+          "type": "RANGE",
+          "data": [
+            1,
+            2,
+            3
+          ]
+        },
+        "rule4": {
+          "ast": "BUILD",
+          "type": "WILDCARD"
+        },
+        "rule5": {
+          "ast": "BUILD",
+          "type": "CALL",
+          "data": "rule1"
+        },
+        "!invalid-key": {
+          "ast": "BUILD",
+          "type": "STRING"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"ast\":\"BUILD\",\"type\":\"STRING\",\"data\":\"\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[1]['properties']['data']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['data']:\n    ''",
+      "data": {
+        "rule1": {
+          "ast": "BUILD",
+          "type": "STRING",
+          "data": ""
+        },
+        "rule2": {
+          "ast": "BUILD",
+          "type": "CALL",
+          "data": ""
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"ast\":\"BUILD\",\"type\":\"RULE\",\"data\":{\"ast\":\"BUILD\",\"type\":\"SEQUENCE\",\"data\":[{\"ast\":\"BUILD\",\"type\":\"STRING\",\"data\":\"hello\"},{\"ast\":\"BUILD\",\"type\":\"STRING\",\"data\":\"\"}]}} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[1]['properties']['data']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['data']:\n    ''",
+      "data": {
+        "rule1": {
+          "ast": "BUILD",
+          "type": "RULE",
+          "data": {
+            "ast": "BUILD",
+            "type": "SEQUENCE",
+            "data": [
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": "hello"
+              },
+              {
+                "ast": "BUILD",
+                "type": "STRING",
+                "data": ""
+              }
+            ]
+          }
+        },
+        "rule2": {
+          "ast": "BUILD",
+          "type": "CHOICE",
+          "data": []
+        },
+        "rule3": {
+          "ast": "BUILD",
+          "type": "RANGE",
+          "data": [
+            3,
+            2,
+            1
+          ]
+        },
+        "rule4": {
+          "ast": "BUILD",
+          "type": "WILDCARD",
+          "data": "extra"
+        },
+        "rule5": {
+          "ast": "BUILD",
+          "type": "CALL",
+          "data": ""
+        }
+      }
+    }
+  ]
+}

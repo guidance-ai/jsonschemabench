@@ -1,0 +1,175 @@
+{
+  "description": "sample Github_medium/o42283.json",
+  "meta": {
+    "full_size": 807,
+    "stripped_size": 725,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "org.eclipse.persistence.testing.jaxb.annotations.xmlidref.self.Customer",
+    "type": "object",
+    "properties": {
+      "customer": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/definitions/AddressSelfSource"
+          },
+          "phoneNumber": {
+            "$ref": "#/definitions/PhoneNumber"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "definitions": {
+      "AddressSelfSource": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "$ref": "#/definitions/Contact"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "idRefPhoneNumber": {
+            "type": "string"
+          },
+          "idRefPhoneNumbers": {
+            "type": "object",
+            "properties": {
+              "idRefPhoneNumber": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "PhoneNumber": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "customer": {
+          "address": {
+            "contact": {
+              "idRefPhoneNumber": "phone1",
+              "idRefPhoneNumbers": {
+                "idRefPhoneNumber": [
+                  "phone2",
+                  "phone3"
+                ]
+              }
+            }
+          },
+          "phoneNumber": {
+            "id": "phone1"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['customer']['properties']['address']['properties']['contact']['properties']['idRefPhoneNumbers']['properties']['idRefPhoneNumber']['items']:\n    {'type': 'string'}\n\nOn instance['customer']['address']['contact']['idRefPhoneNumbers']['idRefPhoneNumber'][1]:\n    123",
+      "data": {
+        "customer": {
+          "address": {
+            "contact": {
+              "idRefPhoneNumber": "phone1",
+              "idRefPhoneNumbers": {
+                "idRefPhoneNumber": [
+                  "phone2",
+                  123
+                ]
+              }
+            }
+          },
+          "phoneNumber": {
+            "id": "phone1"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "customer": {
+          "address": {
+            "contact": {
+              "idRefPhoneNumber": "12345",
+              "idRefPhoneNumbers": {
+                "idRefPhoneNumber": [
+                  "67890",
+                  "11111"
+                ]
+              }
+            }
+          },
+          "phoneNumber": {
+            "id": "12345"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['customer']['properties']['phoneNumber']['properties']['id']:\n    {'type': 'string'}\n\nOn instance['customer']['phoneNumber']['id']:\n    12345",
+      "data": {
+        "customer": {
+          "address": {
+            "contact": {
+              "idRefPhoneNumber": "12345",
+              "idRefPhoneNumbers": {
+                "idRefPhoneNumber": [
+                  "67890"
+                ]
+              },
+              "extraProperty": "This is an invalid extra property"
+            }
+          },
+          "phoneNumber": {
+            "id": 12345
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "description": "sample Snowplow/sp_317_Normalized.json",
+  "meta": {
+    "full_size": 529,
+    "stripped_size": 360,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maximum",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for an internal site search event",
+    "properties": {
+      "filters": {
+        "additionalProperties": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "type": "object"
+      },
+      "pageResults": {
+        "maximum": 2147483647,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "terms": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "totalResults": {
+        "maximum": 2147483647,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "terms"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "site_search",
+      "vendor": "com.snowplowanalytics.snowplow",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": "high"
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of types \"boolean\", \"string\"",
+      "python_error": "123 is not of type 'string', 'boolean'\n\nFailed validating 'type' in schema['properties']['filters']['additionalProperties']:\n    {'type': ['string', 'boolean']}\n\nOn instance['filters']['unknownProperty']:\n    123",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": "high",
+          "unknownProperty": 123
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['terms']:\n    {'items': {'type': 'string'}, 'minItems': 1, 'type': 'array'}\n\nOn instance['terms']:\n    []",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": "high"
+        },
+        "pageResults": 10,
+        "terms": [],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "100 is not of types \"boolean\", \"string\"",
+      "python_error": "100 is not of type 'string', 'boolean'\n\nFailed validating 'type' in schema['properties']['filters']['additionalProperties']:\n    {'type': ['string', 'boolean']}\n\nOn instance['filters']['priceRange']:\n    100",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": 100
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['pageResults']:\n    {'maximum': 2147483647, 'minimum': 0, 'type': 'integer'}\n\nOn instance['pageResults']:\n    -1",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": "high"
+        },
+        "pageResults": -1,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "100 is not of types \"boolean\", \"string\"",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for an internal site search event',\n     'properties': {'filters': {'additionalProperties': {'type': ['string',\n                                                                  'boolean']},\n                                'type': 'object'},\n                    'pageResults': {'maximum': 2147483647,\n                                    'minimum': 0,\n                                    'type': 'integer'},\n                    'terms': {'items': {'type': 'string'},\n                              'minItems': 1,\n                              'type': 'array'},\n                    'totalResults': {'maximum': 2147483647,\n                                     'minimum': 0,\n                                     'type': 'integer'}},\n     'required': ['terms'],\n     'self': {'format': 'jsonschema',\n              'name': 'site_search',\n     .. (330 more)",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": 100
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50,
+        "extraProperty": "invalid"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"boolean\", \"string\"",
+      "python_error": "123 is not of type 'string', 'boolean'\n\nFailed validating 'type' in schema['properties']['filters']['additionalProperties']:\n    {'type': ['string', 'boolean']}\n\nOn instance['filters']['brand']:\n    123",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": 123,
+          "priceRange": "high"
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of types \"boolean\", \"string\"",
+      "python_error": "123 is not of type 'string', 'boolean'\n\nFailed validating 'type' in schema['properties']['filters']['additionalProperties']:\n    {'type': ['string', 'boolean']}\n\nOn instance['filters']['unsupportedKey']:\n    123",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": "high",
+          "unsupportedKey": 123
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of types \"boolean\", \"string\"",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for an internal site search event',\n     'properties': {'filters': {'additionalProperties': {'type': ['string',\n                                                                  'boolean']},\n                                'type': 'object'},\n                    'pageResults': {'maximum': 2147483647,\n                                    'minimum': 0,\n                                    'type': 'integer'},\n                    'terms': {'items': {'type': 'string'},\n                              'minItems': 1,\n                              'type': 'array'},\n                    'totalResults': {'maximum': 2147483647,\n                                     'minimum': 0,\n                                     'type': 'integer'}},\n     'required': ['terms'],\n     'self': {'format': 'jsonschema',\n              'name': 'site_search',\n     .. (322 more)",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": 123
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          123
+        ],
+        "totalResults": 50,
+        "extraProperty": "extraValue"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of types \"boolean\", \"string\"",
+      "python_error": "123 is not of type 'string', 'boolean'\n\nFailed validating 'type' in schema['properties']['filters']['additionalProperties']:\n    {'type': ['string', 'boolean']}\n\nOn instance['filters']['extraField']:\n    123",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": "high",
+          "extraField": 123
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": 50
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of types \"boolean\", \"string\"",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['totalResults']:\n    {'maximum': 2147483647, 'minimum': 0, 'type': 'integer'}\n\nOn instance['totalResults']:\n    -1",
+      "data": {
+        "filters": {
+          "category": "shoes",
+          "brand": "Nike",
+          "priceRange": "high",
+          "discount": 123
+        },
+        "pageResults": 10,
+        "terms": [
+          "running shoes",
+          "hiking boots"
+        ],
+        "totalResults": -1
+      }
+    }
+  ]
+}

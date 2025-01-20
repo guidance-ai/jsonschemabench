@@ -1,0 +1,101 @@
+{
+  "description": "sample Github_easy/o90946.json",
+  "meta": {
+    "full_size": 434,
+    "stripped_size": 434,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "const",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "type",
+      "type:boolean",
+      "type:object"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+      "subject": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/first"
+          },
+          {
+            "$ref": "#/definitions/second"
+          }
+        ]
+      }
+    },
+    "definitions": {
+      "first": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "const": "first"
+          },
+          "first": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "second": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "const": "second"
+          },
+          "second": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "subject": {
+          "discriminator": "first",
+          "first": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"discriminator\":\"first\",\"second\":true,\"first\":true} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'second' was expected\n\nFailed validating 'const' in schema[1]['properties']['discriminator']:\n    {'const': 'second'}\n\nOn instance['discriminator']:\n    'first'",
+      "data": {
+        "subject": {
+          "discriminator": "first",
+          "second": true,
+          "first": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"discriminator\":\"first\",\"first\":true,\"extra\":false} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'second' was expected\n\nFailed validating 'const' in schema[1]['properties']['discriminator']:\n    {'const': 'second'}\n\nOn instance['discriminator']:\n    'first'",
+      "data": {
+        "subject": {
+          "discriminator": "first",
+          "first": true,
+          "extra": false
+        }
+      }
+    }
+  ]
+}

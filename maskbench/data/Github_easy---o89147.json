@@ -1,0 +1,97 @@
+{
+  "description": "sample Github_easy/o89147.json",
+  "meta": {
+    "full_size": 945,
+    "stripped_size": 324,
+    "features": [
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "memo",
+    "description": "Memo objects represent arbitrary data that can be included in a transaction",
+    "type": "object",
+    "properties": {
+      "type": {
+        "pattern": "^[A-Za-z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=%]*$",
+        "description": "Conventionally, a unique relation (according to [RFC 5988](http://tools.ietf.org/html/rfc5988#section-4)) that defines the format of this memo. Only characters allowed in URLs are permitted."
+      },
+      "format": {
+        "pattern": "^[A-Za-z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=%]*$",
+        "description": "Conventionally containing information on how the memo is encoded, for example as a [MIME type](http://www.iana.org/assignments/media-types/media-types.xhtml). Only characters allowed in URLs are permitted."
+      },
+      "data": {
+        "type": "string",
+        "description": "Arbitrary string, conventionally containing the content of the memo."
+      }
+    },
+    "additionalProperties": false,
+    "anyOf": [
+      {
+        "required": [
+          "data"
+        ]
+      },
+      {
+        "required": [
+          "type"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "https://example.com/memo-type",
+        "format": "text/plain",
+        "data": "This is an example memo."
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "https://example.com/memo",
+        "format": "text/plain",
+        "data": "Hello, World!"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"https://example.com/memo<\" does not match \"^[A-Za-z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=%]*$\"",
+      "python_error": "'https://example.com/memo<' does not match \"^[A-Za-z0-9\\\\-._~:/?#\\\\[\\\\]@!$&'()*+,;=%]*$\"\n\nFailed validating 'pattern' in schema['properties']['type']:\n    {'pattern': \"^[A-Za-z0-9\\\\-._~:/?#\\\\[\\\\]@!$&'()*+,;=%]*$\",\n     'description': 'Conventionally, a unique relation (according to [RFC '\n                    '5988](http://tools.ietf.org/html/rfc5988#section-4)) '\n                    'that defines the format of this memo. Only characters '\n                    'allowed in URLs are permitted.'}\n\nOn instance['type']:\n    'https://example.com/memo<'",
+      "data": {
+        "type": "https://example.com/memo<",
+        "format": "text/plain",
+        "data": "Hello, World!"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['data']:\n    {'type': 'string',\n     'description': 'Arbitrary string, conventionally containing the '\n                    'content of the memo.'}\n\nOn instance['data']:\n    123",
+      "data": {
+        "type": "https://example.com/memo",
+        "format": "text/plain",
+        "data": 123
+      }
+    }
+  ]
+}

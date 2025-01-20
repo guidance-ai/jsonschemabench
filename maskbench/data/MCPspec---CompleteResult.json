@@ -1,0 +1,106 @@
+{
+  "description": "sample MCPspec/CompleteResult.json",
+  "meta": {
+    "full_size": 991,
+    "stripped_size": 411,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CompleteResult",
+    "definitions": {
+      "CompleteResult": {
+        "description": "The server's response to a completion/complete request",
+        "properties": {
+          "_meta": {
+            "additionalProperties": {},
+            "description": "This result property is reserved by the protocol to allow clients and servers to attach additional metadata to their responses.",
+            "type": "object"
+          },
+          "completion": {
+            "properties": {
+              "hasMore": {
+                "description": "Indicates whether there are additional completion options beyond those provided in the current response, even if the exact total is unknown.",
+                "type": "boolean"
+              },
+              "total": {
+                "description": "The total number of completion options available. This can exceed the number of values actually sent in the response.",
+                "type": "integer"
+              },
+              "values": {
+                "description": "An array of completion values. Must not exceed 100 items.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "values"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "completion"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_meta": {},
+        "completion": {
+          "hasMore": true,
+          "total": 150,
+          "values": [
+            "option1",
+            "option2",
+            "option3"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1 is not of type \"string\"",
+      "python_error": "1 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['completion']['properties']['values']['items']:\n    {'type': 'string'}\n\nOn instance['completion']['values'][2]:\n    1",
+      "data": {
+        "_meta": {},
+        "completion": {
+          "hasMore": true,
+          "total": 150,
+          "values": [
+            "option1",
+            "option2",
+            1,
+            "option3"
+          ]
+        }
+      }
+    }
+  ]
+}

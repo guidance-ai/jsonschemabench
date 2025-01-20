@@ -1,0 +1,247 @@
+{
+  "description": "sample JsonSchemaStore/pathfinder-policy-yml-schema.json",
+  "meta": {
+    "full_size": 709,
+    "stripped_size": 604,
+    "features": [
+      "anyOf",
+      "const",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/transcend-io/cli/main/pathfinder-policy-yml-schema.json",
+    "title": "pathfinderPolicy.yml",
+    "description": "Define the schema for the the Transcend AI Proxy service.",
+    "type": "object",
+    "properties": {
+      "enabledIntegrations": {
+        "type": "object",
+        "properties": {
+          "openAI": {
+            "type": "object",
+            "required": [
+              "enabledRoutes"
+            ],
+            "properties": {
+              "enabledRoutes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "routeName",
+                    "enabledPolicies"
+                  ],
+                  "properties": {
+                    "routeName": {
+                      "anyOf": [
+                        {
+                          "const": "/v1/chat/completions"
+                        },
+                        {
+                          "const": "/v1/embeddings"
+                        }
+                      ]
+                    },
+                    "enabledPolicies": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "const": "redactEmail"
+                          },
+                          {
+                            "const": "log"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "enabledIntegrations": {
+          "openAI": {
+            "enabledRoutes": [
+              {
+                "routeName": "/v1/chat/completions",
+                "enabledPolicies": [
+                  "redactEmail",
+                  "log"
+                ]
+              },
+              {
+                "routeName": "/v1/embeddings",
+                "enabledPolicies": [
+                  "log"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"/v1/invalidRoute\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'/v1/invalidRoute' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['enabledIntegrations']['properties']['openAI']['properties']['enabledRoutes']['items']['properties']['routeName']:\n    {'anyOf': [{'const': '/v1/chat/completions'},\n               {'const': '/v1/embeddings'}]}\n\nOn instance['enabledIntegrations']['openAI']['enabledRoutes'][2]['routeName']:\n    '/v1/invalidRoute'",
+      "data": {
+        "enabledIntegrations": {
+          "openAI": {
+            "enabledRoutes": [
+              {
+                "routeName": "/v1/chat/completions",
+                "enabledPolicies": [
+                  "redactEmail",
+                  "log"
+                ]
+              },
+              {
+                "routeName": "/v1/embeddings",
+                "enabledPolicies": [
+                  "log"
+                ]
+              },
+              {
+                "routeName": "/v1/invalidRoute",
+                "enabledPolicies": [
+                  "log"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"unknownPolicy\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'unknownPolicy' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['enabledIntegrations']['properties']['openAI']['properties']['enabledRoutes']['items']['properties']['enabledPolicies']['items']:\n    {'anyOf': [{'const': 'redactEmail'}, {'const': 'log'}]}\n\nOn instance['enabledIntegrations']['openAI']['enabledRoutes'][1]['enabledPolicies'][0]:\n    'unknownPolicy'",
+      "data": {
+        "enabledIntegrations": {
+          "openAI": {
+            "enabledRoutes": [
+              {
+                "routeName": "/v1/chat/completions",
+                "enabledPolicies": [
+                  "redactEmail",
+                  "log"
+                ]
+              },
+              {
+                "routeName": "/v1/embeddings",
+                "enabledPolicies": [
+                  "unknownPolicy"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"unknownPolicy\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'unknownPolicy' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['enabledIntegrations']['properties']['openAI']['properties']['enabledRoutes']['items']['properties']['enabledPolicies']['items']:\n    {'anyOf': [{'const': 'redactEmail'}, {'const': 'log'}]}\n\nOn instance['enabledIntegrations']['openAI']['enabledRoutes'][0]['enabledPolicies'][2]:\n    'unknownPolicy'",
+      "data": {
+        "enabledIntegrations": {
+          "openAI": {
+            "enabledRoutes": [
+              {
+                "routeName": "/v1/chat/completions",
+                "enabledPolicies": [
+                  "redactEmail",
+                  "log",
+                  "unknownPolicy"
+                ]
+              },
+              {
+                "routeName": "/v1/embeddings",
+                "enabledPolicies": [
+                  "log"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"/v1/chat/completions/extra\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'/v1/chat/completions/extra' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['enabledIntegrations']['properties']['openAI']['properties']['enabledRoutes']['items']['properties']['routeName']:\n    {'anyOf': [{'const': '/v1/chat/completions'},\n               {'const': '/v1/embeddings'}]}\n\nOn instance['enabledIntegrations']['openAI']['enabledRoutes'][0]['routeName']:\n    '/v1/chat/completions/extra'",
+      "data": {
+        "enabledIntegrations": {
+          "openAI": {
+            "enabledRoutes": [
+              {
+                "routeName": "/v1/chat/completions/extra",
+                "enabledPolicies": [
+                  "redactEmail",
+                  "log"
+                ]
+              },
+              {
+                "routeName": "/v1/embeddings",
+                "enabledPolicies": [
+                  "log"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalidPolicy\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalidPolicy' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['enabledIntegrations']['properties']['openAI']['properties']['enabledRoutes']['items']['properties']['enabledPolicies']['items']:\n    {'anyOf': [{'const': 'redactEmail'}, {'const': 'log'}]}\n\nOn instance['enabledIntegrations']['openAI']['enabledRoutes'][0]['enabledPolicies'][1]:\n    'invalidPolicy'",
+      "data": {
+        "enabledIntegrations": {
+          "openAI": {
+            "enabledRoutes": [
+              {
+                "routeName": "/v1/chat/completions",
+                "enabledPolicies": [
+                  "redactEmail",
+                  "invalidPolicy"
+                ]
+              },
+              {
+                "routeName": "/v1/embeddings",
+                "enabledPolicies": [
+                  "log"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

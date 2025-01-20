@@ -1,0 +1,266 @@
+{
+  "description": "sample Github_medium/o12562.json",
+  "meta": {
+    "full_size": 1530,
+    "stripped_size": 916,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "enum",
+      "format",
+      "format:uri",
+      "format:utc-millisec",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://www.paloaltonetworks.com/minemeld-indicator-schema-0-1#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "schema for minemeld attributes",
+    "type": "object",
+    "required": [
+      "type"
+    ],
+    "properties": {
+      "type": {
+        "description": "type of the indicator",
+        "type": "string",
+        "enum": [
+          "IPv4",
+          "IPv6",
+          "domain",
+          "URL",
+          "sha512",
+          "sha256",
+          "sha1",
+          "md5",
+          "ssdeep",
+          "mutex",
+          "windows-registry-value",
+          "user-agent.fragment",
+          "file.name",
+          "process.command_line",
+          "email-addr",
+          "autonomous-system"
+        ]
+      },
+      "direction": {
+        "description": "direction of the session, applies to IPv4",
+        "type": "string",
+        "enum": [
+          "inbound",
+          "outbound"
+        ]
+      },
+      "first_seen": {
+        "type": "integer",
+        "format": "utc-millisec",
+        "description": "time the indicator has been seen for the first time. <"
+      },
+      "last_seen": {
+        "type": "integer",
+        "format": "utc-millisec",
+        "description": "time the indicator has been seen for the last time. >"
+      },
+      "sources": {
+        "description": "list of sources for this indicator",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "confidence": {
+        "type": "integer",
+        "description": "confidence in the indicator 0-100",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "share_level": {
+        "description": "share level of indicator",
+        "type": "string",
+        "enum": [
+          "white",
+          "green",
+          "amber",
+          "red"
+        ]
+      },
+      "country": {
+        "type": "string",
+        "description": "ISO country code (IPv4 and IPv6 only)",
+        "minLength": 2,
+        "maxLength": 2
+      },
+      "AS": {
+        "type": "string",
+        "description": "Autonmous system (IPv4 and IPv6 only)"
+      }
+    },
+    "patternProperties": {
+      "^_[a-zA-Z0-9$_]*$": {
+        "description": "private properties"
+      },
+      "^$[a-zA-Z0-9$_]*$": {
+        "description": "reserved, temporary properties"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "IPv4",
+        "direction": "outbound",
+        "first_seen": 1643723400000,
+        "last_seen": 1643723400000,
+        "sources": [
+          "https://example.com/source1",
+          "https://example.com/source2"
+        ],
+        "confidence": 90,
+        "share_level": "amber",
+        "country": "US",
+        "AS": "AS12345"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "101 is greater than the maximum of 100",
+      "python_error": "101 is greater than the maximum of 100\n\nFailed validating 'maximum' in schema['properties']['confidence']:\n    {'type': 'integer',\n     'description': 'confidence in the indicator 0-100',\n     'minimum': 0,\n     'maximum': 100}\n\nOn instance['confidence']:\n    101",
+      "data": {
+        "type": "IPv4",
+        "direction": "outbound",
+        "first_seen": 1643723400000,
+        "last_seen": 1643723400000,
+        "sources": [
+          "https://example.com/source1",
+          "https://example.com/source2"
+        ],
+        "confidence": 101,
+        "minimum keyword constraint violation": "share_level",
+        "country": "US",
+        "AS": "AS12345"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "'blue' is not one of ['white', 'green', 'amber', 'red']\n\nFailed validating 'enum' in schema['properties']['share_level']:\n    {'description': 'share level of indicator',\n     'type': 'string',\n     'enum': ['white', 'green', 'amber', 'red']}\n\nOn instance['share_level']:\n    'blue'",
+      "data": {
+        "type": "IPv4",
+        "direction": "outbound",
+        "first_seen": 1643723400000,
+        "last_seen": 1643723400001,
+        "sources": [
+          "https://example.com/source1",
+          "https://example.com/source2",
+          12345
+        ],
+        "confidence": 101,
+        "share_level": "blue",
+        "country": "USA",
+        "AS": "AS12345",
+        "_invalidProp": true,
+        "$_invalidProp": true,
+        "invalidProp": true,
+        "$": true,
+        "123": true,
+        "a": true,
+        "b": true,
+        "c": true,
+        "": true,
+        " ": true,
+        "123abc": true,
+        "-1": true,
+        "1.0": true,
+        "key.with.dot": true,
+        "key.with.dash": true,
+        "key.with.space": true,
+        "key.with.special.chars!@#$%^&*()": true,
+        "key.with/non-ASCII.chars": true,
+        "key.with/forward.slash": true,
+        "key.with\\back.slash": true,
+        "key.with|vertical.bar": true,
+        "key.with~tilde": true,
+        "key.with`back.tick": true,
+        "key.with;semi.colon": true,
+        "key.with:colon": true,
+        "key.with'apostrophe": true,
+        "key.with\"double.quote": true,
+        "key.with\u0000NULL.char": true,
+        "key.with\tTAB.char": true,
+        "key.with\u0010LINE.FEED.char": true,
+        "key.with\u0011VERTICAL.TAB.char": true,
+        "key.with\u0012FORM.FEED.char": true,
+        "key.with\u0013CARRIAGE.RETURN.char": true,
+        "key.with\u0014SHIFT.OUT.char": true,
+        "key.with\u0015SHIFT.IN.char": true,
+        "key.with\u0016DATA.LINK.ESCAPE.char": true,
+        "key.with\u0017DEVICE.CONTROL.1.char": true,
+        "key.with\u0018DEVICE.CONTROL.2.char": true,
+        "key.with\u0019DEVICE.CONTROL.3.char": true,
+        "key.with\u001aDEVICE.CONTROL.4.char": true,
+        "key.with\u001bESCAPE.char": true,
+        "key.with\u001cFILE.SEPARATOR.char": true,
+        "key.with\u001dGROUP.SEPARATOR.char": true,
+        "key.with\u001eRECORD.SEPARATOR.char": true,
+        "key.with\u001fUNIT.SEPARATOR.char": true,
+        "key.with SPACE.char": true,
+        "key.withDELETE.char": true,
+        "key.with-undefined char": true,
+        "key.with-undefined char": true,
+        "key.with NO-BREAK.SPACE.char": true,
+        "key.with LINE.SEPARATOR.char": true,
+        "key.with PARAGRAPH.SEPARATOR.char": true,
+        "key.with﻿ZERO.WIDTH.NO-BREAK.SPACE.char": true,
+        "key.with�REPLACEMENT.CHARACTER.char": true,
+        "key.with￾-undefined char": true,
+        "key.with￿-undefined char": true,
+        "key.withက0HIGH.SURROGATE.char": true,
+        "key.withჿFD-undefined char": true,
+        "key.withჿFF-undefined char": true,
+        "key.with⃝0-undefined char": true,
+        "key.with⃟F-undefined char": true,
+        "key.with0-undefined char": true,
+        "key.withF-undefined char": true,
+        "key.with0-undefined char": true,
+        "key.withF-undefined char": true,
+        "key.with﷐-undefined char": true,
+        "key.with﷯-undefined char": true,
+        "key.with︀-undefined char": true,
+        "key.with️-undefined char": true,
+        "key.with︐-undefined char": true,
+        "key.with︟-undefined char": true,
+        "key.with︠-undefined char": true,
+        "key.with︯-undefined char": true,
+        "key.with︰-undefined char": true,
+        "key.with﹏-undefined char": true,
+        "key.with﹐-undefined char": true,
+        "key.with﹯-undefined char": true,
+        "key.withﹰ-undefined char": true,
+        "key.with﻿-undefined char": true,
+        "key.withက00-undefined char": true
+      }
+    }
+  ]
+}

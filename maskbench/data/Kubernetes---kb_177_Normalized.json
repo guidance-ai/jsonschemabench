@@ -1,0 +1,253 @@
+{
+  "description": "sample Kubernetes/kb_177_Normalized.json",
+  "meta": {
+    "full_size": 3281,
+    "stripped_size": 795,
+    "features": [
+      "$ref",
+      "items"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_storage_v1_CSINodeDriver": {
+        "description": "CSINodeDriver holds information about the specification of one CSI driver installed on a node",
+        "properties": {
+          "allocatable": {
+            "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_storage_v1_VolumeNodeResources",
+            "description": "allocatable represents the volume resources of a node that are available for scheduling. This field is beta."
+          },
+          "name": {
+            "description": "This is the name of the CSI driver that this object refers to. This MUST be the same name returned by the CSI GetPluginName() call for that driver.",
+            "type": "string"
+          },
+          "nodeID": {
+            "description": "nodeID of the node from the driver point of view. This field enables Kubernetes to communicate with storage systems that do not share the same nomenclature for nodes. For example, Kubernetes may refer to a given node as \"node1\", but the storage system may refer to the same node as \"nodeA\". When Kubernetes issues a command to the storage system to attach a volume to a specific node, it can use this field to refer to the node name using the ID that the storage system will understand, e.g. \"nodeA\" instead of \"node1\". This field is required.",
+            "type": "string"
+          },
+          "topologyKeys": {
+            "description": "topologyKeys is the list of keys supported by the driver. When a driver is initialized on a cluster, it provides a set of topology keys that it understands (e.g. \"company.com/zone\", \"company.com/region\"). When a driver is initialized on a node, it provides the same topology keys along with values. Kubelet will expose these topology keys as labels on its own node object. When Kubernetes does topology aware provisioning, it can use this list to determine which labels it should retrieve from the node object and pass back to the driver. It is possible for different nodes to use different topology keys. This can be empty if driver does not support topology.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "nodeID"
+        ],
+        "type": "object"
+      },
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_storage_v1_VolumeNodeResources": {
+        "description": "VolumeNodeResources is a set of resource limits for scheduling of volumes.",
+        "properties": {
+          "count": {
+            "_format": "int32",
+            "description": "Maximum number of unique volumes managed by the CSI driver that can be used on a node. A volume that is both attached and mounted on a node is considered to be used once, not twice. The same rule applies for a unique volume that is shared among multiple pods on the same node. If this field is not specified, then the supported number of volumes on this node is unbounded.",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "description": "CSINodeSpec holds information about the specification of all CSI drivers installed on a node",
+    "properties": {
+      "drivers": {
+        "description": "drivers is a list of information of all CSI Drivers existing on a node. If all drivers in the list are uninstalled, this can become empty.",
+        "items": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_storage_v1_CSINodeDriver"
+        },
+        "type": [
+          "array",
+          "null"
+        ],
+        "x-kubernetes-patch-merge-key": "name",
+        "x-kubernetes-patch-strategy": "merge"
+      }
+    },
+    "required": [
+      "drivers"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "drivers": [
+          {
+            "name": "csi-driver-1",
+            "nodeID": "node-1",
+            "topologyKeys": [
+              "company.com/zone",
+              "company.com/region"
+            ],
+            "allocatable ": {
+              "count": 10
+            }
+          },
+          {
+            "name": "csi-driver-2",
+            "nodeID": "node-2",
+            "topologyKeys": [
+              "company.com/datacenter",
+              "company.com/rack"
+            ],
+            "allocatable ": {
+              "count": 20
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"string\" is not of types \"array\", \"null\"",
+      "python_error": "'string' is not of type 'array', 'null'\n\nFailed validating 'type' in schema['properties']['drivers']:\n    {'description': 'drivers is a list of information of all CSI Drivers '\n                    'existing on a node. If all drivers in the list are '\n                    'uninstalled, this can become empty.',\n     'items': {'$ref': '#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_storage_v1_CSINodeDriver'},\n     'type': ['array', 'null'],\n     'x-kubernetes-patch-merge-key': 'name',\n     'x-kubernetes-patch-strategy': 'merge'}\n\nOn instance['drivers']:\n    'string'",
+      "data": {
+        "drivers": "string"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ten\" is not of type \"integer\"",
+      "python_error": "'ten' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['drivers']['items']['properties']['allocatable']['properties']['count']:\n    {'_format': 'int32',\n     'description': 'Maximum number of unique volumes managed by the CSI '\n                    'driver that can be used on a node. A volume that is '\n                    'both attached and mounted on a node is considered to '\n                    'be used once, not twice. The same rule applies for a '\n                    'unique volume that is shared among multiple pods on '\n                    'the same node. If this field is not specified, then '\n                    'the supported number of volumes on this node is '\n                    'unbounded.',\n     'type': 'integer'}\n\nOn instance['drivers'][0]['allocatable']['count']:\n    'ten'",
+      "data": {
+        "drivers": [
+          {
+            "name": "csi-driver-1",
+            "nodeID": "node-1",
+            "topologyKeys": [
+              "company.com/zone",
+              "company.com/region"
+            ],
+            "allocatable": {
+              "count": "ten"
+            }
+          },
+          {
+            "name": "csi-driver-2",
+            "nodeID": "node-2",
+            "topologyKeys": [
+              "company.com/datacenter",
+              "company.com/rack"
+            ],
+            "allocatable": {
+              "count": 20
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"twenty\" is not of type \"integer\"",
+      "python_error": "'twenty' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['drivers']['items']['properties']['allocatable']['properties']['count']:\n    {'_format': 'int32',\n     'description': 'Maximum number of unique volumes managed by the CSI '\n                    'driver that can be used on a node. A volume that is '\n                    'both attached and mounted on a node is considered to '\n                    'be used once, not twice. The same rule applies for a '\n                    'unique volume that is shared among multiple pods on '\n                    'the same node. If this field is not specified, then '\n                    'the supported number of volumes on this node is '\n                    'unbounded.',\n     'type': 'integer'}\n\nOn instance['drivers'][1]['allocatable']['count']:\n    'twenty'",
+      "data": {
+        "drivers": [
+          {
+            "allocatable": {
+              "count": -1
+            },
+            "name": "csi-driver-1",
+            "nodeID": "node-1",
+            "topologyKeys": [
+              "company.com/zone",
+              "company.com/region"
+            ]
+          },
+          {
+            "name": "csi-driver-2",
+            "nodeID": "node-2",
+            "topologyKeys": [
+              "company.com/datacenter",
+              "company.com/rack"
+            ],
+            "allocatable": {
+              "count": "twenty"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "drivers": [
+          {
+            "allocatable": {
+              "count": 10
+            },
+            "name": "csi-driver-1",
+            "nodeID": "node-1",
+            "topologyKeys": [
+              "company.com/zone",
+              "company.com/region"
+            ]
+          },
+          {
+            "allocatable": {
+              "count": 20
+            },
+            "name": "csi-driver-2",
+            "nodeID": "node-2",
+            "topologyKeys": [
+              "company.com/datacenter",
+              "company.com/rack"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"20\" is not of type \"integer\"",
+      "python_error": "'20' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['drivers']['items']['properties']['allocatable']['properties']['count']:\n    {'_format': 'int32',\n     'description': 'Maximum number of unique volumes managed by the CSI '\n                    'driver that can be used on a node. A volume that is '\n                    'both attached and mounted on a node is considered to '\n                    'be used once, not twice. The same rule applies for a '\n                    'unique volume that is shared among multiple pods on '\n                    'the same node. If this field is not specified, then '\n                    'the supported number of volumes on this node is '\n                    'unbounded.',\n     'type': 'integer'}\n\nOn instance['drivers'][0]['allocatable']['count']:\n    '20'",
+      "data": {
+        "drivers": [
+          {
+            "name": "csi-driver-1",
+            "nodeID": "node-1",
+            "topologyKeys": [
+              "company.com/zone",
+              "company.com/region"
+            ],
+            "allocatable": {
+              "count": "20"
+            }
+          },
+          {
+            "name": "csi-driver-2",
+            "nodeID": "node-2",
+            "topologyKeys": [
+              "company.com/datacenter",
+              "company.com/rack"
+            ],
+            "allocatable": {
+              "count": 20
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

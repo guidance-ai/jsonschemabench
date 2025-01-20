@@ -1,0 +1,251 @@
+{
+  "description": "sample Snowplow/sp_230_Normalized.json",
+  "meta": {
+    "full_size": 695,
+    "stripped_size": 475,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for an EMR job status context",
+    "properties": {
+      "created_at": {
+        "_format": "date-time",
+        "type": "string"
+      },
+      "ended_at": {
+        "_format": "date-time",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "jobflow_id": {
+        "maxLength": 32,
+        "type": "string"
+      },
+      "last_state_change_reason": {
+        "maxLength": 255,
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "name": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "state": {
+        "enum": [
+          "STARTING",
+          "BOOTSTRAPPING",
+          "RUNNING",
+          "WAITING",
+          "TERMINATING",
+          "TERMINATED",
+          "TERMINATED_WITH_ERRORS"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "jobflow_id",
+      "state",
+      "created_at"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "emr_job_status",
+      "vendor": "com.snowplowanalytics.monitoring.batch",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "created_at": "2022-01-01T12:00:00Z",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"j-1234567890abcdef01234567890abcdef01234567890\" is longer than 32 characters",
+      "python_error": "'j-1234567890abcdef01234567890abcdef01234567890' is too long\n\nFailed validating 'maxLength' in schema['properties']['jobflow_id']:\n    {'maxLength': 32, 'type': 'string'}\n\nOn instance['jobflow_id']:\n    'j-1234567890abcdef01234567890abcdef01234567890'",
+      "data": {
+        "created_at": "2022-01-01T12:00:00Z",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef01234567890abcdef01234567890",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['ended_at']:\n    {'_format': 'date-time', 'type': ['string', 'null']}\n\nOn instance['ended_at']:\n    123",
+      "data": {
+        "created_at": "2022-01-01T12:00:00Z",
+        "ended_at": 123,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for an EMR job status context',\n     'properties': {'created_at': {'_format': 'date-time',\n                                   'type': 'string'},\n                    'ended_at': {'_format': 'date-time',\n                                 'type': ['string', 'null']},\n                    'jobflow_id': {'maxLength': 32, 'type': 'string'},\n                    'last_state_change_reason': {'maxLength': 255,\n                                                 'type': ['string',\n                                                          'null']},\n                    'name': {'maxLength': 255, 'type': 'string'},\n                    'state': {'enum': ['STARTING',\n                                       'BOOTSTRAPPING',\n                                       'RUNNING',\n                                       'WAITING',\n                        .. (747 more)",
+      "data": {
+        "created_at": "2022-01-01T12:00:00Z",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef01234567890",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING",
+        "extra_property": "extra_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"null\", \"string\"",
+      "python_error": "True is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['ended_at']:\n    {'_format': 'date-time', 'type': ['string', 'null']}\n\nOn instance['ended_at']:\n    True",
+      "data": {
+        "created_at": "2022-01-01T12:00:00Z",
+        "ended_at": true,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"j-1234567890abcdef01234567890abcdef01234567890abcdef01234567890\" is longer than 32 characters",
+      "python_error": "'j-1234567890abcdef01234567890abcdef01234567890abcdef01234567890' is too long\n\nFailed validating 'maxLength' in schema['properties']['jobflow_id']:\n    {'maxLength': 32, 'type': 'string'}\n\nOn instance['jobflow_id']:\n    'j-1234567890abcdef01234567890abcdef01234567890abcdef01234567890'",
+      "data": {
+        "created_at": "2022-01-01T12:00:00Z",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef01234567890abcdef01234567890abcdef01234567890",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "12345 is not of types \"null\", \"string\"",
+      "python_error": "12345 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['ended_at']:\n    {'_format': 'date-time', 'type': ['string', 'null']}\n\nOn instance['ended_at']:\n    12345",
+      "data": {
+        "created_at": "2022-01-01T12:00:00Z",
+        "ended_at": 12345,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('created_at_2', 'extra_property' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for an EMR job status context',\n     'properties': {'created_at': {'_format': 'date-time',\n                                   'type': 'string'},\n                    'ended_at': {'_format': 'date-time',\n                                 'type': ['string', 'null']},\n                    'jobflow_id': {'maxLength': 32, 'type': 'string'},\n                    'last_state_change_reason': {'maxLength': 255,\n                                                 'type': ['string',\n                                                          'null']},\n                    'name': {'maxLength': 255, 'type': 'string'},\n                    'state': {'enum': ['STARTING',\n                                       'BOOTSTRAPPING',\n                                       'RUNNING',\n                                       'WAITING',\n       .. (798 more)",
+      "data": {
+        "created_at": "2022-01-01T12:00:00",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started successfully",
+        "name": "My EMR Job",
+        "state": "RUNNING",
+        "extra_property": "extra_value",
+        "created_at_2": "2022-01-01T12:00:00Z"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "created_at": "2022-01-01T12:00:00.000Z",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['ended_at']:\n    {'_format': 'date-time', 'type': ['string', 'null']}\n\nOn instance['ended_at']:\n    123",
+      "data": {
+        "created_at": "2022-01-01T12:00:00.000Z",
+        "ended_at": 123,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started",
+        "name": "My EMR Job",
+        "state": "RUNNING"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for an EMR job status context',\n     'properties': {'created_at': {'_format': 'date-time',\n                                   'type': 'string'},\n                    'ended_at': {'_format': 'date-time',\n                                 'type': ['string', 'null']},\n                    'jobflow_id': {'maxLength': 32, 'type': 'string'},\n                    'last_state_change_reason': {'maxLength': 255,\n                                                 'type': ['string',\n                                                          'null']},\n                    'name': {'maxLength': 255, 'type': 'string'},\n                    'state': {'enum': ['STARTING',\n                                       'BOOTSTRAPPING',\n                                       'RUNNING',\n                                       'WAITING',\n                        .. (717 more)",
+      "data": {
+        "created_at": "2022-01-01T12:00:00.000Z",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "a",
+        "name": "My EMR Job",
+        "state": "RUNNING",
+        "extra_property": "some_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('invalid_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('invalid_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for an EMR job status context',\n     'properties': {'created_at': {'_format': 'date-time',\n                                   'type': 'string'},\n                    'ended_at': {'_format': 'date-time',\n                                 'type': ['string', 'null']},\n                    'jobflow_id': {'maxLength': 32, 'type': 'string'},\n                    'last_state_change_reason': {'maxLength': 255,\n                                                 'type': ['string',\n                                                          'null']},\n                    'name': {'maxLength': 255, 'type': 'string'},\n                    'state': {'enum': ['STARTING',\n                                       'BOOTSTRAPPING',\n                                       'RUNNING',\n                                       'WAITING',\n                      .. (720 more)",
+      "data": {
+        "created_at": "2022-01-01T12:00:00",
+        "ended_at": null,
+        "jobflow_id": "j-1234567890abcdef0",
+        "last_state_change_reason": "Job started",
+        "name": "My EMR Job",
+        "state": "RUNNING",
+        "invalid_property": "Test"
+      }
+    }
+  ]
+}

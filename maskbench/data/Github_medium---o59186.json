@@ -1,0 +1,264 @@
+{
+  "description": "sample Github_medium/o59186.json",
+  "meta": {
+    "full_size": 1858,
+    "stripped_size": 1218,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "allOf",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "JSON schema for express-json-patch-assertion options",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "allow": {
+        "description": "Assertions that will allow matched operations to proceed",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/assertion"
+          },
+          {
+            "$ref": "#/definitions/assertionList"
+          }
+        ]
+      },
+      "deny": {
+        "description": "Assertions that will deny matched operations from proceeding",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/assertion"
+          },
+          {
+            "$ref": "#/definitions/assertionList"
+          }
+        ]
+      },
+      "property": {
+        "type": "string",
+        "minLenth": 1
+      },
+      "ajv": {
+        "$ref": "#/definitions/ajvOptions"
+      }
+    },
+    "required": [
+      "allow",
+      "deny",
+      "property",
+      "ajv"
+    ],
+    "definitions": {
+      "assertion": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/definitions/path"
+          },
+          {
+            "$ref": "#/definitions/op"
+          }
+        ],
+        "properties": {
+          "condition": {
+            "type": "object"
+          },
+          "assertion": {
+            "description": "Whether to proceed to next middleware if this one is matched"
+          },
+          "next": {
+            "description": "Whether to proceed to next middleware if this one is matched",
+            "type": "boolean"
+          },
+          "value": {
+            "description": "Value or pattern to match against this operation"
+          },
+          "from": {
+            "description": "Property to copy or move from",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "op"
+        ]
+      },
+      "assertionList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/assertion"
+        }
+      },
+      "path": {
+        "properties": {
+          "path": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/pathString"
+              },
+              {
+                "$ref": "#/definitions/pathList"
+              }
+            ]
+          }
+        }
+      },
+      "pathString": {
+        "description": "A JSON Pointer path.",
+        "type": "string"
+      },
+      "pathList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/pathString"
+        }
+      },
+      "op": {
+        "properties": {
+          "op": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/opString"
+              },
+              {
+                "$ref": "#/definitions/opList"
+              }
+            ]
+          }
+        }
+      },
+      "opString": {
+        "type": "string",
+        "enum": [
+          "add",
+          "replace",
+          "test",
+          "remove",
+          "*"
+        ]
+      },
+      "opList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/opString"
+        }
+      },
+      "ajvOptions": {
+        "description": "AJV json validator options - see https://github.com/epoberezkin/ajv/blob/master/README.md#options",
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "allow": {
+          "path": "/users/0/name",
+          "op": "add",
+          "value": "John Doe",
+          "next": true
+        },
+        "deny": [
+          {
+            "path": "/users/0/email",
+            "op": "replace",
+            "value": "johndoe@example.com",
+            "next": false
+          },
+          {
+            "path": "/users/0/phone",
+            "op": "remove",
+            "next": false
+          }
+        ],
+        "property": "users",
+        "ajv": {
+          "allErrors": true,
+          "verbose": true
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "allow": {
+          "path": "/users/0/name",
+          "op": "add",
+          "value": "John Doe",
+          "next": true
+        },
+        "deny": [
+          {
+            "path": "/users/0/email",
+            "op": "replace",
+            "value": "johndoe@example.com",
+            "next": false
+          },
+          {
+            "path": "/users/0/password",
+            "op": "add",
+            "value": "password123",
+            "next": false
+          }
+        ],
+        "property": "users",
+        "ajv": {
+          "allErrors": true,
+          "verbose": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[{\"path\":\"/users/0/email\",\"op\":\"replace\",\"value\":\"johndoe@example.com\",\"next\":false},{\"path\":\"/users/0/password\",\"op\":\"add\",\"from\":123,\"next\":false}] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[1]['items']['properties']['from']:\n    {'description': 'Property to copy or move from', 'type': 'string'}\n\nOn instance[1]['from']:\n    123",
+      "data": {
+        "allow": {
+          "path": "/users/0/name",
+          "op": "add",
+          "value": "John Doe",
+          "next": true
+        },
+        "deny": [
+          {
+            "path": "/users/0/email",
+            "op": "replace",
+            "value": "johndoe@example.com",
+            "next": false
+          },
+          {
+            "path": "/users/0/password",
+            "op": "add",
+            "from": 123,
+            "next": false
+          }
+        ],
+        "property": "",
+        "ajv": {
+          "allErrors": true,
+          "verbose": true
+        }
+      }
+    }
+  ]
+}

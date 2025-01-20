@@ -1,0 +1,74 @@
+{
+  "description": "sample Synthesized/draft2019_09_nonvalid_properties_id1_subschema1_not_2.json",
+  "meta": {
+    "full_size": 126,
+    "stripped_size": 126,
+    "features": [
+      "allOf",
+      "enum",
+      "not"
+    ],
+    "raw_features": [
+      "properties",
+      "type",
+      "type:integer",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "allOf": [
+      {
+        "enum": [
+          {
+            "bar": "baz",
+            "foo": 1
+          }
+        ]
+      },
+      {
+        "not": {
+          "not": {
+            "properties": {
+              "bar": {
+                "type": "string"
+              },
+              "foo": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "bar": "baz",
+        "foo": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"bar\":\"baz\",\"foo\":2} is not one of [{\"bar\":\"baz\",\"foo\":1}]",
+      "python_error": "{'bar': 'baz', 'foo': 2} is not one of [{'bar': 'baz', 'foo': 1}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 'baz', 'foo': 1}]}\n\nOn instance:\n    {'bar': 'baz', 'foo': 2}",
+      "data": {
+        "bar": "baz",
+        "foo": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"bar\":1,\"foo\":\"baz\"} is not one of [{\"bar\":\"baz\",\"foo\":1}]",
+      "python_error": "{'bar': 1, 'foo': 'baz'} is not one of [{'bar': 'baz', 'foo': 1}]\n\nFailed validating 'enum' in schema['allOf'][0]:\n    {'enum': [{'bar': 'baz', 'foo': 1}]}\n\nOn instance:\n    {'bar': 1, 'foo': 'baz'}",
+      "data": {
+        "bar": 1,
+        "foo": "baz"
+      }
+    }
+  ]
+}

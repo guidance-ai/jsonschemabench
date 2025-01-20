@@ -1,0 +1,167 @@
+{
+  "description": "sample Github_easy/o6227.json",
+  "meta": {
+    "full_size": 1226,
+    "stripped_size": 912,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "definitions": {
+      "valuePath": {
+        "title": "Value Path",
+        "description": "JSON Path of where to find value to check in payload",
+        "type": "string",
+        "minLength": 1
+      },
+      "_changeTypeOthers": {
+        "title": "Change Type",
+        "enum": [
+          "percent",
+          "percentInc",
+          "percentDec",
+          "value",
+          "valueInc",
+          "valueDec"
+        ]
+      },
+      "_changeTypeAny": {
+        "title": "Change Type",
+        "enum": [
+          "any"
+        ]
+      },
+      "changeThreshold": {
+        "title": "Change Threshold",
+        "description": "Amount of change required",
+        "type": "number"
+      },
+      "prevValuePath": {
+        "title": "Previous Value Path",
+        "description": "JSON path of where to put the previous triggering value and time",
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "valuePath": {
+            "$ref": "#/definitions/valuePath"
+          },
+          "changeType": {
+            "$ref": "#/definitions/_changeTypeOthers"
+          },
+          "changeThreshold": {
+            "$ref": "#/definitions/changeThreshold"
+          },
+          "prevValuePath": {
+            "$ref": "#/definitions/prevValuePath"
+          }
+        },
+        "required": [
+          "valuePath",
+          "changeType",
+          "changeThreshold"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "properties": {
+          "valuePath": {
+            "$ref": "#/definitions/valuePath"
+          },
+          "changeType": {
+            "$ref": "#/definitions/_changeTypeAny"
+          },
+          "prevValuePath": {
+            "$ref": "#/definitions/prevValuePath"
+          }
+        },
+        "required": [
+          "valuePath",
+          "changeType"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "valuePath": "$.data.value",
+        "changeType": "percentInc",
+        "changeThreshold": 10,
+        "prevValuePath": "$.data.prevValue"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "valuePath": "$.data.value",
+        "changeType": "percentInc",
+        "changeThreshold": 10.5,
+        "prevValuePath": "$.data.prevValue"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"valuePath\":\"$.data.value\",\"changeType\":\"any\",\"changeThreshold\":10.5,\"prevValuePath\":\"$.data.prevValue\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'any' is not one of ['percent', 'percentInc', 'percentDec', 'value', 'valueInc', 'valueDec']\n\nFailed validating 'enum' in schema[0]['properties']['changeType']:\n    {'title': 'Change Type',\n     'enum': ['percent',\n              'percentInc',\n              'percentDec',\n              'value',\n              'valueInc',\n              'valueDec']}\n\nOn instance['changeType']:\n    'any'",
+      "data": {
+        "valuePath": "$.data.value",
+        "changeType": "any",
+        "changeThreshold": 10.5,
+        "prevValuePath": "$.data.prevValue"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"valuePath\":\"\",\"changeType\":\"percentInc\",\"changeThreshold\":10.5,\"prevValuePath\":\"$.data.prevValue\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'percentInc' is not one of ['any']\n\nFailed validating 'enum' in schema[1]['properties']['changeType']:\n    {'title': 'Change Type', 'enum': ['any']}\n\nOn instance['changeType']:\n    'percentInc'",
+      "data": {
+        "valuePath": "",
+        "changeType": "percentInc",
+        "changeThreshold": 10.5,
+        "prevValuePath": "$.data.prevValue"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"valuePath\":\"\",\"changeType\":\"percentInc\",\"changeThreshold\":10.5,\"prevValuePath\":\"$.data.prevValue\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'percentInc' is not one of ['any']\n\nFailed validating 'enum' in schema[1]['properties']['changeType']:\n    {'title': 'Change Type', 'enum': ['any']}\n\nOn instance['changeType']:\n    'percentInc'",
+      "data": {
+        "valuePath": "",
+        "changeType": "percentInc",
+        "changeThreshold": 10.5,
+        "prevValuePath": "$.data.prevValue"
+      }
+    }
+  ]
+}

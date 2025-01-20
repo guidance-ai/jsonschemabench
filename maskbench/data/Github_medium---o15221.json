@@ -1,0 +1,424 @@
+{
+  "description": "sample Github_medium/o15221.json",
+  "meta": {
+    "full_size": 2338,
+    "stripped_size": 983,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "additionalProperties",
+      "enum",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "definitions": {
+      "pluginMessage": {
+        "title": "Plugin Message",
+        "type": "object",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "description": "The code that represents the rule or type of issue",
+            "type": "string"
+          },
+          "messageText": {
+            "title": "Message Text",
+            "description": "The message text to be displayed for this issue",
+            "type": "string"
+          },
+          "severity": {
+            "title": "Severity",
+            "description": "The severity level of the issue",
+            "type": "string",
+            "enum": [
+              "FATAL",
+              "CRITICAL",
+              "ERROR",
+              "WARNING",
+              "CAUTION",
+              "INFO",
+              "COSMETIC"
+            ]
+          }
+        }
+      }
+    },
+    "title": "Rules Configuration",
+    "description": "A set of rules configuration options for CFLint",
+    "type": "object",
+    "properties": {
+      "rule": {
+        "title": "Rules",
+        "description": "Allows you to add a plugin for this folder that is not listed in the global configuration",
+        "type": "array",
+        "minItems": 0,
+        "items": {
+          "title": "Rule",
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "className": {
+              "title": "Class Name",
+              "type": "string"
+            },
+            "message": {
+              "title": "Messages",
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/definitions/pluginMessage"
+              }
+            },
+            "parameter": {
+              "title": "Parameters",
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "title": "Parameter",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "value": {
+                    "title": "Value"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "default": []
+      },
+      "excludes": {
+        "title": "Excludes",
+        "description": "An array of objects describing rules you want to be excluded from this directory and its children",
+        "type": "array",
+        "minItems": 0,
+        "items": {
+          "$ref": "#/definitions/pluginMessage"
+        },
+        "default": []
+      },
+      "includes": {
+        "title": "Includes",
+        "description": "An array of objects describing rules you want to be applied for this directory and its children",
+        "type": "array",
+        "minItems": 0,
+        "items": {
+          "$ref": "#/definitions/pluginMessage"
+        },
+        "default": []
+      },
+      "inheritParent": {
+        "title": "Inherit Parent",
+        "description": "Configures if the rules set in the global or any parent configuration should be inherited as a base set of rules",
+        "type": "boolean",
+        "default": true
+      },
+      "parameters": {
+        "title": "Parameters",
+        "description": "The set of parameters to configure, where the keys are denoted as RuleName.parameterName",
+        "type": "object",
+        "patternProperties": {
+          "^([\\w])+\\.([\\w])+$": {
+            "title": "Parameter",
+            "description": "The parameter for a particular rule whose value will be overridden. Denoted as RuleName.parameterName.",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "rule": [
+          {
+            "name": "Rule1",
+            "className": "com.example.Rule1",
+            "message": [
+              {
+                "code": "RULE1-001",
+                "messageText": "This is a message for Rule1",
+                "severity": "ERROR"
+              }
+            ],
+            "parameter": [
+              {
+                "name": "param1",
+                "value": "value1"
+              }
+            ]
+          },
+          {
+            "name": "Rule2",
+            "className": "com.example.Rule2",
+            "message": [
+              {
+                "code": "RULE2-001",
+                "messageText": "This is a message for Rule2",
+                "severity": "WARNING"
+              }
+            ],
+            "parameter": [
+              {
+                "name": "param2",
+                "value": "value2"
+              }
+            ]
+          }
+        ],
+        "excludes": [
+          {
+            "code": "RULE1-001",
+            "messageText": "Exclude Rule1",
+            "severity": "INFO"
+          }
+        ],
+        "includes": [
+          {
+            "code": "RULE2-001",
+            "messageText": "Include Rule2",
+            "severity": "ERROR"
+          }
+        ],
+        "inheritParent": false,
+        "parameters": {
+          "Rule1.param1": "new_value1",
+          "Rule2.param2": "new_value2"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "rule": [
+          {
+            "name": "rule1",
+            "className": "rule1Class",
+            "message": [
+              {
+                "code": "code1",
+                "messageText": "messageText1",
+                "severity": "ERROR"
+              },
+              {
+                "code": "code2",
+                "messageText": "messageText2",
+                "severity": "WARNING"
+              }
+            ],
+            "parameter": [
+              {
+                "name": "param1",
+                "value": "value1"
+              },
+              {
+                "name": "param2",
+                "value": "value2"
+              }
+            ]
+          },
+          {
+            "name": "rule2",
+            "className": "rule2Class",
+            "message": [
+              {
+                "code": "code3",
+                "messageText": "messageText3",
+                "severity": "INFO"
+              }
+            ],
+            "parameter": [
+              {
+                "name": "param3",
+                "value": "value3"
+              }
+            ]
+          }
+        ],
+        "excludes": [
+          {
+            "code": "excludeCode1",
+            "messageText": "excludeMessageText1",
+            "severity": "FATAL"
+          },
+          {
+            "code": "excludeCode2",
+            "messageText": "excludeMessageText2",
+            "severity": "CRITICAL"
+          }
+        ],
+        "includes": [
+          {
+            "code": "includeCode1",
+            "messageText": "includeMessageText1",
+            "severity": "CAUTION"
+          },
+          {
+            "code": "includeCode2",
+            "messageText": "includeMessageText2",
+            "severity": "COSMETIC"
+          }
+        ],
+        "inheritParent": false,
+        "parameters": {
+          "rule1.param1": "value1",
+          "rule2.param2": "value2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('rule1' was unexpected)",
+      "python_error": "'rule1', 'rule1 is not a valid key in parameters', 'value2' do not match any of the regexes: '^([\\\\w])+\\\\.([\\\\w])+$'\n\nFailed validating 'additionalProperties' in schema['properties']['parameters']:\n    {'title': 'Parameters',\n     'description': 'The set of parameters to configure, where the keys '\n                    'are denoted as RuleName.parameterName',\n     'type': 'object',\n     'patternProperties': {'^([\\\\w])+\\\\.([\\\\w])+$': {'title': 'Parameter',\n                                                     'description': 'The '\n                                                                    'parameter '\n                                                                    'for a '\n                                                                    'particular '\n                                                                    'rule '\n                                                                    'whose '\n                                                                    'value '\n                    .. (736 more)",
+      "data": {
+        "rule": [
+          {
+            "name": "rule1",
+            "className": "rule1Class",
+            "message": [
+              {
+                "code": "code1",
+                "messageText": "messageText1",
+                "severity": "ERROR"
+              },
+              {
+                "code": "code2",
+                "messageText": "messageText2",
+                "severity": "WARNING"
+              }
+            ],
+            "parameter": [
+              {
+                "name": "param1",
+                "value": "value1"
+              },
+              {
+                "name": "param2",
+                "value": "value2"
+              }
+            ]
+          },
+          {
+            "name": "rule2",
+            "className": "rule2Class",
+            "message": [
+              {
+                "code": "code3",
+                "messageText": "messageText3",
+                "severity": "INFO"
+              }
+            ],
+            "parameter": [
+              {
+                "name": "param3",
+                "value": "value3"
+              }
+            ]
+          }
+        ],
+        "excludes": [
+          {
+            "code": "excludeCode1",
+            "messageText": "excludeMessageText1",
+            "severity": "FATAL"
+          },
+          {
+            "code": "excludeCode2",
+            "messageText": "excludeMessageText2",
+            "severity": "CRITICAL"
+          }
+        ],
+        "includes": [
+          {
+            "code": "includeCode1",
+            "messageText": "includeMessageText1",
+            "severity": "CAUTION"
+          },
+          {
+            "code": "includeCode2",
+            "messageText": "includeMessageText2",
+            "severity": "COSMETIC"
+          }
+        ],
+        "inheritParent": false,
+        "parameters": {
+          "rule1": "value1",
+          "rule1 is not a valid key in parameters": "rule2.param2",
+          "value2": " is not a valid key in parameters"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"INVALID_SEVERITY\" is not one of [\"FATAL\",\"CRITICAL\",\"ERROR\",\"WARNING\",\"CAUTION\",\"INFO\",\"COSMETIC\"]",
+      "python_error": "10 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['parameters']['patternProperties']['^([\\\\w])+\\\\.([\\\\w])+$']:\n    {'title': 'Parameter',\n     'description': 'The parameter for a particular rule whose value will '\n                    'be overridden. Denoted as RuleName.parameterName.',\n     'type': 'string'}\n\nOn instance['parameters']['rule1.param1']:\n    10",
+      "data": {
+        "rule": [
+          {
+            "name": "rule1",
+            "className": "rule1Class",
+            "message": [
+              {
+                "code": "code1",
+                "messageText": "messageText1",
+                "severity": "INVALID_SEVERITY"
+              }
+            ],
+            "parameter": [
+              {
+                "name": 1,
+                "value": "value1"
+              }
+            ]
+          }
+        ],
+        "excludes": [
+          {
+            "code": "excludeCode1",
+            "messageText": "excludeMessageText1",
+            "severity": "FATAL"
+          }
+        ],
+        "includes": [
+          {
+            "code": "includeCode1",
+            "messageText": "includeMessageText1"
+          }
+        ],
+        "inheritParent": false,
+        "parameters": {
+          "rule1.param1": 10,
+          "rule2.param2": "value2"
+        }
+      }
+    }
+  ]
+}

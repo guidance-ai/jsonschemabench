@@ -1,0 +1,306 @@
+{
+  "description": "sample JsonSchemaStore/mycode.json",
+  "meta": {
+    "full_size": 1302,
+    "stripped_size": 642,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "allOf:trivial",
+      "definitions",
+      "id",
+      "minLength",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "classification": {
+        "enum": [
+          "MyCode",
+          "LibraryCode",
+          "UnrelatedCode"
+        ]
+      },
+      "includes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/mycode.json",
+    "properties": {
+      "Eval": {
+        "description": "Script that is executed by passing a string to the host-provided eval function.",
+        "default": "MyCode",
+        "allOf": [
+          {
+            "$ref": "#/definitions/classification"
+          }
+        ]
+      },
+      "Function": {
+        "description": "Script that is executed by passing a string to the 'Function' constructor.",
+        "default": "LibraryCode",
+        "allOf": [
+          {
+            "$ref": "#/definitions/classification"
+          }
+        ]
+      },
+      "ScriptBlock": {
+        "description": "Script that is executed by passing a string to the 'setTimeout', 'setImmediate', or 'setInterval' functions.",
+        "default": "UnrelatedCode",
+        "allOf": [
+          {
+            "$ref": "#/definitions/classification"
+          }
+        ]
+      },
+      "MyCode": {
+        "description": "An array of urls or files that are classified as 'MyCode'.",
+        "allOf": [
+          {
+            "$ref": "#/definitions/includes"
+          }
+        ]
+      },
+      "Libraries": {
+        "description": "An array of urls or files that are classified as 'LibraryCode'.",
+        "allOf": [
+          {
+            "$ref": "#/definitions/includes"
+          }
+        ]
+      },
+      "Unrelated": {
+        "description": "An array of urls or files that are classified as 'UnrelatedCode'.",
+        "allOf": [
+          {
+            "$ref": "#/definitions/includes"
+          }
+        ]
+      }
+    },
+    "title": "JSON schema for mycode.js files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          "https://example.com/mycode2.js"
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "https://example.com/library2.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "https://example.com/unrelated2.js"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['MyCode']['allOf'][0]['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['MyCode'][0]:\n    ''",
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "",
+          "https://example.com/mycode2.js"
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "https://example.com/library2.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "https://example.com/unrelated2.js"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['MyCode']['allOf'][0]['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['MyCode'][1]:\n    ''",
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          ""
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "https://example.com/library2.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "https://example.com/unrelated2.js"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"InvalidCode\" is not one of [\"MyCode\",\"LibraryCode\",\"UnrelatedCode\"]",
+      "python_error": "'InvalidCode' is not one of ['MyCode', 'LibraryCode', 'UnrelatedCode']\n\nFailed validating 'enum' in schema['properties']['Eval']['allOf'][0]:\n    {'enum': ['MyCode', 'LibraryCode', 'UnrelatedCode']}\n\nOn instance['Eval']:\n    'InvalidCode'",
+      "data": {
+        "Eval": "InvalidCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          "https://example.com/mycode2.js"
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "https://example.com/library2.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "https://example.com/unrelated2.js"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['Libraries']['allOf'][0]['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['Libraries'][1]:\n    ''",
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          "https://example.com/mycode2.js"
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          ""
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "https://example.com/unrelated2.js"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          "/path/to/mycode.js"
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "/path/to/library.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "/path/to/unrelated.js"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['MyCode']['allOf'][0]['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['MyCode'][2]:\n    ''",
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          "/path/to/mycode.js",
+          ""
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "/path/to/library.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "/path/to/unrelated.js"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['MyCode']['allOf'][0]['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['MyCode'][1]:\n    ''",
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          ""
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "/path/to/library.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "/path/to/unrelated.js"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['MyCode']['allOf'][0]['items']:\n    {'type': 'string', 'minLength': 1}\n\nOn instance['MyCode'][1]:\n    ''",
+      "data": {
+        "Eval": "MyCode",
+        "Function": "LibraryCode",
+        "ScriptBlock": "UnrelatedCode",
+        "MyCode": [
+          "https://example.com/mycode.js",
+          ""
+        ],
+        "Libraries": [
+          "https://example.com/library.js",
+          "/path/to/library.js"
+        ],
+        "Unrelated": [
+          "https://example.com/unrelated.js",
+          "/path/to/unrelated.js"
+        ]
+      }
+    }
+  ]
+}

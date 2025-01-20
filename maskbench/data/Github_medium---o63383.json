@@ -1,0 +1,175 @@
+{
+  "description": "sample Github_medium/o63383.json",
+  "meta": {
+    "full_size": 928,
+    "stripped_size": 928,
+    "features": [
+      "additionalProperties",
+      "format",
+      "format:minimal",
+      "format:minimal_pullrequest",
+      "format:minimal_user",
+      "format:positiveInteger",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "type": "object",
+    "format": "minimal",
+    "properties": {
+      "first_timers": {
+        "type": "object",
+        "patternProperties": {
+          "^[^/#]+$": {
+            "type": "object",
+            "format": "minimal_user",
+            "properties": {
+              "pull_request": {
+                "type": "string",
+                "pattern": "^[^/#]+/[^/#]+#[0123456789]+$"
+              }
+            },
+            "required": [
+              "pull_request"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "number_of_first_timers": {
+        "format": "positiveInteger"
+      },
+      "number_of_first_timer_pull_requests": {
+        "format": "positiveInteger"
+      },
+      "first_timer_pull_requests": {
+        "type": "object",
+        "patternProperties": {
+          "^[^/#]+/[^/#]+#[0123456789]+$": {
+            "type": "object",
+            "format": "minimal_pullrequest",
+            "properties": {
+              "first_timer": {
+                "type": "string",
+                "pattern": "^[^/#]+$"
+              }
+            },
+            "required": [
+              "first_timer"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "owner": {
+        "type": "object",
+        "format": "minimal_user"
+      }
+    },
+    "required": [
+      "first_timer_pull_requests",
+      "number_of_first_timer_pull_requests",
+      "number_of_first_timers",
+      "first_timers",
+      "owner"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "first_timers": {
+          "johnDoe": {
+            "pull_request": "johnDoe/repo#123"
+          },
+          "janeDoe": {
+            "pull_request": "janeDoe/repo#456"
+          }
+        },
+        "number_of_first_timers": 2,
+        "number_of_first_timer_pull_requests": 2,
+        "first_timer_pull_requests": {
+          "johnDoe/repo#123": {
+            "first_timer": "johnDoe"
+          },
+          "janeDoe/repo#456": {
+            "first_timer": "janeDoe"
+          }
+        },
+        "owner": {
+          "login": "admin"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('johnDoe/invalid' was unexpected)",
+      "python_error": "'johnDoe/invalid' does not match any of the regexes: '^[^/#]+$'\n\nFailed validating 'additionalProperties' in schema['properties']['first_timers']:\n    {'type': 'object',\n     'patternProperties': {'^[^/#]+$': {'type': 'object',\n                                        'format': 'minimal_user',\n                                        'properties': {'pull_request': {'type': 'string',\n                                                                        'pattern': '^[^/#]+/[^/#]+#[0123456789]+$'}},\n                                        'required': ['pull_request']}},\n     'additionalProperties': False}\n\nOn instance['first_timers']:\n    {'johnDoe/invalid': {'pull_request': 'johnDoe/repo#123'},\n     'janeDoe': {'pull_request': 'janeDoe/repo#456'}}",
+      "data": {
+        "first_timers": {
+          "johnDoe/invalid": {
+            "pull_request": "johnDoe/repo#123"
+          },
+          "janeDoe": {
+            "pull_request": "janeDoe/repo#456"
+          }
+        },
+        "number_of_first_timers": 2,
+        "number_of_first_timer_pull_requests": 2,
+        "first_timer_pull_requests": {
+          "johnDoe/repo#123": {
+            "first_timer": "johnDoe"
+          },
+          "janeDoe/repo#456": {
+            "first_timer": "janeDoe"
+          }
+        },
+        "owner": {
+          "login": "admin"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"johnDoe/repo#abc\" does not match \"^[^/#]+/[^/#]+#[0123456789]+$\"",
+      "python_error": "'johnDoe/repo#abc' does not match '^[^/#]+/[^/#]+#[0123456789]+$'\n\nFailed validating 'pattern' in schema['properties']['first_timers']['patternProperties']['^[^/#]+$']['properties']['pull_request']:\n    {'type': 'string', 'pattern': '^[^/#]+/[^/#]+#[0123456789]+$'}\n\nOn instance['first_timers']['johnDoe']['pull_request']:\n    'johnDoe/repo#abc'",
+      "data": {
+        "first_timers": {
+          "johnDoe": {
+            "pull_request": "johnDoe/repo#abc"
+          },
+          "janeDoe": {
+            "pull_request": "janeDoe/repo#456"
+          }
+        },
+        "number_of_first_timers": 2,
+        "number_of_first_timer_pull_requests": 2,
+        "first_timer_pull_requests": {
+          "johnDoe/repo#123": {
+            "first_timer": "johnDoe"
+          },
+          "janeDoe/repo#456": {
+            "first_timer": "janeDoe"
+          }
+        },
+        "owner": {
+          "login": "admin"
+        }
+      }
+    }
+  ]
+}

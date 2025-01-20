@@ -1,0 +1,104 @@
+{
+  "description": "sample Github_trivial/o10069.json",
+  "meta": {
+    "full_size": 479,
+    "stripped_size": 286,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "DatabaseCollection",
+    "description": "A collection from a certain namespace",
+    "oneOf": [
+      {
+        "type": "object",
+        "description": "A collection from the given namespace",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\.]+$",
+            "minLength": 2
+          },
+          "namespace": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_\\.]+$"
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "string",
+        "description": "A collection from the default namespace",
+        "pattern": "^[a-zA-Z0-9_\\.~]+$"
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "my_collection",
+        "namespace": "my_namespace"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"my-collection\",\"namespace\":\"my_namespace\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'my-collection' does not match '^[a-zA-Z0-9_\\\\.]+$'\n\nFailed validating 'pattern' in schema[0]['properties']['name']:\n    {'type': 'string', 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'minLength': 2}\n\nOn instance['name']:\n    'my-collection'",
+      "data": {
+        "name": "my-collection",
+        "namespace": "my_namespace"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"my_collection\",\"namespace\":\"my_namespace\",\"additional_property\":\"value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('additional_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema[0]:\n    {'type': 'object',\n     'description': 'A collection from the given namespace',\n     'properties': {'name': {'type': 'string',\n                             'pattern': '^[a-zA-Z0-9_\\\\.]+$',\n                             'minLength': 2},\n                    'namespace': {'type': 'string',\n                                  'pattern': '^[a-zA-Z0-9_\\\\.]+$'}},\n     'required': ['name', 'namespace'],\n     'additionalProperties': False}\n\nOn instance:\n    {'name': 'my_collection',\n     'namespace': 'my_namespace',\n     'additional_property': 'value'}",
+      "data": {
+        "name": "my_collection",
+        "namespace": "my_namespace",
+        "additional_property": "value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"a\",\"namespace\":\"my_namespace\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema[0]['properties']['name']:\n    {'type': 'string', 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'minLength': 2}\n\nOn instance['name']:\n    'a'",
+      "data": {
+        "name": "a",
+        "namespace": "my_namespace"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"name\":\"a\",\"namespace\":\"my_namespace\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema[0]['properties']['name']:\n    {'type': 'string', 'pattern': '^[a-zA-Z0-9_\\\\.]+$', 'minLength': 2}\n\nOn instance['name']:\n    'a'",
+      "data": {
+        "name": "a",
+        "namespace": "my_namespace"
+      }
+    }
+  ]
+}

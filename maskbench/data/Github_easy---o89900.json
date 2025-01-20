@@ -1,0 +1,75 @@
+{
+  "description": "sample Github_easy/o89900.json",
+  "meta": {
+    "full_size": 235,
+    "stripped_size": 235,
+    "features": [
+      "additionalProperties",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "dictionary": {
+        "type": "object",
+        "patternProperties": {
+          "^[a-zA-Z0-9]{1,10}$": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dictionary": {
+          "key1": "value1",
+          "key2": "value2",
+          "key3": "value3"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('key4!' was unexpected)",
+      "python_error": "'key4!' does not match any of the regexes: '^[a-zA-Z0-9]{1,10}$'\n\nFailed validating 'additionalProperties' in schema['properties']['dictionary']:\n    {'type': 'object',\n     'patternProperties': {'^[a-zA-Z0-9]{1,10}$': {'type': 'string'}},\n     'additionalProperties': False}\n\nOn instance['dictionary']:\n    {'key1': 'value1',\n     'key2': 'value2',\n     'key3': 'value3',\n     'key4!': 'value4'}",
+      "data": {
+        "dictionary": {
+          "key1": "value1",
+          "key2": "value2",
+          "key3": "value3",
+          "key4!": "value4"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['dictionary']['patternProperties']['^[a-zA-Z0-9]{1,10}$']:\n    {'type': 'string'}\n\nOn instance['dictionary']['key3']:\n    123",
+      "data": {
+        "dictionary": {
+          "key1": "value1",
+          "key2": "value2",
+          "key3": 123
+        }
+      }
+    }
+  ]
+}

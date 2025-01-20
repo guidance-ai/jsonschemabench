@@ -1,0 +1,227 @@
+{
+  "description": "sample Github_medium/o73919.json",
+  "meta": {
+    "full_size": 1087,
+    "stripped_size": 737,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:uri",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "JSON schema for Entry Point Regulation manifest files",
+    "definitions": {
+      "behavior": {
+        "type": "string",
+        "enum": [
+          "block",
+          "allow",
+          "noAuth"
+        ]
+      },
+      "rule": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "Relative path to resource.",
+            "type": "string"
+          },
+          "regex": {
+            "description": "A regular expression for identifying paths to resources.",
+            "type": "string"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "navigation",
+                "image",
+                "stylesheet",
+                "script",
+                "xhr",
+                "other"
+              ]
+            }
+          },
+          "allowData": {
+            "description": "Determines if data is allowed at this path.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "site": {
+        "description": "A fully qualified URL of your website.",
+        "type": "string",
+        "format": "uri"
+      },
+      "maxAge": {
+        "description": "Set the max age HTTP cache expiration.",
+        "type": "integer"
+      },
+      "reportUrl": {
+        "type": "string",
+        "format": "uri"
+      },
+      "defaultNavBehavior": {
+        "$ref": "#/definitions/behavior"
+      },
+      "defaultResBehavior": {
+        "$ref": "#/definitions/behavior"
+      },
+      "rules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/rule"
+        }
+      }
+    },
+    "additionalProperties": true,
+    "required": [
+      "rules"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "site": "https://example.com",
+        "maxAge": 3600,
+        "reportUrl": "https://example.com/report",
+        "defaultNavBehavior": "allow",
+        "defaultResBehavior": "block",
+        "rules": [
+          {
+            "path": "/public",
+            "types": [
+              "navigation",
+              "image",
+              "stylesheet",
+              "script"
+            ],
+            "allowData": true,
+            "behavior": "allow"
+          },
+          {
+            "regex": "^/api/.*$",
+            "types": [
+              "xhr"
+            ],
+            "allowData": false,
+            "behavior": "block"
+          },
+          {
+            "path": "/admin",
+            "types": [
+              "navigation"
+            ],
+            "allowData": true,
+            "behavior": "noAuth"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "site": "https://example.com",
+        "maxAge": 3600,
+        "reportUrl": "https://example.com/report",
+        "defaultNavBehavior": "allow",
+        "defaultResBehavior": "block",
+        "rules": [
+          {
+            "path": "/admin",
+            "types": [
+              "navigation"
+            ],
+            "allowData": true,
+            "behavior": "block"
+          },
+          {
+            "regex": "^/api/.*$",
+            "types": [
+              "xhr"
+            ],
+            "allowData": false,
+            "behavior": "noAuth"
+          },
+          {
+            "path": "/public",
+            "types": [
+              "image",
+              "stylesheet",
+              "script"
+            ],
+            "allowData": true,
+            "behavior": "allow"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"example.com\" is not a \"uri\"",
+      "python_error": "'example.com' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['site']:\n    {'description': 'A fully qualified URL of your website.',\n     'type': 'string',\n     'format': 'uri'}\n\nOn instance['site']:\n    'example.com'",
+      "data": {
+        "site": "example.com",
+        "maxAge": 3600,
+        "reportUrl": "https://example.com/report",
+        "defaultNavBehavior": "allow",
+        "defaultResBehavior": "block",
+        "rules": [
+          {
+            "path": "/admin",
+            "types": [
+              "navigation"
+            ],
+            "allowData": true,
+            "behavior": "block"
+          },
+          {
+            "regex": "^/api/.*$",
+            "types": [
+              "xhr"
+            ],
+            "allowData": false,
+            "behavior": "noAuth"
+          },
+          {
+            "path": "/public",
+            "types": [
+              "image",
+              "stylesheet",
+              "script"
+            ],
+            "allowData": true,
+            "behavior": "allow"
+          }
+        ]
+      }
+    }
+  ]
+}

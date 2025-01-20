@@ -1,0 +1,292 @@
+{
+  "description": "sample Github_easy/o26627.json",
+  "meta": {
+    "full_size": 603,
+    "stripped_size": 528,
+    "features": [
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Policy",
+    "description": "document containing permission statements",
+    "type": "object",
+    "properties": {
+      "statements": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "effect": {
+              "type": "string",
+              "pattern": "^allow|deny$"
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z]+:\\w+$"
+              }
+            },
+            "resources": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^brn:(\\w+):(\\w+):(\\w*):(\\*|[\\w\\-]*\\*?)$"
+              }
+            }
+          },
+          "required": [
+            "effect",
+            "actions",
+            "resources"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "statements"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "statements": [
+          {
+            "effect": "allow",
+            "actions": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2"
+            ]
+          },
+          {
+            "effect": "deny",
+            "actions": [
+              "sqs:DeleteQueue"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"deny1\" does not match \"^allow|deny$\"",
+      "python_error": "Additional properties are not allowed ('deny1' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['statements']['items']:\n    {'type': 'object',\n     'properties': {'effect': {'type': 'string', 'pattern': '^allow|deny$'},\n                    'actions': {'type': 'array',\n                                'items': {'type': 'string',\n                                          'pattern': '^[a-z]+:\\\\w+$'}},\n                    'resources': {'type': 'array',\n                                  'items': {'type': 'string',\n                                            'pattern': '^brn:(\\\\w+):(\\\\w+):(\\\\w*):(\\\\*|[\\\\w\\\\-]*\\\\*?)$'}}},\n     'required': ['effect', 'actions', 'resources'],\n     'additionalProperties': False}\n\nOn instance['statements'][1]:\n    {'effect': 'deny1',\n     'deny1': 'deny1',\n     'actions': ['sqs:DeleteQueue'],\n     'resources': ['brn:aws:sqs:uswest2:123456789012-myqueue']}",
+      "data": {
+        "statements": [
+          {
+            "effect": "allow",
+            "actions": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2"
+            ]
+          },
+          {
+            "effect": "deny1",
+            "deny1": "deny1",
+            "actions": [
+              "sqs:DeleteQueue"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['statements']['items']:\n    {'type': 'object',\n     'properties': {'effect': {'type': 'string', 'pattern': '^allow|deny$'},\n                    'actions': {'type': 'array',\n                                'items': {'type': 'string',\n                                          'pattern': '^[a-z]+:\\\\w+$'}},\n                    'resources': {'type': 'array',\n                                  'items': {'type': 'string',\n                                            'pattern': '^brn:(\\\\w+):(\\\\w+):(\\\\w*):(\\\\*|[\\\\w\\\\-]*\\\\*?)$'}}},\n     'required': ['effect', 'actions', 'resources'],\n     'additionalProperties': False}\n\nOn instance['statements'][1]:\n    {'effect': 'deny',\n     'actions': ['sqs:DeleteQueue'],\n     'resources': ['brn:aws:sqs:uswest2:123456789012-myqueue'],\n     'extraProperty': 'someValue'}",
+      "data": {
+        "statements": [
+          {
+            "effect": "allow",
+            "actions": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2"
+            ]
+          },
+          {
+            "effect": "deny",
+            "actions": [
+              "sqs:DeleteQueue"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue"
+            ],
+            "extraProperty": "someValue"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"brn:aws:sqs:uswest2:123456789012-myqueue3:extra\" does not match \"^brn:(\\w+):(\\w+):(\\w*):(\\*|[\\w\\-]*\\*?)$\"",
+      "python_error": "'brn:aws:sqs:uswest2:123456789012-myqueue3:extra' does not match '^brn:(\\\\w+):(\\\\w+):(\\\\w*):(\\\\*|[\\\\w\\\\-]*\\\\*?)$'\n\nFailed validating 'pattern' in schema['properties']['statements']['items']['properties']['resources']['items']:\n    {'type': 'string',\n     'pattern': '^brn:(\\\\w+):(\\\\w+):(\\\\w*):(\\\\*|[\\\\w\\\\-]*\\\\*?)$'}\n\nOn instance['statements'][2]['resources'][2]:\n    'brn:aws:sqs:uswest2:123456789012-myqueue3:extra'",
+      "data": {
+        "statements": [
+          {
+            "effect": "allow",
+            "actions": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2"
+            ]
+          },
+          {
+            "effect": "deny",
+            "actions": [
+              "sqs:DeleteQueue"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue"
+            ]
+          },
+          {
+            "effect": "allow",
+            "actions": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2",
+              "brn:aws:sqs:uswest2:123456789012-myqueue3:extra"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['statements']['items']:\n    {'type': 'object',\n     'properties': {'effect': {'type': 'string', 'pattern': '^allow|deny$'},\n                    'actions': {'type': 'array',\n                                'items': {'type': 'string',\n                                          'pattern': '^[a-z]+:\\\\w+$'}},\n                    'resources': {'type': 'array',\n                                  'items': {'type': 'string',\n                                            'pattern': '^brn:(\\\\w+):(\\\\w+):(\\\\w*):(\\\\*|[\\\\w\\\\-]*\\\\*?)$'}}},\n     'required': ['effect', 'actions', 'resources'],\n     'additionalProperties': False}\n\nOn instance['statements'][0]:\n    {'effect': 'allow',\n     'actions': ['sqs:SendMessage', 'sqs:ReceiveMessage'],\n     'resources': ['brn:aws:sqs:uswest2:123456789012-myqueue',\n                   'brn:aws:sqs:uswest2:123456789012-myqueue2'],\n     'extraProperty': 'extraValue'}",
+      "data": {
+        "statements": [
+          {
+            "effect": "allow",
+            "actions": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2"
+            ],
+            "extraProperty": "extraValue"
+          },
+          {
+            "effect": "deny",
+            "actions": [
+              "sqs:DeleteQueue"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Sqs:SendMessage\" does not match \"^[a-z]+:\\w+$\"",
+      "python_error": "'Sqs:SendMessage' does not match '^[a-z]+:\\\\w+$'\n\nFailed validating 'pattern' in schema['properties']['statements']['items']['properties']['actions']['items']:\n    {'type': 'string', 'pattern': '^[a-z]+:\\\\w+$'}\n\nOn instance['statements'][0]['actions'][0]:\n    'Sqs:SendMessage'",
+      "data": {
+        "statements": [
+          {
+            "effect": "allow",
+            "actions": [
+              "Sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2"
+            ]
+          },
+          {
+            "effect": "deny",
+            "actions": [
+              "sqs:DeleteQueue"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['statements']['items']:\n    {'type': 'object',\n     'properties': {'effect': {'type': 'string', 'pattern': '^allow|deny$'},\n                    'actions': {'type': 'array',\n                                'items': {'type': 'string',\n                                          'pattern': '^[a-z]+:\\\\w+$'}},\n                    'resources': {'type': 'array',\n                                  'items': {'type': 'string',\n                                            'pattern': '^brn:(\\\\w+):(\\\\w+):(\\\\w*):(\\\\*|[\\\\w\\\\-]*\\\\*?)$'}}},\n     'required': ['effect', 'actions', 'resources'],\n     'additionalProperties': False}\n\nOn instance['statements'][0]:\n    {'effect': 'allow',\n     'actions': ['sqs:SendMessage', 'sqs:ReceiveMessage'],\n     'resources': ['brn:aws:sqs:uswest2:123456789012-myqueue',\n                   'brn:aws:sqs:uswest2:123456789012-myqueue2'],\n     'extra_property': 'value'}",
+      "data": {
+        "statements": [
+          {
+            "effect": "allow",
+            "actions": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue",
+              "brn:aws:sqs:uswest2:123456789012-myqueue2"
+            ],
+            "extra_property": "value"
+          },
+          {
+            "effect": "deny",
+            "actions": [
+              "sqs:DeleteQueue"
+            ],
+            "resources": [
+              "brn:aws:sqs:uswest2:123456789012-myqueue"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

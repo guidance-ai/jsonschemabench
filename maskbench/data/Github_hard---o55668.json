@@ -1,0 +1,613 @@
+{
+  "description": "sample Github_hard/o55668.json",
+  "meta": {
+    "full_size": 6767,
+    "stripped_size": 2216,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalItems",
+      "additionalProperties",
+      "allOf",
+      "enum",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "anyOf:trivial",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "JSON schema for `sp-build-tasks` - SharePoint Frontend build tool-belt",
+    "definitions": {
+      "coreProperties": {
+        "type": "object",
+        "patternProperties": {
+          "^_": {
+            "description": "Any property starting with _ is valid.",
+            "additionalProperties": true,
+            "additionalItems": true
+          }
+        },
+        "properties": {
+          "spFolder": {
+            "description": "Publishing SPWeb-relative folder path in SharePoint where files should be uploaded to\n\nE.g.: `_catalogs/masterpage/spf`",
+            "type": "string",
+            "default": "_catalogs/masterpage/spf"
+          },
+          "distFolder": {
+            "description": "Local distribution folder with built assets ready for publishing\n\nE.g.: `./dist`",
+            "type": "string",
+            "default": "./dist"
+          },
+          "deleteFiles": {
+            "description": "Delete remote files on local files unlink event",
+            "type": "boolean",
+            "default": false
+          },
+          "customStyles": {
+            "description": "Custom styles bundle configuration. Array or a single object element src/dist pair of source style entry point and output bundle file",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "src",
+                "dist"
+              ],
+              "properties": {
+                "name": {
+                  "description": "Description of the configuration, doesn't effect on logic",
+                  "type": "string"
+                },
+                "src": {
+                  "description": "Source entry point path relative to './src'\n\nE.g.: `styles/index.scss`",
+                  "type": "string",
+                  "default": "styles/index.scss"
+                },
+                "dist": {
+                  "description": "Output .css file path relative to './dist'\n\nE.g.: `styles/myModule.css`",
+                  "type": "string",
+                  "default": "./dist"
+                }
+              }
+            }
+          },
+          "bundleJSLibsFiles": {
+            "description": "3-rd party JavaScript libraries and scripts bundle configuration. Array of local path to .js files.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Relative local path to a .js file (EcmaScript 5) to bundle into vendor.js file."
+            },
+            "default": [
+              "./node_modules/es6-promise/dist/es6-promise.auto.min.js",
+              "./node_modules/whatwg-fetch/fetch.js"
+            ]
+          },
+          "bundleCSSLibsFiles": {
+            "description": "3-rd party Styles libraries bundle configuration. Array of local path to .css files.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Relative local path to a .css file to bundle into vendor.css file."
+            }
+          },
+          "copyAssetsMap": {
+            "description": "Custom assets copying to './dist' rules definition. Array of src/dist pairs objects.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "src",
+                "dist"
+              ],
+              "properties": {
+                "name": {
+                  "description": "Description of the configuration, doesn't effect on logic",
+                  "type": "string"
+                },
+                "src": {
+                  "description": "Is an array of paths to folders or files. Folders and files are copied based on this array, subfolders are created automatically",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Relative local path to a file of folder.\n\nE.g.: `./node_modules/datatables/media/images` or `./src/scripts/modules/wysiwyg.js`"
+                  }
+                },
+                "dist": {
+                  "description": "Target destination folder path where files are copied to. In most cases it should be `./dist`.",
+                  "type": "string",
+                  "default": "./dist"
+                }
+              }
+            }
+          },
+          "customActions": {
+            "description": "SharePoint ScriptLink Custom Actions configuration",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "scriptSrc",
+                "scope",
+                "sequence"
+              ],
+              "properties": {
+                "name": {
+                  "description": "An optional name for custom action",
+                  "type": "string",
+                  "default": "My Custom Action"
+                },
+                "scriptSrc": {
+                  "description": "Custom action script source.\n\nSupports following hashes:\n\n- `~publishroot` - location in SharePoint where SPPP's `./dist` folder is targeted to;\n\n- `~site` - SPWeb location;\n\n- `~sitecollection` - SPSite location;\n\n- `~hubsite` - SPO Hub Site location.",
+                  "type": "string",
+                  "default": "~publishroot/scripts/app.js"
+                },
+                "scope": {
+                  "description": "Custom action scope: `web` (SPWeb) or `site` (SPSite) (site collection)",
+                  "type": "string",
+                  "enum": [
+                    "web",
+                    "site"
+                  ],
+                  "default": "web"
+                },
+                "sequence": {
+                  "description": "Custom action script sequence",
+                  "type": "number",
+                  "default": 100
+                },
+                "namespace": {
+                  "description": "Script namespace, i.e. `react.js`",
+                  "type": "string"
+                },
+                "dependencies": {
+                  "description": "Script dependencies namespaces",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Namespace of dependency"
+                  }
+                }
+              }
+            }
+          },
+          "webpackItemsMap": {
+            "description": "Scripts build configuration. Array or entry/target script pairs.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "entry",
+                "target"
+              ],
+              "properties": {
+                "name": {
+                  "description": "Description of the configuration, doesn't effect on logic",
+                  "type": "string"
+                },
+                "entry": {
+                  "description": "Relative path to .ts, .js file within the project's folder structure.\n\nE.g.: `./src/scripts/index.ts`",
+                  "type": "string",
+                  "default": "./src/scripts/index.ts"
+                },
+                "target": {
+                  "description": "Relative path to output bundle script within `./dist/stripts` folder.\n\nE.g.: `app.js`",
+                  "type": "string",
+                  "default": "app.js"
+                },
+                "includePolyfills": {
+                  "description": "Include polyfills into the bundle",
+                  "type": "boolean",
+                  "default": false
+                },
+                "disable": {
+                  "description": "Disable entry from build",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          },
+          "modulePath": {
+            "description": "Relative path for module inside dist structure, e.g. `modules/my-module`",
+            "type": "string",
+            "default": ""
+          },
+          "devtool": {
+            "description": "Webpack `devtool` option for development mode\n\nE.g.: `eval`\n\nSee more: https://webpack.js.org/configuration/devtool/",
+            "type": "string",
+            "default": "cheap-eval-source-map"
+          },
+          "filesMetaData": {
+            "description": "gulp-spsave filesMetaData property, see more https://github.com/s-KaiNet/gulp-spsave",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "fileName",
+                "metadata"
+              ],
+              "properties": {
+                "fileName": {
+                  "description": "File name with extention (without path)\n\nE.g.: `app.js`",
+                  "type": "string"
+                },
+                "metadata": {
+                  "description": "REST API metadata object",
+                  "type": "object",
+                  "required": [
+                    "__metadata"
+                  ],
+                  "properties": {
+                    "__metadata": {
+                      "description": "SharePoint REST API OData entity type",
+                      "type": "object",
+                      "required": [
+                        "type"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "^.*$": {
+                    "additionalProperties": true,
+                    "additionalItems": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "brandingConfig": {
+        "type": "object",
+        "properties": {
+          "masterpagePath": {
+            "description": "Relative to publishing folder path to custom masterpage.\nIs used in `gulp masterpage:apply` task.",
+            "type": "string",
+            "default": "masterpage/frankfurt.master"
+          },
+          "logoPath": {
+            "description": "Relative to publishing folder path to custom logo.\nIs used in `gulp masterpage:apply` and `gulp logo:apply` tasks.",
+            "type": "string",
+            "default": "images/logo.png"
+          },
+          "masterpageCodeName": {
+            "description": "Masterpage code name.",
+            "type": "string",
+            "default": "frankfurt"
+          },
+          "platformVersion": {
+            "description": "Masterpage platform version (2016, 2013, etc.)",
+            "type": "string",
+            "enum": [
+              "spo",
+              "2016",
+              "2013"
+            ],
+            "default": "spo"
+          },
+          "masterpage": {
+            "description": "Custom structure object which properties can be used while compiling masterpage's .hbs.",
+            "type": "object",
+            "additionalProperties": true,
+            "default": {
+              "copyright": {
+                "year": "2017",
+                "title": "Contoso intranet"
+              }
+            }
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/coreProperties"
+      },
+      {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/brandingConfig"
+          }
+        ]
+      },
+      {
+        "required": [
+          "spFolder",
+          "distFolder"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "spFolder": "_catalogs/masterpage/spf",
+        "distFolder": "./dist",
+        "deleteFiles": false,
+        "customStyles": [
+          {
+            "name": "Main Styles",
+            "src": "styles/index.scss",
+            "dist": "styles/myModule.css"
+          },
+          {
+            "name": "Additional Styles",
+            "src": "styles/additional.scss",
+            "dist": "styles/additional.css"
+          }
+        ],
+        "bundleJSLibsFiles": [
+          "./node_modules/es6-promise/dist/es6-promise.auto.min.js",
+          "./node_modules/whatwg-fetch/fetch.js"
+        ],
+        "bundleCSSLibsFiles": [
+          "./node_modules/bootstrap/dist/css/bootstrap.min.css"
+        ],
+        "copyAssetsMap": [
+          {
+            "name": "Copy Bootstrap Fonts",
+            "src": [
+              "./node_modules/bootstrap/dist/fonts"
+            ],
+            "dist": "./dist/fonts"
+          },
+          {
+            "name": "Copy Custom Images",
+            "src": [
+              "./src/images"
+            ],
+            "dist": "./dist/images"
+          }
+        ],
+        "customActions": [
+          {
+            "name": "My Custom Action",
+            "scriptSrc": "~publishroot/scripts/app.js",
+            "scope": "web",
+            "sequence": 100,
+            "namespace": "react.js",
+            "dependencies": [
+              "jquery"
+            ]
+          }
+        ],
+        "webpackItemsMap": [
+          {
+            "name": "Main Script",
+            "entry": "./src/scripts/index.ts",
+            "target": "app.js",
+            "includePolyfills": true,
+            "disable": false
+          },
+          {
+            "name": "Additional Script",
+            "entry": "./src/scripts/additional.ts",
+            "target": "additional.js",
+            "includePolyfills": false,
+            "disable": true
+          }
+        ],
+        "modulePath": "modules/my-module",
+        "devtool": "cheap-eval-source-map",
+        "filesMetaData": [
+          {
+            "fileName": "app.js",
+            "metadata": {
+              "__metadata": {
+                "type": "SP.File"
+              },
+              "FileLeafRef": {
+                "__metadata": {
+                  "type": "SP.FileLeafRef"
+                },
+                "UniqueId": "guid"
+              }
+            }
+          }
+        ],
+        "brandingConfig": {
+          "masterpagePath": "masterpage/frankfurt.master",
+          "logoPath": "images/logo.png",
+          "masterpageCodeName": "frankfurt",
+          "platformVersion": "spo",
+          "masterpage": {
+            "copyright": {
+              "year": "2022",
+              "title": "My Intranet"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "spFolder": "_catalogs/masterpage/spf",
+        "distFolder": "./dist",
+        "deleteFiles": false,
+        "customStyles": [
+          {
+            "name": "Main Styles",
+            "src": "styles/index.scss",
+            "dist": "styles/myModule.css"
+          }
+        ],
+        "bundleJSLibsFiles": [
+          "./node_modules/es6-promise/dist/es6-promise.auto.min.js",
+          "./node_modules/whatwg-fetch/fetch.js"
+        ],
+        "bundleCSSLibsFiles": [
+          "./node_modules/bootstrap/dist/css/bootstrap.min.css"
+        ],
+        "copyAssetsMap": [
+          {
+            "name": "Copy Bootstrap Fonts",
+            "src": [
+              "./node_modules/bootstrap/dist/fonts"
+            ],
+            "dist": "./dist/fonts"
+          }
+        ],
+        "customActions": [
+          {
+            "name": "My Custom Action",
+            "scriptSrc": "~publishroot/scripts/app.js",
+            "scope": "web",
+            "sequence": 100,
+            "namespace": "react.js",
+            "dependencies": [
+              "jquery.js"
+            ]
+          }
+        ],
+        "webpackItemsMap": [
+          {
+            "name": "Main Script",
+            "entry": "./src/scripts/index.ts",
+            "target": "app.js",
+            "includePolyfills": false,
+            "disable": false
+          }
+        ],
+        "modulePath": "modules/my-module",
+        "devtool": "cheap-eval-source-map",
+        "filesMetaData": [
+          {
+            "fileName": "app.js",
+            "metadata": {
+              "__metadata": {
+                "type": "SP.File"
+              },
+              "CheckInComment": "Initial check-in",
+              "FileLeafRef": {
+                "__metadata": {
+                  "type": "SP.File"
+                },
+                "UniqueId": "12345678-1234-1234-1234-123456789012"
+              }
+            }
+          }
+        ],
+        "brandingConfig": {
+          "masterpagePath": "masterpage/frankfurt.master",
+          "logoPath": "images/logo.png",
+          "masterpageCodeName": "frankfurt",
+          "platformVersion": "spo",
+          "masterpage": {
+            "copyright": {
+              "year": "2022",
+              "title": "Contoso intranet"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "42 is not of type \"string\"",
+      "python_error": "42 is not of type 'string'\n\nFailed validating 'type' in schema['allOf'][0]['properties']['customStyles']['items']['properties']['src']:\n    {'description': \"Source entry point path relative to './src'\\n\"\n                    '\\n'\n                    'E.g.: `styles/index.scss`',\n     'type': 'string',\n     'default': 'styles/index.scss'}\n\nOn instance['customStyles'][0]['src']:\n    42",
+      "data": {
+        "spFolder": "_catalogs/masterpage/spf",
+        "distFolder": "./dist",
+        "deleteFiles": false,
+        "customStyles": [
+          {
+            "name": "Main Styles",
+            "src": 42,
+            "dist": "styles/myModule.css"
+          }
+        ],
+        "bundleJSLibsFiles": [
+          "./node_modules/es6-promise/dist/es6-promise.auto.min.js",
+          "./node_modules/whatwg-fetch/fetch.js"
+        ],
+        "bundleCSSLibsFiles": [
+          "./node_modules/bootstrap/dist/css/bootstrap.min.css"
+        ],
+        "copyAssetsMap": [
+          {
+            "name": "Copy Bootstrap Fonts",
+            "src": [
+              "./node_modules/bootstrap/dist/fonts"
+            ],
+            "dist": "./dist/fonts"
+          }
+        ],
+        "customActions": [
+          {
+            "name": "My Custom Action",
+            "scriptSrc": "~publishroot/scripts/app.js",
+            "scope": "web",
+            "sequence": 100,
+            "namespace": "react.js",
+            "dependencies": [
+              "jquery.js"
+            ]
+          }
+        ],
+        "webpackItemsMap": [
+          {
+            "name": "Main Script",
+            "entry": "./src/scripts/index.ts",
+            "target": "app.js",
+            "includePolyfills": false,
+            "disable": false
+          }
+        ],
+        "modulePath": "modules/my-module",
+        "devtool": "cheap-eval-source-map",
+        "filesMetaData": [
+          {
+            "fileName": "app.js",
+            "metadata": {
+              "__metadata": {
+                "type": "SP.File"
+              },
+              "CheckInComment": "Initial check-in",
+              "FileLeafRef": {
+                "__metadata": {
+                  "type": "SP.File"
+                },
+                "UniqueId": "12345678-1234-1234-1234-123456789012"
+              }
+            }
+          }
+        ],
+        "brandingConfig": {
+          "masterpagePath": "masterpage/frankfurt.master",
+          "logoPath": "images/logo.png",
+          "masterpageCodeName": "frankfurt",
+          "platformVersion": "spo",
+          "masterpage": {
+            "copyright": {
+              "year": "2022",
+              "title": "Contoso intranet"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,222 @@
+{
+  "description": "sample Github_easy/o10088.json",
+  "meta": {
+    "full_size": 360,
+    "stripped_size": 327,
+    "features": [
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "schemas": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "component": {
+              "pattern": "^[a-z_]$",
+              "type": "string"
+            },
+            "group": {
+              "pattern": "^[a-z_]$",
+              "type": "string"
+            },
+            "path": {
+              "pattern": "^[a-zA-Z0-9_\\-\\./]+$",
+              "type": "string"
+            },
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "type": "array"
+      }
+    },
+    "title": "RegisterResourceSchema",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "schemas": [
+          {
+            "component": "a",
+            "group": "b",
+            "path": "path/to/schema",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "component": "c",
+            "group": "d",
+            "path": "another/path",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "age": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"A\" does not match \"^[a-z_]$\"",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['schemas']['items']:\n    {'additionalProperties': False,\n     'properties': {'component': {'pattern': '^[a-z_]$', 'type': 'string'},\n                    'group': {'pattern': '^[a-z_]$', 'type': 'string'},\n                    'path': {'pattern': '^[a-zA-Z0-9_\\\\-\\\\./]+$',\n                             'type': 'string'},\n                    'schema': {'type': 'object'}}}\n\nOn instance['schemas'][1]:\n    {'component': 'c',\n     'group': 'd',\n     'path': 'another/path',\n     'schema': {'type': 'object',\n                'properties': {'age': {'type': 'integer'}}},\n     'extraProperty': 'Invalid: extra property not allowed due to '\n                      \"'additionalProperties': false\"}",
+      "data": {
+        "schemas": [
+          {
+            "component": "A",
+            "Invalid: component should match pattern '^[a-z_]$'": "group",
+            "Invalid: group should be a string": "b",
+            "path": "path/to/schema",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "component": "c",
+            "group": "d",
+            "path": "another/path",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "age": {
+                  "type": "integer"
+                }
+              }
+            },
+            "extraProperty": "Invalid: extra property not allowed due to 'additionalProperties': false"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"A\" does not match \"^[a-z_]$\"",
+      "python_error": "'A' does not match '^[a-z_]$'\n\nFailed validating 'pattern' in schema['properties']['schemas']['items']['properties']['component']:\n    {'pattern': '^[a-z_]$', 'type': 'string'}\n\nOn instance['schemas'][0]['component']:\n    'A'",
+      "data": {
+        "schemas": [
+          {
+            "component": "A",
+            "group": "b",
+            "path": "path/to/schema",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "component": "c",
+            "group": "d",
+            "path": "another/path",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "age": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"A\" does not match \"^[a-z_]$\"",
+      "python_error": "Additional properties are not allowed ('Invalid: component should be lowercase', 'Invalid: extra colon' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['schemas']['items']:\n    {'additionalProperties': False,\n     'properties': {'component': {'pattern': '^[a-z_]$', 'type': 'string'},\n                    'group': {'pattern': '^[a-z_]$', 'type': 'string'},\n                    'path': {'pattern': '^[a-zA-Z0-9_\\\\-\\\\./]+$',\n                             'type': 'string'},\n                    'schema': {'type': 'object'}}}\n\nOn instance['schemas'][0]:\n    {'component': 'A',\n     'Invalid: component should be lowercase': 'group',\n     'Invalid: extra colon': 'b',\n     'path': 'path/to/schema',\n     'schema': {'type': 'object',\n                'properties': {'name': {'type': 'string'}}}}",
+      "data": {
+        "schemas": [
+          {
+            "component": "A",
+            "Invalid: component should be lowercase": "group",
+            "Invalid: extra colon": "b",
+            "path": "path/to/schema",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "component": "c",
+            "group": "d",
+            "path": "another/path",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "age": {
+                  "type": "integer"
+                }
+              },
+              "extraProperty": "Invalid: extra property not allowed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"A\" does not match \"^[a-z_]$\"",
+      "python_error": "Additional properties are not allowed ('Invalid, as component should be in lowercase', \"Invalid, extra property is not allowed. Should be 'group':\" were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['schemas']['items']:\n    {'additionalProperties': False,\n     'properties': {'component': {'pattern': '^[a-z_]$', 'type': 'string'},\n                    'group': {'pattern': '^[a-z_]$', 'type': 'string'},\n                    'path': {'pattern': '^[a-zA-Z0-9_\\\\-\\\\./]+$',\n                             'type': 'string'},\n                    'schema': {'type': 'object'}}}\n\nOn instance['schemas'][0]:\n    {'component': 'A',\n     'Invalid, as component should be in lowercase': 'group',\n     \"Invalid, extra property is not allowed. Should be 'group':\": 'd',\n     'path': 'another/path',\n     'schema': {'type': 'object',\n                'properties': {'age': {'type': 'integer'}}}}",
+      "data": {
+        "schemas": [
+          {
+            "component": "A",
+            "Invalid, as component should be in lowercase": "group",
+            "Invalid, extra property is not allowed. Should be 'group':": "d",
+            "path": "another/path",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "age": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

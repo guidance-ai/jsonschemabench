@@ -1,0 +1,164 @@
+{
+  "description": "sample Github_trivial/o88605.json",
+  "meta": {
+    "full_size": 1017,
+    "stripped_size": 916,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "format",
+      "format:uri",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "schema for a inverse functional identifier of a statement in the xAPI, version 1.0.*",
+    "oneOf": [
+      {
+        "type": "object",
+        "properties": {
+          "mbox": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^mailto:"
+          }
+        },
+        "patternProperties": {
+          "^(mbox_sha1sum|account|openid)$": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "mbox"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "mbox_sha1sum": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9]{20,}$"
+          }
+        },
+        "patternProperties": {
+          "^(mbox|account|openid)$": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "mbox_sha1sum"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "openid": {
+            "type": "string",
+            "format": "uri",
+            "minLength": 1
+          }
+        },
+        "patternProperties": {
+          "^(mbox|account|mbox_sha1sum)$": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "openid"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "object",
+            "properties": {
+              "homePage": {
+                "type": "string",
+                "format": "uri"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "homePage",
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "patternProperties": {
+          "^(mbox|mbox_sha1sum|openid)$": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "account"
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "mbox": "mailto:user@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"mbox\":\"mailto:user@example.com\",\"mbox_sha1sum\":\"1234567890abcdef\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'mbox': 'mailto:user@example.com', 'mbox_sha1sum': '1234567890abcdef'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'schema for a inverse functional identifier of a '\n                    'statement in the xAPI, version 1.0.*',\n     'oneOf': [{'type': 'object',\n                'properties': {'mbox': {'type': 'string',\n                                        'format': 'uri',\n                                        'pattern': '^mailto:'}},\n                'patternProperties': {'^(mbox_sha1sum|account|openid)$': {'type': 'null'}},\n                'required': ['mbox']},\n               {'type': 'object',\n                'properties': {'mbox_sha1sum': {'type': 'string',\n                                                'pattern': '^[a-zA-Z0-9]{20,}$'}},\n                'patternProperties': {'^(mbox|account|openid)$': {'type': 'null'}},\n                'required': ['mbox_sha1sum']},\n               {'type.. (1057 more)",
+      "data": {
+        "mbox": "mailto:user@example.com",
+        "mbox_sha1sum": "1234567890abcdef"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"mbox\":\"mailto:user@example.com\",\"mbox_sha1sum\":\"invalid\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'mbox': 'mailto:user@example.com', 'mbox_sha1sum': 'invalid'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'schema for a inverse functional identifier of a '\n                    'statement in the xAPI, version 1.0.*',\n     'oneOf': [{'type': 'object',\n                'properties': {'mbox': {'type': 'string',\n                                        'format': 'uri',\n                                        'pattern': '^mailto:'}},\n                'patternProperties': {'^(mbox_sha1sum|account|openid)$': {'type': 'null'}},\n                'required': ['mbox']},\n               {'type': 'object',\n                'properties': {'mbox_sha1sum': {'type': 'string',\n                                                'pattern': '^[a-zA-Z0-9]{20,}$'}},\n                'patternProperties': {'^(mbox|account|openid)$': {'type': 'null'}},\n                'required': ['mbox_sha1sum']},\n               {'type': 'objec.. (1039 more)",
+      "data": {
+        "mbox": "mailto:user@example.com",
+        "mbox_sha1sum": "invalid"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "{\"mbox\":\"ftp:user@example.com\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'ftp:user@example.com' does not match '^mailto:'\n\nFailed validating 'pattern' in schema[0]['properties']['mbox']:\n    {'type': 'string', 'format': 'uri', 'pattern': '^mailto:'}\n\nOn instance['mbox']:\n    'ftp:user@example.com'",
+      "data": {
+        "mbox": "ftp:user@example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "{\"openid\":\"\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'openid': ''} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'description': 'schema for a inverse functional identifier of a '\n                    'statement in the xAPI, version 1.0.*',\n     'oneOf': [{'type': 'object',\n                'properties': {'mbox': {'type': 'string',\n                                        'format': 'uri',\n                                        'pattern': '^mailto:'}},\n                'patternProperties': {'^(mbox_sha1sum|account|openid)$': {'type': 'null'}},\n                'required': ['mbox']},\n               {'type': 'object',\n                'properties': {'mbox_sha1sum': {'type': 'string',\n                                                'pattern': '^[a-zA-Z0-9]{20,}$'}},\n                'patternProperties': {'^(mbox|account|openid)$': {'type': 'null'}},\n                'required': ['mbox_sha1sum']},\n               {'type': 'object',\n                'properties': {'openid': {'t.. (943 more)",
+      "data": {
+        "openid": ""
+      }
+    }
+  ]
+}

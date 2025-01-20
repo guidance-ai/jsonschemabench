@@ -1,0 +1,120 @@
+{
+  "description": "sample Github_easy/o74459.json",
+  "meta": {
+    "full_size": 578,
+    "stripped_size": 578,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "pattern"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://api.example.com/credit-card.json#",
+    "type": "object",
+    "properties": {
+      "cardHolderName": {
+        "type": "string",
+        "minLength": 5,
+        "maxLength": 64
+      },
+      "expireDateMonth": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 12
+      },
+      "expireDateYear": {
+        "type": "integer",
+        "minimum": 18,
+        "maximum": 30
+      },
+      "cvvNumber": {
+        "type": "string",
+        "pattern": "^[0-9]{3}$"
+      },
+      "cardNumber": {
+        "type": "string",
+        "minLength": 15,
+        "maxLength": 16,
+        "pattern": "^[0-9]{16}$"
+      }
+    },
+    "required": [
+      "cardHolderName",
+      "cardNumber",
+      "expireDateMonth",
+      "expireDateYear",
+      "cvvNumber"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "cardHolderName": "John Doe",
+        "expireDateMonth": 12,
+        "expireDateYear": 25,
+        "cvvNumber": "123",
+        "cardNumber": "1234567890123456"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123456789012345\" does not match \"^[0-9]{16}$\"",
+      "python_error": "'123456789012345' does not match '^[0-9]{16}$'\n\nFailed validating 'pattern' in schema['properties']['cardNumber']:\n    {'type': 'string',\n     'minLength': 15,\n     'maxLength': 16,\n     'pattern': '^[0-9]{16}$'}\n\nOn instance['cardNumber']:\n    '123456789012345'",
+      "data": {
+        "cardHolderName": "John Doe",
+        "expireDateMonth": 12,
+        "expireDateYear": 25,
+        "cvvNumber": "123",
+        "cardNumber": "123456789012345"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"abc\" is shorter than 5 characters",
+      "python_error": "'abc' is too short\n\nFailed validating 'minLength' in schema['properties']['cardHolderName']:\n    {'type': 'string', 'minLength': 5, 'maxLength': 64}\n\nOn instance['cardHolderName']:\n    'abc'",
+      "data": {
+        "cardHolderName": "abc",
+        "expireDateMonth": 12,
+        "expireDateYear": 25,
+        "cvvNumber": "123",
+        "cardNumber": "1234567890123456"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['expireDateMonth']:\n    {'type': 'integer', 'minimum': 1, 'maximum': 12}\n\nOn instance['expireDateMonth']:\n    0",
+      "data": {
+        "cardHolderName": "John Doe",
+        "expireDateMonth": 0,
+        "expireDateYear": 25,
+        "cvvNumber": "123",
+        "cardNumber": "1234567890123456"
+      }
+    }
+  ]
+}

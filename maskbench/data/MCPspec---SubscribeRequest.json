@@ -1,0 +1,92 @@
+{
+  "description": "sample MCPspec/SubscribeRequest.json",
+  "meta": {
+    "full_size": 616,
+    "stripped_size": 349,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "const",
+      "format",
+      "format:uri"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SubscribeRequest",
+    "definitions": {
+      "SubscribeRequest": {
+        "description": "Sent from the client to request resources/updated notifications from the server whenever a particular resource changes.",
+        "properties": {
+          "method": {
+            "const": "resources/subscribe",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "uri": {
+                "description": "The URI of the resource to subscribe to. The URI can use any protocol; it is up to the server how to interpret it.",
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "uri"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "https://example.com/resource"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"Invalid URI\" is not a \"uri\"",
+      "python_error": "'Invalid URI' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['params']['properties']['uri']:\n    {'description': 'The URI of the resource to subscribe to. The URI can '\n                    'use any protocol; it is up to the server how to '\n                    'interpret it.',\n     'format': 'uri',\n     'type': 'string'}\n\nOn instance['params']['uri']:\n    'Invalid URI'",
+      "data": {
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "Invalid URI"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"example.com/resource\" is not a \"uri\"",
+      "python_error": "'example.com/resource' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['params']['properties']['uri']:\n    {'description': 'The URI of the resource to subscribe to. The URI can '\n                    'use any protocol; it is up to the server how to '\n                    'interpret it.',\n     'format': 'uri',\n     'type': 'string'}\n\nOn instance['params']['uri']:\n    'example.com/resource'",
+      "data": {
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "example.com/resource"
+        }
+      }
+    }
+  ]
+}

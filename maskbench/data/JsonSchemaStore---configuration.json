@@ -1,0 +1,841 @@
+{
+  "description": "sample JsonSchemaStore/configuration.json",
+  "meta": {
+    "full_size": 7610,
+    "stripped_size": 3744,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "exclusiveMinimum",
+      "maximum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "DstackConfiguration",
+    "discriminator": {
+      "propertyName": "type",
+      "mapping": {
+        "dev-environment": "#/definitions/DevEnvironmentConfiguration",
+        "task": "#/definitions/TaskConfiguration",
+        "service": "#/definitions/ServiceConfiguration"
+      }
+    },
+    "oneOf": [
+      {
+        "$ref": "#/definitions/DevEnvironmentConfiguration"
+      },
+      {
+        "$ref": "#/definitions/TaskConfiguration"
+      },
+      {
+        "$ref": "#/definitions/ServiceConfiguration"
+      }
+    ],
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "RegistryAuth": {
+        "title": "RegistryAuth",
+        "type": "object",
+        "properties": {
+          "username": {
+            "title": "Username",
+            "description": "Username",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "description": "Password or access token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "PythonVersion": {
+        "title": "PythonVersion",
+        "description": "An enumeration.",
+        "enum": [
+          "3.7",
+          "3.8",
+          "3.9",
+          "3.10",
+          "3.11"
+        ],
+        "type": "string"
+      },
+      "PortMapping": {
+        "title": "PortMapping",
+        "type": "object",
+        "properties": {
+          "local_port": {
+            "title": "Local Port",
+            "exclusiveMinimum": 0,
+            "maximum": 65536,
+            "type": "integer"
+          },
+          "container_port": {
+            "title": "Container Port",
+            "exclusiveMinimum": 0,
+            "maximum": 65536,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "container_port"
+        ],
+        "additionalProperties": false
+      },
+      "DevEnvironmentConfiguration": {
+        "title": "DevEnvironmentConfiguration",
+        "type": "object",
+        "properties": {
+          "type": {
+            "title": "Type",
+            "default": "dev-environment",
+            "enum": [
+              "dev-environment"
+            ],
+            "type": "string"
+          },
+          "image": {
+            "title": "Image",
+            "description": "The name of the Docker image to run",
+            "type": "string"
+          },
+          "entrypoint": {
+            "title": "Entrypoint",
+            "description": "The Docker entrypoint",
+            "type": "string"
+          },
+          "home_dir": {
+            "title": "Home Dir",
+            "description": "The absolute path to the home directory inside the container",
+            "default": "/root",
+            "type": "string"
+          },
+          "registry_auth": {
+            "title": "Registry Auth",
+            "description": "Credentials for pulling a private container",
+            "allOf": [
+              {
+                "$ref": "#/definitions/RegistryAuth"
+              }
+            ]
+          },
+          "python": {
+            "description": "The major version of Python\nMutually exclusive with the image",
+            "allOf": [
+              {
+                "$ref": "#/definitions/PythonVersion"
+              }
+            ]
+          },
+          "env": {
+            "title": "Env",
+            "description": "The mapping or the list of environment variables",
+            "default": {},
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*=.*$"
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "build": {
+            "title": "Build",
+            "description": "The bash commands to run during build stage",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "setup": {
+            "title": "Setup",
+            "description": "The bash commands to run on the boot",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cache": {
+            "title": "Cache",
+            "description": "The directories to be cached between configuration runs",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ports": {
+            "title": "Ports",
+            "description": "Port numbers/mapping to expose",
+            "default": [],
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 65536
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?:[0-9]+|\\*):[0-9]+$"
+                },
+                {
+                  "$ref": "#/definitions/PortMapping"
+                }
+              ]
+            }
+          },
+          "ide": {
+            "title": "Ide",
+            "description": "The IDE to run",
+            "enum": [
+              "vscode"
+            ],
+            "type": "string"
+          },
+          "init": {
+            "title": "Init",
+            "description": "The bash commands to run",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ide"
+        ],
+        "additionalProperties": false
+      },
+      "Artifact": {
+        "title": "Artifact",
+        "type": "object",
+        "properties": {
+          "path": {
+            "title": "Path",
+            "description": "The path to the folder that must be stored as an output artifact",
+            "type": "string"
+          },
+          "mount": {
+            "title": "Mount",
+            "description": "Must be set to `true` if the artifact files must be saved in real-time",
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "TaskConfiguration": {
+        "title": "TaskConfiguration",
+        "type": "object",
+        "properties": {
+          "type": {
+            "title": "Type",
+            "default": "task",
+            "enum": [
+              "task"
+            ],
+            "type": "string"
+          },
+          "image": {
+            "title": "Image",
+            "description": "The name of the Docker image to run",
+            "type": "string"
+          },
+          "entrypoint": {
+            "title": "Entrypoint",
+            "description": "The Docker entrypoint",
+            "type": "string"
+          },
+          "home_dir": {
+            "title": "Home Dir",
+            "description": "The absolute path to the home directory inside the container",
+            "default": "/root",
+            "type": "string"
+          },
+          "registry_auth": {
+            "title": "Registry Auth",
+            "description": "Credentials for pulling a private container",
+            "allOf": [
+              {
+                "$ref": "#/definitions/RegistryAuth"
+              }
+            ]
+          },
+          "python": {
+            "description": "The major version of Python\nMutually exclusive with the image",
+            "allOf": [
+              {
+                "$ref": "#/definitions/PythonVersion"
+              }
+            ]
+          },
+          "env": {
+            "title": "Env",
+            "description": "The mapping or the list of environment variables",
+            "default": {},
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*=.*$"
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "build": {
+            "title": "Build",
+            "description": "The bash commands to run during build stage",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "setup": {
+            "title": "Setup",
+            "description": "The bash commands to run on the boot",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cache": {
+            "title": "Cache",
+            "description": "The directories to be cached between configuration runs",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ports": {
+            "title": "Ports",
+            "description": "Port numbers/mapping to expose",
+            "default": [],
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 65536
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?:[0-9]+|\\*):[0-9]+$"
+                },
+                {
+                  "$ref": "#/definitions/PortMapping"
+                }
+              ]
+            }
+          },
+          "commands": {
+            "title": "Commands",
+            "description": "The bash commands to run",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "artifacts": {
+            "title": "Artifacts",
+            "description": "The list of output artifacts",
+            "default": [],
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Artifact"
+            }
+          }
+        },
+        "required": [
+          "commands"
+        ],
+        "additionalProperties": false
+      },
+      "ServiceConfiguration": {
+        "title": "ServiceConfiguration",
+        "type": "object",
+        "properties": {
+          "type": {
+            "title": "Type",
+            "default": "service",
+            "enum": [
+              "service"
+            ],
+            "type": "string"
+          },
+          "image": {
+            "title": "Image",
+            "description": "The name of the Docker image to run",
+            "type": "string"
+          },
+          "entrypoint": {
+            "title": "Entrypoint",
+            "description": "The Docker entrypoint",
+            "type": "string"
+          },
+          "home_dir": {
+            "title": "Home Dir",
+            "description": "The absolute path to the home directory inside the container",
+            "default": "/root",
+            "type": "string"
+          },
+          "registry_auth": {
+            "title": "Registry Auth",
+            "description": "Credentials for pulling a private container",
+            "allOf": [
+              {
+                "$ref": "#/definitions/RegistryAuth"
+              }
+            ]
+          },
+          "python": {
+            "description": "The major version of Python\nMutually exclusive with the image",
+            "allOf": [
+              {
+                "$ref": "#/definitions/PythonVersion"
+              }
+            ]
+          },
+          "env": {
+            "title": "Env",
+            "description": "The mapping or the list of environment variables",
+            "default": {},
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*=.*$"
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "build": {
+            "title": "Build",
+            "description": "The bash commands to run during build stage",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "setup": {
+            "title": "Setup",
+            "description": "The bash commands to run on the boot",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cache": {
+            "title": "Cache",
+            "description": "The directories to be cached between configuration runs",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "commands": {
+            "title": "Commands",
+            "description": "The bash commands to run",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "port": {
+            "title": "Port",
+            "description": "The port, that application listens to or the mapping",
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 65536
+              },
+              {
+                "type": "string",
+                "pattern": "^[0-9]+:[0-9]+$"
+              },
+              {
+                "$ref": "#/definitions/PortMapping"
+              }
+            ]
+          },
+          "gateway": {
+            "title": "Gateway",
+            "description": "The gateway IP address or domain to publish the service",
+            "type": "string"
+          }
+        },
+        "required": [
+          "commands",
+          "port",
+          "gateway"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "entrypoint": "/bin/bash",
+        "home_dir": "/root",
+        "registry_auth": {
+          "username": "username",
+          "password": "password"
+        },
+        "env": {
+          "VARIABLE1": "value1",
+          "VARIABLE2": "value2"
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/project"
+        ],
+        "ports": [
+          8080,
+          "8081:8081"
+        ],
+        "ide": "vscode",
+        "init": [
+          "cd /root/project"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": {
+          "PYTHONPATH": "/root/project"
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          8080,
+          "8081:8081"
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"dev-environment\",\"image\":\"python:3.9\",\"home_dir\":\"/root\",\"env\":[\"PYTHONPATH\"],\"build\":[\"pip install -r requirements.txt\"],\"setup\":[\"mkdir -p /root/project\"],\"cache\":[\"/root/.cache\"],\"ports\":[8080,\"*:8081\"],\"ide\":\"vscode\",\"init\":[\"git config --global user.name 'John Doe'\",\"git config --global user.email 'john@example.com'\"]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'dev-environment', 'image': 'python:3.9', 'home_dir': '/root', 'env': ['PYTHONPATH'], 'build': ['pip install -r requirements.txt'], 'setup': ['mkdir -p /root/project'], 'cache': ['/root/.cache'], 'ports': [8080, '*:8081'], 'ide': 'vscode', 'init': [\"git config --global user.name 'John Doe'\", \"git config --global user.email 'john@example.com'\"]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'title': 'DstackConfiguration',\n     'discriminator': {'propertyName': 'type',\n                       'mapping': {'dev-environment': '#/definitions/DevEnvironmentConfiguration',\n                                   'task': '#/definitions/TaskConfiguration',\n                                   'service': '#/definitions/ServiceConfiguration'}},\n     'oneOf': [{'$ref': '#/definitions/DevEnvironmentConfiguration'},\n               {'$ref': '#/definitions/TaskConfiguration'},\n               {'$ref': '#/definitions/ServiceConfiguration'}],\n     '$schema': 'http://json-schema.org/draft.. (46889 more)",
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": [
+          "PYTHONPATH"
+        ],
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          8080,
+          "*:8081"
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"dev-environment\",\"image\":\"python:3.9\",\"home_dir\":\"/root\",\"env\":{\"PYTHONPATH\":\"/root/project\"},\"build\":[\"pip install -r requirements.txt\"],\"setup\":[\"mkdir -p /root/project\"],\"cache\":[\"/root/.cache\"],\"ports\":[8080,\"8081:8081\"],\"ide\":\"vscode\",\"init\":[\"git config --global user.name 'John Doe'\",\"git config --global user.email 'john@example.com'\"],\"commands\":[\"echo hello\"]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'dev-environment', 'image': 'python:3.9', 'home_dir': '/root', 'env': {'PYTHONPATH': '/root/project'}, 'build': ['pip install -r requirements.txt'], 'setup': ['mkdir -p /root/project'], 'cache': ['/root/.cache'], 'ports': [8080, '8081:8081'], 'ide': 'vscode', 'init': [\"git config --global user.name 'John Doe'\", \"git config --global user.email 'john@example.com'\"], 'commands': ['echo hello']} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'title': 'DstackConfiguration',\n     'discriminator': {'propertyName': 'type',\n                       'mapping': {'dev-environment': '#/definitions/DevEnvironmentConfiguration',\n                                   'task': '#/definitions/TaskConfiguration',\n                                   'service': '#/definitions/ServiceConfiguration'}},\n     'oneOf': [{'$ref': '#/definitions/DevEnvironmentConfiguration'},\n               {'$ref': '#/definitions/TaskConfiguration'},\n               {'$ref': '#/definitions/ServiceConfiguration'}.. (46990 more)",
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": {
+          "PYTHONPATH": "/root/project"
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          8080,
+          "8081:8081"
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'"
+        ],
+        "commands": [
+          "echo hello"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maximum keyword or exclusiveMinimum keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"dev-environment\",\"image\":\"python:3.9\",\"home_dir\":\"/root\",\"env\":{\"PYTHONPATH\":\"/root/project\"},\"build\":[\"pip install -r requirements.txt\"],\"setup\":[\"mkdir -p /root/project\"],\"cache\":[\"/root/.cache\"],\"ports\":[65537],\"ide\":\"vscode\",\"init\":[\"git config --global user.name 'John Doe'\",\"git config --global user.email 'john@example.com'\"]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'dev-environment', 'image': 'python:3.9', 'home_dir': '/root', 'env': {'PYTHONPATH': '/root/project'}, 'build': ['pip install -r requirements.txt'], 'setup': ['mkdir -p /root/project'], 'cache': ['/root/.cache'], 'ports': [65537], 'ide': 'vscode', 'init': [\"git config --global user.name 'John Doe'\", \"git config --global user.email 'john@example.com'\"]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'title': 'DstackConfiguration',\n     'discriminator': {'propertyName': 'type',\n                       'mapping': {'dev-environment': '#/definitions/DevEnvironmentConfiguration',\n                                   'task': '#/definitions/TaskConfiguration',\n                                   'service': '#/definitions/ServiceConfiguration'}},\n     'oneOf': [{'$ref': '#/definitions/DevEnvironmentConfiguration'},\n               {'$ref': '#/definitions/TaskConfiguration'},\n               {'$ref': '#/definitions/ServiceConfiguration'}],\n     '$schema': 'http://json-schema.o.. (46905 more)",
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": {
+          "PYTHONPATH": "/root/project"
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          65537
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"type\":\"dev-environment\",\"image\":\"python:3.9\",\"home_dir\":\"/root\",\"env\":{\"PYTHONPATH\":\"/root/project\",\"key_without_value\":null},\"build\":[\"pip install -r requirements.txt\"],\"setup\":[\"mkdir -p /root/project\"],\"cache\":[\"/root/.cache\"],\"ports\":[8080,\"8081:8081\"],\"ide\":\"vscode\",\"init\":[\"git config --global user.name 'John Doe'\",\"git config --global user.email 'john@example.com'\",\"extra_init_command\"],\"extra_property\":\"extra_value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'dev-environment', 'image': 'python:3.9', 'home_dir': '/root', 'env': {'PYTHONPATH': '/root/project', 'key_without_value': None}, 'build': ['pip install -r requirements.txt'], 'setup': ['mkdir -p /root/project'], 'cache': ['/root/.cache'], 'ports': [8080, '8081:8081'], 'ide': 'vscode', 'init': [\"git config --global user.name 'John Doe'\", \"git config --global user.email 'john@example.com'\", 'extra_init_command'], 'extra_property': 'extra_value'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'title': 'DstackConfiguration',\n     'discriminator': {'propertyName': 'type',\n                       'mapping': {'dev-environment': '#/definitions/DevEnvironmentConfiguration',\n                                   'task': '#/definitions/TaskConfiguration',\n                                   'service': '#/definitions/ServiceConfiguration'}},\n     'oneOf': [{'$ref': '#/definitions/DevEnvironmentConfiguration'},\n               {'$ref': '#/definitions/TaskConfiguration'},\n       .. (47112 more)",
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": {
+          "PYTHONPATH": "/root/project",
+          "key_without_value": null
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          8080,
+          "8081:8081"
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'",
+          "extra_init_command"
+        ],
+        "extra_property": "extra_value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"dev-environment\",\"image\":\"python:3.9\",\"home_dir\":\"/root\",\"env\":{\"PYTHONPATH\":\"/root/project\"},\"build\":[\"pip install -r requirements.txt\"],\"setup\":[\"mkdir -p /root/project\"],\"cache\":[\"/root/.cache\"],\"ports\":[8080,\"8081:8081\"],\"ide\":\"vscode\",\"init\":[\"git config --global user.name 'John Doe'\",\"git config --global user.email 'john@example.com'\"],\"registry_auth\":{\"username\":\"user\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'dev-environment', 'image': 'python:3.9', 'home_dir': '/root', 'env': {'PYTHONPATH': '/root/project'}, 'build': ['pip install -r requirements.txt'], 'setup': ['mkdir -p /root/project'], 'cache': ['/root/.cache'], 'ports': [8080, '8081:8081'], 'ide': 'vscode', 'init': [\"git config --global user.name 'John Doe'\", \"git config --global user.email 'john@example.com'\"], 'registry_auth': {'username': 'user'}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'title': 'DstackConfiguration',\n     'discriminator': {'propertyName': 'type',\n                       'mapping': {'dev-environment': '#/definitions/DevEnvironmentConfiguration',\n                                   'task': '#/definitions/TaskConfiguration',\n                                   'service': '#/definitions/ServiceConfiguration'}},\n     'oneOf': [{'$ref': '#/definitions/DevEnvironmentConfiguration'},\n               {'$ref': '#/definitions/TaskConfiguration'},\n               {'$ref': '#/definitions/ServiceConf.. (47012 more)",
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": {
+          "PYTHONPATH": "/root/project"
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          8080,
+          "8081:8081"
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'"
+        ],
+        "registry_auth": {
+          "username": "user"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"dev-environment\",\"image\":\"python:3.9\",\"home_dir\":\"/root\",\"env\":{\"PYTHONPATH\":\"/root/project\"},\"build\":[\"pip install -r requirements.txt\"],\"setup\":[\"mkdir -p /root/project\"],\"cache\":[\"/root/.cache\"],\"ports\":[8080,\"8081:8081\",\"invalid-port\"],\"ide\":\"vscode\",\"init\":[\"git config --global user.name 'John Doe'\",\"git config --global user.email 'john@example.com'\"]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'dev-environment', 'image': 'python:3.9', 'home_dir': '/root', 'env': {'PYTHONPATH': '/root/project'}, 'build': ['pip install -r requirements.txt'], 'setup': ['mkdir -p /root/project'], 'cache': ['/root/.cache'], 'ports': [8080, '8081:8081', 'invalid-port'], 'ide': 'vscode', 'init': [\"git config --global user.name 'John Doe'\", \"git config --global user.email 'john@example.com'\"]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'title': 'DstackConfiguration',\n     'discriminator': {'propertyName': 'type',\n                       'mapping': {'dev-environment': '#/definitions/DevEnvironmentConfiguration',\n                                   'task': '#/definitions/TaskConfiguration',\n                                   'service': '#/definitions/ServiceConfiguration'}},\n     'oneOf': [{'$ref': '#/definitions/DevEnvironmentConfiguration'},\n               {'$ref': '#/definitions/TaskConfiguration'},\n               {'$ref': '#/definitions/ServiceConfiguration'}],\n     '$sc.. (46961 more)",
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": {
+          "PYTHONPATH": "/root/project"
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          8080,
+          "8081:8081",
+          "invalid-port"
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"type\":\"dev-environment\",\"image\":\"python:3.9\",\"home_dir\":\"/root\",\"env\":{\"PYTHONPATH\":\"/root/project\"},\"build\":[\"pip install -r requirements.txt\"],\"setup\":[\"mkdir -p /root/project\"],\"cache\":[\"/root/.cache\"],\"ports\":[8080,\"8081:8081\",70000],\"ide\":\"vscode\",\"init\":[\"git config --global user.name 'John Doe'\",\"git config --global user.email 'john@example.com'\"]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'type': 'dev-environment', 'image': 'python:3.9', 'home_dir': '/root', 'env': {'PYTHONPATH': '/root/project'}, 'build': ['pip install -r requirements.txt'], 'setup': ['mkdir -p /root/project'], 'cache': ['/root/.cache'], 'ports': [8080, '8081:8081', 70000], 'ide': 'vscode', 'init': [\"git config --global user.name 'John Doe'\", \"git config --global user.email 'john@example.com'\"]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'title': 'DstackConfiguration',\n     'discriminator': {'propertyName': 'type',\n                       'mapping': {'dev-environment': '#/definitions/DevEnvironmentConfiguration',\n                                   'task': '#/definitions/TaskConfiguration',\n                                   'service': '#/definitions/ServiceConfiguration'}},\n     'oneOf': [{'$ref': '#/definitions/DevEnvironmentConfiguration'},\n               {'$ref': '#/definitions/TaskConfiguration'},\n               {'$ref': '#/definitions/ServiceConfiguration'}],\n     '$schema': 'h.. (46943 more)",
+      "data": {
+        "type": "dev-environment",
+        "image": "python:3.9",
+        "home_dir": "/root",
+        "env": {
+          "PYTHONPATH": "/root/project"
+        },
+        "build": [
+          "pip install -r requirements.txt"
+        ],
+        "setup": [
+          "mkdir -p /root/project"
+        ],
+        "cache": [
+          "/root/.cache"
+        ],
+        "ports": [
+          8080,
+          "8081:8081",
+          70000
+        ],
+        "ide": "vscode",
+        "init": [
+          "git config --global user.name 'John Doe'",
+          "git config --global user.email 'john@example.com'"
+        ]
+      }
+    }
+  ]
+}

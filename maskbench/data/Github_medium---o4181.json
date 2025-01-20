@@ -1,0 +1,340 @@
+{
+  "description": "sample Github_medium/o4181.json",
+  "meta": {
+    "full_size": 1596,
+    "stripped_size": 904,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "id": "https://eddn.edcd.io/schemas/shipyard/2#",
+    "properties": {
+      "$schemaRef": {
+        "type": "string"
+      },
+      "header": {
+        "additionalProperties": true,
+        "properties": {
+          "gatewayTimestamp": {
+            "_format": "date-time",
+            "description": "Timestamp upon receipt at the gateway. If present, this property will be overwritten by the gateway; submitters are not intended to populate this property.",
+            "type": "string"
+          },
+          "softwareName": {
+            "type": "string"
+          },
+          "softwareVersion": {
+            "type": "string"
+          },
+          "uploaderID": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploaderID",
+          "softwareName",
+          "softwareVersion"
+        ],
+        "type": "object"
+      },
+      "message": {
+        "additionalProperties": false,
+        "properties": {
+          "horizons": {
+            "description": "Whether the sending Cmdr has a Horizons pass.",
+            "type": "boolean"
+          },
+          "marketId": {
+            "type": "number"
+          },
+          "ships": {
+            "items": {
+              "description": "Ship symbolic name. i.e. one of: SideWinder, Adder, Anaconda, Asp, Asp_Scout CobraMkIII, CobraMkIV, Cutter, DiamondBack, DiamondBackXL, Eagle, Empire_Courier, Empire_Eagle, Empire_Trader, Federation_Corvette, Federation_Dropship, Federation_Dropship_MkII, Federation_Gunship, FerDeLance, Hauler, Independant_Trader, Orca, Python, Type6, Type7, Type9, Viper, Viper_MkIV, Vulture",
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "_uniqueItems": true
+          },
+          "stationName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "systemName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "timestamp": {
+            "_format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "systemName",
+          "stationName",
+          "marketId",
+          "timestamp",
+          "ships"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "$schemaRef",
+      "header",
+      "message"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2#",
+        "header": {
+          "softwareName": "My Shipyard App",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrMyUsername"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 123456789,
+          "ships": [
+            "Anaconda",
+            "CobraMkIII",
+            "Viper_MkIV"
+          ],
+          "stationName": "Jameson Memorial",
+          "systemName": "Sol",
+          "timestamp": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['message']['properties']['ships']['items']:\n    {'description': 'Ship symbolic name. i.e. one of: SideWinder, Adder, '\n                    'Anaconda, Asp, Asp_Scout CobraMkIII, CobraMkIV, '\n                    'Cutter, DiamondBack, DiamondBackXL, Eagle, '\n                    'Empire_Courier, Empire_Eagle, Empire_Trader, '\n                    'Federation_Corvette, Federation_Dropship, '\n                    'Federation_Dropship_MkII, Federation_Gunship, '\n                    'FerDeLance, Hauler, Independant_Trader, Orca, Python, '\n                    'Type6, Type7, Type9, Viper, Viper_MkIV, Vulture',\n     'minLength': 1,\n     'type': 'string'}\n\nOn instance['message']['ships'][0]:\n    ''",
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2#",
+        "header": {
+          "softwareName": "My Shipyard App",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrMyUsername"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 123456789,
+          "ships": [
+            "",
+            "CobraMkIII",
+            "Viper_MkIV"
+          ],
+          "stationName": "Jameson Memorial",
+          "systemName": "Sol",
+          "timestamp": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['message']['properties']['ships']:\n    {'items': {'description': 'Ship symbolic name. i.e. one of: '\n                              'SideWinder, Adder, Anaconda, Asp, Asp_Scout '\n                              'CobraMkIII, CobraMkIV, Cutter, DiamondBack, '\n                              'DiamondBackXL, Eagle, Empire_Courier, '\n                              'Empire_Eagle, Empire_Trader, '\n                              'Federation_Corvette, Federation_Dropship, '\n                              'Federation_Dropship_MkII, '\n                              'Federation_Gunship, FerDeLance, Hauler, '\n                              'Independant_Trader, Orca, Python, Type6, '\n                              'Type7, Type9, Viper, Viper_MkIV, Vulture',\n               'minLength': 1,\n               'type': 'string'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['message']['ships']:\n    []",
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2#",
+        "header": {
+          "softwareName": "My Shipyard App",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrMyUsername"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 123456789,
+          "ships": [],
+          "stationName": "Jameson Memorial",
+          "systemName": "Sol",
+          "timestamp": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['message']['properties']['stationName']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['message']['stationName']:\n    ''",
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2#",
+        "header": {
+          "softwareName": "My Shipyard App",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrMyUsername"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 123456789,
+          "ships": [
+            "Anaconda",
+            "CobraMkIII",
+            "Viper_MkIV"
+          ],
+          "stationName": "",
+          "systemName": "Sol",
+          "timestamp": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['message']['properties']['stationName']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['message']['stationName']:\n    ''",
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2#",
+        "header": {
+          "softwareName": "My Shipyard App",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrMyUsername"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 123456789,
+          "ships": [
+            "Anaconda",
+            "CobraMkIII",
+            "CobraMkIII",
+            "Viper_MkIV"
+          ],
+          "stationName": "",
+          "systemName": "Sol",
+          "timestamp": "2022-01-01T12:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2",
+        "header": {
+          "gatewayTimestamp": "2023-12-07T14:30:00Z",
+          "softwareName": "MyEDDNUploader",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrUploader"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 12345,
+          "ships": [
+            "Anaconda",
+            "CobraMkIII",
+            "Viper_MkIV"
+          ],
+          "stationName": "New Station",
+          "systemName": "Sol",
+          "timestamp": "2023-12-07T14:30:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['message']['properties']['ships']:\n    {'items': {'description': 'Ship symbolic name. i.e. one of: '\n                              'SideWinder, Adder, Anaconda, Asp, Asp_Scout '\n                              'CobraMkIII, CobraMkIV, Cutter, DiamondBack, '\n                              'DiamondBackXL, Eagle, Empire_Courier, '\n                              'Empire_Eagle, Empire_Trader, '\n                              'Federation_Corvette, Federation_Dropship, '\n                              'Federation_Dropship_MkII, '\n                              'Federation_Gunship, FerDeLance, Hauler, '\n                              'Independant_Trader, Orca, Python, Type6, '\n                              'Type7, Type9, Viper, Viper_MkIV, Vulture',\n               'minLength': 1,\n               'type': 'string'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['message']['ships']:\n    []",
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2",
+        "header": {
+          "gatewayTimestamp": "2023-12-07T14:30:00Z",
+          "softwareName": "MyEDDNUploader",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrUploader"
+        },
+        "message": {
+          "systemName": "Sol",
+          "stationName": "New Station",
+          "marketId": 12345,
+          "timestamp": "2023-12-07T14:30:00Z",
+          "ships": [],
+          "horizons": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['message']['properties']['systemName']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['message']['systemName']:\n    ''",
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2",
+        "header": {
+          "gatewayTimestamp": "2023-12-07T14:30:00Z",
+          "softwareName": "MyEDDNUploader",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrUploader"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 12345,
+          "ships": [
+            "Anaconda",
+            "CobraMkIII",
+            "Viper_MkIV"
+          ],
+          "stationName": "New Station",
+          "systemName": "",
+          "timestamp": "2023-12-07T14:30:00Z"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['message']['properties']['stationName']:\n    {'minLength': 1, 'type': 'string'}\n\nOn instance['message']['stationName']:\n    ''",
+      "data": {
+        "$schemaRef": "https://eddn.edcd.io/schemas/shipyard/2",
+        "header": {
+          "gatewayTimestamp": "2023-12-07T14:30:00Z",
+          "softwareName": "MyEDDNUploader",
+          "softwareVersion": "1.0.0",
+          "uploaderID": "CmdrUploader"
+        },
+        "message": {
+          "horizons": true,
+          "marketId": 12345,
+          "ships": [
+            "Anaconda",
+            "CobraMkIII",
+            "CobraMkIII"
+          ],
+          "stationName": "",
+          "systemName": "Sol",
+          "timestamp": "2023-12-07T14:30:00Z"
+        }
+      }
+    }
+  ]
+}

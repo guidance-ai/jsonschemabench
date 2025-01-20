@@ -1,0 +1,364 @@
+{
+  "description": "sample Github_medium/o90708.json",
+  "meta": {
+    "full_size": 2880,
+    "stripped_size": 831,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "configuration": {
+        "description": "influxdb networking configuration properties",
+        "properties": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": {
+            "default": "_internal",
+            "description": "The destination database for recorded statistics.",
+            "type": "string"
+          },
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": {
+            "default": "30m0s",
+            "description": "The rate at which InfluxDB checks to enforce a retention policy.",
+            "type": "string"
+          },
+          "INFLUXDB_RETENTION_ENABLED": {
+            "default": true,
+            "description": "Set to false to prevent InfluxDB from enforcing retention policies.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "networking": {
+        "description": "influxdb networking configuration properties",
+        "properties": {
+          "external_access": {
+            "description": "Enable access from outside the cluster through Marathon-LB.\nNOTE: this connection is unencrypted.",
+            "properties": {
+              "enable": {
+                "default": false,
+                "description": "Enable or disable creating a VIP for external access through a public node running Marathon-LB.",
+                "type": "boolean"
+              },
+              "external_access_port": {
+                "default": 18086,
+                "description": "For external access, port number to be used for clear communication in the external Marathon-LB load balancer",
+                "type": "number"
+              },
+              "external_public_agent_ip": {
+                "default": "",
+                "description": "For external access, dns to be used for Marathon-LB vHost: For example use your public slave elb dns.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "port_api": {
+            "default": 8086,
+            "description": "Port number to be used for api communication internally to the cluster.",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "service": {
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "cpus": {
+            "default": 1,
+            "description": "CPU shares to allocate to each service instance.",
+            "minimum": 1,
+            "type": "number"
+          },
+          "mem": {
+            "default": 2048.0,
+            "description": "Memory to allocate to each service instance.",
+            "minimum": 1024.0,
+            "type": "number"
+          },
+          "name": {
+            "default": "influxdb",
+            "description": "Name of this service instance",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem"
+        ],
+        "type": "object"
+      },
+      "storage": {
+        "description": "influxdb storage configuration properties",
+        "properties": {
+          "host_volume_influxdb": {
+            "default": "/tmp",
+            "description": "If using non-persistent volumes (local volumes), this sets the location of a volume on the host to be used for the influxdb service to store the contents of the influxdb. The final location will be derived from this value plus the name set in `name` (e.g. `/mnt/host_volume/service_name`). This can be a mounted NFS drive. Note that this path must be the same on all DC/OS agents. NOTE: if you don't change the default /tmp value, YOUR DATA WILL NOT BE SAVED IN ANY WAY.",
+            "type": "string"
+          },
+          "persistence": {
+            "description": "Enable persistent storage.",
+            "properties": {
+              "enable": {
+                "default": false,
+                "description": "Enable or disable persistent storage.",
+                "type": "boolean"
+              },
+              "volume_mode_influxdb": {
+                "default": "RW",
+                "description": "Choose your mode: RW, R -> default RW.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "configuration": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": "my_database",
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": "1h0m0s",
+          "INFLUXDB_RETENTION_ENABLED": true
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 18087,
+            "external_public_agent_ip": "my-public-agent-ip"
+          },
+          "port_api": 8087
+        },
+        "service": {
+          "cpus": 2,
+          "mem": 4096.0,
+          "name": "my-influxdb-service"
+        },
+        "storage": {
+          "host_volume_influxdb": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_mode_influxdb": "RW"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "512.0 is less than the minimum of 1024.0\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['mem']:\n    {'default': 2048.0,\n     'description': 'Memory to allocate to each service instance.',\n     'minimum': 1024.0,\n     'type': 'number'}\n\nOn instance['service']['mem']:\n    512.0",
+      "data": {
+        "configuration": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": "my_database",
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": "1h0m0s",
+          "INFLUXDB_RETENTION_ENABLED": true
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 18087,
+            "external_public_agent_ip": "my-public-agent-ip"
+          },
+          "port_api": 8087
+        },
+        "service": {
+          "cpus": 0,
+          "mem": 512.0,
+          "name": "my-influxdb-service"
+        },
+        "storage": {
+          "host_volume_influxdb": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_mode_influxdb": "RW"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"not a number\" is not of type \"number\"",
+      "python_error": "'not a number' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['networking']['properties']['external_access']['properties']['external_access_port']:\n    {'default': 18086,\n     'description': 'For external access, port number to be used for clear '\n                    'communication in the external Marathon-LB load '\n                    'balancer',\n     'type': 'number'}\n\nOn instance['networking']['external_access']['external_access_port']:\n    'not a number'",
+      "data": {
+        "configuration": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": "my_database",
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": "1h0m0s",
+          "INFLUXDB_RETENTION_ENABLED": true
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": "not a number",
+            "external_public_agent_ip": "my-public-agent-ip"
+          },
+          "port_api": 8087
+        },
+        "service": {
+          "cpus": 2,
+          "mem": 4096.0,
+          "name": "my-influxdb-service"
+        },
+        "storage": {
+          "host_volume_influxdb": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_mode_influxdb": "RW"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "1023.9 is less than the minimum of 1024.0\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['mem']:\n    {'default': 2048.0,\n     'description': 'Memory to allocate to each service instance.',\n     'minimum': 1024.0,\n     'type': 'number'}\n\nOn instance['service']['mem']:\n    1023.9",
+      "data": {
+        "configuration": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": "my_database",
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": "1h0m0s",
+          "INFLUXDB_RETENTION_ENABLED": true
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 18087,
+            "external_public_agent_ip": "my-public-agent-ip"
+          },
+          "port_api": 8087
+        },
+        "service": {
+          "cpus": 0,
+          "mem": 1023.9,
+          "name": "my-influxdb-service"
+        },
+        "storage": {
+          "host_volume_influxdb": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_mode_influxdb": "RW"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "'mem' is a required property\n\nFailed validating 'required' in schema['properties']['service']:\n    {'description': 'DC/OS service configuration properties',\n     'properties': {'cpus': {'default': 1,\n                             'description': 'CPU shares to allocate to '\n                                            'each service instance.',\n                             'minimum': 1,\n                             'type': 'number'},\n                    'mem': {'default': 2048.0,\n                            'description': 'Memory to allocate to each '\n                                           'service instance.',\n                            'minimum': 1024.0,\n                            'type': 'number'},\n                    'name': {'default': 'influxdb',\n                             'description': 'Name of this service instance',\n                             'type': 'string'}},\n     'required': ['cpus', 'mem'],\n     'type': 'object'}\n\nOn instance['service']:\n    {'cpus': 0,\n     'minimum value of cpus is 1': 'mem',\n     'name': 'my-influxdb-service'}",
+      "data": {
+        "configuration": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": "my_database",
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": "1h0m0s",
+          "INFLUXDB_RETENTION_ENABLED": true
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 18087,
+            "external_public_agent_ip": "my-public-agent-ip"
+          },
+          "port_api": 8087
+        },
+        "service": {
+          "cpus": 0,
+          "minimum value of cpus is 1": "mem",
+          "name": "my-influxdb-service"
+        },
+        "storage": {
+          "host_volume_influxdb": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_mode_influxdb": "RW"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "1023.0 is less than the minimum of 1024.0\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['mem']:\n    {'default': 2048.0,\n     'description': 'Memory to allocate to each service instance.',\n     'minimum': 1024.0,\n     'type': 'number'}\n\nOn instance['service']['mem']:\n    1023.0",
+      "data": {
+        "configuration": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": "my_database",
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": "1h0m0s",
+          "INFLUXDB_RETENTION_ENABLED": true
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 18087,
+            "external_public_agent_ip": "my-public-agent-ip"
+          },
+          "port_api": 8087
+        },
+        "service": {
+          "cpus": 0,
+          "mem": 1023.0,
+          "name": "my-influxdb-service"
+        },
+        "storage": {
+          "host_volume_influxdb": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_mode_influxdb": "RW"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"8087\" is not of type \"number\"",
+      "python_error": "'8087' is not of type 'number'\n\nFailed validating 'type' in schema['properties']['networking']['properties']['port_api']:\n    {'default': 8086,\n     'description': 'Port number to be used for api communication '\n                    'internally to the cluster.',\n     'type': 'number'}\n\nOn instance['networking']['port_api']:\n    '8087'",
+      "data": {
+        "configuration": {
+          "INFLUXDB_MONITOR_STORE_DATABASE": "my_database",
+          "INFLUXDB_RETENTION_CHECK_INTERVAL": "1h0m0s",
+          "INFLUXDB_RETENTION_ENABLED": true,
+          "INFLUXDB_NEW_PROPERTY": "this is not allowed"
+        },
+        "networking": {
+          "external_access": {
+            "enable": true,
+            "external_access_port": 18087,
+            "external_public_agent_ip": "my-public-agent-ip"
+          },
+          "port_api": "8087"
+        },
+        "service": {
+          "cpus": 2,
+          "mem": 4096.0,
+          "name": "my-influxdb-service",
+          "new_property": "this is not allowed"
+        },
+        "storage": {
+          "host_volume_influxdb": "/mnt/host_volume",
+          "persistence": {
+            "enable": true,
+            "volume_mode_influxdb": "RWR"
+          }
+        }
+      }
+    }
+  ]
+}

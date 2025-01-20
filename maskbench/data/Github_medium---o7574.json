@@ -1,0 +1,265 @@
+{
+  "description": "sample Github_medium/o7574.json",
+  "meta": {
+    "full_size": 1487,
+    "stripped_size": 771,
+    "features": [
+      "$ref",
+      "@minmaxProperties",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "format",
+      "format:uri",
+      "not",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "id",
+      "minProperties",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://raw.githubusercontent.com/JSONScript/jsonscript-proxy/master/config_schema.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Configuration",
+    "description": "Schema for proxy server configuration file (and for config passed to proxy middleware)",
+    "type": "object",
+    "required": [
+      "services"
+    ],
+    "properties": {
+      "services": {
+        "title": "proxied services",
+        "description": "each property name will be an executor exposed to JSONScript interpreter",
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": false,
+        "patternProperties": {
+          "^[A-Za-z_$][A-Za-z_$0-9]+$": {
+            "$ref": "#/definitions/service"
+          }
+        }
+      },
+      "jsonscript": {
+        "description": "options passed to JSONScript interpreter",
+        "type": "object"
+      },
+      "processResponse": {
+        "$ref": "#/definitions/processResponse"
+      },
+      "Promise": {
+        "description": "Promise class to use, will be ignored if used from command line",
+        "typeof": "function"
+      }
+    },
+    "definitions": {
+      "service": {
+        "description": "proxied service definition",
+        "required": [
+          "basePath"
+        ],
+        "properties": {
+          "basePath": {
+            "type": "string",
+            "format": "uri"
+          },
+          "processResponse": {
+            "$ref": "#/definitions/processResponse"
+          }
+        }
+      },
+      "processResponse": {
+        "description": "defines how response from service is processed",
+        "anyOf": [
+          {
+            "description": "return only response body if status code is < 300, throw an exception otherwise",
+            "type": "string",
+            "enum": [
+              "body"
+            ]
+          },
+          {
+            "description": "uses custom keyword 'typeof', function should return result or throw exception",
+            "not": {
+              "type": [
+                "string",
+                "number",
+                "array",
+                "object",
+                "boolean",
+                "null"
+              ]
+            },
+            "typeof": "function"
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "services": {
+          "myService": {
+            "basePath": "https://example.com/api",
+            "processResponse": "body"
+          },
+          "myOtherService": {
+            "basePath": "https://example.com/other-api",
+            "processResponse": "body"
+          }
+        },
+        "jsonscript": {
+          "timeout": 30000
+        },
+        "processResponse": "body",
+        "Promise": "Promise"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!myService' was unexpected)",
+      "python_error": "'!myService' does not match any of the regexes: '^[A-Za-z_$][A-Za-z_$0-9]+$'\n\nFailed validating 'additionalProperties' in schema['properties']['services']:\n    {'title': 'proxied services',\n     'description': 'each property name will be an executor exposed to '\n                    'JSONScript interpreter',\n     'type': 'object',\n     'minProperties': 1,\n     'additionalProperties': False,\n     'patternProperties': {'^[A-Za-z_$][A-Za-z_$0-9]+$': {'$ref': '#/definitions/service'}}}\n\nOn instance['services']:\n    {'!myService': {'basePath': 'https://example.com/api',\n                    'processResponse': 'body'},\n     'myOtherService': {'basePath': 'https://example.com/other-api',\n                        'processResponse': 'body'}}",
+      "data": {
+        "services": {
+          "!myService": {
+            "basePath": "https://example.com/api",
+            "processResponse": "body"
+          },
+          "myOtherService": {
+            "basePath": "https://example.com/other-api",
+            "processResponse": "body"
+          }
+        },
+        "jsonscript": {
+          "timeout": 30000
+        },
+        "processResponse": "body",
+        "Promise": "Promise"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['services']['patternProperties']['^[A-Za-z_$][A-Za-z_$0-9]+$']['properties']['processResponse']:\n    {'description': 'defines how response from service is processed',\n     'anyOf': [{'description': 'return only response body if status code '\n                               'is < 300, throw an exception otherwise',\n                'type': 'string',\n                'enum': ['body']},\n               {'description': \"uses custom keyword 'typeof', function \"\n                               'should return result or throw exception',\n                'not': {'type': ['string',\n                                 'number',\n                                 'array',\n                                 'object',\n                                 'boolean',\n                                 'null']},\n                'typeof': 'function'}]}\n\nOn instance['services']['myService']['processResponse']:\n    123",
+      "data": {
+        "services": {
+          "myService": {
+            "basePath": "https://example.com/api",
+            "processResponse": 123
+          },
+          "myOtherService": {
+            "basePath": "https://example.com/other-api",
+            "processResponse": "body"
+          }
+        },
+        "jsonscript": {
+          "timeout": 30000
+        },
+        "processResponse": "body",
+        "Promise": "Promise"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\" invalid uri \" is not a \"uri\"",
+      "python_error": "' invalid uri ' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['services']['patternProperties']['^[A-Za-z_$][A-Za-z_$0-9]+$']['properties']['basePath']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['services']['myService']['basePath']:\n    ' invalid uri '",
+      "data": {
+        "services": {
+          "myService": {
+            "basePath": " invalid uri ",
+            "processResponse": "body"
+          },
+          "myOtherService": {
+            "basePath": "https://example.com/other-api",
+            "processResponse": "body"
+          }
+        },
+        "jsonscript": {
+          "timeout": 30000
+        },
+        "processResponse": "body",
+        "Promise": "Promise"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minProperties keyword",
+      "valid": false,
+      "rust_error": "{} has less than 1 property",
+      "python_error": "{} should be non-empty\n\nFailed validating 'minProperties' in schema['properties']['services']:\n    {'title': 'proxied services',\n     'description': 'each property name will be an executor exposed to '\n                    'JSONScript interpreter',\n     'type': 'object',\n     'minProperties': 1,\n     'additionalProperties': False,\n     'patternProperties': {'^[A-Za-z_$][A-Za-z_$0-9]+$': {'$ref': '#/definitions/service'}}}\n\nOn instance['services']:\n    {}",
+      "data": {
+        "services": {},
+        "jsonscript": {
+          "timeout": 30000
+        },
+        "processResponse": "body",
+        "Promise": "Promise"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['services']['patternProperties']['^[A-Za-z_$][A-Za-z_$0-9]+$']['properties']['processResponse']:\n    {'description': 'defines how response from service is processed',\n     'anyOf': [{'description': 'return only response body if status code '\n                               'is < 300, throw an exception otherwise',\n                'type': 'string',\n                'enum': ['body']},\n               {'description': \"uses custom keyword 'typeof', function \"\n                               'should return result or throw exception',\n                'not': {'type': ['string',\n                                 'number',\n                                 'array',\n                                 'object',\n                                 'boolean',\n                                 'null']},\n                'typeof': 'function'}]}\n\nOn instance['services']['myService']['processResponse']:\n    {}",
+      "data": {
+        "services": {
+          "myService": {
+            "basePath": "https://example.com/api",
+            "processResponse": {}
+          },
+          "myOtherService": {
+            "basePath": "https://example.com/other-api",
+            "processResponse": "body"
+          }
+        },
+        "jsonscript": {
+          "timeout": 30000
+        },
+        "processResponse": "body",
+        "Promise": "Promise"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalid' is not one of ['body']\n\nFailed validating 'enum' in schema[0]:\n    {'description': 'return only response body if status code is < 300, '\n                    'throw an exception otherwise',\n     'type': 'string',\n     'enum': ['body']}\n\nOn instance:\n    'invalid'",
+      "data": {
+        "services": {
+          "myService": {
+            "basePath": "https://example.com/api",
+            "processResponse": "body"
+          },
+          "myOtherService": {
+            "basePath": "https://example.com/other-api",
+            "processResponse": "invalid"
+          }
+        },
+        "jsonscript": {
+          "timeout": 30000
+        },
+        "processResponse": "body",
+        "Promise": "Promise"
+      }
+    }
+  ]
+}

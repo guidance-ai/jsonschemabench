@@ -1,0 +1,322 @@
+{
+  "description": "sample Snowplow/sp_351_Normalized.json",
+  "meta": {
+    "full_size": 1662,
+    "stripped_size": 1469,
+    "features": [
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for PII pseudonymization enrichment",
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string"
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "pii": {
+            "items": {
+              "additionalProperties": false,
+              "oneOf": [
+                {
+                  "required": [
+                    "pojo"
+                  ]
+                },
+                {
+                  "required": [
+                    "json"
+                  ]
+                }
+              ],
+              "properties": {
+                "json": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "type": "string"
+                    },
+                    "jsonPath": {
+                      "pattern": "^\\$.*$",
+                      "type": "string"
+                    },
+                    "schemaCriterion": {
+                      "pattern": "^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\*)-((?:0|[1-9][0-9]*)|\\*)-((?:0|[1-9][0-9]*)|\\*)$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "field",
+                    "schemaCriterion",
+                    "jsonPath"
+                  ],
+                  "type": "object"
+                },
+                "pojo": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "enum": [
+                        "user_id",
+                        "user_ipaddress",
+                        "user_fingerprint",
+                        "domain_userid",
+                        "network_userid",
+                        "ip_organization",
+                        "ip_domain",
+                        "tr_orderid",
+                        "ti_orderid",
+                        "mkt_term",
+                        "mkt_content",
+                        "se_category",
+                        "se_action",
+                        "se_label",
+                        "se_property",
+                        "mkt_clickid",
+                        "refr_domain_userid",
+                        "domain_sessionid"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "field"
+                  ],
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "strategy": {
+            "additionalProperties": false,
+            "properties": {
+              "pseudonymize": {
+                "additionalProperties": false,
+                "properties": {
+                  "hashFunction": {
+                    "enum": [
+                      "MD2",
+                      "MD5",
+                      "SHA-1",
+                      "SHA-256",
+                      "SHA-384",
+                      "SHA-512"
+                    ]
+                  }
+                },
+                "required": [
+                  "hashFunction"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "pseudonymize"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "pii",
+          "strategy"
+        ],
+        "type": "object"
+      },
+      "vendor": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "vendor",
+      "name",
+      "enabled",
+      "parameters"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "pii_enrichment_config",
+      "vendor": "com.snowplowanalytics.snowplow.enrichments",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "vendor": "com.example",
+        "name": "pii_pseudonymization_enrichment",
+        "enabled": true,
+        "parameters": {
+          "pii": [
+            {
+              "pojo": {
+                "field": "user_id"
+              }
+            },
+            {
+              "json": {
+                "field": "user_data",
+                "jsonPath": "$.user_data",
+                "schemaCriterion": "iglu:com.example/user/jsonschema/1-0-0"
+              }
+            }
+          ],
+          "strategy": {
+            "pseudonymize": {
+              "hashFunction": "SHA-256"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "enabled": true,
+        "name": "pii_enrichment_config",
+        "parameters": {
+          "pii": [
+            {
+              "pojo": {
+                "field": "user_id"
+              }
+            },
+            {
+              "json": {
+                "field": "user_data",
+                "jsonPath": "$.user_data",
+                "schemaCriterion": "iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0-0"
+              }
+            }
+          ],
+          "strategy": {
+            "pseudonymize": {
+              "hashFunction": "SHA-256"
+            }
+          }
+        },
+        "vendor": "com.snowplowanalytics.snowplow.enrichments"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0\" does not match \"^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\*)-((?:0|[1-9][0-9]*)|\\*)-((?:0|[1-9][0-9]*)|\\*)$\"",
+      "python_error": "'iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0' does not match '^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)$'\n\nFailed validating 'pattern' in schema['properties']['parameters']['properties']['pii']['items']['properties']['json']['properties']['schemaCriterion']:\n    {'pattern': '^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)$',\n     'type': 'string'}\n\nOn instance['parameters']['pii'][1]['json']['schemaCriterion']:\n    'iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0'",
+      "data": {
+        "enabled": true,
+        "name": "pii_enrichment_config",
+        "parameters": {
+          "pii": [
+            {
+              "pojo": {
+                "field": "user_id"
+              }
+            },
+            {
+              "json": {
+                "field": "user_data",
+                "jsonPath": "$.user_data",
+                "schemaCriterion": "iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0"
+              }
+            }
+          ],
+          "strategy": {
+            "pseudonymize": {
+              "hashFunction": "SHA-256"
+            }
+          }
+        },
+        "vendor": "com.snowplowanalytics.snowplow.enrichments"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"pojo\":{\"field\":\"user_id\"},\"json\":{\"field\":\"user_data\",\"jsonPath\":\"$.user_data\",\"schemaCriterion\":\"iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0-0\"}} is valid under more than one of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'pojo': {'field': 'user_id'}, 'json': {'field': 'user_data', 'jsonPath': '$.user_data', 'schemaCriterion': 'iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0-0'}} is valid under each of {'required': ['json']}, {'required': ['pojo']}\n\nFailed validating 'oneOf' in schema['properties']['parameters']['properties']['pii']['items']:\n    {'additionalProperties': False,\n     'oneOf': [{'required': ['pojo']}, {'required': ['json']}],\n     'properties': {'json': {'additionalProperties': False,\n                             'properties': {'field': {'type': 'string'},\n                                            'jsonPath': {'pattern': '^\\\\$.*$',\n                                                         'type': 'string'},\n                                            'schemaCriterion': {'pattern': '^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)$',\n                                                                'type': 'string'}},\n              .. (2048 more)",
+      "data": {
+        "enabled": true,
+        "name": "pii_enrichment_config",
+        "parameters": {
+          "pii": [
+            {
+              "pojo": {
+                "field": "user_id"
+              },
+              "json": {
+                "field": "user_data",
+                "jsonPath": "$.user_data",
+                "schemaCriterion": "iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0-0"
+              }
+            }
+          ],
+          "strategy": {
+            "pseudonymize": {
+              "hashFunction": "SHA-256"
+            }
+          }
+        },
+        "vendor": "com.snowplowanalytics.snowplow.enrichments"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid_field\" is not one of [\"user_id\",\"user_ipaddress\",\"user_fingerprint\",\"domain_userid\",\"network_userid\",\"ip_organization\",\"ip_domain\",\"tr_orderid\",\"ti_orderid\",\"mkt_term\",\"mkt_content\",\"se_category\",\"se_action\",\"se_label\",\"se_property\",\"mkt_clickid\",\"refr_domain_userid\",\"domain_sessionid\"]",
+      "python_error": "Additional properties are not allowed ('extra_field' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for PII pseudonymization enrichment',\n     'properties': {'enabled': {'type': 'boolean'},\n                    'name': {'type': 'string'},\n                    'parameters': {'additionalProperties': False,\n                                   'properties': {'pii': {'items': {'additionalProperties': False,\n                                                                    'oneOf': [{'required': ['pojo']},\n                                                                              {'required': ['json']}],\n                                                                    'properties': {'json': {'additionalProperties': False,\n                                                                                            'properties': {'field': {'type': 'string'},\n                                                                       .. (6676 more)",
+      "data": {
+        "enabled": true,
+        "name": "pii_enrichment_config",
+        "parameters": {
+          "pii": [
+            {
+              "pojo": {
+                "field": "invalid_field"
+              }
+            },
+            {
+              "json": {
+                "field": "user_data",
+                "jsonPath": "$.user_data",
+                "schemaCriterion": "iglu:com.snowplowanalytics.snowplow/pii/jsonschema/1-0-0"
+              }
+            }
+          ],
+          "strategy": {
+            "pseudonymize": {
+              "hashFunction": "SHA-256"
+            }
+          }
+        },
+        "vendor": "com.snowplowanalytics.snowplow.enrichments",
+        "extra_field": "extra value"
+      }
+    }
+  ]
+}

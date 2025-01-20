@@ -1,0 +1,515 @@
+{
+  "description": "sample JsonSchemaStore/unist.json",
+  "meta": {
+    "full_size": 3047,
+    "stripped_size": 772,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/unist.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": true,
+    "definitions": {
+      "Point": {
+        "description": "A point represents one place in a source file. The value of the point field implements the Point interface.",
+        "markdownDescription": "A point represents one place in a source file. The value of the point field implements the [Point](https://github.com/syntax-tree/unist#point) interface.",
+        "type": "object",
+        "properties": {
+          "column": {
+            "description": "The column field (1-indexed integer) represents a column in a source file.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "line": {
+            "description": "The line field (1-indexed integer) represents a line in a source file.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "offset": {
+            "description": "The offset field (0-indexed integer) represents a character in a source file.",
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "column",
+          "line"
+        ],
+        "additionalProperties": false
+      },
+      "Position": {
+        "description": "A position represents the location of a node in a source file. The value of the position field implements the Position interface. The position field must not be present if a node is generated.",
+        "markdownDescription": "A position represents the location of a node in a source file. The value of the position field implements the [Position](https://github.com/syntax-tree/unist#position) interface. The position field must not be present if a node is generated.",
+        "type": "object",
+        "properties": {
+          "end": {
+            "description": "The end field of Position represents the place of the first character after the parsed source region, whether it exists or not.",
+            "$ref": "#/definitions/Point"
+          },
+          "start": {
+            "description": "The start field of Position represents the place of the first character of the parsed source region.",
+            "$ref": "#/definitions/Point"
+          }
+        },
+        "required": [
+          "end",
+          "start"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "description": "Syntactic units in unist syntax trees are called nodes, and implement the Node interface.",
+    "properties": {
+      "type": {
+        "description": "The type field is a non-empty string representing the variant of a node. This field can be used to determine the type a node implements.",
+        "markdownDescription": "The [type](https://github.com/syntax-tree/unist#type) field is a non-empty string representing the variant of a node. This field can be used to determine the type a node implements.",
+        "type": "string"
+      },
+      "position": {
+        "$ref": "#/definitions/Position"
+      },
+      "children": {
+        "description": "The children field is a list representing the children of a node.",
+        "type": "array",
+        "items": {
+          "$ref": "#"
+        }
+      },
+      "data": {
+        "description": "The data field represents information from the ecosystem. The value of the data field implements the Data interface.",
+        "markdownDescription": "The data field represents information from the ecosystem. The value of the data field implements the [Data](https://github.com/syntax-tree/unist#data) interface.",
+        "type": "object",
+        "additionalProperties": true
+      },
+      "value": {
+        "description": "The value field can contain any value."
+      }
+    },
+    "required": [
+      "type"
+    ],
+    "title": "JSON schema for unist syntax trees",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "type": "root",
+        "position": {
+          "end": {
+            "column": 10,
+            "line": 2,
+            "offset": 20
+          },
+          "start": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "end": {
+                "column": 10,
+                "line": 2,
+                "offset": 20
+              },
+              "start": {
+                "column": 1,
+                "line": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "This is a text node."
+              }
+            ]
+          }
+        ],
+        "data": {
+          "someKey": "someValue"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 1",
+      "python_error": "-1 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['position']['properties']['end']['properties']['column']:\n    {'description': 'The column field (1-indexed integer) represents a '\n                    'column in a source file.',\n     'type': 'integer',\n     'minimum': 1}\n\nOn instance['position']['end']['column']:\n    -1",
+      "data": {
+        "type": "root",
+        "position": {
+          "end": {
+            "column": -1,
+            "line": 2,
+            "offset": 20
+          },
+          "start": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "end": {
+                "column": 10,
+                "line": 2,
+                "offset": 20
+              },
+              "start": {
+                "column": 1,
+                "line": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "This is a text node."
+              }
+            ]
+          }
+        ],
+        "data": {
+          "someKey": "someValue"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"line\" is a required property",
+      "python_error": "'line' is a required property\n\nFailed validating 'required' in schema['properties']['position']['properties']['start']:\n    {'description': 'A point represents one place in a source file. The '\n                    'value of the point field implements the Point '\n                    'interface.',\n     'markdownDescription': 'A point represents one place in a source '\n                            'file. The value of the point field implements '\n                            'the '\n                            '[Point](https://github.com/syntax-tree/unist#point) '\n                            'interface.',\n     'type': 'object',\n     'properties': {'column': {'description': 'The column field (1-indexed '\n                                              'integer) represents a '\n                                              'column in a source file.',\n                               'type': 'integer',\n                               'minimum': 1},\n                    'line': {'description': 'The line field (1-indexed '\n    .. (750 more)",
+      "data": {
+        "type": "root",
+        "position": {
+          "end": {
+            "column": 10,
+            "line": 2,
+            "offset": 20
+          },
+          "start": {
+            "column": 0,
+            "Invalid column value, should be 1 or more": "line",
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "end": {
+                "column": 10,
+                "line": 2,
+                "offset": 20
+              },
+              "start": {
+                "column": 1,
+                "line": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "This is a text node."
+              }
+            ]
+          }
+        ],
+        "data": {
+          "someKey": "someValue"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['position']['properties']['end']['properties']['column']:\n    {'description': 'The column field (1-indexed integer) represents a '\n                    'column in a source file.',\n     'type': 'integer',\n     'minimum': 1}\n\nOn instance['position']['end']['column']:\n    0",
+      "data": {
+        "type": "root",
+        "position": {
+          "end": {
+            "column": 0,
+            "line": 2,
+            "offset": 20
+          },
+          "start": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "end": {
+                "column": 10,
+                "line": 2,
+                "offset": 20
+              },
+              "start": {
+                "column": 1,
+                "line": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "This is a text node."
+              }
+            ]
+          }
+        ],
+        "data": {
+          "someKey": "someValue"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "Additional properties are not allowed ('Invalid: column should be at least 1' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['position']['properties']['end']:\n    {'description': 'A point represents one place in a source file. The '\n                    'value of the point field implements the Point '\n                    'interface.',\n     'markdownDescription': 'A point represents one place in a source '\n                            'file. The value of the point field implements '\n                            'the '\n                            '[Point](https://github.com/syntax-tree/unist#point) '\n                            'interface.',\n     'type': 'object',\n     'properties': {'column': {'description': 'The column field (1-indexed '\n                                              'integer) represents a '\n                                              'column in a source file.',\n                               'type': 'integer',\n                               'minimum': 1},\n   .. (834 more)",
+      "data": {
+        "type": "root",
+        "position": {
+          "end": {
+            "column": 0,
+            "Invalid: column should be at least 1": "line",
+            "line": 2,
+            "offset": 20
+          },
+          "start": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "end": {
+                "column": 10,
+                "line": 2,
+                "offset": 20
+              },
+              "start": {
+                "column": 1,
+                "line": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "This is a text node."
+              }
+            ]
+          }
+        ],
+        "data": {
+          "someKey": "someValue"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "type": "root",
+        "position": {
+          "end": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          },
+          "start": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "end": {
+                "column": 1,
+                "line": 1,
+                "offset": 0
+              },
+              "start": {
+                "column": 1,
+                "line": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "position": {
+                  "end": {
+                    "column": 1,
+                    "line": 1,
+                    "offset": 0
+                  },
+                  "start": {
+                    "column": 1,
+                    "line": 1,
+                    "offset": 0
+                  }
+                },
+                "value": "Hello, world!"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['position']['properties']['start']['properties']['line']:\n    {'description': 'The line field (1-indexed integer) represents a line '\n                    'in a source file.',\n     'type': 'integer',\n     'minimum': 1}\n\nOn instance['position']['start']['line']:\n    0",
+      "data": {
+        "type": "root",
+        "position": {
+          "start": {
+            "line": 0,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "position": {
+                  "start": {
+                    "line": 1,
+                    "column": 1,
+                    "offset": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1,
+                    "offset": 0
+                  }
+                },
+                "value": "Hello, world!"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['position']['properties']['start']['properties']['line']:\n    {'description': 'The line field (1-indexed integer) represents a line '\n                    'in a source file.',\n     'type': 'integer',\n     'minimum': 1}\n\nOn instance['position']['start']['line']:\n    0",
+      "data": {
+        "type": "root",
+        "position": {
+          "start": {
+            "line": 0,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
+        },
+        "children": [
+          {
+            "type": "paragraph",
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              }
+            },
+            "children": [
+              {
+                "type": "text",
+                "position": {
+                  "start": {
+                    "line": 1,
+                    "column": 1,
+                    "offset": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1,
+                    "offset": 0
+                  }
+                },
+                "value": "Hello, world!"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

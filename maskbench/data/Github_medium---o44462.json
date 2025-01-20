@@ -1,0 +1,461 @@
+{
+  "description": "sample Github_medium/o44462.json",
+  "meta": {
+    "full_size": 680,
+    "stripped_size": 584,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@minmaxLength",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "exclusiveMinimum",
+      "maxLength",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "a payment transaction",
+    "properties": {
+      "sign": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "_uniqueItems": true
+      },
+      "tx": {
+        "properties": {
+          "fee": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "from": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "_uniqueItems": true
+          },
+          "id": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "msg": {
+            "maxLength": 254,
+            "type": "string"
+          },
+          "to": {
+            "items": {
+              "properties": {
+                "address": {
+                  "type": "string"
+                },
+                "amount": {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "address",
+                "amount"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "from",
+          "to",
+          "msg",
+          "fee"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "tx",
+      "sign"
+    ],
+    "title": "Payment",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 10,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "msg": "Payment for goods",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on exclusiveMinimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than or equal to the minimum of 0",
+      "python_error": "0 is less than or equal to the minimum of 0\n\nFailed validating 'exclusiveMinimum' in schema['properties']['tx']['properties']['fee']:\n    {'exclusiveMinimum': 0, 'type': 'integer'}\n\nOn instance['tx']['fee']:\n    0",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 0,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "msg": "Payment for goods",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 0
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"InvalidId\" does not match \"^[0-9a-f]{64}$\"",
+      "python_error": "'InvalidId' does not match '^[0-9a-f]{64}$'\n\nFailed validating 'pattern' in schema['properties']['tx']['properties']['id']:\n    {'pattern': '^[0-9a-f]{64}$', 'type': 'string'}\n\nOn instance['tx']['id']:\n    'InvalidId'",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 10,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "InvalidId",
+          "msg": "Payment for goods",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['sign']:\n    {'items': {'type': 'string'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['sign']:\n    []",
+      "data": {
+        "sign": [],
+        "tx": {
+          "fee": 10,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "msg": "Payment for goods",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde\" does not match \"^[0-9a-f]{64}$\"",
+      "python_error": "'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde' does not match '^[0-9a-f]{64}$'\n\nFailed validating 'pattern' in schema['properties']['tx']['properties']['id']:\n    {'pattern': '^[0-9a-f]{64}$', 'type': 'string'}\n\nOn instance['tx']['id']:\n    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde'",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 10,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde",
+          "msg": "Payment for goods",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on exclusiveMinimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than or equal to the minimum of 0",
+      "python_error": "0 is less than or equal to the minimum of 0\n\nFailed validating 'exclusiveMinimum' in schema['properties']['tx']['properties']['fee']:\n    {'exclusiveMinimum': 0, 'type': 'integer'}\n\nOn instance['tx']['fee']:\n    0",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 0,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "msg": "Payment for goods",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than or equal to the minimum of 0",
+      "python_error": "'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde' does not match '^[0-9a-f]{64}$'\n\nFailed validating 'pattern' in schema['properties']['tx']['properties']['id']:\n    {'pattern': '^[0-9a-f]{64}$', 'type': 'string'}\n\nOn instance['tx']['id']:\n    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde'",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature1"
+        ],
+        "tx": {
+          "fee": 0,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde",
+          "msg": "Payment for goods",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 10,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "msg": "Payment for services rendered",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['tx']['properties']['from']:\n    {'items': {'type': 'string'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['tx']['from']:\n    []",
+      "data": {
+        "tx": {
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "from": [],
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ],
+          "msg": "Payment for services rendered",
+          "fee": 10
+        },
+        "sign": [
+          "signature1",
+          "signature2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde\" does not match \"^[0-9a-f]{64}$\"",
+      "python_error": "'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde' does not match '^[0-9a-f]{64}$'\n\nFailed validating 'pattern' in schema['properties']['tx']['properties']['id']:\n    {'pattern': '^[0-9a-f]{64}$', 'type': 'string'}\n\nOn instance['tx']['id']:\n    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde'",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 10,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde",
+          "msg": "Payment for services rendered",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on exclusiveMinimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than or equal to the minimum of 0",
+      "python_error": "0 is less than or equal to the minimum of 0\n\nFailed validating 'exclusiveMinimum' in schema['properties']['tx']['properties']['fee']:\n    {'exclusiveMinimum': 0, 'type': 'integer'}\n\nOn instance['tx']['fee']:\n    0",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature2"
+        ],
+        "tx": {
+          "fee": 0,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "msg": "Payment for services rendered",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 0
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde\" does not match \"^[0-9a-f]{64}$\"",
+      "python_error": "'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde' does not match '^[0-9a-f]{64}$'\n\nFailed validating 'pattern' in schema['properties']['tx']['properties']['id']:\n    {'pattern': '^[0-9a-f]{64}$', 'type': 'string'}\n\nOn instance['tx']['id']:\n    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde'",
+      "data": {
+        "sign": [
+          "signature1",
+          "signature1"
+        ],
+        "tx": {
+          "fee": 10,
+          "from": [
+            "address1",
+            "address2"
+          ],
+          "id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde",
+          "msg": "Payment for services rendered",
+          "to": [
+            {
+              "address": "recipient1",
+              "amount": 100
+            },
+            {
+              "address": "recipient2",
+              "amount": 200
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

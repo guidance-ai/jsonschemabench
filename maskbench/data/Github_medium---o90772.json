@@ -1,0 +1,225 @@
+{
+  "description": "sample Github_medium/o90772.json",
+  "meta": {
+    "full_size": 1305,
+    "stripped_size": 591,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "credentials": {
+        "description": "Credentials to authenticate with Minio server",
+        "properties": {
+          "access-key": {
+            "default": "minio",
+            "description": "Access Key",
+            "type": "string"
+          },
+          "secret-key": {
+            "default": "minio123",
+            "description": "Secret Key",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "networking": {
+        "description": "Networking properties for Minio on DC/OS",
+        "properties": {
+          "https-redirect": {
+            "default": false,
+            "description": "If true Marathon-LB redirects HTTP traffic to HTTPS",
+            "type": "boolean"
+          },
+          "service-port": {
+            "description": "Minio service port",
+            "type": "number"
+          }
+        },
+        "required": [
+          "service-port"
+        ],
+        "type": "object"
+      },
+      "service": {
+        "description": "Service properties for Minio on DC/OS",
+        "properties": {
+          "cpus": {
+            "default": 1,
+            "description": "CPU shares to allocate to service instance",
+            "minimum": 0.5,
+            "type": "number"
+          },
+          "mem": {
+            "default": 2048,
+            "description": "Memory to allocate to service instance",
+            "minimum": 2048,
+            "type": "number"
+          },
+          "name": {
+            "description": "Name of this service instance",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "cpus",
+          "mem"
+        ],
+        "type": "object"
+      },
+      "storage": {
+        "description": "Storage properties for Minio on DC/OS",
+        "properties": {
+          "config-size": {
+            "description": "Size of config volume in MiB",
+            "type": "number"
+          },
+          "data-size": {
+            "description": "Size of data volume in MiB",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data-size",
+          "config-size"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "credentials": {
+          "access-key": "my-minio-access-key",
+          "secret-key": "my-minio-secret-key"
+        },
+        "networking": {
+          "https-redirect": true,
+          "service-port": 9000
+        },
+        "service": {
+          "cpus": 2,
+          "mem": 4096,
+          "name": "my-minio-service"
+        },
+        "storage": {
+          "config-size": 100,
+          "data-size": 1000
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "2047 is less than the minimum of 2048\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['mem']:\n    {'default': 2048,\n     'description': 'Memory to allocate to service instance',\n     'minimum': 2048,\n     'type': 'number'}\n\nOn instance['service']['mem']:\n    2047",
+      "data": {
+        "credentials": {
+          "access-key": "my-minio-access-key",
+          "secret-key": "my-minio-secret-key"
+        },
+        "networking": {
+          "https-redirect": true,
+          "service-port": 9000
+        },
+        "service": {
+          "cpus": 0.4,
+          "mem": 2047,
+          "name": "my-minio-service"
+        },
+        "storage": {
+          "config-size": 100,
+          "data-size": 1000
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"service-port\" is a required property",
+      "python_error": "'service-port' is a required property\n\nFailed validating 'required' in schema['properties']['networking']:\n    {'description': 'Networking properties for Minio on DC/OS',\n     'properties': {'https-redirect': {'default': False,\n                                       'description': 'If true Marathon-LB '\n                                                      'redirects HTTP '\n                                                      'traffic to HTTPS',\n                                       'type': 'boolean'},\n                    'service-port': {'description': 'Minio service port',\n                                     'type': 'number'}},\n     'required': ['service-port'],\n     'type': 'object'}\n\nOn instance['networking']:\n    {'https-redirect': True}",
+      "data": {
+        "credentials": {
+          "access-key": "my-minio-access-key",
+          "secret-key": "my-minio-secret-key"
+        },
+        "networking": {
+          "https-redirect": true
+        },
+        "service": {
+          "cpus": 2,
+          "mem": 4096,
+          "name": "my-minio-service"
+        },
+        "storage": {
+          "config-size": 100,
+          "data-size": 1000
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.4 is less than the minimum of 0.5",
+      "python_error": "0.4 is less than the minimum of 0.5\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['cpus']:\n    {'default': 1,\n     'description': 'CPU shares to allocate to service instance',\n     'minimum': 0.5,\n     'type': 'number'}\n\nOn instance['service']['cpus']:\n    0.4",
+      "data": {
+        "credentials": {
+          "access-key": "my-minio-access-key",
+          "secret-key": "my-minio-secret-key"
+        },
+        "networking": {
+          "https-redirect": true,
+          "service-port": 9000
+        },
+        "service": {
+          "cpus": 0.4,
+          "mem": 2048,
+          "name": "my-minio-service"
+        },
+        "storage": {
+          "config-size": 100,
+          "data-size": 1000
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "credentials": {
+          "access-key": "minio",
+          "secret-key": "minio123"
+        },
+        "networking": {
+          "https-redirect": false,
+          "service-port": 9000
+        },
+        "service": {
+          "cpus": 1,
+          "mem": 2048,
+          "name": "minio-service"
+        },
+        "storage": {
+          "config-size": 100,
+          "data-size": 1000
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,412 @@
+{
+  "description": "sample Github_medium/o7377.json",
+  "meta": {
+    "full_size": 2472,
+    "stripped_size": 1187,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "description": "The name of the resource",
+        "type": "string"
+      },
+      "path": {
+        "description": "The resource file path",
+        "type": "string"
+      },
+      "ino": {
+        "description": "The ino of the file on disk",
+        "type": "number"
+      },
+      "hash": {
+        "description": "The sha1 of the resource",
+        "type": "string"
+      },
+      "size": {
+        "description": "The size of the resource",
+        "type": "number"
+      },
+      "ext": {
+        "description": "The suggested ext of the resource",
+        "type": "string"
+      },
+      "type": {
+        "description": "The resource type. Can be `forge`, `liteloader`, `resourcepack`, and etc.",
+        "type": "string"
+      },
+      "tags": {
+        "description": "The custom tag on this resource",
+        "default": [],
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "domain": {
+        "description": "The domain of the resource. This decide where (which folder) the resource go",
+        "type": "string"
+      },
+      "metadata": {
+        "description": "The resource specific metadata read from the file",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        ]
+      },
+      "source": {
+        "$ref": "#/definitions/Source",
+        "description": "Where the resource imported from?"
+      }
+    },
+    "required": [
+      "domain",
+      "ext",
+      "hash",
+      "ino",
+      "metadata",
+      "name",
+      "path",
+      "size",
+      "source",
+      "tags",
+      "type"
+    ],
+    "definitions": {
+      "Source": {
+        "type": "object",
+        "properties": {
+          "uri": {
+            "description": "The source uris.\n- For the forge mod, it will be the forge://<modid>/<version>\n- For the liteloader mod, it will be the liteloader://<name>/<version>\n- For the curseforge file, it will be the curseforge://<fileId>\n\nIf the source is remote resource, it might also contain the uri like https://host/paths",
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "date": {
+            "description": "The date of import",
+            "default": "",
+            "type": "string"
+          },
+          "github": {
+            "description": "The github info for this source. If this is imported from github release, it will present.",
+            "type": "object",
+            "properties": {
+              "owner": {
+                "type": "string"
+              },
+              "repo": {
+                "type": "string"
+              },
+              "release": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "owner",
+              "release",
+              "repo"
+            ]
+          },
+          "curseforge": {
+            "description": "The curseforge info for this source. If this is imported from curseforge, it will present.",
+            "$ref": "#/definitions/CurseforgeSource"
+          }
+        },
+        "required": [
+          "date",
+          "uri"
+        ]
+      },
+      "CurseforgeSource": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "description": "The curseforge project id",
+            "type": "number"
+          },
+          "fileId": {
+            "description": "The file id",
+            "type": "number"
+          }
+        },
+        "required": [
+          "fileId",
+          "projectId"
+        ]
+      }
+    },
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "Example Resource",
+        "path": "/path/to/resource",
+        "ino": 123456789,
+        "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "size": 1024,
+        "ext": "zip",
+        "type": "forge",
+        "tags": [
+          "example",
+          "resource"
+        ],
+        "domain": "example.com",
+        "metadata": {
+          "version": "1.0.0",
+          "author": "John Doe"
+        },
+        "source": {
+          "uri": [
+            "https://example.com/resource.zip"
+          ],
+          "date": "2022-01-01T00:00:00Z",
+          "github": {
+            "owner": "john-doe",
+            "repo": "example-resource",
+            "release": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"Invalid metadata\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'Invalid metadata' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['metadata']:\n    {'description': 'The resource specific metadata read from the file',\n     'anyOf': [{'type': 'object',\n                'properties': {},\n                'additionalProperties': True},\n               {'type': 'array',\n                'items': {'type': 'object',\n                          'properties': {},\n                          'additionalProperties': True}}]}\n\nOn instance['metadata']:\n    'Invalid metadata'",
+      "data": {
+        "name": "Example Resource",
+        "path": "/path/to/resource",
+        "ino": 123456789,
+        "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "size": 1024,
+        "ext": "zip",
+        "type": "forge",
+        "tags": [
+          "example",
+          "resource"
+        ],
+        "domain": "example.com",
+        "metadata": "Invalid metadata",
+        "source": {
+          "uri": [
+            "https://example.com/resource.zip"
+          ],
+          "date": "2022-01-01T00:00:00Z",
+          "github": {
+            "owner": "john-doe",
+            "repo": "example-resource",
+            "release": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"release\" is a required property",
+      "python_error": "'release' is a required property\n\nFailed validating 'required' in schema['properties']['source']['properties']['github']:\n    {'description': 'The github info for this source. If this is imported '\n                    'from github release, it will present.',\n     'type': 'object',\n     'properties': {'owner': {'type': 'string'},\n                    'repo': {'type': 'string'},\n                    'release': {'type': 'string'}},\n     'required': ['owner', 'release', 'repo']}\n\nOn instance['source']['github']:\n    {'owner': 'john-doe', 'repo': 'example-resource'}",
+      "data": {
+        "name": "Example Resource",
+        "path": "/path/to/resource",
+        "ino": 123456789,
+        "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "size": 1024,
+        "ext": "zip",
+        "type": "forge",
+        "tags": [
+          "example",
+          "resource"
+        ],
+        "domain": "example.com",
+        "metadata": {
+          "version": "1.0.0",
+          "author": "John Doe"
+        },
+        "source": {
+          "uri": [
+            "https://example.com/resource.zip"
+          ],
+          "date": "2022-01-01T00:00:00Z",
+          "github": {
+            "owner": "john-doe",
+            "repo": "example-resource"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['tags']['items']:\n    {'type': 'string'}\n\nOn instance['tags'][2]:\n    123",
+      "data": {
+        "name": "Example Resource",
+        "path": "/path/to/resource",
+        "ino": 123456789,
+        "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "size": 1024,
+        "ext": "zip",
+        "type": "forge",
+        "tags": [
+          "example",
+          "resource",
+          123
+        ],
+        "domain": "example.com",
+        "metadata": {
+          "version": "1.0.0",
+          "author": "John Doe"
+        },
+        "source": {
+          "uri": [
+            "https://example.com/resource.zip"
+          ],
+          "date": "2022-01-01T00:00:00Z",
+          "github": {
+            "owner": "john-doe",
+            "repo": "example-resource",
+            "release": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "Example Resource",
+        "path": "/path/to/resource",
+        "ino": 123456789,
+        "hash": "sha1:0123456789abcdef0123456789abcdef01234567",
+        "size": 1024,
+        "ext": "jar",
+        "type": "forge",
+        "tags": [
+          "example",
+          "resource"
+        ],
+        "domain": "example.com",
+        "metadata": {
+          "author": "John Doe",
+          "version": "1.0.0"
+        },
+        "source": {
+          "uri": [
+            "forge://example/mod/1.0.0",
+            "https://example.com/resource.jar"
+          ],
+          "date": "2022-01-01T12:00:00Z",
+          "github": {
+            "owner": "john-doe",
+            "repo": "example-mod",
+            "release": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"string\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'string' is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['metadata']:\n    {'description': 'The resource specific metadata read from the file',\n     'anyOf': [{'type': 'object',\n                'properties': {},\n                'additionalProperties': True},\n               {'type': 'array',\n                'items': {'type': 'object',\n                          'properties': {},\n                          'additionalProperties': True}}]}\n\nOn instance['metadata']:\n    'string'",
+      "data": {
+        "name": "Example Resource",
+        "path": "/path/to/resource",
+        "ino": 123456789,
+        "hash": "sha1:0123456789abcdef0123456789abcdef01234567",
+        "size": 1024,
+        "ext": "jar",
+        "type": "forge",
+        "tags": [
+          "example",
+          "resource"
+        ],
+        "domain": "example.com",
+        "metadata": "string",
+        "source": {
+          "uri": [
+            "forge://example/mod/1.0.0",
+            "https://example.com/resource.jar"
+          ],
+          "date": "2022-01-01T12:00:00Z",
+          "github": {
+            "owner": "john-doe",
+            "repo": "example-mod",
+            "release": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['source']['properties']['github']['properties']['release']:\n    {'type': 'string'}\n\nOn instance['source']['github']['release']:\n    None",
+      "data": {
+        "name": "Example Resource",
+        "path": "/path/to/resource",
+        "ino": 123456789,
+        "hash": "sha1:0123456789abcdef0123456789abcdef01234567",
+        "size": 1024,
+        "ext": "jar",
+        "type": "forge",
+        "tags": [
+          "example",
+          "resource"
+        ],
+        "domain": "example.com",
+        "metadata": {
+          "author": "John Doe",
+          "version": "1.0.0"
+        },
+        "source": {
+          "uri": [
+            "forge://example/mod/1.0.0",
+            "https://example.com/resource.jar"
+          ],
+          "date": "2022-01-01T12:00:00Z",
+          "github": {
+            "owner": "john-doe",
+            "repo": "example-mod",
+            "release": null
+          }
+        }
+      }
+    }
+  ]
+}

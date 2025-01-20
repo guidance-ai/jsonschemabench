@@ -1,0 +1,277 @@
+{
+  "description": "sample Github_medium/o42552.json",
+  "meta": {
+    "full_size": 1777,
+    "stripped_size": 1003,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "http://schemas.gdbots.io/json-schema/gdbots/forms/field/document-field/1-0-0.json#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "_schema": {
+        "type": "string",
+        "pattern": "^pbj:([a-z0-9-]+):([a-z0-9\\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+)$",
+        "default": "pbj:gdbots:forms:field:document-field:1-0-0"
+      },
+      "name": {
+        "type": "string",
+        "pattern": "^[a-zA-Z_]{1}[\\w-]*$",
+        "description": "A unique identifier (within the form) for the field. This value is not shown to the user and should NOT change once set."
+      },
+      "maps_to": {
+        "type": "string",
+        "default": "cf",
+        "pattern": "^[a-zA-Z_]{1}\\w*$",
+        "description": "The name of the schema field the answer will map to. By default this will go to the \"cf\" field which is a \"dynamic-field\" list containing all answers filled out on the form (ref \"gdbots:forms:mixin:send-submission\")."
+      },
+      "label": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 255,
+        "description": "The main text for the question/field."
+      },
+      "placeholder": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 255
+      },
+      "description": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 65535,
+        "description": "A short description to better explain this field."
+      },
+      "is_required": {
+        "type": "boolean"
+      },
+      "link_text": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 255,
+        "description": "The text that will replace the token \"{link}\" within the label or description."
+      },
+      "link_url": {
+        "type": "string",
+        "pattern": "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$",
+        "description": "The URL to use for the replaced token \"{link}\" within the label or description."
+      },
+      "pii_impact": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "high",
+          "moderate",
+          "low"
+        ]
+      },
+      "max_bytes": {
+        "type": "integer",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 4294967295
+      }
+    },
+    "required": [
+      "_schema",
+      "name"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer here",
+        "description": "This is a short description for the example field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "https://www.example.com",
+        "pii_impact": "low",
+        "max_bytes": 1024
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"invalid_url\" does not match \"^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$\"",
+      "python_error": "'invalid_url' does not match '^(https?:\\\\/\\\\/)?([\\\\da-z\\\\.-]+)\\\\.([a-z\\\\.]{2,6})([\\\\/\\\\w \\\\.-]*)*\\\\/?$'\n\nFailed validating 'pattern' in schema['properties']['link_url']:\n    {'type': 'string',\n     'pattern': '^(https?:\\\\/\\\\/)?([\\\\da-z\\\\.-]+)\\\\.([a-z\\\\.]{2,6})([\\\\/\\\\w '\n                '\\\\.-]*)*\\\\/?$',\n     'description': 'The URL to use for the replaced token \"{link}\" within '\n                    'the label or description.'}\n\nOn instance['link_url']:\n    'invalid_url'",
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer here",
+        "description": "This is a short description for the example field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "invalid_url",
+        "pii_impact": "low",
+        "max_bytes": 1024
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "-1 is less than the minimum of 0",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['max_bytes']:\n    {'type': 'integer', 'default': 0, 'minimum': 0, 'maximum': 4294967295}\n\nOn instance['max_bytes']:\n    -1",
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer here",
+        "description": "This is a short description for the example field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "https://www.example.com",
+        "pii_impact": "low",
+        "max_bytes": -1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ftp://www.example.com\" does not match \"^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$\"",
+      "python_error": "Additional properties are not allowed ('Invalid URL scheme', 'Invalid property', 'Missing value for max_bytes', 'Missing value for pii_impact' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'id': 'http://schemas.gdbots.io/json-schema/gdbots/forms/field/document-field/1-0-0.json#',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'_schema': {'type': 'string',\n                                'pattern': '^pbj:([a-z0-9-]+):([a-z0-9\\\\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+)$',\n                                'default': 'pbj:gdbots:forms:field:document-field:1-0-0'},\n                    'name': {'type': 'string',\n                             'pattern': '^[a-zA-Z_]{1}[\\\\w-]*$',\n                             'description': 'A unique identifier (within '\n                                            'the form) for the field. This '\n                                            'value is not shown to the '\n                       .. (3872 more)",
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer here",
+        "description": "This is a short description for the example field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "ftp://www.example.com",
+        "Invalid URL scheme": "pii_impact",
+        "Missing value for pii_impact": "max_bytes",
+        "Missing value for max_bytes": "extra_property",
+        "Invalid property": "Invalid value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "4294967296 is greater than the maximum of 4294967295",
+      "python_error": "4294967296 is greater than the maximum of 4294967295\n\nFailed validating 'maximum' in schema['properties']['max_bytes']:\n    {'type': 'integer', 'default': 0, 'minimum': 0, 'maximum': 4294967295}\n\nOn instance['max_bytes']:\n    4294967296",
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer here",
+        "description": "This is a short description for the example field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "https://www.example.com",
+        "pii_impact": "low",
+        "max_bytes": 4294967296
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"ftp://www.example.com\" does not match \"^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$\"",
+      "python_error": "Additional properties are not allowed ('Extra property not allowed by schema', 'Invalid URL scheme', 'Missing value for max_bytes', 'Missing value for pii_impact' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'id': 'http://schemas.gdbots.io/json-schema/gdbots/forms/field/document-field/1-0-0.json#',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'_schema': {'type': 'string',\n                                'pattern': '^pbj:([a-z0-9-]+):([a-z0-9\\\\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+)$',\n                                'default': 'pbj:gdbots:forms:field:document-field:1-0-0'},\n                    'name': {'type': 'string',\n                             'pattern': '^[a-zA-Z_]{1}[\\\\w-]*$',\n                             'description': 'A unique identifier (within '\n                                            'the form) for the field. This '\n                                            'value is not shown to the '\n   .. (3910 more)",
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer here",
+        "description": "This is a short description for the example field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "ftp://www.example.com",
+        "Invalid URL scheme": "pii_impact",
+        "Missing value for pii_impact": "max_bytes",
+        "Missing value for max_bytes": "extra_property",
+        "Extra property not allowed by schema": "extra_value"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer",
+        "description": "This is a short description of the field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "https://www.example.com",
+        "pii_impact": "low",
+        "max_bytes": 1024
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"javascript:alert('XSS')\" does not match \"^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$\"",
+      "python_error": "\"javascript:alert('XSS')\" does not match '^(https?:\\\\/\\\\/)?([\\\\da-z\\\\.-]+)\\\\.([a-z\\\\.]{2,6})([\\\\/\\\\w \\\\.-]*)*\\\\/?$'\n\nFailed validating 'pattern' in schema['properties']['link_url']:\n    {'type': 'string',\n     'pattern': '^(https?:\\\\/\\\\/)?([\\\\da-z\\\\.-]+)\\\\.([a-z\\\\.]{2,6})([\\\\/\\\\w '\n                '\\\\.-]*)*\\\\/?$',\n     'description': 'The URL to use for the replaced token \"{link}\" within '\n                    'the label or description.'}\n\nOn instance['link_url']:\n    \"javascript:alert('XSS')\"",
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer",
+        "description": "This is a short description of the field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "javascript:alert('XSS')",
+        "pii_impact": "low",
+        "max_bytes": 1024
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "4294967296 is greater than the maximum of 4294967295",
+      "python_error": "4294967296 is greater than the maximum of 4294967295\n\nFailed validating 'maximum' in schema['properties']['max_bytes']:\n    {'type': 'integer', 'default': 0, 'minimum': 0, 'maximum': 4294967295}\n\nOn instance['max_bytes']:\n    4294967296",
+      "data": {
+        "_schema": "pbj:gdbots:forms:field:document-field:1-0-0",
+        "name": "example_field",
+        "maps_to": "cf",
+        "label": "Example Field",
+        "placeholder": "Enter your answer",
+        "description": "This is a short description of the field.",
+        "is_required": true,
+        "link_text": "Learn more",
+        "link_url": "https://www.example.com",
+        "pii_impact": "low",
+        "max_bytes": 4294967296
+      }
+    }
+  ]
+}

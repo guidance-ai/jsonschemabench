@@ -1,0 +1,146 @@
+{
+  "description": "sample Github_easy/o9876.json",
+  "meta": {
+    "full_size": 226,
+    "stripped_size": 226,
+    "features": [
+      "format",
+      "format:date-time",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "patternProperties": {
+      ".*": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "time": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "count": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "key1": [
+          {
+            "time": "2022-01-01T12:00:00Z",
+            "count": 10
+          },
+          {
+            "time": "2022-01-01T13:00:00Z",
+            "count": 20
+          }
+        ],
+        "key2": [
+          {
+            "time": "2022-01-02T12:00:00Z",
+            "count": 30
+          },
+          {
+            "time": "2022-01-02T13:00:00Z",
+            "count": 40
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "\"Invalid Value\" is not of type \"array\"",
+      "python_error": "'Invalid Value' is not of type 'array'\n\nFailed validating 'type' in schema['patternProperties']['.*']:\n    {'type': 'array',\n     'items': {'type': 'object',\n               'properties': {'time': {'type': 'string',\n                                       'format': 'date-time'},\n                              'count': {'type': 'number'}}}}\n\nOn instance['key2']:\n    'Invalid Value'",
+      "data": {
+        "key1": [
+          {
+            "time": "2022-01-01T12:00:00Z",
+            "count": 10
+          },
+          {
+            "time": "2022-01-01T13:00:00Z",
+            "count": 20
+          }
+        ],
+        "key2": "Invalid Value"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-01-01\" is not a \"date-time\"",
+      "python_error": "'2022-01-01' is not a 'date-time'\n\nFailed validating 'format' in schema['patternProperties']['.*']['items']['properties']['time']:\n    {'type': 'string', 'format': 'date-time'}\n\nOn instance['key1'][0]['time']:\n    '2022-01-01'",
+      "data": {
+        "key1": [
+          {
+            "time": "2022-01-01",
+            "count": 10
+          },
+          {
+            "time": "2022-01-01T13:00:00Z",
+            "count": 20
+          }
+        ],
+        "key2": [
+          {
+            "time": "2022-01-02T12:00:00Z",
+            "count": 30
+          },
+          {
+            "time": "2022-01-02T13:00:00Z",
+            "count": 40
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"20\" is not of type \"number\"",
+      "python_error": "'2022-01-02T13:00:00' is not a 'date-time'\n\nFailed validating 'format' in schema['patternProperties']['.*']['items']['properties']['time']:\n    {'type': 'string', 'format': 'date-time'}\n\nOn instance['key2'][1]['time']:\n    '2022-01-02T13:00:00'",
+      "data": {
+        "key1": [
+          {
+            "time": "2022-01-01T12:00:00Z",
+            "count": 10
+          },
+          {
+            "time": "2022-01-01T13:00:00Z",
+            "count": "20"
+          }
+        ],
+        "key2": [
+          {
+            "time": "2022-01-02T12:00:00Z",
+            "count": 30
+          },
+          {
+            "time": "2022-01-02T13:00:00",
+            "count": 40
+          }
+        ]
+      }
+    }
+  ]
+}

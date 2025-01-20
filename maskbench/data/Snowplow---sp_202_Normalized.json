@@ -1,0 +1,651 @@
+{
+  "description": "sample Snowplow/sp_202_Normalized.json",
+  "meta": {
+    "full_size": 1201,
+    "stripped_size": 1072,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxItems",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "dagName": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "lockType": {
+        "enum": [
+          "hard",
+          "soft"
+        ],
+        "type": "string"
+      },
+      "metadata": {
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "owners": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "email": {
+              "_format": "email",
+              "type": "string"
+            },
+            "name": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "email"
+          ],
+          "type": "object"
+        },
+        "maxItems": 64,
+        "minItems": 0,
+        "type": [
+          "array",
+          "null"
+        ]
+      },
+      "playbooks": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "dependsOn": {
+              "items": {
+                "maxLength": 256,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "minItems": 0,
+              "type": "array"
+            },
+            "playbook": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "playbook",
+            "dependsOn"
+          ],
+          "type": "object"
+        },
+        "maxItems": 64,
+        "minItems": 1,
+        "type": "array"
+      },
+      "sqlRunner": {
+        "pattern": "^(0|[1-9][0-9]{0,1})\\.(0|[1-9][0-9]{0,1})\\.(0|[1-9][0-9]{0,1})(-rc[0-9]{1,2}){0,1}$",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "storage": {
+        "enum": [
+          "Default",
+          "BigQuery"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "enabled",
+      "lockType",
+      "storage",
+      "playbooks"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "config",
+      "vendor": "com.snowplowanalytics.datamodeling",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "dagName": "example_dag",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": [
+          {
+            "email": "example@example.com",
+            "name": "John Doe"
+          },
+          {
+            "email": "example2@example.com",
+            "name": "Jane Doe"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "playbook1",
+              "playbook2"
+            ],
+            "playbook": "playbook3"
+          },
+          {
+            "dependsOn": [
+              "playbook4"
+            ],
+            "playbook": "playbook5"
+          }
+        ],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['dagName']:\n    {'maxLength': 256, 'minLength': 1, 'type': ['string', 'null']}\n\nOn instance['dagName']:\n    ''",
+      "data": {
+        "dagName": "",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": [
+          {
+            "email": "example@example.com",
+            "name": ""
+          },
+          {
+            "email": "example2@example.com",
+            "name": "Jane Doe"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "playbook1",
+              "playbook2"
+            ],
+            "playbook": ""
+          },
+          {
+            "dependsOn": [
+              "playbook4"
+            ],
+            "playbook": "playbook5"
+          }
+        ],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1.2.3.4\" does not match \"^(0|[1-9][0-9]{0,1})\\.(0|[1-9][0-9]{0,1})\\.(0|[1-9][0-9]{0,1})(-rc[0-9]{1,2}){0,1}$\"",
+      "python_error": "'1.2.3.4' does not match '^(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})(-rc[0-9]{1,2}){0,1}$'\n\nFailed validating 'pattern' in schema['properties']['sqlRunner']:\n    {'pattern': '^(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})(-rc[0-9]{1,2}){0,1}$',\n     'type': ['string', 'null']}\n\nOn instance['sqlRunner']:\n    '1.2.3.4'",
+      "data": {
+        "dagName": "example_dag",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": [
+          {
+            "email": "example@example.com",
+            "name": "John Doe"
+          },
+          {
+            "email": "example2@example.com",
+            "name": "Jane Doe"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "playbook1",
+              "playbook2"
+            ],
+            "playbook": "playbook3"
+          },
+          {
+            "dependsOn": [
+              "playbook4"
+            ],
+            "playbook": "playbook5"
+          }
+        ],
+        "sqlRunner": "1.2.3.4",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['playbooks']:\n    {'items': {'additionalProperties': False,\n               'properties': {'dependsOn': {'items': {'maxLength': 256,\n                                                      'minLength': 1,\n                                                      'type': 'string'},\n                                            'maxItems': 64,\n                                            'minItems': 0,\n                                            'type': 'array'},\n                              'playbook': {'maxLength': 256,\n                                           'minLength': 1,\n                                           'type': 'string'}},\n               'required': ['playbook', 'dependsOn'],\n               'type': 'object'},\n     'maxItems': 64,\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['playbooks']:\n    []",
+      "data": {
+        "dagName": "example_dag",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": [],
+        "playbooks": [],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['dagName']:\n    {'maxLength': 256, 'minLength': 1, 'type': ['string', 'null']}\n\nOn instance['dagName']:\n    123",
+      "data": {
+        "dagName": 123,
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": [
+          {
+            "email": "example@example.com",
+            "name": "John Doe"
+          },
+          {
+            "email": "example2@example.com",
+            "name": "Jane Doe"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "playbook1",
+              "playbook2"
+            ],
+            "playbook": "playbook3"
+          },
+          {
+            "dependsOn": [
+              "playbook4"
+            ],
+            "playbook": "playbook5"
+          }
+        ],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraField' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraField' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['playbooks']['items']:\n    {'additionalProperties': False,\n     'properties': {'dependsOn': {'items': {'maxLength': 256,\n                                            'minLength': 1,\n                                            'type': 'string'},\n                                  'maxItems': 64,\n                                  'minItems': 0,\n                                  'type': 'array'},\n                    'playbook': {'maxLength': 256,\n                                 'minLength': 1,\n                                 'type': 'string'}},\n     'required': ['playbook', 'dependsOn'],\n     'type': 'object'}\n\nOn instance['playbooks'][2]:\n    {'dependsOn': ['playbook6'],\n     'playbook': 'playbook7',\n     'extraField': 'extraValue'}",
+      "data": {
+        "dagName": "example_dag",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": [
+          {
+            "email": "example@example.com",
+            "name": "John Doe"
+          },
+          {
+            "email": "example2@example.com",
+            "name": "Jane Doe"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "playbook1",
+              "playbook2"
+            ],
+            "playbook": "playbook3"
+          },
+          {
+            "dependsOn": [
+              "playbook4"
+            ],
+            "playbook": "playbook5"
+          },
+          {
+            "dependsOn": [
+              "playbook6"
+            ],
+            "playbook": "playbook7",
+            "extraField": "extraValue"
+          }
+        ],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"object\"",
+      "python_error": "123 is not of type 'object', 'null'\n\nFailed validating 'type' in schema['properties']['metadata']:\n    {'type': ['object', 'null']}\n\nOn instance['metadata']:\n    123",
+      "data": {
+        "dagName": "example_dag",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": 123,
+        "owners": [
+          {
+            "email": "example@example.com",
+            "name": "John Doe"
+          },
+          {
+            "email": "example2@example.com",
+            "name": "Jane Doe"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "playbook1",
+              "playbook2"
+            ],
+            "playbook": "playbook3"
+          },
+          {
+            "dependsOn": [
+              "playbook4"
+            ],
+            "playbook": "playbook5"
+          }
+        ],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['playbooks']:\n    {'items': {'additionalProperties': False,\n               'properties': {'dependsOn': {'items': {'maxLength': 256,\n                                                      'minLength': 1,\n                                                      'type': 'string'},\n                                            'maxItems': 64,\n                                            'minItems': 0,\n                                            'type': 'array'},\n                              'playbook': {'maxLength': 256,\n                                           'minLength': 1,\n                                           'type': 'string'}},\n               'required': ['playbook', 'dependsOn'],\n               'type': 'object'},\n     'maxItems': 64,\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['playbooks']:\n    []",
+      "data": {
+        "dagName": "example_dag",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": null,
+        "playbooks": [],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['dagName']:\n    {'maxLength': 256, 'minLength': 1, 'type': ['string', 'null']}\n\nOn instance['dagName']:\n    ''",
+      "data": {
+        "dagName": "",
+        "enabled": true,
+        "lockType": "soft",
+        "metadata": null,
+        "owners": [
+          {
+            "email": "example@example.com",
+            "name": "John Doe"
+          },
+          {
+            "email": "example2@example.com",
+            "name": "Jane Doe"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "playbook1",
+              "playbook2"
+            ],
+            "playbook": "playbook3"
+          },
+          {
+            "dependsOn": [
+              "playbook4"
+            ],
+            "playbook": "playbook5"
+          }
+        ],
+        "sqlRunner": "1.2.3",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dagName": "my_dag",
+        "enabled": true,
+        "lockType": "hard",
+        "metadata": {
+          "key": "value"
+        },
+        "owners": [
+          {
+            "email": "owner@example.com",
+            "name": "Owner Name"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "dependency1",
+              "dependency2"
+            ],
+            "playbook": "playbook1"
+          },
+          {
+            "dependsOn": [],
+            "playbook": "playbook2"
+          }
+        ],
+        "sqlRunner": "1.2.3-rc1",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1.2.345-rc123\" does not match \"^(0|[1-9][0-9]{0,1})\\.(0|[1-9][0-9]{0,1})\\.(0|[1-9][0-9]{0,1})(-rc[0-9]{1,2}){0,1}$\"",
+      "python_error": "'1.2.345-rc123' does not match '^(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})(-rc[0-9]{1,2}){0,1}$'\n\nFailed validating 'pattern' in schema['properties']['sqlRunner']:\n    {'pattern': '^(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})\\\\.(0|[1-9][0-9]{0,1})(-rc[0-9]{1,2}){0,1}$',\n     'type': ['string', 'null']}\n\nOn instance['sqlRunner']:\n    '1.2.345-rc123'",
+      "data": {
+        "dagName": "my_dag",
+        "enabled": true,
+        "lockType": "hard",
+        "metadata": {
+          "key": "value"
+        },
+        "owners": [
+          {
+            "email": "owner@example.com",
+            "name": "Owner Name"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "dependency1",
+              "dependency2"
+            ],
+            "playbook": "playbook1"
+          },
+          {
+            "dependsOn": [],
+            "playbook": "playbook2"
+          }
+        ],
+        "sqlRunner": "1.2.345-rc123",
+        "storage": "BigQuery"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['dagName']:\n    {'maxLength': 256, 'minLength': 1, 'type': ['string', 'null']}\n\nOn instance['dagName']:\n    ''",
+      "data": {
+        "dagName": "",
+        "enabled": true,
+        "lockType": "hard",
+        "metadata": {
+          "key": "value"
+        },
+        "owners": [
+          {
+            "email": "owner@example.com",
+            "name": "a"
+          }
+        ],
+        "playbooks": [
+          {
+            "dependsOn": [
+              "b",
+              "c"
+            ],
+            "playbook": "a"
+          },
+          {
+            "dependsOn": [],
+            "playbook": "playbook2"
+          }
+        ],
+        "sqlRunner": "1.2.3-rc1",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['dagName']:\n    {'maxLength': 256, 'minLength': 1, 'type': ['string', 'null']}\n\nOn instance['dagName']:\n    123",
+      "data": {
+        "dagName": 123,
+        "enabled": true,
+        "lockType": "hard",
+        "metadata": {
+          "key": "value"
+        },
+        "owners": [
+          {
+            "email": "owner@example.com",
+            "name": "Owner Name"
+          }
+        ],
+        "playbooks": [
+          {
+            "playbook": "playbook1",
+            "dependsOn": [
+              "dependency1",
+              "dependency2"
+            ]
+          },
+          {
+            "playbook": "playbook2",
+            "dependsOn": []
+          }
+        ],
+        "sqlRunner": "1.2.3-rc1",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['playbooks']:\n    {'items': {'additionalProperties': False,\n               'properties': {'dependsOn': {'items': {'maxLength': 256,\n                                                      'minLength': 1,\n                                                      'type': 'string'},\n                                            'maxItems': 64,\n                                            'minItems': 0,\n                                            'type': 'array'},\n                              'playbook': {'maxLength': 256,\n                                           'minLength': 1,\n                                           'type': 'string'}},\n               'required': ['playbook', 'dependsOn'],\n               'type': 'object'},\n     'maxItems': 64,\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['playbooks']:\n    []",
+      "data": {
+        "dagName": "my_dag",
+        "enabled": true,
+        "lockType": "hard",
+        "metadata": {
+          "key": "value"
+        },
+        "owners": null,
+        "playbooks": [],
+        "sqlRunner": "1.2.3-rc1",
+        "storage": "Default"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"extraKey\":\"extraValue\"} is not of type \"string\"",
+      "python_error": "Additional properties are not allowed ('extraKey' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'properties': {'dagName': {'maxLength': 256,\n                                'minLength': 1,\n                                'type': ['string', 'null']},\n                    'enabled': {'type': 'boolean'},\n                    'lockType': {'enum': ['hard', 'soft'],\n                                 'type': 'string'},\n                    'metadata': {'type': ['object', 'null']},\n                    'owners': {'items': {'additionalProperties': False,\n                                         'properties': {'email': {'_format': 'email',\n                                                                  'type': 'string'},\n                                                        'name': {'maxLength': 256,\n                                                                 'minLength': 1,\n                                                                 'type': 'stri.. (2682 more)",
+      "data": {
+        "dagName": "my_dag",
+        "enabled": true,
+        "lockType": "hard",
+        "metadata": {
+          "key": "value"
+        },
+        "owners": [
+          {
+            "email": "owner@example.com",
+            "name": "Owner Name"
+          }
+        ],
+        "playbooks": [
+          {
+            "playbook": "playbook1",
+            "dependsOn": [
+              "dependency1",
+              "dependency2",
+              {
+                "extraKey": "extraValue"
+              }
+            ]
+          },
+          {
+            "playbook": "playbook2",
+            "dependsOn": []
+          }
+        ],
+        "sqlRunner": "1.2.3-rc1",
+        "storage": "Default",
+        "extraKey": "extraValue"
+      }
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "description": "sample WashingtonPost/wp_48_Normalized.json",
+  "meta": {
+    "full_size": 1703,
+    "stripped_size": 588,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxItems",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "description": "Trait that applies contains the content restrictions of an ANS object.",
+    "properties": {
+      "content_code": {
+        "description": "The content restriction code/level/flag associated with the ANS object",
+        "type": "string"
+      },
+      "embargo": {
+        "additionalProperties": false,
+        "description": "Embargo configuration to enforce publishing restrictions. Embargoed content must not go live.",
+        "properties": {
+          "active": {
+            "description": "The boolean flag to indicate if the embargo is active or not. If this field is false, ignore the embargo.",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "An optional description for the embargo.",
+            "type": "string"
+          },
+          "end_time": {
+            "_format": "date-time",
+            "description": "An optional end time for the embargo to indicate when it ends. When it's not defined, it means the embargo keeps applying. The end time should be ignored if active flag is false.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "active"
+        ],
+        "type": "object"
+      },
+      "geo": {
+        "additionalProperties": false,
+        "description": "Geo-Restriction configuration that contains the restriction ids that this content should be associated with.",
+        "properties": {
+          "restrictions": {
+            "description": "An array containing the geo-restriction objects. Limited to a size of 1 for now.",
+            "items": {
+              "additionalProperties": false,
+              "description": "An object specifying the _id of the restriction this content should be associated with.",
+              "properties": {
+                "restriction_id": {
+                  "description": "The _id of the restriction that is stored in Global Settings.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "restriction_id"
+              ],
+              "type": "object"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "restrictions"
+        ],
+        "type": "object"
+      }
+    },
+    "title": "Content Restrictions",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "description": "Embargo until the official release date",
+          "end_time": "2024-12-31T23:59:59Z"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[{\"restriction_id\":\"US-Only\"},{\"restriction_id\":\"Canada-Only\"}] has more than 1 item",
+      "python_error": "[{'restriction_id': 'US-Only'}, {'restriction_id': 'Canada-Only'}] is too long\n\nFailed validating 'maxItems' in schema['properties']['geo']['properties']['restrictions']:\n    {'description': 'An array containing the geo-restriction objects. '\n                    'Limited to a size of 1 for now.',\n     'items': {'additionalProperties': False,\n               'description': 'An object specifying the _id of the '\n                              'restriction this content should be '\n                              'associated with.',\n               'properties': {'restriction_id': {'description': 'The _id '\n                                                                'of the '\n                                                                'restriction '\n                                                                'that is '\n                                                                'stored in '\n                                                                'Global '\n                                       .. (357 more)",
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "description": "Embargo until the official release date",
+          "end_time": "2024-12-31T23:59:59Z"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            },
+            {
+              "restriction_id": "Canada-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['embargo']:\n    {'additionalProperties': False,\n     'description': 'Embargo configuration to enforce publishing '\n                    'restrictions. Embargoed content must not go live.',\n     'properties': {'active': {'description': 'The boolean flag to '\n                                              'indicate if the embargo is '\n                                              'active or not. If this '\n                                              'field is false, ignore the '\n                                              'embargo.',\n                               'type': 'boolean'},\n                    'description': {'description': 'An optional '\n                                                   'description for the '\n                                                   'embargo.',\n                                    'type': 'string'},\n                    'end_time': {'_for.. (894 more)",
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "description": "Embargo until the official release date",
+          "end_time": "2024-12-31T23:59:59Z",
+          "extra_property": "Invalid"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_field' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_field' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['geo']['properties']['restrictions']['items']:\n    {'additionalProperties': False,\n     'description': 'An object specifying the _id of the restriction this '\n                    'content should be associated with.',\n     'properties': {'restriction_id': {'description': 'The _id of the '\n                                                      'restriction that is '\n                                                      'stored in Global '\n                                                      'Settings.',\n                                       'type': 'string'}},\n     'required': ['restriction_id'],\n     'type': 'object'}\n\nOn instance['geo']['restrictions'][0]:\n    {'restriction_id': 'US-Only', 'extra_field': 'extra_value'}",
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "description": "Embargo until the official release date",
+          "end_time": "2024-12-31T23:59:59"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only",
+              "extra_field": "extra_value"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['geo']['properties']['restrictions']:\n    {'description': 'An array containing the geo-restriction objects. '\n                    'Limited to a size of 1 for now.',\n     'items': {'additionalProperties': False,\n               'description': 'An object specifying the _id of the '\n                              'restriction this content should be '\n                              'associated with.',\n               'properties': {'restriction_id': {'description': 'The _id '\n                                                                'of the '\n                                                                'restriction '\n                                                                'that is '\n                                                                'stored in '\n                                                                'Global '\n                                                                'Settings.',\n                  .. (237 more)",
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "description": "Embargo until the official release date",
+          "end_time": "2024-12-31T23:59:59Z"
+        },
+        "geo": {
+          "restrictions": []
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['geo']['properties']['restrictions']['items']:\n    {'additionalProperties': False,\n     'description': 'An object specifying the _id of the restriction this '\n                    'content should be associated with.',\n     'properties': {'restriction_id': {'description': 'The _id of the '\n                                                      'restriction that is '\n                                                      'stored in Global '\n                                                      'Settings.',\n                                       'type': 'string'}},\n     'required': ['restriction_id'],\n     'type': 'object'}\n\nOn instance['geo']['restrictions'][0]:\n    {'restriction_id': 'US-Only', 'extra_property': True}",
+      "data": {
+        "content_code": "PG-13",
+        "embargo": {
+          "active": true,
+          "description": "Embargo until the official release date",
+          "end_time": "2024-12-31T23:59:59"
+        },
+        "geo": {
+          "restrictions": [
+            {
+              "restriction_id": "US-Only",
+              "extra_property": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

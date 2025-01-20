@@ -1,0 +1,415 @@
+{
+  "description": "sample Snowplow/sp_307_Normalized.json",
+  "meta": {
+    "full_size": 2765,
+    "stripped_size": 1584,
+    "features": [
+      "@minmaxLength",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for a PII enrichment original values",
+    "properties": {
+      "pii": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "pojo"
+            ]
+          },
+          {
+            "required": [
+              "json"
+            ]
+          }
+        ],
+        "properties": {
+          "json": {
+            "description": "A JSON field replacement from the EnrichedEvent POJO (e.g. contexts). Each entry in this array is a match of the jsonPath for that field",
+            "items": {
+              "properties": {
+                "fieldMapping": {
+                  "additionalProperties": false,
+                  "description": "A single replacement (there can be multiple) caused by specifying that JsonPath",
+                  "properties": {
+                    "fieldName": {
+                      "description": "The name of the field",
+                      "enum": [
+                        "contexts",
+                        "derived_contexts",
+                        "unstruct_event"
+                      ]
+                    },
+                    "jsonPath": {
+                      "description": "The JsonPath that was specified",
+                      "type": "string"
+                    },
+                    "modifiedValue": {
+                      "description": "The modified value (e.g. hash) of the original value",
+                      "maxLength": 128,
+                      "type": "string"
+                    },
+                    "originalValue": {
+                      "description": "The original value of the field",
+                      "type": "string"
+                    },
+                    "schema": {
+                      "description": "The iglu schema corresponding to this field and value",
+                      "pattern": "^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\*)-((?:0|[1-9][0-9]*)|\\*)-((?:0|[1-9][0-9]*)|\\*)$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "fieldName",
+                    "jsonPath",
+                    "originalValue",
+                    "modifiedValue",
+                    "schema"
+                  ],
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "pojo": {
+            "description": "A scalar field replacement from the EnrichedEvent POJO (e.g. user_id)",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "fieldName": {
+                  "description": "The name of the field",
+                  "enum": [
+                    "user_id",
+                    "user_ipaddress",
+                    "user_fingerprint",
+                    "domain_userid",
+                    "network_userid",
+                    "ip_organization",
+                    "ip_domain",
+                    "tr_orderid",
+                    "ti_orderid",
+                    "mkt_term",
+                    "mkt_content",
+                    "se_category",
+                    "se_action",
+                    "se_label",
+                    "se_property",
+                    "mkt_clickid",
+                    "refr_domain_userid",
+                    "domain_sessionid"
+                  ]
+                },
+                "modifiedValue": {
+                  "description": "The value that this field was replaced with (e.g. the hash of the original)",
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "originalValue": {
+                  "description": "The original value (before the PII transform), of the field",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "fieldName",
+                "originalValue",
+                "modifiedValue"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "strategy": {
+        "additionalProperties": false,
+        "description": "The strategy used to modify the original value",
+        "properties": {
+          "pseudonymize": {
+            "additionalProperties": false,
+            "description": "The pseudonymize strategy for modifying the original value",
+            "properties": {
+              "hashFunction": {
+                "description": "The function used to pseudonymize",
+                "enum": [
+                  "MD2",
+                  "MD5",
+                  "SHA-1",
+                  "SHA-256",
+                  "SHA-384",
+                  "SHA-512"
+                ]
+              }
+            },
+            "required": [
+              "hashFunction"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "pseudonymize"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "pii",
+      "strategy"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "pii_transformation",
+      "vendor": "com.snowplowanalytics.snowplow",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "pii": {
+          "json": [
+            {
+              "fieldMapping": {
+                "fieldName": "contexts",
+                "jsonPath": "$.contexts[0].schema",
+                "modifiedValue": "hashed_value",
+                "originalValue": "original_value",
+                "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0"
+              }
+            }
+          ]
+        },
+        "strategy": {
+          "pseudonymize": {
+            "hashFunction": "SHA-256"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a_very_long_modified_value_that_exceeds_the_max_length_of_128_characters_and_will_cause_an_error_in_a_validator_that_doesnt_support_maxLength_keyword_in_json_schema\" is longer than 128 characters",
+      "python_error": "'a_very_long_modified_value_that_exceeds_the_max_length_of_128_characters_and_will_cause_an_error_in_a_validator_that_doesnt_support_maxLength_keyword_in_json_schema' is too long\n\nFailed validating 'maxLength' in schema['properties']['pii']['properties']['json']['items']['properties']['fieldMapping']['properties']['modifiedValue']:\n    {'description': 'The modified value (e.g. hash) of the original value',\n     'maxLength': 128,\n     'type': 'string'}\n\nOn instance['pii']['json'][0]['fieldMapping']['modifiedValue']:\n    'a_very_long_modified_value_that_exceeds_the_max_length_of_128_characters_and_will_cause_an_error_in_a_validator_that_doesnt_support_maxLength_keyword_in_json_schema'",
+      "data": {
+        "pii": {
+          "json": [
+            {
+              "fieldMapping": {
+                "fieldName": "contexts",
+                "jsonPath": "$.contexts[0].schema",
+                "modifiedValue": "a_very_long_modified_value_that_exceeds_the_max_length_of_128_characters_and_will_cause_an_error_in_a_validator_that_doesnt_support_maxLength_keyword_in_json_schema",
+                "originalValue": "original_value",
+                "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0"
+              }
+            }
+          ]
+        },
+        "strategy": {
+          "pseudonymize": {
+            "hashFunction": "SHA-256"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraField' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraField' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['pii']['properties']['json']['items']['properties']['fieldMapping']:\n    {'additionalProperties': False,\n     'description': 'A single replacement (there can be multiple) caused '\n                    'by specifying that JsonPath',\n     'properties': {'fieldName': {'description': 'The name of the field',\n                                  'enum': ['contexts',\n                                           'derived_contexts',\n                                           'unstruct_event']},\n                    'jsonPath': {'description': 'The JsonPath that was '\n                                                'specified',\n                                 'type': 'string'},\n                    'modifiedValue': {'description': 'The modified value '\n                                                     '(e.g. hash) of the '\n                                                     'original value.. (1231 more)",
+      "data": {
+        "pii": {
+          "json": [
+            {
+              "fieldMapping": {
+                "fieldName": "contexts",
+                "jsonPath": "$.contexts[0].schema",
+                "modifiedValue": "hashed_value",
+                "originalValue": "original_value",
+                "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0",
+                "extraField": "extraValue"
+              }
+            }
+          ]
+        },
+        "strategy": {
+          "pseudonymize": {
+            "hashFunction": "SHA-256"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc\" does not match \"^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\*)-((?:0|[1-9][0-9]*)|\\*)-((?:0|[1-9][0-9]*)|\\*)$\"",
+      "python_error": "'iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc' does not match '^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)$'\n\nFailed validating 'pattern' in schema['properties']['pii']['properties']['json']['items']['properties']['fieldMapping']['properties']['schema']:\n    {'description': 'The iglu schema corresponding to this field and value',\n     'pattern': '^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)$',\n     'type': 'string'}\n\nOn instance['pii']['json'][0]['fieldMapping']['schema']:\n    'iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc'",
+      "data": {
+        "pii": {
+          "json": [
+            {
+              "fieldMapping": {
+                "fieldName": "contexts",
+                "jsonPath": "$.contexts[0].schema",
+                "modifiedValue": "hashed_value",
+                "originalValue": "original_value",
+                "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc"
+              }
+            }
+          ]
+        },
+        "strategy": {
+          "pseudonymize": {
+            "hashFunction": "SHA-256"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "pii": {
+          "json": [
+            {
+              "fieldMapping": {
+                "fieldName": "contexts",
+                "jsonPath": "$.contexts[0].schema",
+                "modifiedValue": "hashed_value_1",
+                "originalValue": "original_value_1",
+                "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0"
+              }
+            },
+            {
+              "fieldMapping": {
+                "fieldName": "derived_contexts",
+                "jsonPath": "$.derived_contexts[0].schema",
+                "modifiedValue": "hashed_value_2",
+                "originalValue": "original_value_2",
+                "schema": "iglu:com.snowplowanalytics.snowplow/derived_contexts/jsonschema/1-0-0"
+              }
+            }
+          ]
+        },
+        "strategy": {
+          "pseudonymize": {
+            "hashFunction": "SHA-256"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc\" does not match \"^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\*)-((?:0|[1-9][0-9]*)|\\*)-((?:0|[1-9][0-9]*)|\\*)$\"",
+      "python_error": "'iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc' does not match '^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)$'\n\nFailed validating 'pattern' in schema['properties']['pii']['properties']['json']['items']['properties']['fieldMapping']['properties']['schema']:\n    {'description': 'The iglu schema corresponding to this field and value',\n     'pattern': '^iglu:([a-zA-Z0-9-_.]+)/([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)/([1-9][0-9]*|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)-((?:0|[1-9][0-9]*)|\\\\*)$',\n     'type': 'string'}\n\nOn instance['pii']['json'][0]['fieldMapping']['schema']:\n    'iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc'",
+      "data": {
+        "pii": {
+          "json": [
+            {
+              "fieldMapping": {
+                "fieldName": "contexts",
+                "jsonPath": "$.contexts[0].schema",
+                "modifiedValue": "hashed_value_1",
+                "originalValue": "original_value_1",
+                "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0-abc"
+              }
+            },
+            {
+              "fieldMapping": {
+                "fieldName": "derived_contexts",
+                "jsonPath": "$.derived_contexts[0].schema",
+                "modifiedValue": "hashed_value_2",
+                "originalValue": "original_value_2",
+                "schema": "iglu:com.snowplowanalytics.snowplow/derived_contexts/jsonschema/1-0-0"
+              }
+            }
+          ]
+        },
+        "strategy": {
+          "pseudonymize": {
+            "hashFunction": "SHA-256"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"extra_field\" is not one of [\"contexts\",\"derived_contexts\",\"unstruct_event\"]",
+      "python_error": "Additional properties are not allowed ('extra_strategy' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['strategy']:\n    {'additionalProperties': False,\n     'description': 'The strategy used to modify the original value',\n     'properties': {'pseudonymize': {'additionalProperties': False,\n                                     'description': 'The pseudonymize '\n                                                    'strategy for '\n                                                    'modifying the '\n                                                    'original value',\n                                     'properties': {'hashFunction': {'description': 'The '\n                                                                                    'function '\n                                                                                    'used '\n                                                                                    'to '\n                                                   .. (855 more)",
+      "data": {
+        "pii": {
+          "json": [
+            {
+              "fieldMapping": {
+                "fieldName": "contexts",
+                "jsonPath": "$.contexts[0].schema",
+                "modifiedValue": "hashed_value_1",
+                "originalValue": "original_value_1",
+                "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0"
+              }
+            },
+            {
+              "fieldMapping": {
+                "fieldName": "derived_contexts",
+                "jsonPath": "$.derived_contexts[0].schema",
+                "modifiedValue": "hashed_value_2",
+                "originalValue": "original_value_2",
+                "schema": "iglu:com.snowplowanalytics.snowplow/derived_contexts/jsonschema/1-0-0"
+              }
+            },
+            {
+              "fieldMapping": {
+                "fieldName": "unstruct_event",
+                "jsonPath": "$.unstruct_event.schema",
+                "modifiedValue": "hashed_value_3",
+                "originalValue": "original_value_3",
+                "schema": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
+              }
+            },
+            {
+              "fieldMapping": {
+                "fieldName": "extra_field",
+                "jsonPath": "$.extra_field.schema",
+                "modifiedValue": "hashed_value_4",
+                "originalValue": "original_value_4",
+                "schema": "iglu:com.snowplowanalytics.snowplow/extra_field/jsonschema/1-0-0"
+              }
+            }
+          ]
+        },
+        "strategy": {
+          "pseudonymize": {
+            "hashFunction": "SHA-256"
+          },
+          "extra_strategy": {}
+        }
+      }
+    }
+  ]
+}

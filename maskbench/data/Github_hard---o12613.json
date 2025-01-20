@@ -1,0 +1,734 @@
+{
+  "description": "sample Github_hard/o12613.json",
+  "meta": {
+    "full_size": 4393,
+    "stripped_size": 2358,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "interface": {
+        "type": "object",
+        "title": "Interface Specification",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Network interface type.",
+            "enum": [
+              "monitor",
+              "vlan",
+              "wifi-ap"
+            ]
+          },
+          "dhcp": {
+            "type": "object",
+            "properties": {
+              "leasetime": {
+                "type": "string",
+                "description": "Duration of client leases, e.g. 2h.",
+                "pattern": "\\d+[dhms]"
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Size of address range beginning at start value.",
+                "minimum": 1
+              },
+              "start": {
+                "type": "integer",
+                "description": "Starting offset for address assignment.",
+                "minimum": 3
+              }
+            },
+            "additionalProperties": false
+          },
+          "dns": {
+            "type": "array",
+            "description": "List of DNS servers to advertise to connected clients.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "wireless": {
+            "type": "object",
+            "properties": {
+              "ssid": {
+                "type": "string",
+                "description": "ESSID to broadcast.",
+                "maxLength": 32
+              },
+              "key": {
+                "type": "string",
+                "description": "Wireless network password.",
+                "minLength": 8
+              },
+              "nasid": {
+                "type": "string",
+                "description": "NAS identifier for RADIUS."
+              },
+              "acct_server": {
+                "type": "string",
+                "description": "RADIUS accounting server."
+              },
+              "acct_secret": {
+                "type": "string",
+                "description": "RADIUS accounting secret."
+              },
+              "acct_interval": {
+                "type": "integer",
+                "description": "RADIUS accounting update interval (seconds).",
+                "minimum": 1
+              },
+              "hidden": {
+                "type": "boolean",
+                "description": "Disable broadcasting the ESSID in beacons."
+              },
+              "isolate": {
+                "type": "boolean",
+                "description": "Disable forwarding traffic between connected clients."
+              },
+              "maxassoc": {
+                "type": "integer",
+                "description": "Maximum number of associated clients.",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "hwmode": {
+                "type": "string",
+                "description": "Required operating mode (11b for old hardware, 11g for 2.4 GHz, 11a for 5 Ghz).",
+                "enum": [
+                  "11b",
+                  "11g",
+                  "11a"
+                ]
+              },
+              "ipv4_network": {
+                "type": "string",
+                "description": "Required IP network in slash notation.",
+                "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+"
+              }
+            },
+            "additionalProperties": false
+          },
+          "l3bridge": {
+            "type": "string",
+            "description": "Bridge to another network using ARP proxying (experimental)."
+          },
+          "vlan-id": {
+            "type": "integer",
+            "description": "VLAN tag for traffic to and from the interface.",
+            "minimum": 1,
+            "maximum": 4094
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false,
+        "$$target": "#/definitions/interface"
+      },
+      "service": {
+        "type": "object",
+        "title": "Service Specification",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of chute service.",
+            "enum": [
+              "light",
+              "normal",
+              "image"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "Source directory for this service."
+          },
+          "image": {
+            "type": "string",
+            "description": "Image specification for services that pull a Docker image."
+          },
+          "command": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "dns": {
+            "type": "array",
+            "description": "List of DNS servers to be used within the container.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "environment": {
+            "type": "object",
+            "description": "Environment variables."
+          },
+          "interfaces": {
+            "type": "object",
+            "description": "Network interfaces to be connected.",
+            "patternProperties": {
+              "\\w{1,16}": {
+                "$ref": "#/definitions/interface"
+              }
+            }
+          },
+          "requests": {
+            "type": "object",
+            "properties": {
+              "as-root": {
+                "type": "boolean",
+                "description": "Run service as privileged user."
+              },
+              "port-bindings": {
+                "type": "array",
+                "description": "Port bindings from host to service container.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "external": {
+                      "type": "integer",
+                      "description": "External (host) port number.",
+                      "minimum": 1,
+                      "maximum": 65536
+                    },
+                    "internal": {
+                      "type": "integer",
+                      "description": "Internal (container) port number.",
+                      "minimum": 1,
+                      "maximum": 65536
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "$$target": "#/definitions/service"
+      }
+    },
+    "type": "object",
+    "title": "Chute Specification",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Name of the chute."
+      },
+      "description": {
+        "type": "string",
+        "description": "Description of the chute to be shown to users."
+      },
+      "version": {
+        "description": "Version of the chute.",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      },
+      "services": {
+        "type": "object",
+        "description": "Services to be installed with the chute.",
+        "patternProperties": {
+          "\\w+": {
+            "$ref": "#/definitions/service"
+          }
+        }
+      },
+      "web": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string",
+            "description": "Name of chute service which provides the web service."
+          },
+          "port": {
+            "type": "integer",
+            "description": "Listening port inside the chute.",
+            "minimum": 1,
+            "maximum": 65536
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "example-chute",
+        "description": "This is an example chute.",
+        "version": "1.0",
+        "services": {
+          "web-service": {
+            "type": "normal",
+            "source": "/path/to/source",
+            "command": "/bin/httpd",
+            "dns": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ],
+            "environment": {
+              "VARIABLE": "value"
+            },
+            "interfaces": {
+              "eth0": {
+                "type": "vlan",
+                "vlan-id": 100,
+                "dhcp": {
+                  "leasetime": "2h",
+                  "limit": 10,
+                  "start": 10
+                },
+                "dns": [
+                  "8.8.8.8",
+                  "8.8.4.4"
+                ],
+                "requirements": {
+                  "hwmode": "11g",
+                  "ipv4_network": "192.168.1.0/24"
+                }
+              },
+              "wlan0": {
+                "type": "wifi-ap",
+                "wireless": {
+                  "ssid": "example-ssid",
+                  "key": "password123",
+                  "nasid": "example-nasid",
+                  "acct_server": "example-acct-server",
+                  "acct_secret": "example-acct-secret",
+                  "acct_interval": 60,
+                  "hidden": false,
+                  "isolate": false,
+                  "maxassoc": 10
+                }
+              }
+            },
+            "requests": {
+              "as-root": false,
+              "port-bindings": [
+                {
+                  "external": 80,
+                  "internal": 8080
+                }
+              ]
+            }
+          }
+        },
+        "web": {
+          "service": "web-service",
+          "port": 8080
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "example-chute",
+        "description": "Example chute for testing",
+        "version": "1.0",
+        "services": {
+          "web-service": {
+            "type": "normal",
+            "source": "/path/to/source",
+            "command": "python app.py",
+            "dns": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ],
+            "environment": {
+              "VARIABLE": "value"
+            },
+            "interfaces": {
+              "eth0": {
+                "type": "vlan",
+                "vlan-id": 100,
+                "dhcp": {
+                  "leasetime": "2h",
+                  "limit": 10,
+                  "start": 10
+                },
+                "dns": [
+                  "8.8.8.8",
+                  "8.8.4.4"
+                ],
+                "requirements": {
+                  "hwmode": "11g",
+                  "ipv4_network": "192.168.1.0/24"
+                }
+              },
+              "wlan0": {
+                "type": "wifi-ap",
+                "wireless": {
+                  "ssid": "example-ssid",
+                  "key": "password123",
+                  "nasid": "example-nasid",
+                  "acct_server": "example-acct-server",
+                  "acct_secret": "example-acct-secret",
+                  "acct_interval": 60,
+                  "hidden": false,
+                  "isolate": false,
+                  "maxassoc": 10
+                }
+              }
+            },
+            "requests": {
+              "as-root": false,
+              "port-bindings": [
+                {
+                  "external": 80,
+                  "internal": 8080
+                }
+              ]
+            }
+          }
+        },
+        "web": {
+          "service": "web-service",
+          "port": 8080
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('--shorter than 8 char. minimumLength error--' was unexpected)",
+      "python_error": "Additional properties are not allowed ('--shorter than 8 char. minimumLength error--' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['services']['patternProperties']['\\\\w+']['properties']['interfaces']['patternProperties']['\\\\w{1,16}']['properties']['wireless']:\n    {'type': 'object',\n     'properties': {'ssid': {'type': 'string',\n                             'description': 'ESSID to broadcast.',\n                             'maxLength': 32},\n                    'key': {'type': 'string',\n                            'description': 'Wireless network password.',\n                            'minLength': 8},\n                    'nasid': {'type': 'string',\n                              'description': 'NAS identifier for RADIUS.'},\n                    'acct_server': {'type': 'string',\n                                    'description': 'RADIUS accounting '\n                                                   'server.'},\n                    'acct_secret': {'type': 'string',\n           .. (1542 more)",
+      "data": {
+        "name": "example-chute",
+        "description": "Example chute for testing",
+        "version": "1.0",
+        "services": {
+          "web-service": {
+            "type": "normal",
+            "source": "/path/to/source",
+            "command": "python app.py",
+            "dns": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ],
+            "environment": {
+              "VARIABLE": "value"
+            },
+            "interfaces": {
+              "eth0": {
+                "type": "vlan",
+                "vlan-id": 100,
+                "dhcp": {
+                  "leasetime": "2h",
+                  "limit": 10,
+                  "start": 10
+                },
+                "dns": [
+                  "8.8.8.8",
+                  "8.8.4.4"
+                ],
+                "requirements": {
+                  "hwmode": "11g",
+                  "ipv4_network": "192.168.1.0/24"
+                }
+              },
+              "wlan0": {
+                "type": "wifi-ap",
+                "wireless": {
+                  "ssid": "a",
+                  "--shorter than 8 char. minimumLength error--": "password123",
+                  "nasid": "example-nasid",
+                  "acct_server": "example-acct-server",
+                  "acct_secret": "example-acct-secret",
+                  "acct_interval": 60,
+                  "hidden": false,
+                  "isolate": false,
+                  "maxassoc": 10
+                }
+              }
+            },
+            "requests": {
+              "as-root": false,
+              "port-bindings": [
+                {
+                  "external": 80,
+                  "internal": 8080
+                }
+              ]
+            }
+          }
+        },
+        "web": {
+          "service": "web-service",
+          "port": 8080
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['services']['patternProperties']['\\\\w+']['properties']['interfaces']['patternProperties']['\\\\w{1,16}']['properties']['vlan-id']:\n    {'type': 'integer',\n     'description': 'VLAN tag for traffic to and from the interface.',\n     'minimum': 1,\n     'maximum': 4094}\n\nOn instance['services']['web-service']['interfaces']['eth0']['vlan-id']:\n    0",
+      "data": {
+        "name": "example-chute",
+        "description": "Example chute for testing",
+        "version": "1.0",
+        "services": {
+          "web-service": {
+            "type": "normal",
+            "source": "/path/to/source",
+            "command": "python app.py",
+            "dns": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ],
+            "environment": {
+              "VARIABLE": "value"
+            },
+            "interfaces": {
+              "eth0": {
+                "type": "vlan",
+                "vlan-id": 0,
+                "dhcp": {
+                  "leasetime": "2h",
+                  "limit": 10,
+                  "start": 10
+                },
+                "dns": [
+                  "8.8.8.8",
+                  "8.8.4.4"
+                ],
+                "requirements": {
+                  "hwmode": "11g",
+                  "ipv4_network": "192.168.1.0/24"
+                }
+              },
+              "wlan0": {
+                "type": "wifi-ap",
+                "wireless": {
+                  "ssid": "example-ssid",
+                  "key": "password123",
+                  "nasid": "example-nasid",
+                  "acct_server": "example-acct-server",
+                  "acct_secret": "example-acct-secret",
+                  "acct_interval": 0,
+                  "hidden": false,
+                  "isolate": false,
+                  "maxassoc": 10
+                }
+              }
+            },
+            "requests": {
+              "as-root": false,
+              "port-bindings": [
+                {
+                  "external": 65537,
+                  "internal": 8080
+                }
+              ]
+            }
+          }
+        },
+        "web": {
+          "service": "web-service",
+          "port": 8080
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"not-a-string-or-array\":\"python app.py\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'not-a-string-or-array': 'python app.py'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['services']['patternProperties']['\\\\w+']['properties']['command']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'array', 'items': {'type': 'string'}}]}\n\nOn instance['services']['web-service']['command']:\n    {'not-a-string-or-array': 'python app.py'}",
+      "data": {
+        "name": "example-chute",
+        "description": "Example chute for testing",
+        "version": "1.0",
+        "services": {
+          "web-service": {
+            "type": "normal",
+            "source": "/path/to/source",
+            "command": {
+              "not-a-string-or-array": "python app.py"
+            },
+            "dns": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ],
+            "environment": {
+              "VARIABLE": "value"
+            },
+            "interfaces": {
+              "eth0": {
+                "type": "vlan",
+                "vlan-id": 100,
+                "dhcp": {
+                  "leasetime": "2h",
+                  "limit": 10,
+                  "start": 10
+                },
+                "dns": [
+                  "8.8.8.8",
+                  "8.8.4.4"
+                ],
+                "requirements": {
+                  "hwmode": "11g",
+                  "ipv4_network": "192.168.1.0/24"
+                }
+              },
+              "wlan0": {
+                "type": "wifi-ap",
+                "wireless": {
+                  "ssid": "example-ssid",
+                  "key": "password123",
+                  "nasid": "example-nasid",
+                  "acct_server": "example-acct-server",
+                  "acct_secret": "example-acct-secret",
+                  "acct_interval": 60,
+                  "hidden": false,
+                  "isolate": false,
+                  "maxassoc": 10
+                }
+              }
+            },
+            "requests": {
+              "as-root": false,
+              "port-bindings": [
+                {
+                  "external": 80,
+                  "internal": 8080
+                }
+              ]
+            }
+          }
+        },
+        "web": {
+          "service": "web-service",
+          "port": 8080
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "Additional properties are not allowed ('<--- invalid port, should be between 1 and 65536' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['web']:\n    {'type': 'object',\n     'properties': {'service': {'type': 'string',\n                                'description': 'Name of chute service '\n                                               'which provides the web '\n                                               'service.'},\n                    'port': {'type': 'integer',\n                             'description': 'Listening port inside the '\n                                            'chute.',\n                             'minimum': 1,\n                             'maximum': 65536}},\n     'additionalProperties': False}\n\nOn instance['web']:\n    {'service': 'web-service',\n     'port': 8080,\n     '<--- invalid port, should be between 1 and 65536': 'service'}",
+      "data": {
+        "name": "example-chute",
+        "description": "Example chute for testing",
+        "version": "1.0",
+        "services": {
+          "web-service": {
+            "type": "normal",
+            "source": "/path/to/source",
+            "command": "python app.py",
+            "dns": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ],
+            "environment": {
+              "VARIABLE": "value"
+            },
+            "interfaces": {
+              "eth0": {
+                "type": "vlan",
+                "vlan-id": 0,
+                "<--- invalid vlan-id, should be between 1 and 4094": "dhcp",
+                "leasetime": "2h",
+                "limit": 10,
+                "start": 10
+              },
+              "dns": [
+                "8.8.8.8",
+                "8.8.4.4"
+              ],
+              "requirements": {
+                "hwmode": "11g",
+                "ipv4_network": "192.168.1.0/24"
+              }
+            },
+            "wlan0": {
+              "type": "wifi-ap",
+              "wireless": {
+                "ssid": "example-ssid",
+                "key": "pass",
+                "<--- invalid key, should be at least 8 characters": "nasid",
+                "acct_server": "example-acct-server",
+                "acct_secret": "example-acct-secret",
+                "acct_interval": 60,
+                "hidden": false,
+                "isolate": false,
+                "maxassoc": 10
+              }
+            }
+          },
+          "requests": {
+            "as-root": false,
+            "port-bindings": [
+              {
+                "external": 80,
+                "internal": 8080,
+                "<--- invalid internal port, should be between 1 and 65536": "external"
+              }
+            ]
+          }
+        },
+        "web": {
+          "service": "web-service",
+          "port": 8080,
+          "<--- invalid port, should be between 1 and 65536": "service"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "description": "sample JsonSchemaStore/vim-addon-info.json",
+  "meta": {
+    "full_size": 3144,
+    "stripped_size": 1269,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "anyOf",
+      "dependencies",
+      "enum",
+      "format",
+      "format:uri"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://json.schemastore.org/vim-addon-info",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "url": {
+        "type": "string",
+        "format": "uri",
+        "examples": [
+          "git://github.com/tpope/vim-surround"
+        ]
+      },
+      "repoType": {
+        "enum": [
+          "hg",
+          "git",
+          "svn",
+          "bzr"
+        ]
+      },
+      "selfRepository": {
+        "description": "Info for the plugin itself. Describes where the canonical copy of the plugin can be fetched from.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/definitions/repoType"
+          },
+          "url": {
+            "$ref": "#/definitions/url"
+          },
+          "deprecated": {
+            "description": "For a deprecated plugin, a deprecation message to be shown to any user who installs the plugin.",
+            "type": "string"
+          }
+        },
+        "dependencies": {
+          "url": [
+            "type"
+          ],
+          "type": [
+            "url"
+          ]
+        }
+      },
+      "otherRepository": {
+        "description": "Info about a plugin/repository outside this one.",
+        "type": "object",
+        "anyOf": [
+          {
+            "$comment": "Empty repository info. Used to declare plugin with the given name is required without specifying any explicit details about how to fetch it (e.g., if name can be looked up in a predefined package index).",
+            "additionalProperties": false
+          },
+          {
+            "$comment": "Repository with empty type and url pointing to local path.",
+            "properties": {
+              "type": {
+                "enum": [
+                  "",
+                  "archive"
+                ]
+              },
+              "url": {
+                "$ref": "#/definitions/url"
+              },
+              "vim_script_nr": {
+                "description": "Script ID number of the target plugin on www.vim.org, if any.",
+                "type": "number",
+                "examples": [
+                  31,
+                  1075
+                ]
+              },
+              "script-type": {
+                "enum": [
+                  "color scheme",
+                  "ftplugin",
+                  "game",
+                  "indent",
+                  "syntax",
+                  "utility",
+                  "patch"
+                ]
+              }
+            }
+          },
+          {
+            "$comment": "Explicit remote repository.",
+            "properties": {
+              "type": {
+                "$ref": "#/definitions/repoType"
+              },
+              "url": {
+                "$ref": "#/definitions/url"
+              }
+            },
+            "required": [
+              "type",
+              "url"
+            ]
+          }
+        ],
+        "properties": {
+          "homepage": {
+            "description": "Primary homepage of the plugin.",
+            "type": "string",
+            "format": "uri"
+          },
+          "addon-info": {
+            "$comment": "Addon information for the other plugin in case it does not supply its own addon-info file.",
+            "$ref": "#"
+          }
+        }
+      }
+    },
+    "properties": {
+      "name": {
+        "description": "The name of the plugin. Used by plugin managers and some introspection tools. Generally corresponds to the name of the repository but without \"vim\" prefix/suffix.",
+        "type": "string",
+        "examples": [
+          "surround.vim",
+          "nerdtree",
+          "maktaba"
+        ]
+      },
+      "version": {
+        "description": "Dotted version number of the plugin, generally in semantic versioning scheme.",
+        "type": "string",
+        "examples": [
+          "0.0.1",
+          "2.0"
+        ],
+        "default": "0.0.1"
+      },
+      "description": {
+        "description": "Short description of the plugin and what it does (a sentence or two)",
+        "type": "string"
+      },
+      "homepage": {
+        "description": "Primary homepage of the plugin.",
+        "type": "string",
+        "format": "uri"
+      },
+      "author": {
+        "description": "Name of the person or organization that created the plugin",
+        "type": "string",
+        "examples": [
+          "Priya Exampleton",
+          "Example Industries"
+        ]
+      },
+      "maintainer": {
+        "description": "Name of the person who maintains the plugin",
+        "type": "string",
+        "examples": [
+          "Priya Exampleton"
+        ]
+      },
+      "repository": {
+        "$ref": "#/definitions/selfRepository"
+      },
+      "dependencies": {
+        "description": "Plugins that are strictly required for the plugin to work, where keys are plugin names and values may describe where plugins can be fetched from.",
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/definitions/otherRepository"
+        }
+      }
+    },
+    "title": "JSON schema for vim plugin addon-info.json metadata files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "name": "vim-surround",
+        "version": "2.0",
+        "description": "Surround.vim is a plugin for Vim that makes it easy to surround words or selections with various characters.",
+        "homepage": "https://github.com/tpope/vim-surround",
+        "author": "Tim Pope",
+        "maintainer": "Tim Pope",
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/tpope/vim-surround.git"
+        },
+        "dependencies": {
+          "vim-repeat": {
+            "type": "git",
+            "url": "https://github.com/tpope/vim-repeat.git"
+          },
+          "vim-unimpaired": {
+            "type": "git",
+            "url": "https://github.com/tpope/vim-unimpaired.git"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\" invalid-url\" is not a \"uri\"",
+      "python_error": "' invalid-url' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['homepage']:\n    {'description': 'Primary homepage of the plugin.',\n     'type': 'string',\n     'format': 'uri'}\n\nOn instance['homepage']:\n    ' invalid-url'",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "name": "vim-surround",
+        "version": "2.0",
+        "description": "Surround.vim is a plugin for Vim that makes it easy to surround words or selections with various characters.",
+        "homepage": " invalid-url",
+        "author": "Tim Pope",
+        "maintainer": "Tim Pope",
+        "repository": {
+          "type": "git",
+          "url": " invalid-url"
+        },
+        "dependencies": {
+          "vim-repeat": {
+            "type": "git",
+            "url": " invalid-url"
+          },
+          "vim-unimpaired": {
+            "type": "git",
+            "url": " invalid-url"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on dependencies keyword",
+      "valid": false,
+      "rust_error": "\"type\" is a required property",
+      "python_error": "'type' is a dependency of 'url'\n\nFailed validating 'dependencies' in schema['properties']['repository']:\n    {'description': 'Info for the plugin itself. Describes where the '\n                    'canonical copy of the plugin can be fetched from.',\n     'type': 'object',\n     'properties': {'type': {'$ref': '#/definitions/repoType'},\n                    'url': {'$ref': '#/definitions/url'},\n                    'deprecated': {'description': 'For a deprecated '\n                                                  'plugin, a deprecation '\n                                                  'message to be shown to '\n                                                  'any user who installs '\n                                                  'the plugin.',\n                                   'type': 'string'}},\n     'dependencies': {'url': ['type'], 'type': ['url']}}\n\nOn instance['repository']:\n    {'url': 'https://github.com/tpope/vim-surround.git'}",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "name": "vim-surround",
+        "version": "2.0",
+        "description": "Surround.vim is a plugin for Vim that makes it easy to surround words or selections with various characters.",
+        "homepage": "https://github.com/tpope/vim-surround",
+        "author": "Tim Pope",
+        "maintainer": "Tim Pope",
+        "repository": {
+          "url": "https://github.com/tpope/vim-surround.git"
+        },
+        "dependencies": {
+          "vim-repeat": {
+            "type": "git",
+            "url": "https://github.com/tpope/vim-repeat.git"
+          },
+          "vim-unimpaired": {
+            "type": "git"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"not a url\" is not a \"uri\"",
+      "python_error": "'not a url' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['dependencies']['additionalProperties']['properties']['homepage']:\n    {'description': 'Primary homepage of the plugin.',\n     'type': 'string',\n     'format': 'uri'}\n\nOn instance['dependencies']['vim-repeat']['homepage']:\n    'not a url'",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "name": "",
+        "version": "2.0",
+        "description": "Surround.vim is a plugin for Vim that makes it easy to surround words or selections with various characters.",
+        "homepage": "https://github.com/tpope/vim-surround",
+        "author": "Tim Pope",
+        "maintainer": "Tim Pope",
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/tpope/vim-surround"
+        },
+        "dependencies": {
+          "vim-repeat": {
+            "type": "git",
+            "url": "https://github.com/tpope/vim-repeat.git",
+            "homepage": "not a url"
+          },
+          "vim-unimpaired": {
+            "type": "git",
+            "url": "https://github.com/tpope/vim-unimpaired.git"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,224 @@
+{
+  "description": "sample Kubernetes/kb_1067_Normalized.json",
+  "meta": {
+    "full_size": 1910,
+    "stripped_size": 605,
+    "features": [
+      "$ref",
+      "format",
+      "format:int64",
+      "items"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_authentication_v1_BoundObjectReference": {
+        "description": "BoundObjectReference is a reference to an object that a token is bound to.",
+        "properties": {
+          "apiVersion": {
+            "description": "API version of the referent.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Kind of the referent. Valid kinds are 'Pod' and 'Secret'.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the referent.",
+            "type": "string"
+          },
+          "uid": {
+            "description": "UID of the referent.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "description": "TokenRequestSpec contains client provided parameters of a token request.",
+    "properties": {
+      "audiences": {
+        "description": "Audiences are the intendend audiences of the token. A recipient of a token must identitfy themself with an identifier in the list of audiences of the token, and otherwise should reject the token. A token issued for multiple audiences may be used to authenticate against any of the audiences listed but implies a high degree of trust between the target audiences.",
+        "items": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": [
+          "array",
+          "null"
+        ]
+      },
+      "boundObjectRef": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_authentication_v1_BoundObjectReference",
+        "description": "BoundObjectRef is a reference to an object that the token will be bound to. The token will only be valid for as long as the bound object exists. NOTE: The API server's TokenReview endpoint will validate the BoundObjectRef, but other audiences may not. Keep ExpirationSeconds small if you want prompt revocation."
+      },
+      "expirationSeconds": {
+        "description": "ExpirationSeconds is the requested duration of validity of the request. The token issuer may return a token with a different validity duration so a client needs to check the 'expiration' field in a response.",
+        "format": "int64",
+        "type": [
+          "integer",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "audiences"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "audiences": [
+          "https://my-service.com",
+          "https://my-other-service.com"
+        ],
+        "boundObjectRef": {
+          "apiVersion": "v1",
+          "kind": "Pod",
+          "name": "my-pod",
+          "uid": "12345678-1234-1234-1234-123456789012"
+        },
+        "expirationSeconds": 3600
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "12345 is not of types \"null\", \"string\"",
+      "python_error": "12345 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['audiences']['items']:\n    {'type': ['string', 'null']}\n\nOn instance['audiences'][1]:\n    12345",
+      "data": {
+        "audiences": [
+          "https://my-service.com",
+          12345
+        ],
+        "boundObjectRef": {
+          "apiVersion": "v1",
+          "kind": "Pod",
+          "name": "my-pod",
+          "uid": "12345678-1234-1234-1234-123456789012"
+        },
+        "expirationSeconds": 3600
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"3600\" is not of types \"integer\", \"null\"",
+      "python_error": "'3600' is not of type 'integer', 'null'\n\nFailed validating 'type' in schema['properties']['expirationSeconds']:\n    {'description': 'ExpirationSeconds is the requested duration of '\n                    'validity of the request. The token issuer may return '\n                    'a token with a different validity duration so a '\n                    \"client needs to check the 'expiration' field in a \"\n                    'response.',\n     'format': 'int64',\n     'type': ['integer', 'null']}\n\nOn instance['expirationSeconds']:\n    '3600'",
+      "data": {
+        "audiences": [
+          "https://my-service.com",
+          "https://my-other-service.com"
+        ],
+        "boundObjectRef": {
+          "apiVersion": "v1",
+          "kind": "Deployment",
+          "uid": "12345678-1234-1234-1234-123456789012",
+          "Invalid kind, should be 'Pod' or 'Secret'": "name",
+          "Invalid syntax, should be 'name':": "my-pod"
+        },
+        "expirationSeconds": "3600",
+        "Invalid type, should be integer": "Invalid syntax, should be 'expirationSeconds':"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"null\", \"string\"",
+      "python_error": "True is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['audiences']['items']:\n    {'type': ['string', 'null']}\n\nOn instance['audiences'][2]:\n    True",
+      "data": {
+        "audiences": [
+          "https://my-service.com",
+          "https://my-other-service.com",
+          true
+        ],
+        "boundObjectRef": {
+          "apiVersion": "v1",
+          "kind": "Pod",
+          "name": "my-pod",
+          "uid": "12345678-1234-1234-1234-123456789012"
+        },
+        "expirationSeconds": 3600
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['audiences']['items']:\n    {'type': ['string', 'null']}\n\nOn instance['audiences'][2]:\n    123",
+      "data": {
+        "audiences": [
+          "https://my-service.com",
+          "https://my-other-service.com",
+          123
+        ],
+        "boundObjectRef": {
+          "apiVersion": "v1",
+          "kind": "Pod",
+          "name": "my-pod",
+          "uid": "12345678-1234-1234-1234-123456789012"
+        },
+        "expirationSeconds": 3600
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"3600\" is not of types \"integer\", \"null\"",
+      "python_error": "'3600' is not of type 'integer', 'null'\n\nFailed validating 'type' in schema['properties']['expirationSeconds']:\n    {'description': 'ExpirationSeconds is the requested duration of '\n                    'validity of the request. The token issuer may return '\n                    'a token with a different validity duration so a '\n                    \"client needs to check the 'expiration' field in a \"\n                    'response.',\n     'format': 'int64',\n     'type': ['integer', 'null']}\n\nOn instance['expirationSeconds']:\n    '3600'",
+      "data": {
+        "audiences": [
+          "https://my-service.com",
+          "https://my-other-service.com"
+        ],
+        "boundObjectRef": {
+          "apiVersion": "v1",
+          "kind": "Deployment",
+          "Invalid kind, should be 'Pod' or 'Secret'": "name",
+          "Missing property 'name'": "uid",
+          "Missing property 'uid'": "expirationSeconds",
+          "Missing required property 'expirationSeconds'": "Invalid property 'expirationSeconds' should be of type integer or null"
+        },
+        "expirationSeconds": "3600",
+        "Invalid type, should be integer or null": "Invalid property 'expirationSeconds' should be of type integer or null"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['audiences']['items']:\n    {'type': ['string', 'null']}\n\nOn instance['audiences'][2]:\n    123",
+      "data": {
+        "audiences": [
+          "https://my-service.com",
+          "https://my-other-service.com",
+          123
+        ],
+        "boundObjectRef": {
+          "apiVersion": "v1",
+          "kind": "Deployment",
+          "name": "my-pod",
+          "uid": "12345678-1234-1234-1234-123456789012"
+        },
+        "expirationSeconds": 3600
+      }
+    }
+  ]
+}

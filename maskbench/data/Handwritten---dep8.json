@@ -1,0 +1,163 @@
+{
+  "description": "sample Handwritten/dep8.json",
+  "meta": {
+    "full_size": 373,
+    "stripped_size": 373,
+    "features": [
+      "@minmaxProperties",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "anyOf",
+      "dependencies",
+      "not",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxProperties",
+      "required",
+      "type",
+      "type:object"
+    ]
+  },
+  "schema": {
+    "type": "object",
+    "patternProperties": {
+      "^[a-e]$": true
+    },
+    "additionalProperties": false,
+    "allOf": [
+      {
+        "dependencies": {
+          "a": {
+            "anyOf": [
+              {
+                "required": [
+                  "c"
+                ]
+              },
+              {
+                "required": [
+                  "b"
+                ]
+              }
+            ]
+          },
+          "b": {
+            "not": {
+              "required": [
+                "c"
+              ]
+            }
+          },
+          "c": {
+            "allOf": [
+              {
+                "required": [
+                  "e"
+                ]
+              },
+              {
+                "required": [
+                  "a"
+                ]
+              }
+            ]
+          },
+          "d": {
+            "not": {
+              "required": [
+                "e"
+              ]
+            }
+          },
+          "e": {
+            "anyOf": [
+              {
+                "required": [
+                  "c"
+                ]
+              },
+              {
+                "required": [
+                  "d"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "required": [
+          "a"
+        ]
+      }
+    ],
+    "maxProperties": 2
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "a": true,
+        "b": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('f' was unexpected)",
+      "python_error": "'f' does not match any of the regexes: '^[a-e]$'\n\nFailed validating 'additionalProperties' in schema:\n    {'type': 'object',\n     'patternProperties': {'^[a-e]$': True},\n     'additionalProperties': False,\n     'allOf': [{'dependencies': {'a': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['b']}]},\n                                 'b': {'not': {'required': ['c']}},\n                                 'c': {'allOf': [{'required': ['e']},\n                                                 {'required': ['a']}]},\n                                 'd': {'not': {'required': ['e']}},\n                                 'e': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['d']}]}}},\n               {'required': ['a']}],\n     'maxProperties': 2}\n\nOn instance:\n    {'a': True, 'f': True}",
+      "data": {
+        "a": true,
+        "f": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxProperties keyword",
+      "valid": false,
+      "rust_error": "{\"required\":[\"c\"]} is not allowed for {\"a\":true,\"b\":true,\"c\":true}",
+      "python_error": "{'a': True, 'b': True, 'c': True} has too many properties\n\nFailed validating 'maxProperties' in schema:\n    {'type': 'object',\n     'patternProperties': {'^[a-e]$': True},\n     'additionalProperties': False,\n     'allOf': [{'dependencies': {'a': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['b']}]},\n                                 'b': {'not': {'required': ['c']}},\n                                 'c': {'allOf': [{'required': ['e']},\n                                                 {'required': ['a']}]},\n                                 'd': {'not': {'required': ['e']}},\n                                 'e': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['d']}]}}},\n               {'required': ['a']}],\n     'maxProperties': 2}\n\nOn instance:\n    {'a': True, 'b': True, 'c': True}",
+      "data": {
+        "a": true,
+        "b": true,
+        "c": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"required\":[\"c\"]} is not allowed for {\"a\":true,\"b\":true,\"c\":true}",
+      "python_error": "{'a': True, 'b': True, 'c': True} has too many properties\n\nFailed validating 'maxProperties' in schema:\n    {'type': 'object',\n     'patternProperties': {'^[a-e]$': True},\n     'additionalProperties': False,\n     'allOf': [{'dependencies': {'a': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['b']}]},\n                                 'b': {'not': {'required': ['c']}},\n                                 'c': {'allOf': [{'required': ['e']},\n                                                 {'required': ['a']}]},\n                                 'd': {'not': {'required': ['e']}},\n                                 'e': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['d']}]}}},\n               {'required': ['a']}],\n     'maxProperties': 2}\n\nOn instance:\n    {'a': True, 'b': True, 'c': True}",
+      "data": {
+        "a": true,
+        "b": true,
+        "c": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"a\":true,\"e\":true,\"c\":true} has more than 2 properties",
+      "python_error": "{'a': True, 'e': True, 'c': True} has too many properties\n\nFailed validating 'maxProperties' in schema:\n    {'type': 'object',\n     'patternProperties': {'^[a-e]$': True},\n     'additionalProperties': False,\n     'allOf': [{'dependencies': {'a': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['b']}]},\n                                 'b': {'not': {'required': ['c']}},\n                                 'c': {'allOf': [{'required': ['e']},\n                                                 {'required': ['a']}]},\n                                 'd': {'not': {'required': ['e']}},\n                                 'e': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['d']}]}}},\n               {'required': ['a']}],\n     'maxProperties': 2}\n\nOn instance:\n    {'a': True, 'e': True, 'c': True}",
+      "data": {
+        "a": true,
+        "e": true,
+        "c": true
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('f' was unexpected)",
+      "python_error": "'f' does not match any of the regexes: '^[a-e]$'\n\nFailed validating 'additionalProperties' in schema:\n    {'type': 'object',\n     'patternProperties': {'^[a-e]$': True},\n     'additionalProperties': False,\n     'allOf': [{'dependencies': {'a': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['b']}]},\n                                 'b': {'not': {'required': ['c']}},\n                                 'c': {'allOf': [{'required': ['e']},\n                                                 {'required': ['a']}]},\n                                 'd': {'not': {'required': ['e']}},\n                                 'e': {'anyOf': [{'required': ['c']},\n                                                 {'required': ['d']}]}}},\n               {'required': ['a']}],\n     'maxProperties': 2}\n\nOn instance:\n    {'a': True, 'b': True, 'f': True}",
+      "data": {
+        "a": true,
+        "b": true,
+        "f": true
+      }
+    }
+  ]
+}

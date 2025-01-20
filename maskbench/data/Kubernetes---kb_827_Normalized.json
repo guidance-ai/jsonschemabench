@@ -1,0 +1,114 @@
+{
+  "description": "sample Kubernetes/kb_827_Normalized.json",
+  "meta": {
+    "full_size": 758,
+    "stripped_size": 442,
+    "features": [
+      "$ref",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "description": "ResourceFieldSelector represents container resources (cpu, memory) and their output format",
+    "properties": {
+      "containerName": {
+        "description": "Container name: required for volumes, optional for env vars",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "divisor": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity",
+        "description": "Specifies the output format of the exposed resources, defaults to \"1\""
+      },
+      "resource": {
+        "description": "Required: resource to select",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "resource"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "containerName": "my-container",
+        "divisor": 1000,
+        "resource": "cpu"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "containerName": "my-container",
+        "divisor": "1",
+        "resource": "cpu"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"null\", \"string\"",
+      "python_error": "True is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['containerName']:\n    {'description': 'Container name: required for volumes, optional for '\n                    'env vars',\n     'type': ['string', 'null']}\n\nOn instance['containerName']:\n    True",
+      "data": {
+        "containerName": true,
+        "divisor": "1",
+        "resource": "cpu"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['divisor']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['divisor']:\n    True",
+      "data": {
+        "containerName": "my-container",
+        "divisor": true,
+        "resource": "cpu"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['divisor']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['divisor']:\n    True",
+      "data": {
+        "containerName": "my-container",
+        "divisor": true,
+        "resource": "cpu"
+      }
+    }
+  ]
+}

@@ -1,0 +1,519 @@
+{
+  "description": "sample Github_medium/o42216.json",
+  "meta": {
+    "full_size": 2132,
+    "stripped_size": 1334,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "additionalProperties",
+      "items",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "redmine": {
+        "$ref": "#/definitions/redmine-configuration"
+      },
+      "git-lab": {
+        "$ref": "#/definitions/git-lab-configuration"
+      }
+    },
+    "required": [
+      "redmine",
+      "git-lab"
+    ],
+    "definitions": {
+      "redmine-configuration": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Your Redmine username (must be an administrator)."
+          },
+          "password": {
+            "type": "string",
+            "description": "Your Redmine password."
+          },
+          "base-uri": {
+            "type": "string",
+            "description": "The base URL of your Redmine installation."
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "base-uri"
+        ],
+        "additionalProperties": false
+      },
+      "git-lab-configuration": {
+        "properties": {
+          "private-token": {
+            "type": "string",
+            "description": "Your GitLab private token (can be found in your account settings)."
+          },
+          "base-uri": {
+            "type": "string",
+            "description": "The base URL of your GitLab installation (incl. API prefix)."
+          },
+          "labels-mapping": {
+            "$ref": "#/definitions/labels-mapping",
+            "description": "Describes how to map Redmine ticket meta data to GitLab issue labels."
+          },
+          "users-mapping": {
+            "$ref": "#/definitions/users-mapping",
+            "description": "Describes how to map an assignee's Redmine user ID to his GitLab user ID."
+          }
+        },
+        "required": [
+          "private-token",
+          "base-uri"
+        ],
+        "additionalProperties": false
+      },
+      "labels-mapping": {
+        "properties": {
+          "tracker": {
+            "$ref": "#/definitions/simple-label-mapping",
+            "description": "Labels to assign to tickets of a specific tracker."
+          },
+          "status": {
+            "$ref": "#/definitions/simple-label-mapping",
+            "description": "Labels to assign to tickets with a specific status."
+          },
+          "priority": {
+            "$ref": "#/definitions/simple-label-mapping",
+            "description": "Labels to assign to tickets with a specific priority."
+          },
+          "custom-field": {
+            "patternProperties": {
+              ".*": {
+                "$ref": "#/definitions/simple-label-mapping"
+              }
+            },
+            "description": "Labels to assign to tickets with one or more specific custom field value(s)."
+          }
+        },
+        "additionalProperties": false
+      },
+      "simple-label-mapping": {
+        "type": "object",
+        "patternProperties": {
+          ".*": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "users-mapping": {
+        "type": "object",
+        "patternProperties": {
+          "^\\d+$": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "redmine": {
+          "username": "admin",
+          "password": "password123",
+          "base-uri": "https://example.com/redmine"
+        },
+        "git-lab": {
+          "private-token": "your_private_token",
+          "base-uri": "https://gitlab.com/api/v4",
+          "labels-mapping": {
+            "tracker": {
+              "1": [
+                "bug",
+                "issue"
+              ],
+              "2": [
+                "feature",
+                "enhancement"
+              ]
+            },
+            "status": {
+              "new": [
+                "new",
+                "open"
+              ],
+              "in_progress": [
+                "in_progress",
+                "wip"
+              ],
+              "resolved": [
+                "resolved",
+                "fixed"
+              ]
+            },
+            "priority": {
+              "low": [
+                "low_priority"
+              ],
+              "high": [
+                "high_priority",
+                "urgent"
+              ]
+            },
+            "custom-field": {
+              "1": {
+                "value1": [
+                  "custom_field_1_value1"
+                ],
+                "value2": [
+                  "custom_field_1_value2"
+                ]
+              },
+              "2": {
+                "value1": [
+                  "custom_field_2_value1"
+                ],
+                "value2": [
+                  "custom_field_2_value2"
+                ]
+              }
+            }
+          },
+          "users-mapping": {
+            "1": 123,
+            "2": 456,
+            "3": 789
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['git-lab']['properties']['users-mapping']['patternProperties']['^\\\\d+$']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['git-lab']['users-mapping']['1']:\n    0",
+      "data": {
+        "redmine": {
+          "username": "admin",
+          "password": "password123",
+          "base-uri": "https://example.com/redmine"
+        },
+        "git-lab": {
+          "private-token": "your_private_token",
+          "base-uri": "https://gitlab.com/api/v4",
+          "labels-mapping": {
+            "tracker": {
+              "1": [],
+              "2": [
+                "feature",
+                "enhancement"
+              ]
+            },
+            "status": {
+              "new": [
+                "new",
+                "open"
+              ],
+              "in_progress": [
+                "in_progress",
+                "wip"
+              ],
+              "resolved": [
+                "resolved",
+                "fixed"
+              ]
+            },
+            "priority": {
+              "low": [
+                "low_priority"
+              ],
+              "high": [
+                "high_priority",
+                "urgent"
+              ]
+            },
+            "custom-field": {
+              "1": {
+                "value1": [
+                  "custom_field_1_value1"
+                ],
+                "value2": [
+                  "custom_field_1_value2"
+                ]
+              },
+              "2": {
+                "value1": [
+                  "custom_field_2_value1"
+                ],
+                "value2": [
+                  "custom_field_2_value2"
+                ]
+              }
+            }
+          },
+          "users-mapping": {
+            "1": 0,
+            "2": 456,
+            "3": 789
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['git-lab']['properties']['labels-mapping']['properties']['tracker']['patternProperties']['.*']:\n    {'type': 'array', 'minItems': 1, 'items': {'type': 'string'}}\n\nOn instance['git-lab']['labels-mapping']['tracker']['2']:\n    []",
+      "data": {
+        "redmine": {
+          "username": "admin",
+          "password": "password123",
+          "base-uri": "https://example.com/redmine"
+        },
+        "git-lab": {
+          "private-token": "your_private_token",
+          "base-uri": "https://gitlab.com/api/v4",
+          "labels-mapping": {
+            "tracker": {
+              "1": [
+                "bug"
+              ],
+              "2": []
+            },
+            "status": {
+              "new": [
+                "new",
+                "open"
+              ],
+              "in_progress": [
+                "in_progress",
+                "wip"
+              ],
+              "resolved": [
+                "resolved",
+                "fixed"
+              ]
+            },
+            "priority": {
+              "low": [
+                "low_priority"
+              ],
+              "high": [
+                "high_priority",
+                "urgent"
+              ]
+            },
+            "custom-field": {
+              "1": {
+                "value1": [
+                  "custom_field_1_value1"
+                ],
+                "value2": [
+                  "custom_field_1_value2"
+                ]
+              },
+              "2": {
+                "value1": [
+                  "custom_field_2_value1"
+                ],
+                "value2": [
+                  "custom_field_2_value2"
+                ]
+              }
+            }
+          },
+          "users-mapping": {
+            "1": 123,
+            "2": 456,
+            "3": 789
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('abc' was unexpected)",
+      "python_error": "'Invalid key in users-mapping', 'Invalid value for key in users-mapping', 'abc' do not match any of the regexes: '^\\\\d+$'\n\nFailed validating 'additionalProperties' in schema['properties']['git-lab']['properties']['users-mapping']:\n    {'type': 'object',\n     'patternProperties': {'^\\\\d+$': {'type': 'integer', 'minimum': 1}},\n     'additionalProperties': False}\n\nOn instance['git-lab']['users-mapping']:\n    {'1': 123,\n     'abc': 456,\n     'Invalid key in users-mapping': 'Invalid key in users-mapping',\n     'Invalid value for key in users-mapping': 123}",
+      "data": {
+        "redmine": {
+          "username": "admin",
+          "password": "password123",
+          "base-uri": "https://example.com/redmine"
+        },
+        "git-lab": {
+          "private-token": "your_private_token",
+          "base-uri": "https://gitlab.com/api/v4",
+          "labels-mapping": {
+            "tracker": {
+              "1": [
+                "bug",
+                "issue"
+              ],
+              "2": [
+                "feature",
+                "enhancement"
+              ]
+            },
+            "status": {
+              "new": [
+                "new",
+                "open"
+              ],
+              "in_progress": [
+                "in_progress",
+                "wip"
+              ],
+              "resolved": [
+                "resolved",
+                "fixed"
+              ]
+            },
+            "priority": {
+              "low": [
+                "low_priority"
+              ],
+              "high": [
+                "high_priority",
+                "urgent"
+              ]
+            },
+            "custom-field": {
+              "1": {
+                "value1": [
+                  "custom_field_1_value1"
+                ],
+                "value2": [
+                  "custom_field_1_value2"
+                ]
+              },
+              "2": {
+                "value1": [
+                  "custom_field_2_value1"
+                ],
+                "value2": [
+                  "custom_field_2_value2"
+                ]
+              },
+              "invalid_property": {
+                "value1": [
+                  "custom_field_3_value1"
+                ],
+                "value2": [
+                  "custom_field_3_value2"
+                ]
+              }
+            }
+          },
+          "users-mapping": {
+            "1": 123,
+            "abc": 456,
+            "Invalid key in users-mapping": "Invalid key in users-mapping",
+            "Invalid value for key in users-mapping": 123
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "'string' is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['git-lab']['properties']['users-mapping']['patternProperties']['^\\\\d+$']:\n    {'type': 'integer', 'minimum': 1}\n\nOn instance['git-lab']['users-mapping']['2']:\n    'string'",
+      "data": {
+        "redmine": {
+          "username": "admin",
+          "password": "password123",
+          "base-uri": "https://example.com/redmine"
+        },
+        "git-lab": {
+          "private-token": "your_private_token",
+          "base-uri": "https://gitlab.com/api/v4",
+          "labels-mapping": {
+            "tracker": {
+              "1": [
+                "bug",
+                123
+              ],
+              "2": [
+                "feature",
+                "enhancement"
+              ]
+            },
+            "status": {
+              "new": [
+                "new",
+                "open"
+              ],
+              "in_progress": [
+                "in_progress",
+                "wip"
+              ],
+              "resolved": [
+                "resolved",
+                "fixed"
+              ]
+            },
+            "priority": {
+              "low": [
+                "low_priority"
+              ],
+              "high": [
+                "high_priority",
+                "urgent"
+              ]
+            },
+            "custom-field": {
+              "1": {
+                "value1": [
+                  "custom_field_1_value1"
+                ],
+                "value2": [
+                  "custom_field_1_value2"
+                ]
+              },
+              "2": {
+                "value1": [
+                  "custom_field_2_value1"
+                ],
+                "value2": [
+                  "custom_field_2_value2"
+                ]
+              }
+            }
+          },
+          "users-mapping": {
+            "1": 123,
+            "2": "string",
+            "3": 789
+          }
+        }
+      }
+    }
+  ]
+}

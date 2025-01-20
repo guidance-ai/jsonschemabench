@@ -1,0 +1,101 @@
+{
+  "description": "sample Github_easy/o58633.json",
+  "meta": {
+    "full_size": 384,
+    "stripped_size": 306,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "properties",
+      "type",
+      "type:array",
+      "type:object"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "nc:Vehicle": {
+        "description": "a vehicle or array of vehicles",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/nc:VehicleType"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/nc:VehicleType"
+            }
+          }
+        ]
+      }
+    },
+    "definitions": {
+      "nc:VehicleType": {
+        "description": "a vehicle type",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {}
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "nc:Vehicle": {
+          "make": "Toyota",
+          "model": "Camry",
+          "year": 2015
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "nc:Vehicle": {
+          "color": "red",
+          "make": "Toyota",
+          "model": "Camry"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'properties': {'nc:Vehicle': {'description': 'a vehicle or array of '\n                                                  'vehicles',\n                                   'oneOf': [{'$ref': '#/definitions/nc:VehicleType'},\n                                             {'type': 'array',\n                                              'items': {'$ref': '#/definitions/nc:VehicleType'}}]}},\n     'definitions': {'nc:VehicleType': {'description': 'a vehicle type',\n                                        'allOf': [{'type': 'object',\n                                                   'properties': {}}]}}}\n\nOn instance:\n    {'nc:Vehicle': {'color': 'red', 'make': 'Toyota', 'model': 'Camry'},\n     'extra': 'field'}",
+      "data": {
+        "nc:Vehicle": {
+          "color": "red",
+          "make": "Toyota",
+          "model": "Camry"
+        },
+        "extra": "field"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "12345 is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['nc:Vehicle']:\n    {'description': 'a vehicle or array of vehicles',\n     'oneOf': [{'$ref': '#/definitions/nc:VehicleType'},\n               {'type': 'array',\n                'items': {'$ref': '#/definitions/nc:VehicleType'}}]}\n\nOn instance['nc:Vehicle']:\n    12345",
+      "data": {
+        "nc:Vehicle": 12345
+      }
+    }
+  ]
+}

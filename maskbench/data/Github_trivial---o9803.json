@@ -1,0 +1,184 @@
+{
+  "description": "sample Github_trivial/o9803.json",
+  "meta": {
+    "full_size": 388,
+    "stripped_size": 388,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "patternProperties": {
+      "^[0-9a-zA-Z_-]{1,255}$": {
+        "oneOf": [
+          {
+            "type": "string",
+            "maxLength": 32767
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[0-9a-zA-Z_-]{1,255}$"
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "example_key": "example string",
+        "example_number": 123,
+        "example_object": {
+          "key": "example_key",
+          "value": "example value"
+        },
+        "another_example_object": {
+          "key": "another_example_key",
+          "value": "another example value"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "example_key": "example string",
+        "example_number": 123,
+        "example_object": {
+          "key": "example_key",
+          "value": "example value"
+        },
+        "another_example_key": "another example string",
+        "another_example_number": 456,
+        "another_example_object": {
+          "key": "another_example_key",
+          "value": "another example value"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!invalid key!' was unexpected)",
+      "python_error": "'!invalid key!' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'oneOf': [{'type': 'string',\n                                                                 'maxLength': 32767},\n                                                                {'type': 'number'},\n                                                                {'type': 'object',\n                                                                 'properties': {'key': {'type': 'string',\n                                                                                        'pattern': '^[0-9a-zA-Z_-]{1,255}$'},\n                                                                                'value': {'type': 'string',\n                                                                                          'minLength': 1,\n                               .. (851 more)",
+      "data": {
+        "example_key": "example string",
+        "example_number": 123,
+        "example_object": {
+          "key": "example_key",
+          "value": "example value"
+        },
+        "another_example_key": "another example string",
+        "another_example_number": 456,
+        "another_example_object": {
+          "key": "another_example_key",
+          "value": "another example value"
+        },
+        "!invalid key!": "This will test the patternProperties keyword which restricts the property name to match ^[0-9a-zA-Z_-]{1,255}$. The exclamation mark is not allowed in this pattern."
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('example key' was unexpected)",
+      "python_error": "'example key' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'oneOf': [{'type': 'string',\n                                                                 'maxLength': 32767},\n                                                                {'type': 'number'},\n                                                                {'type': 'object',\n                                                                 'properties': {'key': {'type': 'string',\n                                                                                        'pattern': '^[0-9a-zA-Z_-]{1,255}$'},\n                                                                                'value': {'type': 'string',\n                                                                                          'minLength': 1,\n                                 .. (622 more)",
+      "data": {
+        "example_key": "example string",
+        "example_number": 123,
+        "example_object": {
+          "key": "example_key",
+          "value": "example value"
+        },
+        "another_example_key": "another example string",
+        "another_example_number": 456,
+        "another_example_object": {
+          "key": "another_example_key",
+          "value": "another example value"
+        },
+        "example key": "example string"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"key\":\"example_key\",\"value\":\"\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[2]['properties']['value']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['value']:\n    ''",
+      "data": {
+        "example_key": "example string",
+        "example_number": 123,
+        "example_object": {
+          "key": "example_key",
+          "value": ""
+        },
+        "another_example_key": "another example string",
+        "another_example_number": 456,
+        "another_example_object": {
+          "key": "another_example_key",
+          "value": "a very long value that exceeds the maximum allowed length of 255 characters, it should trigger an error because it's longer than 255 characters"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"key\":\"example_key\",\"value\":\"\",\"extra_property\":\"extra value\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema[2]['properties']['value']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['value']:\n    ''",
+      "data": {
+        "example_key": "example string",
+        "example_number": 123,
+        "example_object": {
+          "key": "example_key",
+          "value": "",
+          "extra_property": "extra value"
+        },
+        "another_example_key": "another example string",
+        "another_example_number": 456,
+        "another_example_object": {
+          "key": "another_example_key",
+          "value": "another example value"
+        },
+        "example_invalid_key": "another example string",
+        "example_invalid_number": 1.23456789,
+        "example_invalid_array": [
+          1,
+          2,
+          3
+        ]
+      }
+    }
+  ]
+}

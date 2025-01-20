@@ -1,0 +1,2832 @@
+{
+  "description": "sample JsonSchemaStore/saucectl.schema.json",
+  "meta": {
+    "full_size": 62376,
+    "stripped_size": 26836,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@siblingKeys",
+      "additionalProperties",
+      "allOf",
+      "anyOf",
+      "const",
+      "dependencies",
+      "enum",
+      "if",
+      "items",
+      "oneOf",
+      "pattern",
+      "then"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "maxItems",
+      "maximum",
+      "minItems",
+      "minimum",
+      "oneOf:trivial",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "SauceCTL Runner Configuration",
+    "description": "Configuration file for saucectl.",
+    "type": "object",
+    "properties": {
+      "kind": {
+        "enum": [
+          "apitest",
+          "cypress",
+          "espresso",
+          "imagerunner",
+          "playwright",
+          "puppeteer-replay",
+          "testcafe",
+          "xcuitest",
+          "playwright-cucumberjs"
+        ]
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "cypress"
+            },
+            "apiVersion": {
+              "const": "v1alpha"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl cypress runner configuration",
+          "description": "Configuration file for cypress using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl artifacts schema",
+              "description": "Subschema for controlling artifacts",
+              "type": "object",
+              "properties": {
+                "artifacts": {
+                  "description": "Manage test output, such as logs, videos, and screenshots.",
+                  "type": "object",
+                  "properties": {
+                    "cleanup": {
+                      "description": "Whether to remove all contents of artifacts directory",
+                      "type": "boolean"
+                    },
+                    "download": {
+                      "description": "Settings related to downloading test artifacts from Sauce Labs.",
+                      "type": "object",
+                      "properties": {
+                        "match": {
+                          "description": "Specifies which artifacts to download based on whether they match the file pattern provided. Supports the wildcard character '*'.",
+                          "type": "array"
+                        },
+                        "when": {
+                          "description": "Specifies when and under what circumstances to download artifacts.",
+                          "enum": [
+                            "always",
+                            "fail",
+                            "never",
+                            "pass"
+                          ]
+                        },
+                        "directory": {
+                          "description": "Specifies the path to the folder in which to download artifacts. A separate subdirectory is generated in this location for each suite.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "when",
+                        "match",
+                        "directory"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            },
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl npm specific schema",
+              "description": "Subschema for npm specific settings",
+              "type": "object",
+              "properties": {
+                "npm": {
+                  "description": "Settings specific to npm.",
+                  "type": "object",
+                  "properties": {
+                    "packages": {
+                      "description": "Specifies any npm packages that are required to run tests.",
+                      "type": "object"
+                    },
+                    "dependencies": {
+                      "description": "Specify local npm dependencies for saucectl to upload. These dependencies must already be installed in the local node_modules directory.",
+                      "type": "array"
+                    },
+                    "registry": {
+                      "description": "Override the default and official NPM registry URL with a custom one.",
+                      "type": "string",
+                      "deprecated": true
+                    },
+                    "strictSSL": {
+                      "description": "Whether or not to do SSL key validation when making requests to the registry via https.",
+                      "type": "boolean"
+                    },
+                    "registries": {
+                      "description": "Specify all the registries you want to configure",
+                      "type": "array",
+                      "minimum": 0,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "scope": {
+                            "description": "Scope for the registry entry",
+                            "type": "string"
+                          },
+                          "url": {
+                            "description": "URL for the registry entry",
+                            "type": "string"
+                          },
+                          "authToken": {
+                            "description": "authToken for the registry entry",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "url"
+                        ]
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            },
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl sauce specific schema",
+              "description": "Subschema for sauce specific settings",
+              "type": "object",
+              "properties": {
+                "sauce": {
+                  "description": "All settings related to how tests are run and identified in the Sauce Labs platform.",
+                  "type": "object",
+                  "properties": {
+                    "concurrency": {
+                      "description": "Sets the maximum number of suites to execute at the same time. Excess suites are queued and run in order as each suite completes.",
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "metadata": {
+                      "description": "The set of properties that allows you to provide additional information about your project that helps you distinguish it in the various environments in which it is used and reviewed.",
+                      "type": "object",
+                      "properties": {
+                        "build": {
+                          "description": "Sauce Labs can aggregate all jobs under one view based on their association with a build.",
+                          "type": "string"
+                        },
+                        "tags": {
+                          "description": "Tag your jobs so you can find them easier in Sauce Labs.",
+                          "type": "array"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "region": {
+                      "description": "Which Sauce Labs data center to target.",
+                      "enum": [
+                        "us-west-1",
+                        "us-east-4",
+                        "eu-central-1"
+                      ]
+                    },
+                    "sauceignore": {
+                      "description": "Path to the .sauceignore file.",
+                      "default": ".sauceignore"
+                    },
+                    "tunnel": {
+                      "description": "SauceCTL supports using Sauce Connect to establish a secure connection when running your tests on Sauce Labs. To do so, launch a tunnel; then provide the identifier in this property.",
+                      "properties": {
+                        "name": {
+                          "description": "The tunnel name.",
+                          "type": "string"
+                        },
+                        "owner": {
+                          "description": "The owner (username) of the tunnel. Must be specified if the user that created the tunnel differs from the user that is running the tests.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "retries": {
+                      "description": "The number of times to retry a failing suite.",
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "visibility": {
+                      "description": "Set the visibility level of test results for suites run on Sauce Labs.",
+                      "default": "team",
+                      "type": "string",
+                      "oneOf": [
+                        {
+                          "const": "public",
+                          "title": "Accessible to everyone."
+                        },
+                        {
+                          "const": "public restricted",
+                          "title": "Share your test's results page and video, but keeps the logs only for you."
+                        },
+                        {
+                          "const": "share",
+                          "title": "Only accessible to people with a valid link."
+                        },
+                        {
+                          "const": "team",
+                          "title": "Only accessible to people under the same root account as you."
+                        },
+                        {
+                          "const": "private",
+                          "title": "Only you (the owner) will be able to view assets and test results page."
+                        }
+                      ]
+                    },
+                    "launchOrder": {
+                      "description": "Control starting order of suites. The default is the order in which suites are written in the config file.",
+                      "type": "string",
+                      "oneOf": [
+                        {
+                          "const": "fail rate",
+                          "title": "Suites that historically have the highest failure rate start first."
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            },
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl reporters specific schema",
+              "description": "Subschema for reporters specific settings",
+              "type": "object",
+              "properties": {
+                "reporters": {
+                  "type": "object",
+                  "properties": {
+                    "junit": {
+                      "type": "object",
+                      "description": "The JUnit reporter merges test results from all jobs in the JUnit format into a single report.",
+                      "properties": {
+                        "enabled": {
+                          "description": "Toggles the reporter on/off.",
+                          "type": "boolean"
+                        },
+                        "filename": {
+                          "description": "Filename for the generated JUnit report.",
+                          "type": "string",
+                          "default": "saucectl-report.xml"
+                        }
+                      }
+                    },
+                    "json": {
+                      "type": "object",
+                      "description": "The JSON reporter merges test results from all jobs in the JSON format into a single report.",
+                      "properties": {
+                        "enabled": {
+                          "description": "Toggles the reporter on/off.",
+                          "type": "boolean"
+                        },
+                        "webhookURL": {
+                          "description": "Webhook URL to pass JSON report.",
+                          "type": "string"
+                        },
+                        "filename": {
+                          "description": "Filename for the generated JSON report.",
+                          "type": "string",
+                          "default": "saucectl-test-result.xml"
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "cypress"
+            },
+            "showConsoleLog": {
+              "description": "Shows suites console.log locally. By default console.log is only shown on failures.",
+              "type": "boolean"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                }
+              },
+              "additionalProperties": false
+            },
+            "rootDir": {
+              "description": "The directory of files that need to be bundled and uploaded for the tests to run.",
+              "type": "string"
+            },
+            "cypress": {
+              "description": "Contains details specific to the Cypress project.",
+              "type": "object",
+              "properties": {
+                "configFile": {
+                  "description": "The designated cypress configuration file. SauceCTL determines related files based on the location of the config file. By default saucectl defers to the test file location defined in cypress.json.",
+                  "type": "string",
+                  "examples": [
+                    "cypress.json"
+                  ]
+                },
+                "key": {
+                  "description": "The secret key that grants permission to record your tests in the Cypress dashboard.",
+                  "type": "string"
+                },
+                "record": {
+                  "description": "Whether to record your test results in the Cypress dashboard.",
+                  "type": "boolean"
+                },
+                "version": {
+                  "$ref": "#/allOf/8/then/properties/playwright/properties/version",
+                  "enum": [
+                    "package.json",
+                    "9.7.0",
+                    "8.6.0"
+                  ]
+                },
+                "reporters": {
+                  "description": "Set of reporter to use.",
+                  "type": "array",
+                  "minimum": 0,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "description": "Name of the reporter. You may have to install the associated npm dependency through npm.packages field.",
+                        "type": "string",
+                        "examples": [
+                          "dot",
+                          "nyan"
+                        ]
+                      },
+                      "options": {
+                        "description": "Options to pass to the reporter."
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "configFile",
+                "version"
+              ],
+              "additionalProperties": false
+            },
+            "env": {
+              "description": "Set one or more environment variables. Values can be environment variables themselves. Not supported when running espresso/xcuitest!",
+              "type": "object"
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "browser": {
+                    "$ref": "#/allOf/8/then/properties/suites/items/properties/browserName",
+                    "enum": [
+                      "chrome",
+                      "firefox",
+                      "microsoftedge"
+                    ]
+                  },
+                  "browserVersion": {
+                    "description": "Which version of the browser to use.",
+                    "type": "string"
+                  },
+                  "platformName": {
+                    "$ref": "#/allOf/4/then/properties/suites/items/properties/platform",
+                    "enum": [
+                      "macOS 11.00",
+                      "macOS 12",
+                      "macOS 13",
+                      "Windows 10",
+                      "Windows 11"
+                    ]
+                  },
+                  "screenResolution": {
+                    "description": "Specifies a browser window screen resolution, which may be useful if you are attempting to simulate a browser on a particular device type.",
+                    "type": "string"
+                  },
+                  "config": {
+                    "description": "Provides details related to the Cypress test configuration.",
+                    "type": "object",
+                    "properties": {
+                      "testFiles": {
+                        "description": "One or more paths to the Cypress test files to run for this suite, if not otherwise specified explicitly in cypress.json.",
+                        "type": "array"
+                      },
+                      "excludedTestFiles": {
+                        "$ref": "#/allOf/3/then/properties/suites/items/properties/excludedTestFiles"
+                      },
+                      "env": {
+                        "$ref": "#/allOf/0/then/properties/env"
+                      }
+                    },
+                    "required": [
+                      "testFiles"
+                    ]
+                  },
+                  "shard": {
+                    "description": "When sharding is configured, saucectl automatically splits the tests (e.g. by spec or concurrency) so that they can easily run in parallel.",
+                    "enum": [
+                      "",
+                      "concurrency",
+                      "spec"
+                    ]
+                  },
+                  "headless": {
+                    "description": "Controls whether or not tests are run in headless mode (default: false)",
+                    "type": "boolean"
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                  },
+                  "preExec": {
+                    "description": "Specifies which commands to execute before starting the tests.",
+                    "type": "array"
+                  },
+                  "timeZone": {
+                    "description": "Specifies the timeZone for the suite.",
+                    "type": "string"
+                  },
+                  "passThreshold": {
+                    "description": "The minimum number of successful attempts for a suite to be considered as 'passed'.",
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "smartRetry": {
+                    "description": "Optimize suite retries by configuring the strategy.",
+                    "type": "object",
+                    "properties": {
+                      "failedOnly": {
+                        "description": "Optimize suite retries by retrying failed tests, classes or spec files only.",
+                        "type": "boolean",
+                        "default": false
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "browser",
+                  "config"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "cypress",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "cypress"
+            },
+            "apiVersion": {
+              "const": "v1"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl cypress runner configuration",
+          "description": "Configuration file for cypress using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl artifacts schema",
+              "description": "Subschema for controlling artifacts",
+              "type": "object",
+              "properties": {
+                "artifacts": {
+                  "description": "Manage test output, such as logs, videos, and screenshots.",
+                  "type": "object",
+                  "properties": {
+                    "cleanup": {
+                      "description": "Whether to remove all contents of artifacts directory",
+                      "type": "boolean"
+                    },
+                    "download": {
+                      "description": "Settings related to downloading test artifacts from Sauce Labs.",
+                      "type": "object",
+                      "properties": {
+                        "match": {
+                          "description": "Specifies which artifacts to download based on whether they match the file pattern provided. Supports the wildcard character '*'.",
+                          "type": "array"
+                        },
+                        "when": {
+                          "description": "Specifies when and under what circumstances to download artifacts.",
+                          "enum": [
+                            "always",
+                            "fail",
+                            "never",
+                            "pass"
+                          ]
+                        },
+                        "directory": {
+                          "description": "Specifies the path to the folder in which to download artifacts. A separate subdirectory is generated in this location for each suite.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "when",
+                        "match",
+                        "directory"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            },
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl npm specific schema",
+              "description": "Subschema for npm specific settings",
+              "type": "object",
+              "properties": {
+                "npm": {
+                  "description": "Settings specific to npm.",
+                  "type": "object",
+                  "properties": {
+                    "packages": {
+                      "description": "Specifies any npm packages that are required to run tests.",
+                      "type": "object"
+                    },
+                    "dependencies": {
+                      "description": "Specify local npm dependencies for saucectl to upload. These dependencies must already be installed in the local node_modules directory.",
+                      "type": "array"
+                    },
+                    "registry": {
+                      "description": "Override the default and official NPM registry URL with a custom one.",
+                      "type": "string",
+                      "deprecated": true
+                    },
+                    "strictSSL": {
+                      "description": "Whether or not to do SSL key validation when making requests to the registry via https.",
+                      "type": "boolean"
+                    },
+                    "registries": {
+                      "description": "Specify all the registries you want to configure",
+                      "type": "array",
+                      "minimum": 0,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "scope": {
+                            "description": "Scope for the registry entry",
+                            "type": "string"
+                          },
+                          "url": {
+                            "description": "URL for the registry entry",
+                            "type": "string"
+                          },
+                          "authToken": {
+                            "description": "authToken for the registry entry",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "url"
+                        ]
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            },
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl sauce specific schema",
+              "description": "Subschema for sauce specific settings",
+              "type": "object",
+              "properties": {
+                "sauce": {
+                  "description": "All settings related to how tests are run and identified in the Sauce Labs platform.",
+                  "type": "object",
+                  "properties": {
+                    "concurrency": {
+                      "description": "Sets the maximum number of suites to execute at the same time. Excess suites are queued and run in order as each suite completes.",
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "metadata": {
+                      "description": "The set of properties that allows you to provide additional information about your project that helps you distinguish it in the various environments in which it is used and reviewed.",
+                      "type": "object",
+                      "properties": {
+                        "build": {
+                          "description": "Sauce Labs can aggregate all jobs under one view based on their association with a build.",
+                          "type": "string"
+                        },
+                        "tags": {
+                          "description": "Tag your jobs so you can find them easier in Sauce Labs.",
+                          "type": "array"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "region": {
+                      "description": "Which Sauce Labs data center to target.",
+                      "enum": [
+                        "us-west-1",
+                        "eu-central-1"
+                      ]
+                    },
+                    "sauceignore": {
+                      "description": "Path to the .sauceignore file.",
+                      "default": ".sauceignore"
+                    },
+                    "tunnel": {
+                      "description": "SauceCTL supports using Sauce Connect to establish a secure connection when running your tests on Sauce Labs. To do so, launch a tunnel; then provide the identifier in this property.",
+                      "properties": {
+                        "name": {
+                          "description": "The tunnel name.",
+                          "type": "string"
+                        },
+                        "owner": {
+                          "description": "The owner (username) of the tunnel. Must be specified if the user that created the tunnel differs from the user that is running the tests.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "retries": {
+                      "description": "The number of times to retry a failing suite.",
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "visibility": {
+                      "description": "Set the visibility level of test results for suites run on Sauce Labs.",
+                      "default": "team",
+                      "type": "string",
+                      "oneOf": [
+                        {
+                          "const": "public",
+                          "title": "Accessible to everyone."
+                        },
+                        {
+                          "const": "public restricted",
+                          "title": "Share your test's results page and video, but keeps the logs only for you."
+                        },
+                        {
+                          "const": "share",
+                          "title": "Only accessible to people with a valid link."
+                        },
+                        {
+                          "const": "team",
+                          "title": "Only accessible to people under the same root account as you."
+                        },
+                        {
+                          "const": "private",
+                          "title": "Only you (the owner) will be able to view assets and test results page."
+                        }
+                      ]
+                    },
+                    "launchOrder": {
+                      "description": "Control starting order of suites. The default is the order in which suites are written in the config file.",
+                      "type": "string",
+                      "oneOf": [
+                        {
+                          "const": "fail rate",
+                          "title": "Suites that historically have the highest failure rate start first."
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            },
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "saucectl reporters specific schema",
+              "description": "Subschema for reporters specific settings",
+              "type": "object",
+              "properties": {
+                "reporters": {
+                  "type": "object",
+                  "properties": {
+                    "junit": {
+                      "type": "object",
+                      "description": "The JUnit reporter merges test results from all jobs in the JUnit format into a single report.",
+                      "properties": {
+                        "enabled": {
+                          "description": "Toggles the reporter on/off.",
+                          "type": "boolean"
+                        },
+                        "filename": {
+                          "description": "Filename for the generated JUnit report.",
+                          "type": "string",
+                          "default": "saucectl-report.xml"
+                        }
+                      }
+                    },
+                    "json": {
+                      "type": "object",
+                      "description": "The JSON reporter merges test results from all jobs in the JSON format into a single report.",
+                      "properties": {
+                        "enabled": {
+                          "description": "Toggles the reporter on/off.",
+                          "type": "boolean"
+                        },
+                        "webhookURL": {
+                          "description": "Webhook URL to pass JSON report.",
+                          "type": "string"
+                        },
+                        "filename": {
+                          "description": "Filename for the generated JSON report.",
+                          "type": "string",
+                          "default": "saucectl-test-result.xml"
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": true
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1"
+            },
+            "kind": {
+              "const": "cypress"
+            },
+            "showConsoleLog": {
+              "description": "Shows suites console.log locally. By default console.log is only shown on failures.",
+              "type": "boolean"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "description": "Instructs how long (in ms, s, m, or h) saucectl should wait for a suite to complete.",
+                  "type": "string",
+                  "pattern": "^(?:\\d+h)?(?:\\d+m)?(?:\\d+s)?(?:\\d+ms)?$",
+                  "examples": [
+                    "1h",
+                    "10m",
+                    "90s"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "rootDir": {
+              "description": "The directory of files that need to be bundled and uploaded for the tests to run.",
+              "type": "string"
+            },
+            "cypress": {
+              "description": "Contains details specific to the Cypress project.",
+              "type": "object",
+              "properties": {
+                "configFile": {
+                  "description": "The designated cypress configuration file.",
+                  "type": "string",
+                  "examples": [
+                    "cypress.config.js"
+                  ]
+                },
+                "key": {
+                  "description": "The secret key that grants permission to record your tests in the Cypress dashboard.",
+                  "type": "string"
+                },
+                "record": {
+                  "description": "Whether to record your test results in the Cypress dashboard.",
+                  "type": "boolean"
+                },
+                "version": {
+                  "enum": [
+                    "package.json",
+                    "12.17.2",
+                    "12.14.0",
+                    "12.11.0",
+                    "12.6.0",
+                    "12.3.0",
+                    "11.2.0",
+                    "10.10.0",
+                    "10.7.0",
+                    "10.3.1"
+                  ],
+                  "description": "Which framework version to use."
+                },
+                "reporters": {
+                  "description": "Set of reporter to use.",
+                  "type": "array",
+                  "minimum": 0,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "description": "Name of the reporter. You may have to install the associated npm dependency through npm.packages field.",
+                        "type": "string",
+                        "examples": [
+                          "dot",
+                          "nyan"
+                        ]
+                      },
+                      "options": {
+                        "description": "Options to pass to the reporter."
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "configFile",
+                "version"
+              ],
+              "additionalProperties": false
+            },
+            "env": {
+              "description": "Set one or more environment variables. Values can be environment variables themselves. Not supported when running espresso/xcuitest!",
+              "type": "object"
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "browser": {
+                    "enum": [
+                      "chrome",
+                      "firefox",
+                      "microsoftedge",
+                      "webkit"
+                    ],
+                    "description": "The name of the browser in which to run the tests."
+                  },
+                  "browserVersion": {
+                    "description": "Which version of the browser to use.",
+                    "type": "string"
+                  },
+                  "platformName": {
+                    "enum": [
+                      "macOS 11.00",
+                      "macOS 12",
+                      "macOS 13",
+                      "Windows 10",
+                      "Windows 11"
+                    ],
+                    "description": "A specific operating system on which to run the tests. Sauce Labs will try to choose a reasonable default if not explicitly specified."
+                  },
+                  "screenResolution": {
+                    "description": "Specifies a browser window screen resolution, which may be useful if you are attempting to simulate a browser on a particular device type.",
+                    "type": "string"
+                  },
+                  "config": {
+                    "description": "Provides details related to the Cypress test configuration.",
+                    "type": "object",
+                    "properties": {
+                      "testingType": {
+                        "description": "Specify the type of tests to execute; either e2e or component. Defaults to e2e",
+                        "enum": [
+                          "e2e",
+                          "component"
+                        ],
+                        "default": "e2e"
+                      },
+                      "specPattern": {
+                        "description": "One or more paths to the Cypress test files to run for this suite.",
+                        "type": "array"
+                      },
+                      "excludeSpecPattern": {
+                        "description": "Exclude test files for this suite.",
+                        "type": "array"
+                      },
+                      "env": {
+                        "$ref": "#/allOf/1/then/properties/env"
+                      }
+                    },
+                    "required": [
+                      "specPattern"
+                    ]
+                  },
+                  "shard": {
+                    "description": "When sharding is configured, saucectl automatically splits the tests (e.g. by spec or concurrency) so that they can easily run in parallel.",
+                    "enum": [
+                      "",
+                      "concurrency",
+                      "spec"
+                    ]
+                  },
+                  "shardGrepEnabled": {
+                    "description": "When sharding is configured and the suite is configured to filter using cypress-grep, let saucectl filter tests before executing.",
+                    "type": "boolean"
+                  },
+                  "headless": {
+                    "description": "Controls whether or not tests are run in headless mode (default: false)",
+                    "type": "boolean"
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/1/then/properties/defaults/properties/timeout"
+                  },
+                  "preExec": {
+                    "description": "Specifies which commands to execute before starting the tests.",
+                    "type": "array"
+                  },
+                  "timeZone": {
+                    "description": "Specifies the timeZone for the suite.",
+                    "type": "string"
+                  },
+                  "passThreshold": {
+                    "description": "The minimum number of successful attempts for a suite to be considered as 'passed'.",
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "smartRetry": {
+                    "description": "Optimize suite retries by configuring the strategy.",
+                    "type": "object",
+                    "properties": {
+                      "failedOnly": {
+                        "description": "Optimize suite retries by retrying failed tests, classes or spec files only.",
+                        "type": "boolean",
+                        "default": false
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "browser",
+                  "config"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "cypress",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "espresso"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl espresso runner configuration",
+          "description": "Configuration file for espresso using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/2"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/0"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/3"
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "espresso"
+            },
+            "showConsoleLog": {
+              "$ref": "#/allOf/0/then/properties/showConsoleLog"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                }
+              },
+              "additionalProperties": false
+            },
+            "espresso": {
+              "description": "Contains details specific to the Espresso project.",
+              "type": "object",
+              "properties": {
+                "app": {
+                  "description": "Local path or remote url to the application. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                  "type": "string"
+                },
+                "appDescription": {
+                  "description": "Description for the app",
+                  "type": "string"
+                },
+                "testApp": {
+                  "description": "Local path or remote url to the test application. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                  "type": "string"
+                },
+                "testAppDescription": {
+                  "description": "Description for the testApp",
+                  "type": "string"
+                },
+                "otherApps": {
+                  "description": "A list of applications to be installed alongside the main app. Applications can be defined as a local path or a remote url. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                  "type": "array",
+                  "maxItems": 7
+                }
+              },
+              "required": [
+                "app",
+                "testApp"
+              ],
+              "additionalProperties": false
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "testApp": {
+                    "description": "Local path or remote url to the test application. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                    "type": "string"
+                  },
+                  "testAppDescription": {
+                    "description": "Description for the testApp",
+                    "type": "string"
+                  },
+                  "testOptions": {
+                    "description": "Allows you to control various details on how tests are executed.",
+                    "type": "object",
+                    "properties": {
+                      "class": {
+                        "description": "Only run the specified classes.",
+                        "type": "array"
+                      },
+                      "notClass": {
+                        "description": "Run all classes except those specified here.",
+                        "type": "array"
+                      },
+                      "func": {
+                        "description": "Run all test classes that extend InstrumentationTestCase.",
+                        "type": "boolean"
+                      },
+                      "unit": {
+                        "description": "Run all test classes that do not extend either InstrumentationTestCase or PerformanceTestCase.",
+                        "type": "boolean"
+                      },
+                      "perf": {
+                        "description": "Run all test classes that extend PerformanceTestCase.",
+                        "type": "boolean"
+                      },
+                      "package": {
+                        "description": "Only run tests in the specified package.",
+                        "type": "string"
+                      },
+                      "notPackage": {
+                        "description": "Run all tests except those in this package.",
+                        "type": "string"
+                      },
+                      "size": {
+                        "description": "Run only tests that are annotated with the matching size value.",
+                        "enum": [
+                          "small",
+                          "medium",
+                          "large"
+                        ]
+                      },
+                      "annotation": {
+                        "description": "Only run tests with this annotation.",
+                        "type": "string"
+                      },
+                      "notAnnotation": {
+                        "description": "Run all tests except those with this annotation.",
+                        "type": "string"
+                      },
+                      "filter": {
+                        "description": "Only run tests that pass all of the custom filters.",
+                        "type": "array",
+                        "examples": [
+                          [
+                            "com.android.foo.MyCustomFilter",
+                            "com.android.foo.MyOtherCustomFilter"
+                          ]
+                        ]
+                      },
+                      "runnerBuilder": {
+                        "description": "Use custom builders to run tests.",
+                        "type": "array",
+                        "examples": [
+                          [
+                            "com.android.foo.MyCustomBuilder",
+                            "com.android.foo.MyOtherCustomBuilder"
+                          ]
+                        ]
+                      },
+                      "listener": {
+                        "description": "Observe the test run with one or more RunListener.",
+                        "type": "array",
+                        "examples": [
+                          [
+                            "com.android.foo.MyRunListener",
+                            "com.android.foo.MyOtherRunListener"
+                          ]
+                        ]
+                      },
+                      "newRunListenerMode": {
+                        "description": "Use the new list of RunListeners during a test run.",
+                        "type": "boolean"
+                      },
+                      "numShards": {
+                        "description": "When sharding is configured, saucectl automatically creates the sharded jobs for each of the devices defined for the suite based on the number of shards you specify. For example, for a suite testing a single emulator version that specifies 2 shards, saucectl clones the suite and runs one shard index on the first suite, and the other shard index on the identical clone suite.",
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "clearPackageData": {
+                        "description": "Removes all shared states from the testing device's CPU and memory at the completion of each test. Real devices only. Has to be used in conjunction with the 'useTestOrchestrator' flag.",
+                        "type": "boolean"
+                      },
+                      "useTestOrchestrator": {
+                        "description": "Run each of your tests in its own Instrumentation instance to remove most of the app's shared state from the device CPU and memory between tests. Real devices only. Use this setting in conjunction with clearPackageData: true to completely remove all shared state.",
+                        "type": "boolean"
+                      }
+                    },
+                    "dependencies": {
+                      "clearPackageData": [
+                        "useTestOrchestrator"
+                      ]
+                    },
+                    "additionalProperties": true
+                  },
+                  "emulators": {
+                    "description": "Defines details for running this suite on virtual devices using an emulator.",
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "description": "The name of the emulator. To ensure name accuracy, check the list of supported virtual devices (https://app.saucelabs.com/live/web-testing/virtual).",
+                          "type": "string"
+                        },
+                        "orientation": {
+                          "description": "The screen orientation to use.",
+                          "enum": [
+                            "landscape",
+                            "portrait"
+                          ]
+                        },
+                        "platformVersions": {
+                          "description": "The set of one or more versions of the device platform on which to run the test suite.",
+                          "type": "array",
+                          "minItems": 1
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "platformVersions"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "devices": {
+                    "description": "Define details for running this suite on real devices.",
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "id": {
+                          "description": "Request a specific device for this test suite by its ID. You can look up device IDs in the Sauce Labs app or using our Devices API (https://docs.saucelabs.com/dev/api/rdc#get-devices).",
+                          "type": "string",
+                          "examples": [
+                            "Google_Pixel_5_real",
+                            "Google_Pixel_5_real_us"
+                          ]
+                        },
+                        "name": {
+                          "description": "Match the device name in full or partially (regex), which may provide a larger pool of available devices of the type you want.",
+                          "type": "string",
+                          "examples": [
+                            "Google Pixel .*",
+                            "Samsung .*"
+                          ]
+                        },
+                        "platformVersion": {
+                          "description": "The version of the Android operating system.",
+                          "type": "string"
+                        },
+                        "options": {
+                          "description": "Further specify desired device attributes within the pool of devices that match the name and version criteria.",
+                          "type": "object",
+                          "properties": {
+                            "carrierConnectivity": {
+                              "description": "Limit the device selection to those that are connected to a cellular network.",
+                              "type": "boolean"
+                            },
+                            "deviceType": {
+                              "description": "Limit the device selection to a specific type of device.",
+                              "enum": [
+                                "ANY",
+                                "PHONE",
+                                "TABLET"
+                              ]
+                            },
+                            "private": {
+                              "description": "Limit the device selection to only match from your organization's private pool.",
+                              "type": "boolean"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "oneOf": [
+                        {
+                          "required": [
+                            "id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "name"
+                          ]
+                        }
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                  },
+                  "appSettings": {
+                    "description": "Overwrite real device settings.",
+                    "type": "object",
+                    "properties": {
+                      "audioCapture": {
+                        "description": "Overwrite app settings for real device to capture audio.",
+                        "type": "boolean"
+                      },
+                      "instrumentation": {
+                        "description": "Overwrite app settings for real device instrumentation.",
+                        "type": "object",
+                        "properties": {
+                          "networkCapture": {
+                            "description": "Overwrite app settings for real device to capture network.",
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "passThreshold": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/passThreshold"
+                  },
+                  "smartRetry": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/smartRetry"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "emulators"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "devices"
+                    ]
+                  }
+                ],
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "espresso",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "playwright"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl playwright runner configuration",
+          "description": "Configuration file for playwright using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/0"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/1"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/2"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/3"
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "playwright"
+            },
+            "showConsoleLog": {
+              "$ref": "#/allOf/0/then/properties/showConsoleLog"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                }
+              },
+              "additionalProperties": false
+            },
+            "env": {
+              "$ref": "#/allOf/0/then/properties/env"
+            },
+            "rootDir": {
+              "$ref": "#/allOf/0/then/properties/rootDir"
+            },
+            "playwright": {
+              "description": "Contains details specific to the Playwright project.",
+              "type": "object",
+              "properties": {
+                "version": {
+                  "$ref": "#/allOf/8/then/properties/playwright/properties/version",
+                  "enum": [
+                    "package.json",
+                    "1.36.2",
+                    "1.35.1",
+                    "1.33.0",
+                    "1.31.1",
+                    "1.29.2",
+                    "1.28.1",
+                    "1.27.1",
+                    "1.25.1",
+                    "1.24.1",
+                    "1.22.2"
+                  ]
+                },
+                "configFile": {
+                  "description": "The path to playwright config file",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "version"
+              ],
+              "additionalProperties": false
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "playwrightVersion": {
+                    "$ref": "#/allOf/8/then/properties/playwright/properties/version"
+                  },
+                  "testMatch": {
+                    "description": "Paths to the playwright test files. Regex values are supported to indicate all files of a certain type or in a certain directory, etc.",
+                    "type": "array"
+                  },
+                  "excludedTestFiles": {
+                    "description": "Exclude test files to skip the tests.",
+                    "type": "array"
+                  },
+                  "platformName": {
+                    "$ref": "#/allOf/4/then/properties/suites/items/properties/platform",
+                    "enum": [
+                      "macOS 11.00",
+                      "macOS 12",
+                      "macOS 13",
+                      "Windows 10",
+                      "Windows 11"
+                    ]
+                  },
+                  "params": {
+                    "description": "Details any additional parameters you wish to set for the test suite.",
+                    "type": "object",
+                    "properties": {
+                      "browserName": {
+                        "$ref": "#/allOf/8/then/properties/suites/items/properties/browserName",
+                        "enum": [
+                          "chromium",
+                          "firefox",
+                          "webkit",
+                          "chrome"
+                        ]
+                      },
+                      "headless": {
+                        "description": "Run tests in headless mode.",
+                        "type": "boolean"
+                      },
+                      "globalTimeout": {
+                        "description": "Total timeout in milliseconds for the whole test run.",
+                        "type": "integer"
+                      },
+                      "timeout": {
+                        "description": "Changes the timeout for the test (milliseconds).",
+                        "type": "integer"
+                      },
+                      "grep": {
+                        "description": "Patterns to run tests based on their title.",
+                        "type": "string"
+                      },
+                      "grepInvert": {
+                        "description": "Patterns to skip tests based on their title.",
+                        "type": "string"
+                      },
+                      "repeatEach": {
+                        "description": "The number of times to repeat each test.",
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "retries": {
+                        "description": "The maximum number of retry attempts given to failed tests.",
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxFailures": {
+                        "description": "The maximum number of test failures for this test run. After reaching this number, testing will stop and exit with an error. Setting to zero (default) disables this behavior.",
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "project": {
+                        "description": "Specify playwright project",
+                        "type": "string"
+                      },
+                      "updateSnapshots": {
+                        "description": "Whether to update expected snapshots with the actual results produced by the test run",
+                        "type": "boolean"
+                      },
+                      "workers": {
+                        "description": "Set the maximum number of parallel worker processes (default: 1)",
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "browserName"
+                    ]
+                  },
+                  "screenResolution": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/screenResolution"
+                  },
+                  "env": {
+                    "$ref": "#/allOf/0/then/properties/env"
+                  },
+                  "numShards": {
+                    "description": "When sharding is configured, saucectl automatically creates the sharded jobs based on the number of shards you specify. For example, for a suite that specifies 2 shards, saucectl clones the suite and runs shard 1/2 on the first suite, and the other shard 2/2 on the identical clone suite.",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "shard": {
+                    "description": "When sharding is configured, saucectl automatically splits the tests (e.g. by spec or concurrency) so that they can easily run in parallel.",
+                    "enum": [
+                      "",
+                      "concurrency",
+                      "spec"
+                    ]
+                  },
+                  "shardGrepEnabled": {
+                    "description": "When sharding is configured and the suite is configured to filter using grep/grepInvert, let saucectl filter specs before executing.",
+                    "type": "boolean"
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                  },
+                  "preExec": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/preExec"
+                  },
+                  "timeZone": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/timeZone"
+                  },
+                  "passThreshold": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/passThreshold"
+                  },
+                  "smartRetry": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/smartRetry"
+                  }
+                },
+                "required": [
+                  "name",
+                  "params",
+                  "testMatch"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "playwright",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "puppeteer-replay"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl puppeteer-replay runner configuration",
+          "description": "Configuration file for puppeteer-replay using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/0"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/2"
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "puppeteer-replay"
+            },
+            "showConsoleLog": {
+              "$ref": "#/allOf/0/then/properties/showConsoleLog"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                }
+              },
+              "additionalProperties": false
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "recordings": {
+                    "description": "Relative paths to the chrome devtools recordings.",
+                    "type": "array"
+                  },
+                  "browserName": {
+                    "$ref": "#/allOf/8/then/properties/suites/items/properties/browserName",
+                    "enum": [
+                      "chrome"
+                    ]
+                  },
+                  "browserVersion": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/browserVersion"
+                  },
+                  "platform": {
+                    "enum": [
+                      "macOS 11.00",
+                      "macOS 12",
+                      "macOS 13",
+                      "Windows 10",
+                      "Windows 11"
+                    ],
+                    "description": "A specific operating system on which to run the tests. Sauce Labs will try to choose a reasonable default if not explicitly specified."
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                  },
+                  "passThreshold": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/passThreshold"
+                  }
+                },
+                "required": [
+                  "name",
+                  "recordings"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "testcafe"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl testcafe runner configuration",
+          "description": "Configuration file for testcafe using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/0"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/1"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/2"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/3"
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "testcafe"
+            },
+            "showConsoleLog": {
+              "$ref": "#/allOf/0/then/properties/showConsoleLog"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                }
+              },
+              "additionalProperties": false
+            },
+            "env": {
+              "$ref": "#/allOf/0/then/properties/env"
+            },
+            "rootDir": {
+              "$ref": "#/allOf/0/then/properties/rootDir"
+            },
+            "testcafe": {
+              "description": "Contains details specific to the TestCafe project.",
+              "type": "object",
+              "properties": {
+                "version": {
+                  "$ref": "#/allOf/8/then/properties/playwright/properties/version",
+                  "enum": [
+                    "package.json",
+                    "3.0.1",
+                    "2.6.2",
+                    "2.5.0",
+                    "2.3.1",
+                    "2.2.0",
+                    "2.1.0",
+                    "2.0.1",
+                    "2.0.0",
+                    "1.20.0",
+                    "1.19.0"
+                  ]
+                }
+              },
+              "required": [
+                "version"
+              ],
+              "additionalProperties": false
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "browserName": {
+                    "$ref": "#/allOf/8/then/properties/suites/items/properties/browserName",
+                    "enum": [
+                      "chrome",
+                      "firefox",
+                      "microsoftedge",
+                      "safari"
+                    ]
+                  },
+                  "browserVersion": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/browserVersion"
+                  },
+                  "browserArgs": {
+                    "description": "Browser specific arguments.",
+                    "type": "array",
+                    "examples": [
+                      [
+                        "--no-sandbox"
+                      ],
+                      [
+                        "--disable-features=site-per-process"
+                      ]
+                    ]
+                  },
+                  "headless": {
+                    "description": "Controls whether or not tests are run in headless mode (default: false)",
+                    "type": "boolean"
+                  },
+                  "platformName": {
+                    "$ref": "#/allOf/4/then/properties/suites/items/properties/platform",
+                    "enum": [
+                      "macOS 11.00",
+                      "macOS 12",
+                      "macOS 13",
+                      "Windows 10",
+                      "Windows 11"
+                    ]
+                  },
+                  "assertionTimeout": {
+                    "description": "Specifies the time (in milliseconds) TestCafe attempts to successfully execute an assertion if a selector property or a client function was passed as an actual value.",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "clientScripts": {
+                    "description": "Injects scripts into pages visited during the tests.",
+                    "type": "array"
+                  },
+                  "env": {
+                    "$ref": "#/allOf/0/then/properties/env"
+                  },
+                  "shard": {
+                    "description": "When sharding is configured, saucectl automatically splits the tests (e.g. by spec or concurrency) so that they can easily run in parallel.",
+                    "enum": [
+                      "",
+                      "concurrency",
+                      "spec"
+                    ]
+                  },
+                  "compilerOptions": {
+                    "description": "Specifies the typescript compiler options to be used when running the tests.",
+                    "type": "object",
+                    "properties": {
+                      "typescript": {
+                        "description": "Specifies the TypeScript options.",
+                        "type": "object",
+                        "properties": {
+                          "configPath": {
+                            "description": "Specifies the path to the TypeScript tsconfig.json file.",
+                            "type": "string"
+                          },
+                          "customCompilerModulePath": {
+                            "description": "Specifies the path to a custom TypeScript compiler module.",
+                            "type": "string"
+                          },
+                          "options": {
+                            "description": "Specifies TypeScript compiler options. Full reference: https://www.typescriptlang.org/tsconfig#compilerOptions",
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "disablePageCaching": {
+                    "description": "Prevents the browser from caching page content.",
+                    "type": "boolean"
+                  },
+                  "disableScreenshots": {
+                    "description": "Prevents TestCafe from taking screenshots.",
+                    "type": "boolean"
+                  },
+                  "disableVideo": {
+                    "description": "Disable video recording.",
+                    "type": "boolean"
+                  },
+                  "filter": {
+                    "description": "Allows you to specify which tests or fixtures to run.",
+                    "type": "object",
+                    "properties": {
+                      "test": {
+                        "description": "Runs a test with the specified name.",
+                        "type": "string"
+                      },
+                      "testGrep": {
+                        "description": "Runs tests whose names match the specified grep pattern.",
+                        "type": "string"
+                      },
+                      "testMeta": {
+                        "description": "Runs tests whose metadata matches the specified key-value pair.",
+                        "type": "object"
+                      },
+                      "fixture": {
+                        "description": "Runs a test with the specified fixture name.",
+                        "type": "string"
+                      },
+                      "fixtureGrep": {
+                        "description": "Runs tests whose fixture names match the specified grep pattern.",
+                        "type": "string"
+                      },
+                      "fixtureMeta": {
+                        "description": "Runs tests whose fixture’s metadata matches the specified key-value pair.",
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "pageLoadTimeout": {
+                    "description": "Specifies the time (in milliseconds) passed after the DOMContentLoaded event, within which TestCafe waits for the window.load event to fire.\n\nAfter the timeout passes or the window.load event is raised (whichever happens first), TestCafe starts the test.",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "quarantineMode": {
+                    "description": "Enable quarantine mode to eliminate false negatives and detect unstable tests. TestCafe quarantines tests that fail, and repeats them until they yield conclusive results.",
+                    "type": "object",
+                    "properties": {
+                      "successThreshold": {
+                        "description": "The number of successful attempts necessary to confirm a test’s success. The option value should be greater than 0.",
+                        "type": "integer",
+                        "default": 3
+                      },
+                      "attemptLimit": {
+                        "description": "The maximum number of test execution attempts. The option value must be larger than the value of the successThreshold.",
+                        "type": "integer",
+                        "default": 5
+                      }
+                    }
+                  },
+                  "screenResolution": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/screenResolution"
+                  },
+                  "screenshots": {
+                    "description": "Allows you to specify the screenshot options.",
+                    "type": "object",
+                    "properties": {
+                      "takeOnFails": {
+                        "description": "Specifies that a screenshot should be taken whenever a test fails.",
+                        "type": "boolean"
+                      },
+                      "fullPage": {
+                        "description": "Specifies that the full page should be captured, including content that is not visible due to overflow.",
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "selectorTimeout": {
+                    "description": "Specifies the time (in milliseconds) within which selectors attempt to return a node.",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "ajaxRequestTimeout": {
+                    "description": "Specifies wait time (in milliseconds) for fetch/XHR requests.",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pageRequestTimeout": {
+                    "description": "Specifies time (in milliseconds) to wait for HTML pages.",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "browserInitTimeout": {
+                    "description": "Time (in milliseconds) for browsers to connect to TestCafe and report that they are ready to test.",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "testExecutionTimeout": {
+                    "description": "Maximum test execution time (in milliseconds).",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "runExecutionTimeout": {
+                    "description": "Maximum test run execution time (in milliseconds).",
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "simulators": {
+                    "description": "Run tests against the simulators defined here.",
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "description": "The name of the simulator.",
+                          "type": "string",
+                          "examples": [
+                            "iPhone 12 Simulator"
+                          ]
+                        },
+                        "orientation": {
+                          "$ref": "#/allOf/2/then/properties/suites/items/properties/emulators/items/properties/orientation"
+                        },
+                        "platformName": {
+                          "description": "The name of the simulator platform.",
+                          "enum": [
+                            "iOS"
+                          ]
+                        },
+                        "platformVersions": {
+                          "description": "Which platform versions (OS versions) should be used. Multiple values are treated as 'AND', thus tests run across multiple versions.",
+                          "type": "array"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "skipJsErrors": {
+                    "description": "Determines whether to ignore JavaScript errors on a webpage.",
+                    "type": "boolean"
+                  },
+                  "skipUncaughtErrors": {
+                    "description": "Ignores uncaught errors and unhandled promise rejections in test code.",
+                    "type": "boolean"
+                  },
+                  "speed": {
+                    "description": "Specifies the test execution speed. Provide a number between 1 (the fastest) and 0.01 (the slowest).",
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 1
+                  },
+                  "src": {
+                    "description": "Specifies files or directories from which to run tests.",
+                    "type": "array"
+                  },
+                  "stopOnFirstFail": {
+                    "description": "Stops a test run if a test fails.",
+                    "type": "boolean"
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                  },
+                  "preExec": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/preExec"
+                  },
+                  "excludedTestFiles": {
+                    "$ref": "#/allOf/3/then/properties/suites/items/properties/excludedTestFiles"
+                  },
+                  "timeZone": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/timeZone"
+                  },
+                  "passThreshold": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/passThreshold"
+                  },
+                  "smartRetry": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/smartRetry"
+                  }
+                },
+                "required": [
+                  "name",
+                  "browserName",
+                  "src"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "testcafe",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "xcuitest"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl xcuitest runner configuration",
+          "description": "Configuration file for xcuitest using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/2"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/0"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/3"
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "xcuitest"
+            },
+            "showConsoleLog": {
+              "$ref": "#/allOf/0/then/properties/showConsoleLog"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                }
+              },
+              "additionalProperties": false
+            },
+            "xcuitest": {
+              "description": "Contains details specific to the XCUITest project.",
+              "type": "object",
+              "properties": {
+                "app": {
+                  "description": "Local path or remote url to the application. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                  "type": "string"
+                },
+                "appDescription": {
+                  "description": "Description for the app.",
+                  "type": "string"
+                },
+                "testApp": {
+                  "description": "Local path or remote url to the test application. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                  "type": "string"
+                },
+                "testAppDescription": {
+                  "description": "Description for the testApp.",
+                  "type": "string"
+                },
+                "otherApps": {
+                  "description": "A list of applications to be installed alongside the main app. Applications can be defined as a local path or a remote url. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values. When targeting simulators, a maximum of 2 otherApps is supported.",
+                  "type": "array"
+                }
+              },
+              "additionalProperties": false
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "app": {
+                    "description": "Local path or remote url to the application. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                    "type": "string"
+                  },
+                  "appDescription": {
+                    "description": "Description for the app.",
+                    "type": "string"
+                  },
+                  "testApp": {
+                    "description": "Local path or remote url to the test application. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values.",
+                    "type": "string"
+                  },
+                  "testAppDescription": {
+                    "description": "Description for the testApp.",
+                    "type": "string"
+                  },
+                  "otherApps": {
+                    "description": "A list of applications to be installed alongside the main app. Applications can be defined as a local path or a remote url. If a remote url is defined, the app will be downloaded to a local temp directory before uploading to the SauceLabs Mobile App Storage service. Supports environment variables as values. When targeting simulators, a maximum of 2 otherApps is supported.",
+                    "type": "array"
+                  },
+                  "testOptions": {
+                    "description": "Allows you to control various details on how tests are executed.",
+                    "type": "object",
+                    "properties": {
+                      "class": {
+                        "description": "Only run the specified classes.",
+                        "type": "array"
+                      },
+                      "notClass": {
+                        "description": "Run all classes except those specified here.",
+                        "type": "array"
+                      },
+                      "testLanguage": {
+                        "description": "Specifies ISO 639-1 language during testing. Supported on Simulators only.",
+                        "type": "string"
+                      },
+                      "testRegion": {
+                        "description": "Specifies ISO 3166-1 region during testing.",
+                        "type": "string"
+                      },
+                      "testTimeoutsEnabled": {
+                        "description": "By default there is no timeout, if enabled, then the timeout is 600 seconds. This can be changed by adding the defaultTestExecutionTimeAllowance value. Supported on Simulators only.",
+                        "type": "string",
+                        "enum": [
+                          "Yes",
+                          "No"
+                        ]
+                      },
+                      "maximumTestExecutionTimeAllowance": {
+                        "description": "The maximum execution time, in seconds, an individual test is given to execute, regardless of the test's preferred allowance. Supported on Simulators only.",
+                        "type": "number"
+                      },
+                      "defaultTestExecutionTimeAllowance": {
+                        "description": "The default execution time, in seconds, an individual test is given to execute if test timeouts are enabled. Supported on Simulators only.",
+                        "type": "number"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "appSettings": {
+                    "$ref": "#/allOf/2/then/properties/suites/items/properties/appSettings"
+                  },
+                  "simulators": {
+                    "description": "Defines details for running this suite on virtual devices using a simulator.",
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "description": "The name of the simulator. To ensure name accuracy, check the list of supported virtual devices (https://app.saucelabs.com/live/web-testing/virtual).",
+                          "type": "string"
+                        },
+                        "orientation": {
+                          "$ref": "#/allOf/2/then/properties/suites/items/properties/emulators/items/properties/orientation"
+                        },
+                        "platformVersions": {
+                          "description": "The set of one or more versions of the device platform on which to run the test suite.",
+                          "type": "array",
+                          "minItems": 1
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "platformVersions"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "devices": {
+                    "description": "Define details for running this suite on real devices.",
+                    "type": "array",
+                    "items": {
+                      "properties": {
+                        "id": {
+                          "description": "Request a specific device for this test suite by its ID. You can look up device IDs in the Sauce Labs app or using our Devices API (https://docs.saucelabs.com/dev/api/rdc#get-devices).",
+                          "type": "string",
+                          "examples": [
+                            "iPhone_12_Pro_14_real",
+                            "iPhone_12_Pro_real_us"
+                          ]
+                        },
+                        "name": {
+                          "description": "Match the device name in full or partially (regex), which may provide a larger pool of available devices of the type you want.",
+                          "type": "string",
+                          "examples": [
+                            "iPad .*",
+                            "iPhone .*"
+                          ]
+                        },
+                        "platformVersion": {
+                          "description": "The version of the iOS operating system.",
+                          "type": "string"
+                        },
+                        "options": {
+                          "description": "Further specify desired device attributes within the pool of devices that match the name and version criteria.",
+                          "type": "object",
+                          "properties": {
+                            "carrierConnectivity": {
+                              "description": "Limit the device selection to those that are connected to a cellular network.",
+                              "type": "boolean"
+                            },
+                            "deviceType": {
+                              "description": "Limit the device selection to a specific type of device.",
+                              "enum": [
+                                "ANY",
+                                "PHONE",
+                                "TABLET"
+                              ]
+                            },
+                            "private": {
+                              "description": "Limit the device selection to only match from your organization's private pool.",
+                              "type": "boolean"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "oneOf": [
+                        {
+                          "required": [
+                            "id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "name"
+                          ]
+                        }
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                  },
+                  "passThreshold": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/passThreshold"
+                  },
+                  "smartRetry": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/smartRetry"
+                  },
+                  "shard": {
+                    "description": "When shard is configured as concurrency, saucectl automatically splits the tests by concurrency so that they can easily run in parallel.",
+                    "enum": [
+                      "",
+                      "concurrency"
+                    ]
+                  },
+                  "testListFile": {
+                    "description": "This file containing tests will be used in sharding by concurrency.",
+                    "type": "string"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "simulators"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "devices"
+                    ]
+                  }
+                ],
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "apitest"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl api testing runner configuration",
+          "description": "Configuration file for api testing using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/2"
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "apitest"
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "projectName": {
+                    "description": "Your project's name.",
+                    "type": "string"
+                  },
+                  "testMatch": {
+                    "description": "",
+                    "type": "array"
+                  },
+                  "tests": {
+                    "description": "A list of test IDs to run for the project defined by hookId.",
+                    "type": "array"
+                  },
+                  "tags": {
+                    "description": "A test tag to run for the project defined by hookId.",
+                    "type": "array"
+                  },
+                  "useRemoteTests": {
+                    "description": "Use tests stored in the cloud instead of the local ones.",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "projectName",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "playwright-cucumberjs"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl playwright cucumberjs runner configuration",
+          "description": "Configuration file for cucumber using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/0"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/1"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/2"
+            },
+            {
+              "$ref": "#/allOf/0/then/allOf/3"
+            }
+          ],
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "playwright-cucumberjs"
+            },
+            "showConsoleLog": {
+              "$ref": "#/allOf/0/then/properties/showConsoleLog"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite by default, if no value is set on a suite explicitly.",
+              "type": "object",
+              "properties": {
+                "timeout": {
+                  "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                }
+              },
+              "additionalProperties": false
+            },
+            "rootDir": {
+              "$ref": "#/allOf/0/then/properties/rootDir"
+            },
+            "playwright": {
+              "description": "Contains details specific to the playwright.",
+              "type": "object",
+              "properties": {
+                "version": {
+                  "description": "Which framework version to use."
+                }
+              },
+              "required": [
+                "version"
+              ],
+              "additionalProperties": false
+            },
+            "env": {
+              "$ref": "#/allOf/0/then/properties/env"
+            },
+            "suites": {
+              "description": "The set of properties providing details about the test suites to run.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the test suite, which will be reflected in the test results in Sauce Labs.",
+                    "type": "string"
+                  },
+                  "browserName": {
+                    "description": "The name of the browser in which to run the tests."
+                  },
+                  "browserVersion": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/browserVersion"
+                  },
+                  "platformName": {
+                    "$ref": "#/allOf/4/then/properties/suites/items/properties/platform",
+                    "enum": [
+                      "macOS 11.00",
+                      "macOS 12",
+                      "macOS 13",
+                      "Windows 10",
+                      "Windows 11"
+                    ]
+                  },
+                  "screenResolution": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/screenResolution"
+                  },
+                  "env": {
+                    "$ref": "#/allOf/0/then/properties/env"
+                  },
+                  "options": {
+                    "description": "Provides details related to the Cucumberjs test configuration.",
+                    "type": "object",
+                    "properties": {
+                      "config": {
+                        "description": "Provides the location of the configuration file.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "Regular expressions of which cucumber scenario names should match one of to be run.",
+                        "type": "string"
+                      },
+                      "paths": {
+                        "description": "Paths to where your feature files are.",
+                        "type": "array"
+                      },
+                      "excludedTestFiles": {
+                        "$ref": "#/allOf/3/then/properties/suites/items/properties/excludedTestFiles"
+                      },
+                      "backtrace": {
+                        "description": "Show the full backtrace for errors.",
+                        "type": "boolean"
+                      },
+                      "require": {
+                        "description": "Paths to where your support code is, for CommonJS.",
+                        "type": "array"
+                      },
+                      "import": {
+                        "description": "Paths to where your support code is, for ESM.",
+                        "type": "array"
+                      },
+                      "tags": {
+                        "description": "Tag expression to filter which scenarios should be run.",
+                        "type": "array"
+                      },
+                      "format": {
+                        "description": "Name/path and (optionally) output file path of each formatter to use.",
+                        "type": "array"
+                      },
+                      "formatOptions": {
+                        "description": "Options to be provided to cucumber formatters.",
+                        "type": "array"
+                      },
+                      "parallel": {
+                        "description": "Run tests in parallel with the given number of worker processes.",
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "paths"
+                    ]
+                  },
+                  "shard": {
+                    "description": "When sharding is configured, saucectl automatically splits the tests (e.g. by spec or concurrency) so that they can easily run in parallel.",
+                    "enum": [
+                      "",
+                      "concurrency",
+                      "spec"
+                    ]
+                  },
+                  "timeout": {
+                    "$ref": "#/allOf/9/then/definitions/suite/properties/timeout"
+                  },
+                  "preExec": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/preExec"
+                  },
+                  "timeZone": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/timeZone"
+                  },
+                  "passThreshold": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/passThreshold"
+                  },
+                  "smartRetry": {
+                    "$ref": "#/allOf/0/then/properties/suites/items/properties/smartRetry"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "playwright",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "imagerunner"
+            }
+          }
+        },
+        "then": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "saucectl image runner configuration",
+          "description": "Configuration file for running container images using saucectl",
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/allOf/0/then/allOf/0"
+            }
+          ],
+          "definitions": {
+            "sauce": {
+              "description": "All settings related to how tests are run and identified in the Sauce Labs platform.",
+              "type": "object",
+              "properties": {
+                "region": {
+                  "description": "Which Sauce Labs data center to target.",
+                  "enum": [
+                    "us-west-1",
+                    "eu-central-1"
+                  ]
+                },
+                "tunnel": {
+                  "description": "SauceCTL supports using Sauce Connect to establish a secure connection when running your tests on Sauce Labs. To do so, launch a tunnel; then provide the identifier in this property.",
+                  "properties": {
+                    "name": {
+                      "description": "The tunnel name.",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "description": "The owner (username) of the tunnel. Must be specified if the user that created the tunnel differs from the user that is running the tests.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "suite": {
+              "description": "The set of properties providing details about how to run the container.",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The name of the test suite.",
+                  "type": "string"
+                },
+                "image": {
+                  "description": "The name of the container image.",
+                  "type": "string"
+                },
+                "imagePullAuth": {
+                  "description": "Container registry credentials for accessing the image.",
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "description": "The username.",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "The access token.",
+                      "type": "string"
+                    }
+                  }
+                },
+                "entrypoint": {
+                  "description": "The command line arguments to launch the image with.",
+                  "type": "string"
+                },
+                "files": {
+                  "description": "List of files that you'd like saucectl to upload and mount within the container.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "src": {
+                        "description": "Path to the local file.",
+                        "type": "string"
+                      },
+                      "dst": {
+                        "description": "Path within the container that the file should be mounted at.",
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "artifacts": {
+                  "description": "List of file paths within the container to be made available as downloadable artifacts.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "env": {
+                  "description": "Set one or more environment variables.",
+                  "type": "object"
+                },
+                "timeout": {
+                  "description": "Instructs how long (in ms, s, m, or h) saucectl should wait for a suite to complete.",
+                  "type": "string",
+                  "pattern": "^(?:\\d+h)?(?:\\d+m)?(?:\\d+s)?(?:\\d+ms)?$",
+                  "examples": [
+                    "1h",
+                    "10m",
+                    "90s"
+                  ]
+                },
+                "workload": {
+                  "description": "Sets the kind of workload that is being executed",
+                  "enum": [
+                    "webdriver",
+                    "other"
+                  ]
+                },
+                "resourceProfile": {
+                  "description": "Sets the CPU/memory limits of the container. Format is <CPU><level><mem><level>. Default to c1m1.",
+                  "pattern": "^c(\\d+)m(\\d+)$",
+                  "examples": [
+                    "c1m1",
+                    "c2m2",
+                    "c3m3"
+                  ]
+                },
+                "metadata": {
+                  "description": "Supply additional metadata to your runner.",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "name",
+                "workload"
+              ]
+            }
+          },
+          "properties": {
+            "apiVersion": {
+              "const": "v1alpha"
+            },
+            "kind": {
+              "const": "imagerunner"
+            },
+            "sauce": {
+              "$ref": "#/allOf/9/then/definitions/sauce"
+            },
+            "defaults": {
+              "description": "Settings that are applied onto every suite as a default value.",
+              "$ref": "#/allOf/9/then/definitions/suite"
+            },
+            "suites": {
+              "description": "List of suites",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/allOf/9/then/definitions/suite"
+              }
+            }
+          },
+          "required": [
+            "apiVersion",
+            "kind",
+            "suites"
+          ],
+          "additionalProperties": true
+        }
+      }
+    ]
+  },
+  "tests": []
+}

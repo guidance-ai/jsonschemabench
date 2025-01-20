@@ -1,0 +1,295 @@
+{
+  "description": "sample JsonSchemaStore/libman.json",
+  "meta": {
+    "full_size": 1824,
+    "stripped_size": 1176,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "@siblingKeys",
+      "allOf",
+      "anyOf",
+      "enum",
+      "items",
+      "not",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "allOf": [
+      {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/specifiedProvider"
+          },
+          {
+            "$ref": "#/definitions/defaultProvider"
+          }
+        ]
+      },
+      {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/specifiedDestination"
+          },
+          {
+            "$ref": "#/definitions/defaultDestination"
+          }
+        ]
+      }
+    ],
+    "definitions": {
+      "libraryEntry": {
+        "required": [
+          "library"
+        ],
+        "properties": {
+          "files": {
+            "description": "The file names of the individual files to copy to the project.",
+            "type": "array",
+            "default": null,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "library": {
+            "description": "The unique identifier of the library.",
+            "type": "string",
+            "minLength": 1
+          },
+          "destination": {
+            "description": "The relative folder path from this config file to the location where the files should be copied to.",
+            "type": "string",
+            "pattern": "^[^\\\\]+$"
+          },
+          "provider": {
+            "description": "The unique identifier of the provider",
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "specifiedProvider": {
+        "properties": {
+          "libraries": {
+            "items": {
+              "required": [
+                "provider"
+              ]
+            }
+          }
+        },
+        "not": {
+          "required": [
+            "defaultProvider"
+          ]
+        }
+      },
+      "defaultProvider": {
+        "properties": {
+          "defaultProvider": {
+            "description": "The unique identifier of the provider to use as default.",
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "specifiedDestination": {
+        "properties": {
+          "libraries": {
+            "items": {
+              "required": [
+                "destination"
+              ]
+            }
+          }
+        },
+        "not": {
+          "required": [
+            "defaultDestination"
+          ]
+        }
+      },
+      "defaultDestination": {
+        "properties": {
+          "defaultDestination": {
+            "description": "The default destination to place library files.",
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/libman.json",
+    "properties": {
+      "libraries": {
+        "description": "A list of library references.",
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/libraryEntry"
+        }
+      },
+      "version": {
+        "description": "The syntax version of this config file. Can only be 1.0",
+        "enum": [
+          "1.0"
+        ],
+        "default": "1.0"
+      }
+    },
+    "required": [
+      "libraries"
+    ],
+    "title": "JSON schema for client-side library config files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0",
+        "libraries": [
+          {
+            "library": "library1",
+            "provider": "provider1",
+            "destination": "destination1",
+            "files": [
+              "file1.js",
+              "file2.js"
+            ]
+          },
+          {
+            "library": "library2",
+            "provider": "provider2",
+            "destination": "destination2",
+            "files": [
+              "file3.js",
+              "file4.js"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0",
+        "libraries": [
+          {
+            "library": "jquery",
+            "provider": "cdnjs",
+            "destination": "js/",
+            "files": [
+              "jquery.min.js"
+            ]
+          },
+          {
+            "library": "bootstrap",
+            "provider": "cdnjs",
+            "destination": "css/",
+            "files": [
+              "bootstrap.min.css"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"js\\\\subfolder/\" does not match \"^[^\\\\]+$\"",
+      "python_error": "'js\\\\subfolder/' does not match '^[^\\\\\\\\]+$'\n\nFailed validating 'pattern' in schema['properties']['libraries']['items']['properties']['destination']:\n    {'description': 'The relative folder path from this config file to the '\n                    'location where the files should be copied to.',\n     'type': 'string',\n     'pattern': '^[^\\\\\\\\]+$'}\n\nOn instance['libraries'][0]['destination']:\n    'js\\\\subfolder/'",
+      "data": {
+        "version": "1.0",
+        "libraries": [
+          {
+            "library": "jquery",
+            "provider": "cdnjs",
+            "destination": "js\\subfolder/",
+            "files": [
+              "jquery.min.js"
+            ]
+          },
+          {
+            "library": "bootstrap",
+            "provider": "cdnjs",
+            "destination": "css/",
+            "files": [
+              "bootstrap.min.css"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['libraries']['items']['properties']['library']:\n    {'description': 'The unique identifier of the library.',\n     'type': 'string',\n     'minLength': 1}\n\nOn instance['libraries'][0]['library']:\n    ''",
+      "data": {
+        "version": "1.0",
+        "libraries": [
+          {
+            "library": "",
+            "provider": "cdnjs",
+            "destination": "js/",
+            "files": [
+              "jquery.min.js"
+            ]
+          },
+          {
+            "library": "bootstrap",
+            "provider": "cdnjs",
+            "destination": "css/",
+            "files": [
+              "bootstrap.min.css"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['libraries']['items']['properties']['library']:\n    {'description': 'The unique identifier of the library.',\n     'type': 'string',\n     'minLength': 1}\n\nOn instance['libraries'][0]['library']:\n    ''",
+      "data": {
+        "version": "1.0",
+        "libraries": [
+          {
+            "library": "",
+            "provider": "cdnjs",
+            "destination": "js/",
+            "files": [
+              "jquery.min.js"
+            ]
+          },
+          {
+            "library": "bootstrap",
+            "provider": "cdnjs",
+            "destination": "css/",
+            "files": [
+              ""
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

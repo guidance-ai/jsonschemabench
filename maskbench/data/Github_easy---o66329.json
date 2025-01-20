@@ -1,0 +1,200 @@
+{
+  "description": "sample Github_easy/o66329.json",
+  "meta": {
+    "full_size": 1110,
+    "stripped_size": 577,
+    "features": [
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "This is validation for file metadata fields that the OSF allows to be edited by the user. These fields will match the fields presented to the user on a file metadata form on the OSF.",
+    "properties": {
+      "file_description": {
+        "description": "The description of the file",
+        "type": "string"
+      },
+      "funders": {
+        "description": "Funders responsible for funding the resource.",
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "funding_agency": {
+              "description": "The name of the funding provider",
+              "type": "string"
+            },
+            "grant_number": {
+              "description": "The code assigned by the funder to a sponsored award (grant).",
+              "type": "string"
+            }
+          },
+          "required": [
+            "funding_agency"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "related_publication_doi": {
+        "description": "The DOI of a related resource.",
+        "pattern": "10\\..+/.+",
+        "type": "string"
+      },
+      "resource_type": {
+        "enum": [
+          "Audio/Video",
+          "Dataset",
+          "Image",
+          "Model",
+          "Software",
+          "Book",
+          "Funding Submission",
+          "Journal Article",
+          "Lesson",
+          "Poster",
+          "Preprint",
+          "Presentation",
+          "Research Tool",
+          "Thesis",
+          "Other"
+        ],
+        "type": "string"
+      }
+    },
+    "title": "OSF Specific Fields for the Datacite Schema",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "file_description": "This is a sample file description.",
+        "funders": [
+          {
+            "funding_agency": "National Science Foundation",
+            "grant_number": "1234567890"
+          },
+          {
+            "funding_agency": "National Institutes of Health"
+          }
+        ],
+        "related_publication_doi": "10.1234/567890",
+        "resource_type": "Dataset"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"11.1234/567890\" does not match \"10\\..+/.+\"",
+      "python_error": "'11.1234/567890' does not match '10\\\\..+/.+'\n\nFailed validating 'pattern' in schema['properties']['related_publication_doi']:\n    {'description': 'The DOI of a related resource.',\n     'pattern': '10\\\\..+/.+',\n     'type': 'string'}\n\nOn instance['related_publication_doi']:\n    '11.1234/567890'",
+      "data": {
+        "file_description": "This is a sample file description.",
+        "funders": [
+          {
+            "funding_agency": "National Science Foundation",
+            "grant_number": "1234567890"
+          },
+          {
+            "funding_agency": "National Institutes of Health"
+          }
+        ],
+        "related_publication_doi": "11.1234/567890",
+        "resource_type": "Dataset"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"10.1234\" does not match \"10\\..+/.+\"",
+      "python_error": "'10.1234' does not match '10\\\\..+/.+'\n\nFailed validating 'pattern' in schema['properties']['related_publication_doi']:\n    {'description': 'The DOI of a related resource.',\n     'pattern': '10\\\\..+/.+',\n     'type': 'string'}\n\nOn instance['related_publication_doi']:\n    '10.1234'",
+      "data": {
+        "file_description": "This is a sample file description.",
+        "funders": [
+          {
+            "funding_agency": "National Science Foundation",
+            "grant_number": "1234567890"
+          },
+          {
+            "funding_agency": "National Institutes of Health"
+          }
+        ],
+        "related_publication_doi": "10.1234",
+        "resource_type": "Dataset"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'This is validation for file metadata fields that the '\n                    'OSF allows to be edited by the user. These fields '\n                    'will match the fields presented to the user on a file '\n                    'metadata form on the OSF.',\n     'properties': {'file_description': {'description': 'The description '\n                                                        'of the file',\n                                         'type': 'string'},\n                    'funders': {'description': 'Funders responsible for '\n                                               'funding the resource.',\n                                'items': {'additionalProperties': False,\n                                          'properties': {'funding_agency': {'description': 'The '\n                                                                 .. (3830 more)",
+      "data": {
+        "file_description": "This is a sample file description.",
+        "funders": [
+          {
+            "funding_agency": "National Science Foundation",
+            "grant_number": "1234567890",
+            "extra_property": "This is an extra property that is not allowed"
+          },
+          {
+            "funding_agency": "National Institutes of Health"
+          }
+        ],
+        "related_publication_doi": "10.1234/567890",
+        "resource_type": "Dataset",
+        "extra_property": "This is an extra property that is not allowed"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "file_description": "Example file description",
+        "funders": [
+          {
+            "funding_agency": "National Science Foundation",
+            "grant_number": "123456789"
+          },
+          {
+            "funding_agency": "National Institutes of Health"
+          }
+        ],
+        "related_publication_doi": "10.1234/56789",
+        "resource_type": "Dataset"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"12345/67890\" does not match \"10\\..+/.+\"",
+      "python_error": "'12345/67890' does not match '10\\\\..+/.+'\n\nFailed validating 'pattern' in schema['properties']['related_publication_doi']:\n    {'description': 'The DOI of a related resource.',\n     'pattern': '10\\\\..+/.+',\n     'type': 'string'}\n\nOn instance['related_publication_doi']:\n    '12345/67890'",
+      "data": {
+        "file_description": "Example file description",
+        "funders": [
+          {
+            "funding_agency": "National Science Foundation",
+            "grant_number": "123456789"
+          },
+          {
+            "funding_agency": "National Institutes of Health"
+          }
+        ],
+        "related_publication_doi": "12345/67890",
+        "resource_type": "Dataset"
+      }
+    }
+  ]
+}

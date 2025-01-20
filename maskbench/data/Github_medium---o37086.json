@@ -1,0 +1,342 @@
+{
+  "description": "sample Github_medium/o37086.json",
+  "meta": {
+    "full_size": 1567,
+    "stripped_size": 1166,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "maxItems",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://mcda.drugis.org/dataSource.json#",
+    "title": "MCDA problem schema",
+    "description": "MCDA dataSource schema for uploaded JSON",
+    "type": "object",
+    "required": [
+      "id",
+      "unitOfMeasurement",
+      "scale"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "description": "identifier of the data source",
+        "type": "string"
+      },
+      "unitOfMeasurement": {
+        "type": "object",
+        "required": [
+          "type",
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "custom",
+              "percentage",
+              "decimal"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "source": {
+        "description": "Where the data comes from",
+        "type": "string"
+      },
+      "sourceLink": {
+        "description": "Link to the source",
+        "type": "string"
+      },
+      "strengthOfEvidence": {
+        "description": "Strengths of the data",
+        "type": "string"
+      },
+      "uncertainties": {
+        "description": "Uncertainties about the data",
+        "type": "string"
+      },
+      "scale": {
+        "description": "The minimum and maximum values the data can have",
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "pvf": {
+        "oneOf": [
+          {
+            "description": "The partial value function",
+            "type": "object",
+            "required": [
+              "direction",
+              "type",
+              "range"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "increasing",
+                  "decreasing"
+                ]
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "linear",
+                  "piecewise-linear"
+                ]
+              },
+              "range": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "values": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "cutoffs": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example-data-source",
+        "unitOfMeasurement": {
+          "type": "percentage",
+          "label": "Percentage of patients with improved symptoms"
+        },
+        "source": "Journal of Medicine",
+        "sourceLink": "https://www.journalofmedicine.com/article/12345",
+        "strengthOfEvidence": "High",
+        "uncertainties": "None",
+        "scale": [
+          0,
+          100
+        ],
+        "pvf": {
+          "direction": "increasing",
+          "type": "linear",
+          "range": [
+            0,
+            100
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "example-data-source",
+        "unitOfMeasurement": {
+          "type": "custom",
+          "label": "Example Unit"
+        },
+        "source": "Example Source",
+        "sourceLink": "https://example.com/source",
+        "strengthOfEvidence": "High",
+        "uncertainties": "Low",
+        "scale": [
+          0,
+          100
+        ],
+        "pvf": {
+          "direction": "increasing",
+          "type": "piecewise-linear",
+          "range": [
+            0,
+            100
+          ],
+          "values": [
+            0,
+            0.5,
+            1
+          ],
+          "cutoffs": [
+            20,
+            50,
+            80
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"direction\":\"increasing\",\"type\":\"piecewise-linear\",\"range\":[0,100],\"values\":[0,0.5,1],\"cutoffs\":[20,50,80],\"invalidProperty\":\"invalidValue\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('invalidProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema[0]:\n    {'description': 'The partial value function',\n     'type': 'object',\n     'required': ['direction', 'type', 'range'],\n     'additionalProperties': False,\n     'properties': {'direction': {'type': 'string',\n                                  'enum': ['increasing', 'decreasing']},\n                    'type': {'type': 'string',\n                             'enum': ['linear', 'piecewise-linear']},\n                    'range': {'type': 'array',\n                              'minItems': 2,\n                              'maxItems': 2,\n                              'items': {'type': 'number'}},\n                    'values': {'type': 'array',\n                               'minItems': 3,\n                               'maxItems': 3,\n                               'items': {'type': 'number'}},\n                    'cutoffs': {'type': 'array',\n                                'minItems': 3,\n .. (309 more)",
+      "data": {
+        "id": "example-data-source",
+        "unitOfMeasurement": {
+          "type": "custom",
+          "label": "Example Unit"
+        },
+        "source": "Example Source",
+        "sourceLink": "https://example.com/source",
+        "strengthOfEvidence": "High",
+        "uncertainties": "Low",
+        "scale": [
+          0,
+          100
+        ],
+        "pvf": {
+          "direction": "increasing",
+          "type": "piecewise-linear",
+          "range": [
+            0,
+            100
+          ],
+          "values": [
+            0,
+            0.5,
+            1
+          ],
+          "cutoffs": [
+            20,
+            50,
+            80
+          ],
+          "invalidProperty": "invalidValue"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[0,100,200] has more than 2 items",
+      "python_error": "[0, 100, 200] is too long\n\nFailed validating 'maxItems' in schema['properties']['scale']:\n    {'description': 'The minimum and maximum values the data can have',\n     'type': 'array',\n     'minItems': 2,\n     'maxItems': 2,\n     'items': {'oneOf': [{'type': 'number'}, {'type': 'null'}]}}\n\nOn instance['scale']:\n    [0, 100, 200]",
+      "data": {
+        "id": "example-data-source",
+        "unitOfMeasurement": {
+          "type": "custom",
+          "label": "Example Unit"
+        },
+        "source": "Example Source",
+        "sourceLink": "https://example.com/source",
+        "strengthOfEvidence": "High",
+        "uncertainties": "Low",
+        "scale": [
+          0,
+          100,
+          200
+        ],
+        "pvf": {
+          "direction": "increasing",
+          "type": "piecewise-linear",
+          "range": [
+            0,
+            100
+          ],
+          "values": [
+            0,
+            0.5,
+            1
+          ],
+          "cutoffs": [
+            20,
+            50,
+            80
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[0] has less than 2 items",
+      "python_error": "[0] is too short\n\nFailed validating 'minItems' in schema['properties']['scale']:\n    {'description': 'The minimum and maximum values the data can have',\n     'type': 'array',\n     'minItems': 2,\n     'maxItems': 2,\n     'items': {'oneOf': [{'type': 'number'}, {'type': 'null'}]}}\n\nOn instance['scale']:\n    [0]",
+      "data": {
+        "id": "example-data-source",
+        "unitOfMeasurement": {
+          "type": "custom",
+          "label": "Example Unit"
+        },
+        "source": "Example Source",
+        "sourceLink": "https://example.com/source",
+        "strengthOfEvidence": "High",
+        "uncertainties": "Low",
+        "scale": [
+          0
+        ],
+        "pvf": {
+          "direction": "increasing",
+          "type": "piecewise-linear",
+          "range": [
+            0,
+            100
+          ],
+          "values": [
+            0,
+            0.5,
+            1
+          ],
+          "cutoffs": [
+            20,
+            50,
+            80
+          ]
+        }
+      }
+    }
+  ]
+}

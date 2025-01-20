@@ -1,0 +1,112 @@
+{
+  "description": "sample Github_easy/o78130.json",
+  "meta": {
+    "full_size": 688,
+    "stripped_size": 323,
+    "features": [
+      "format",
+      "format:uri",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+      "sandbox_id": {
+        "description": "A unique identifier for the sandbox.",
+        "type": "string"
+      },
+      "uri": {
+        "description": "The URI of the sandbox.",
+        "type": "string",
+        "format": "uri"
+      },
+      "checksums": {
+        "description": "A hash where each key is one of the checksums that you are willing to upload",
+        "patternProperties": {
+          "[0-9a-f]{32}": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "description": "The URL the file should be uploaded to. Only specified if needs_upload is true.",
+                "type": "string",
+                "format": "uri"
+              },
+              "needs_upload": {
+                "description": "true if the checksum is not already on the server; false if it is.",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "needs_upload"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "sandbox_id": "sandbox-12345",
+        "uri": "https://example.com/sandbox/sandbox-12345",
+        "checksums": {
+          "0123456789abcdef0123456789abcdef": {
+            "url": "https://example.com/upload/0123456789abcdef0123456789abcdef",
+            "needs_upload": true
+          },
+          "fedcba9876543210fedcba9876543210": {
+            "needs_upload": false
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "sandbox_id": "sandbox-12345",
+        "uri": "https://example.com/sandbox",
+        "checksums": {
+          "0123456789abcdef0123456789abcdef": {
+            "url": "https://example.com/upload/0123456789abcdef0123456789abcdef",
+            "needs_upload": true
+          },
+          "fedcba9876543210fedcba9876543210": {
+            "needs_upload": false
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not-a-uri\" is not a \"uri\"",
+      "python_error": "'not-a-uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['uri']:\n    {'description': 'The URI of the sandbox.',\n     'type': 'string',\n     'format': 'uri'}\n\nOn instance['uri']:\n    'not-a-uri'",
+      "data": {
+        "sandbox_id": "sandbox-12345",
+        "uri": "not-a-uri",
+        "checksums": {
+          "0123456789abcdef0123456789abcdef": {
+            "url": "https://example.com/upload/0123456789abcdef0123456789abcdef",
+            "needs_upload": true
+          },
+          "fedcba9876543210fedcba9876543210": {
+            "needs_upload": false
+          }
+        }
+      }
+    }
+  ]
+}

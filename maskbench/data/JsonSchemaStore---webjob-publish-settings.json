@@ -1,0 +1,177 @@
+{
+  "description": "sample JsonSchemaStore/webjob-publish-settings.json",
+  "meta": {
+    "full_size": 1715,
+    "stripped_size": 903,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "enum",
+      "format",
+      "format:date-time",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "allOf:trivial",
+      "definitions",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "shared": {
+        "properties": {
+          "webJobName": {
+            "type": "string",
+            "description": "The name of the Azure Webjob."
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start time of a scheduled job. Example. 2014-06-11T00:00:00-08:00"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The end time of a scheduled job. Example. 2014-06-12T00:00:00-08:00"
+          },
+          "jobRecurrenceFrequency": {
+            "type": "string",
+            "enum": [
+              "Second",
+              "Minute",
+              "Hour",
+              "Day",
+              "Week",
+              "Month"
+            ],
+            "description": "The frequency metric used with the 'interval' property."
+          },
+          "interval": {
+            "type": "integer",
+            "description": "The interval of how often the Azure Webjob should run. Use it with the 'jobRecurrenceFrequency' property."
+          }
+        }
+      },
+      "scheduled": {
+        "required": [
+          "webJobName",
+          "startTime",
+          "endTime",
+          "jobRecurrenceFrequency",
+          "interval"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/definitions/shared"
+          }
+        ],
+        "properties": {
+          "runMode": {
+            "type": "string",
+            "enum": [
+              "Scheduled"
+            ],
+            "description": "Determines the run mode of the Azure Webjob. \n\n Triggered: manually triggered \n Scheduled: runs on a specific schedule \n Continuous: runs all the time"
+          }
+        }
+      },
+      "notScheduled": {
+        "required": [
+          "runMode"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/definitions/shared"
+          }
+        ],
+        "properties": {
+          "runMode": {
+            "type": "string",
+            "enum": [
+              "Continuous",
+              "OnDemand"
+            ],
+            "description": "Determines the run mode of the Azure Webjob. \n\n Triggered: manually triggered \n Scheduled: runs on a specific schedule \n Continuous: runs all the time"
+          }
+        }
+      }
+    },
+    "id": "https://json.schemastore.org/webjob-publish-settings.json",
+    "oneOf": [
+      {
+        "$ref": "#/definitions/scheduled"
+      },
+      {
+        "$ref": "#/definitions/notScheduled"
+      }
+    ],
+    "required": [
+      "runMode"
+    ],
+    "title": "JSON schema for Azure Webjobs configuration files",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "runMode": "Scheduled",
+        "webJobName": "MyAzureWebJob",
+        "startTime": "2024-12-07T00:00:00-08:00",
+        "endTime": "2024-12-08T00:00:00-08:00",
+        "jobRecurrenceFrequency": "Day",
+        "interval": 1
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "runMode": "Scheduled",
+        "webJobName": "MyAzureWebJob",
+        "startTime": "2024-12-08T00:00:00-08:00",
+        "endTime": "2024-12-09T00:00:00-08:00",
+        "jobRecurrenceFrequency": "Day",
+        "interval": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "{\"runMode\":\"Scheduled\",\"webJobName\":\"MyAzureWebJob\",\"startTime\":\"2024-12-08T00:00:00-08:00\",\"endTime\":\"2024-12-09T00:00:00-08:00Z\",\"jobRecurrenceFrequency\":\"Day\",\"interval\":1} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'webJobName': 'MyAzureWebJob', 'startTime': '2024-12-08T00:00:00-08:00', 'endTime': '2024-12-09T00:00:00-08:00Z', 'jobRecurrenceFrequency': 'Day', 'interval': 1, 'runMode': 'Scheduled'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'definitions': {'shared': {'properties': {'webJobName': {'type': 'string',\n                                                              'description': 'The '\n                                                                             'name '\n                                                                             'of '\n                                                                             'the '\n                                                                             'Azure '\n                                                                             'Webjob.'},\n                                               'startTime': {'type': 'string',\n                          .. (10683 more)",
+      "data": {
+        "runMode": "Scheduled",
+        "webJobName": "MyAzureWebJob",
+        "startTime": "2024-12-08T00:00:00-08:00",
+        "endTime": "2024-12-09T00:00:00-08:00Z",
+        "jobRecurrenceFrequency": "Day",
+        "interval": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"runMode\":\"Scheduled\",\"webJobName\":\"MyAzureWebJob\",\"startTime\":\"2024-12-08T00:00:00\",\"endTime\":\"2024-12-09T00:00:00-08:00\",\"jobRecurrenceFrequency\":\"Day\",\"interval\":1} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'Scheduled' is not one of ['Continuous', 'OnDemand']\n\nFailed validating 'enum' in schema[1]['properties']['runMode']:\n    {'type': 'string',\n     'enum': ['Continuous', 'OnDemand'],\n     'description': 'Determines the run mode of the Azure Webjob. \\n'\n                    '\\n'\n                    ' Triggered: manually triggered \\n'\n                    ' Scheduled: runs on a specific schedule \\n'\n                    ' Continuous: runs all the time'}\n\nOn instance['runMode']:\n    'Scheduled'",
+      "data": {
+        "runMode": "Scheduled",
+        "webJobName": "MyAzureWebJob",
+        "startTime": "2024-12-08T00:00:00",
+        "endTime": "2024-12-09T00:00:00-08:00",
+        "jobRecurrenceFrequency": "Day",
+        "interval": 1
+      }
+    }
+  ]
+}

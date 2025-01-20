@@ -1,0 +1,297 @@
+{
+  "description": "sample JsonSchemaStore/resolutions-schema.json",
+  "meta": {
+    "full_size": 1728,
+    "stripped_size": 1405,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://oss-review-toolkit.org/resolutions.yml",
+    "title": "ORT resolutions",
+    "description": "The OSS-Review-Toolkit (ORT) provides a possibility to resolve issues, rule violations and security vulnerabilities in a resolutions file. A full list of all available options can be found at https://github.com/oss-review-toolkit/ort/blob/main/docs/config-file-resolutions-yml.md.",
+    "type": "object",
+    "properties": {
+      "issues": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "reason": {
+              "$ref": "#/definitions/issueResolutionReason"
+            },
+            "comment": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "message",
+            "reason"
+          ]
+        }
+      },
+      "rule_violations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "reason": {
+              "$ref": "#/definitions/ruleViolationResolutionReason"
+            },
+            "comment": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "message",
+            "reason"
+          ]
+        }
+      },
+      "vulnerabilities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "reason": {
+              "$ref": "#/definitions/vulnerabilityResolutionReason"
+            },
+            "comment": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "reason"
+          ]
+        }
+      }
+    },
+    "anyOf": [
+      {
+        "required": [
+          "issues"
+        ]
+      },
+      {
+        "required": [
+          "rule_violations"
+        ]
+      },
+      {
+        "required": [
+          "vulnerabilities"
+        ]
+      }
+    ],
+    "definitions": {
+      "issueResolutionReason": {
+        "enum": [
+          "BUILD_TOOL_ISSUE",
+          "CANT_FIX_ISSUE",
+          "SCANNER_ISSUE"
+        ]
+      },
+      "ruleViolationResolutionReason": {
+        "enum": [
+          "CANT_FIX_EXCEPTION",
+          "DYNAMIC_LINKAGE_EXCEPTION",
+          "EXAMPLE_OF_EXCEPTION",
+          "LICENSE_ACQUIRED_EXCEPTION",
+          "NOT_MODIFIED_EXCEPTION",
+          "PATENT_GRANT_EXCEPTION"
+        ]
+      },
+      "vulnerabilityResolutionReason": {
+        "enum": [
+          "CANT_FIX_VULNERABILITY",
+          "INEFFECTIVE_VULNERABILITY",
+          "INVALID_MATCH_VULNERABILITY",
+          "MITIGATED_VULNERABILITY",
+          "WILL_NOT_FIX_VULNERABILITY",
+          "WORKAROUND_FOR_VULNERABILITY"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "issues": [
+          {
+            "message": "Issue with library A",
+            "reason": "SCANNER_ISSUE",
+            "comment": "This is a comment for the issue"
+          },
+          {
+            "message": "Issue with library B",
+            "reason": "CANT_FIX_ISSUE",
+            "comment": "This is another comment for the issue"
+          }
+        ],
+        "rule_violations": [
+          {
+            "message": "Rule violation with library C",
+            "reason": "NOT_MODIFIED_EXCEPTION",
+            "comment": "This is a comment for the rule violation"
+          }
+        ],
+        "vulnerabilities": [
+          {
+            "id": "CVE-2022-1234",
+            "reason": "MITIGATED_VULNERABILITY",
+            "comment": "This is a comment for the vulnerability"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"INVALID_REASON\" is not one of [\"BUILD_TOOL_ISSUE\",\"CANT_FIX_ISSUE\",\"SCANNER_ISSUE\"]",
+      "python_error": "'INVALID_REASON' is not one of ['BUILD_TOOL_ISSUE', 'CANT_FIX_ISSUE', 'SCANNER_ISSUE']\n\nFailed validating 'enum' in schema['properties']['issues']['items']['properties']['reason']:\n    {'enum': ['BUILD_TOOL_ISSUE', 'CANT_FIX_ISSUE', 'SCANNER_ISSUE']}\n\nOn instance['issues'][1]['reason']:\n    'INVALID_REASON'",
+      "data": {
+        "issues": [
+          {
+            "message": "Issue with library A",
+            "reason": "SCANNER_ISSUE",
+            "comment": "This is a comment for the issue"
+          },
+          {
+            "message": "Issue with library B",
+            "reason": "INVALID_REASON",
+            "comment": "This is another comment for the issue"
+          }
+        ],
+        "rule_violations": [
+          {
+            "message": "Rule violation with library C",
+            "reason": "NOT_MODIFIED_EXCEPTION",
+            "comment": "This is a comment for the rule violation"
+          }
+        ],
+        "vulnerabilities": [
+          {
+            "id": "CVE-2022-1234",
+            "reason": "MITIGATED_VULNERABILITY",
+            "comment": "This is a comment for the vulnerability"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "issues": [
+          {
+            "message": "This is an example issue message",
+            "reason": "BUILD_TOOL_ISSUE",
+            "comment": "This is an example comment for the issue"
+          },
+          {
+            "message": "This is another example issue message",
+            "reason": "CANT_FIX_ISSUE",
+            "comment": "This is another example comment for the issue"
+          }
+        ],
+        "rule_violations": [
+          {
+            "message": "This is an example rule violation message",
+            "reason": "CANT_FIX_EXCEPTION",
+            "comment": "This is an example comment for the rule violation"
+          },
+          {
+            "message": "This is another example rule violation message",
+            "reason": "DYNAMIC_LINKAGE_EXCEPTION",
+            "comment": "This is another example comment for the rule violation"
+          }
+        ],
+        "vulnerabilities": [
+          {
+            "id": "CVE-2022-1234",
+            "reason": "CANT_FIX_VULNERABILITY",
+            "comment": "This is an example comment for the vulnerability"
+          },
+          {
+            "id": "CVE-2022-5678",
+            "reason": "MITIGATED_VULNERABILITY",
+            "comment": "This is another example comment for the vulnerability"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"INVALID_REASON\" is not one of [\"BUILD_TOOL_ISSUE\",\"CANT_FIX_ISSUE\",\"SCANNER_ISSUE\"]",
+      "python_error": "'INVALID_REASON' is not one of ['BUILD_TOOL_ISSUE', 'CANT_FIX_ISSUE', 'SCANNER_ISSUE']\n\nFailed validating 'enum' in schema['properties']['issues']['items']['properties']['reason']:\n    {'enum': ['BUILD_TOOL_ISSUE', 'CANT_FIX_ISSUE', 'SCANNER_ISSUE']}\n\nOn instance['issues'][0]['reason']:\n    'INVALID_REASON'",
+      "data": {
+        "issues": [
+          {
+            "message": "This is an example issue message",
+            "reason": "INVALID_REASON",
+            "comment": "This is an example comment for the issue"
+          },
+          {
+            "message": "This is another example issue message",
+            "reason": "CANT_FIX_ISSUE",
+            "comment": "This is another example comment for the issue"
+          }
+        ],
+        "rule_violations": [
+          {
+            "message": "This is an example rule violation message",
+            "reason": "CANT_FIX_EXCEPTION",
+            "comment": "This is an example comment for the rule violation"
+          },
+          {
+            "message": "This is another example rule violation message",
+            "reason": "DYNAMIC_LINKAGE_EXCEPTION",
+            "comment": "This is another example comment for the rule violation"
+          }
+        ],
+        "vulnerabilities": [
+          {
+            "id": "CVE-2022-1234",
+            "reason": "CANT_FIX_VULNERABILITY",
+            "comment": "This is an example comment for the vulnerability"
+          },
+          {
+            "id": "CVE-2022-5678",
+            "reason": "MITIGATED_VULNERABILITY",
+            "comment": "This is another example comment for the vulnerability"
+          }
+        ]
+      }
+    }
+  ]
+}

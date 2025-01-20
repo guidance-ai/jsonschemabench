@@ -1,0 +1,408 @@
+{
+  "description": "sample Github_medium/o77712.json",
+  "meta": {
+    "full_size": 2615,
+    "stripped_size": 1033,
+    "features": [
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "http://spydra.spotify.net/configuration#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "schema for Spydra configuration",
+    "type": "object",
+    "properties": {
+      "cluster_type": {
+        "description": "type of cluster to execute on",
+        "enum": [
+          "onpremise",
+          "dataproc",
+          "null"
+        ]
+      },
+      "client_id": {
+        "description": "a unique ID of spydra client",
+        "type": "string"
+      },
+      "history_timeout": {
+        "description": "time in seconds to wait for job history to be moved",
+        "type": "number"
+      },
+      "log_bucket": {
+        "description": "bucket for storage of Hadoop logs and history information",
+        "type": "string"
+      },
+      "region": {
+        "description": "The region in which the cluster should be created. Replaces the zone option in cluster.",
+        "type": "string"
+      },
+      "job_type": {
+        "description": "type of job to execute (e.g. hadoop/spark/etc), see `gcloud dataproc jobs submit --help`",
+        "type": "string"
+      },
+      "cluster": {
+        "description": "options for cluster creation",
+        "type": "object",
+        "properties": {
+          "options": {
+            "description": "gcloud options for cluster creation, see `gcloud dataproc clusters create --help`",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "submit": {
+        "description": "options for job submission",
+        "type": "object",
+        "properties": {
+          "options": {
+            "description": "gcloud options for job submission, see `gcloud dataproc jobs submit --help`",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "job_args": {
+            "description": "additional job arguments",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "py_file": {
+            "description": "The main .py file to run as the driver.",
+            "type": "string"
+          }
+        }
+      },
+      "auto_scaler": {
+        "description": "options for the EXPERIMENTAL autoscaler",
+        "type": "object",
+        "properties": {
+          "interval": {
+            "description": "autoscaling interval in minutes",
+            "type": "number"
+          },
+          "max": {
+            "description": "maximum number of nodes to use for autoscaling",
+            "type": "number"
+          },
+          "factor": {
+            "description": "percentage of containers that should be running from 0.0 to 1.0",
+            "type": "number"
+          },
+          "downscale": {
+            "description": "whether or not to enable downscaling",
+            "type": "boolean"
+          },
+          "downscale_timeout": {
+            "description": "how long to wait in minutes for active jobs to finish before terminating nodes",
+            "type": "number"
+          }
+        }
+      },
+      "pooling": {
+        "description": "options for the EXPERIMENTAL pooling of cluster",
+        "type": "object",
+        "properties": {
+          "limit": {
+            "description": "limit of concurrent clusters",
+            "type": "number"
+          },
+          "max_age": {
+            "description": "A java.time.Duration for the maximum age of a cluster",
+            "type": "string"
+          }
+        }
+      },
+      "dry_run": {
+        "description": "do not execute anything, just print out commands that would be run",
+        "type": "boolean"
+      },
+      "metric_class": {
+        "description": "Implementation to use for metrics reporting",
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "cluster_type": "dataproc",
+        "client_id": "client-123",
+        "history_timeout": 300,
+        "log_bucket": "gs://my-bucket/logs",
+        "region": "us-central1",
+        "job_type": "hadoop",
+        "cluster": {
+          "options": {
+            "machine-type": "n1-standard-4",
+            "num-workers": "2"
+          }
+        },
+        "submit": {
+          "options": {
+            "properties": "mapreduce.map.memory.mb=4096"
+          },
+          "job_args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "py_file": "main.py"
+        },
+        "auto_scaler": {
+          "interval": 10,
+          "max": 10,
+          "factor": 0.5,
+          "downscale": true,
+          "downscale_timeout": 30
+        },
+        "pooling": {
+          "limit": 5,
+          "max_age": "PT1H"
+        },
+        "dry_run": false,
+        "metric_class": "com.example.MetricReporter"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "True is not of type 'string'\n\nFailed validating 'type' in schema['properties']['submit']['properties']['options']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['submit']['options']['invalid-key']:\n    True",
+      "data": {
+        "cluster_type": "dataproc",
+        "client_id": "client-123",
+        "history_timeout": 300,
+        "log_bucket": "gs://my-bucket/logs",
+        "region": "us-central1",
+        "job_type": "hadoop",
+        "cluster": {
+          "options": {
+            "machine-type": "n1-standard-4",
+            "num-workers": "2",
+            "invalid-key": 123
+          }
+        },
+        "submit": {
+          "options": {
+            "properties": "mapreduce.map.memory.mb=4096",
+            "invalid-key": true
+          },
+          "job_args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "py_file": "main.py"
+        },
+        "auto_scaler": {
+          "interval": 10,
+          "max": 10,
+          "factor": 0.5,
+          "downscale": true,
+          "downscale_timeout": 30
+        },
+        "pooling": {
+          "limit": 5,
+          "max_age": "PT1H"
+        },
+        "dry_run": false,
+        "metric_class": "com.example.MetricReporter"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['submit']['properties']['py_file']:\n    {'description': 'The main .py file to run as the driver.',\n     'type': 'string'}\n\nOn instance['submit']['py_file']:\n    123",
+      "data": {
+        "cluster_type": "dataproc",
+        "client_id": "client-123",
+        "history_timeout": 300,
+        "log_bucket": "gs://my-bucket/logs",
+        "region": "us-central1",
+        "job_type": "hadoop",
+        "cluster": {
+          "options": {
+            "machine-type": "n1-standard-4",
+            "num-workers": "2"
+          }
+        },
+        "submit": {
+          "options": {
+            "properties": "mapreduce.map.memory.mb=4096"
+          },
+          "job_args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "py_file": 123
+        },
+        "auto_scaler": {
+          "interval": 10,
+          "max": 10,
+          "factor": 0.5,
+          "downscale": true,
+          "downscale_timeout": 30
+        },
+        "pooling": {
+          "limit": 5,
+          "max_age": "PT1H"
+        },
+        "dry_run": false,
+        "metric_class": "com.example.MetricReporter"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['submit']['properties']['job_args']['items']:\n    {'type': 'string'}\n\nOn instance['submit']['job_args'][3]:\n    None",
+      "data": {
+        "cluster_type": "dataproc",
+        "client_id": "client-123",
+        "history_timeout": 300,
+        "log_bucket": "gs://my-bucket/logs",
+        "region": "us-central1",
+        "job_type": "hadoop",
+        "cluster": {
+          "options": {
+            "machine-type": "n1-standard-4",
+            "num-workers": "2"
+          }
+        },
+        "submit": {
+          "options": {
+            "properties": "mapreduce.map.memory.mb=4096"
+          },
+          "job_args": [
+            "--arg1",
+            "--arg2",
+            123,
+            null
+          ],
+          "py_file": "main.py"
+        },
+        "auto_scaler": {
+          "interval": 10,
+          "max": 10,
+          "factor": 1.5,
+          "downscale": true,
+          "downscale_timeout": 30
+        },
+        "pooling": {
+          "limit": 5,
+          "max_age": "PT1H"
+        },
+        "dry_run": false,
+        "metric_class": "com.example.MetricReporter"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "cluster_type": "dataproc",
+        "client_id": "spydra-client-123",
+        "history_timeout": 300,
+        "log_bucket": "gs://spydra-logs",
+        "region": "us-central1",
+        "job_type": "hadoop",
+        "cluster": {
+          "options": {
+            "machine-type": "n1-standard-4",
+            "num-workers": "2"
+          }
+        },
+        "submit": {
+          "options": {
+            "properties": "spark.executor.memory=4g"
+          },
+          "job_args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "py_file": "main.py"
+        },
+        "auto_scaler": {
+          "interval": 5,
+          "max": 10,
+          "factor": 0.8,
+          "downscale": true,
+          "downscale_timeout": 10
+        },
+        "pooling": {
+          "limit": 5,
+          "max_age": "PT1H"
+        },
+        "dry_run": false,
+        "metric_class": "com.spydra.metrics.StdOutMetric"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['submit']['properties']['py_file']:\n    {'description': 'The main .py file to run as the driver.',\n     'type': 'string'}\n\nOn instance['submit']['py_file']:\n    123",
+      "data": {
+        "cluster_type": "dataproc",
+        "client_id": "spydra-client-123",
+        "history_timeout": 300,
+        "log_bucket": "gs://spydra-logs",
+        "region": "us-central1",
+        "job_type": "hadoop",
+        "cluster": {
+          "options": {
+            "machine-type": "n1-standard-4",
+            "num-workers": "2"
+          }
+        },
+        "submit": {
+          "options": {
+            "properties": "spark.executor.memory=4g"
+          },
+          "job_args": [
+            "--arg1",
+            "--arg2"
+          ],
+          "py_file": 123
+        },
+        "auto_scaler": {
+          "interval": 5,
+          "max": 10,
+          "factor": 1.1,
+          "downscale": true,
+          "downscale_timeout": 10
+        },
+        "pooling": {
+          "limit": 5,
+          "max_age": "PT1H"
+        },
+        "dry_run": false,
+        "metric_class": "com.spydra.metrics.StdOutMetric",
+        "extra_key": "extra_value"
+      }
+    }
+  ]
+}

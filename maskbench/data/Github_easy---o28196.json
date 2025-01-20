@@ -1,0 +1,133 @@
+{
+  "description": "sample Github_easy/o28196.json",
+  "meta": {
+    "full_size": 875,
+    "stripped_size": 327,
+    "features": [
+      "@minmaxLength",
+      "enum"
+    ],
+    "raw_features": [
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "Specifies relationships between the current document and an external resource.",
+    "properties": {
+      "href": {
+        "description": "A URL. Specifies the location of the linked document.",
+        "maxLength": 255,
+        "type": "string"
+      },
+      "method": {
+        "description": "Specifies how to send the data (e.g. get, post).",
+        "enum": [
+          "get",
+          "post"
+        ],
+        "type": "string"
+      },
+      "objectType": {
+        "description": "The type of the object, link.",
+        "maxLength": 25,
+        "type": "string"
+      },
+      "rel": {
+        "description": "Specifies the relationship between the current document and the linked document.",
+        "maxLength": 25,
+        "type": "string"
+      },
+      "title": {
+        "description": "Provide additional / advisory information (expand on the meaning of the link).",
+        "maxLength": 25,
+        "type": "string"
+      },
+      "type": {
+        "description": "Specifies the media type of the linked document.",
+        "maxLength": 25,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objectType",
+      "href",
+      "rel"
+    ],
+    "title": "link",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "href": "https://example.com/resource",
+        "method": "get",
+        "objectType": "link",
+        "rel": "related",
+        "title": "Related Resource",
+        "type": "application/json"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"put\" is not one of [\"get\",\"post\"]",
+      "python_error": "'put' is not one of ['get', 'post']\n\nFailed validating 'enum' in schema['properties']['method']:\n    {'description': 'Specifies how to send the data (e.g. get, post).',\n     'enum': ['get', 'post'],\n     'type': 'string'}\n\nOn instance['method']:\n    'put'",
+      "data": {
+        "href": "https://example.com/resource",
+        "method": "put",
+        "objectType": "link",
+        "rel": "related",
+        "title": "Related Resource",
+        "type": "application/json"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "href": "https://www.example.com",
+        "method": "get",
+        "objectType": "link",
+        "rel": "related",
+        "title": "Example Link",
+        "type": "text/html"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"This is a very long title that exceeds the maxLength constraint, it has more than 25 characters\" is longer than 25 characters",
+      "python_error": "'This is a very long title that exceeds the maxLength constraint, it has more than 25 characters' is too long\n\nFailed validating 'maxLength' in schema['properties']['title']:\n    {'description': 'Provide additional / advisory information (expand on '\n                    'the meaning of the link).',\n     'maxLength': 25,\n     'type': 'string'}\n\nOn instance['title']:\n    ('This is a very long title that exceeds the maxLength constraint, it '\n     'has more than 25 characters')",
+      "data": {
+        "href": "https://www.example.com",
+        "method": "get",
+        "objectType": "link",
+        "rel": "related",
+        "title": "This is a very long title that exceeds the maxLength constraint, it has more than 25 characters",
+        "type": "text/html"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"This is a string longer than 25 characters\" is longer than 25 characters",
+      "python_error": "'This is a string longer than 25 characters' is too long\n\nFailed validating 'maxLength' in schema['properties']['objectType']:\n    {'description': 'The type of the object, link.',\n     'maxLength': 25,\n     'type': 'string'}\n\nOn instance['objectType']:\n    'This is a string longer than 25 characters'",
+      "data": {
+        "href": "https://www.example.com",
+        "method": "post",
+        "objectType": "This is a string longer than 25 characters",
+        "rel": "related",
+        "title": "Example Link",
+        "type": "text/html",
+        "objectTypeTooLong": "This is a string longer than 25 characters as specified in the schema for objectType, but objectType property also has a maxLength constraint in the schema so we will change objectType itself to a long one"
+      }
+    }
+  ]
+}

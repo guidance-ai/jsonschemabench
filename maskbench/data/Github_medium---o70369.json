@@ -1,0 +1,234 @@
+{
+  "description": "sample Github_medium/o70369.json",
+  "meta": {
+    "full_size": 1399,
+    "stripped_size": 1399,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "IDType": {
+        "pattern": "^\\d{10}$",
+        "type": "string"
+      },
+      "ISO8601-Date": {
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+      },
+      "ISO8601-Timestamp": {
+        "pattern": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?(([+-]\\d{2}(:\\d{2})?)|Z)",
+        "type": "string"
+      },
+      "LISAManagerReferenceNumberType": {
+        "pattern": "^Z\\d{6}$",
+        "type": "string"
+      },
+      "financialPeriodType": {
+        "properties": {
+          "endDate": {
+            "$ref": "#/definitions/ISO8601-Date"
+          },
+          "startDate": {
+            "$ref": "#/definitions/ISO8601-Date"
+          }
+        },
+        "type": "object"
+      },
+      "paymentDirectionType": {
+        "enum": [
+          "credit",
+          "debit"
+        ],
+        "type": "string"
+      },
+      "paymentMethodType": {
+        "enum": [
+          "directDebit",
+          "BACS"
+        ],
+        "type": "string"
+      },
+      "paymentStatusType": {
+        "enum": [
+          "pending",
+          "submitted",
+          "completed"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "LISAManagerReferenceNumber": {
+        "$ref": "#/definitions/LISAManagerReferenceNumberType"
+      },
+      "_links": {
+        "type": "object"
+      },
+      "amount": {
+        "type": "number"
+      },
+      "direction": {
+        "$ref": "#/definitions/paymentDirectionType"
+      },
+      "financialPeriod": {
+        "$ref": "#/definitions/financialPeriodType"
+      },
+      "method": {
+        "$ref": "#/definitions/paymentMethodType"
+      },
+      "paymentDate": {
+        "$ref": "#/definitions/ISO8601-Date"
+      },
+      "paymentReference": {
+        "$ref": "#/definitions/IDType"
+      },
+      "status": {
+        "$ref": "#/definitions/paymentStatusType"
+      }
+    },
+    "required": [
+      "LISAManagerReferenceNumber",
+      "paymentReference",
+      "method",
+      "direction",
+      "paymentDate",
+      "amount",
+      "financialPeriod"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "LISAManagerReferenceNumber": "Z123456",
+        "amount": 100.0,
+        "direction": "credit",
+        "financialPeriod": {
+          "startDate": "2022-01-01",
+          "endDate ": "2022-01-31"
+        },
+        "method": "BACS",
+        "paymentDate": "2022-01-15",
+        "paymentReference": "1234567890",
+        "status": "pending"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Z12345\" does not match \"^Z\\d{6}$\"",
+      "python_error": "'123456789' does not match '^\\\\d{10}$'\n\nFailed validating 'pattern' in schema['properties']['paymentReference']:\n    {'pattern': '^\\\\d{10}$', 'type': 'string'}\n\nOn instance['paymentReference']:\n    '123456789'",
+      "data": {
+        "LISAManagerReferenceNumber": "Z12345",
+        "amount": 100.0,
+        "direction": "credit",
+        "financialPeriod": {
+          "startDate": "2022-01-01",
+          "endDate": "2022-01-31"
+        },
+        "method": "BACS",
+        "paymentDate": "2022-01-15",
+        "paymentReference": "123456789",
+        "status": "pending"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123456789\" does not match \"^\\d{10}$\"",
+      "python_error": "Additional properties are not allowed ('Invalid IDType: should be 10 digits', \"Invalid: should be 'pending', 'submitted' or 'completed'\" were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'definitions': {'IDType': {'pattern': '^\\\\d{10}$', 'type': 'string'},\n                     'ISO8601-Date': {'pattern': '^\\\\d{4}-\\\\d{2}-\\\\d{2}$',\n                                      'type': 'string'},\n                     'ISO8601-Timestamp': {'pattern': '\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}(:\\\\d{2})?(([+-]\\\\d{2}(:\\\\d{2})?)|Z)',\n                                           'type': 'string'},\n                     'LISAManagerReferenceNumberType': {'pattern': '^Z\\\\d{6}$',\n                                                        'type': 'string'},\n                     'financialPeriodType': {'properties': {'endDate': {'$ref': '#/definitions/ISO8601-Date'},\n                                                           .. (2033 more)",
+      "data": {
+        "LISAManagerReferenceNumber": "Z123456",
+        "amount": 100.0,
+        "direction": "credit",
+        "financialPeriod": {
+          "endDate": "2022-01-31",
+          "startDate": "2022-01-01"
+        },
+        "method": "BACS",
+        "paymentDate": "2022-01-15",
+        "paymentReference": "123456789",
+        "Invalid IDType: should be 10 digits": "status",
+        "Invalid: should be 'pending', 'submitted' or 'completed'": "pending"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"12345678901\" does not match \"^\\d{10}$\"",
+      "python_error": "Additional properties are not allowed ('Invalid - extra property not allowed due to additionalProperties: false', 'Invalid IDType - more than 10 digits' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'definitions': {'IDType': {'pattern': '^\\\\d{10}$', 'type': 'string'},\n                     'ISO8601-Date': {'pattern': '^\\\\d{4}-\\\\d{2}-\\\\d{2}$',\n                                      'type': 'string'},\n                     'ISO8601-Timestamp': {'pattern': '\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}(:\\\\d{2})?(([+-]\\\\d{2}(:\\\\d{2})?)|Z)',\n                                           'type': 'string'},\n                     'LISAManagerReferenceNumberType': {'pattern': '^Z\\\\d{6}$',\n                                                        'type': 'string'},\n                     'financialPeriodType': {'properties': {'endDate': {'$ref': '#/definitions/ISO8601-Date'},\n                                           .. (2067 more)",
+      "data": {
+        "LISAManagerReferenceNumber": "Z123456",
+        "amount": 100.0,
+        "direction": "credit",
+        "financialPeriod": {
+          "endDate": "2022-01-31",
+          "startDate": "2022-01-01"
+        },
+        "method": "BACS",
+        "paymentDate": "2022-01-15",
+        "paymentReference": "12345678901",
+        "Invalid IDType - more than 10 digits": "status",
+        "Invalid - extra property not allowed due to additionalProperties: false": "pending"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "LISAManagerReferenceNumber": "Z123456",
+        "_links": {},
+        "amount": 100.0,
+        "direction": "credit",
+        "financialPeriod": {
+          "endDate": "2022-01-31",
+          "startDate": "2022-01-01"
+        },
+        "method": "BACS",
+        "paymentDate": "2022-01-15",
+        "paymentReference": "1234567890",
+        "status": "pending"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"\" does not match \"^\\d{10}$\"",
+      "python_error": "Additional properties are not allowed ('Invalid: 11 digits instead of exactly 10' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'definitions': {'IDType': {'pattern': '^\\\\d{10}$', 'type': 'string'},\n                     'ISO8601-Date': {'pattern': '^\\\\d{4}-\\\\d{2}-\\\\d{2}$',\n                                      'type': 'string'},\n                     'ISO8601-Timestamp': {'pattern': '\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}(:\\\\d{2})?(([+-]\\\\d{2}(:\\\\d{2})?)|Z)',\n                                           'type': 'string'},\n                     'LISAManagerReferenceNumberType': {'pattern': '^Z\\\\d{6}$',\n                                                        'type': 'string'},\n                     'financialPeriodType': {'properties': {'endDate': {'$ref': '#/definitions/ISO8601-Date'},\n                                                            'startDate': {'$ref': '#/definitions/ISO8601-Date'}},\n .. (1916 more)",
+      "data": {
+        "LISAManagerReferenceNumber": "Z123456",
+        "amount": 100.0,
+        "direction": "credit",
+        "financialPeriod": {
+          "endDate": "2022-01-31",
+          "startDate": "2022-01-01"
+        },
+        "method": "BACS",
+        "paymentDate": "2022-01-15",
+        "paymentReference": "",
+        "Invalid: 11 digits instead of exactly 10": "status",
+        "_links": {}
+      }
+    }
+  ]
+}

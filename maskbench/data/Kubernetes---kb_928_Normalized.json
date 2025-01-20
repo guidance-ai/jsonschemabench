@@ -1,0 +1,266 @@
+{
+  "description": "sample Kubernetes/kb_928_Normalized.json",
+  "meta": {
+    "full_size": 2512,
+    "stripped_size": 565,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_Toleration": {
+        "description": "The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.",
+        "properties": {
+          "effect": {
+            "description": "Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.",
+            "type": "string"
+          },
+          "key": {
+            "description": "Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is empty, operator must be Exists; this combination means to match all values and all keys.",
+            "type": "string"
+          },
+          "operator": {
+            "description": "Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular category.",
+            "type": "string"
+          },
+          "tolerationSeconds": {
+            "_format": "int64",
+            "description": "TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by the system.",
+            "type": "integer"
+          },
+          "value": {
+            "description": "Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "description": "Scheduling specifies the scheduling constraints for nodes supporting a RuntimeClass.",
+    "properties": {
+      "nodeSelector": {
+        "additionalProperties": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": "nodeSelector lists labels that must be present on nodes that support this RuntimeClass. Pods using this RuntimeClass can only be scheduled to a node matched by this selector. The RuntimeClass nodeSelector is merged with a pod's existing nodeSelector. Any conflicts will cause the pod to be rejected in admission.",
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "tolerations": {
+        "description": "tolerations are appended (excluding duplicates) to pods running with this RuntimeClass during admission, effectively unioning the set of nodes tolerated by the pod and the RuntimeClass.",
+        "items": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_Toleration"
+        },
+        "type": [
+          "array",
+          "null"
+        ],
+        "x-kubernetes-list-type": "atomic"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "nodeSelector": {
+          "kubernetes.io/os": "linux",
+          "kubernetes.io/arch": "amd64"
+        },
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "effect ": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Equal",
+            "value": "true",
+            "effect ": "NoExecute",
+            "tolerationSeconds ": 3600
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['nodeSelector']['additionalProperties']:\n    {'type': ['string', 'null']}\n\nOn instance['nodeSelector']['invalidKey']:\n    123",
+      "data": {
+        "nodeSelector": {
+          "kubernetes.io/os": "linux",
+          "kubernetes.io/arch": "amd64",
+          "invalidKey": 123
+        },
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Equal",
+            "value": "true",
+            "effect": "NoExecute",
+            "tolerationSeconds": 3600
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "\"linux\" is not of types \"null\", \"object\"",
+      "python_error": "'linux' is not of type 'object', 'null'\n\nFailed validating 'type' in schema['properties']['nodeSelector']:\n    {'additionalProperties': {'type': ['string', 'null']},\n     'description': 'nodeSelector lists labels that must be present on '\n                    'nodes that support this RuntimeClass. Pods using this '\n                    'RuntimeClass can only be scheduled to a node matched '\n                    'by this selector. The RuntimeClass nodeSelector is '\n                    \"merged with a pod's existing nodeSelector. Any \"\n                    'conflicts will cause the pod to be rejected in '\n                    'admission.',\n     'type': ['object', 'null']}\n\nOn instance['nodeSelector']:\n    'linux'",
+      "data": {
+        "nodeSelector": "linux",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "effect ": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Equal",
+            "value": "true",
+            "effect ": "NoExecute",
+            "tolerationSeconds ": 3600
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['tolerations']['items']['properties']['value']:\n    {'description': 'Value is the taint value the toleration matches to. '\n                    'If the operator is Exists, the value should be empty, '\n                    'otherwise just a regular string.',\n     'type': 'string'}\n\nOn instance['tolerations'][1]['value']:\n    123",
+      "data": {
+        "nodeSelector": {
+          "kubernetes.io/os": "linux",
+          "kubernetes.io/arch": "amd64"
+        },
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "effect ": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Equal",
+            "value": 123,
+            "Invalid value type, should be string": "effect",
+            "Invalid key, should be 'effect'": "NoExecute",
+            "tolerationSeconds ": 3600
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "nodeSelector": {
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/os": "linux"
+        },
+        "tolerations": [
+          {
+            "effect": "NoSchedule",
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "tolerationSeconds": 3600,
+            "value": ""
+          },
+          {
+            "effect": "PreferNoSchedule",
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Equal",
+            "tolerationSeconds": 0,
+            "value": "true"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"object\"",
+      "python_error": "123 is not of type 'object', 'null'\n\nFailed validating 'type' in schema['properties']['nodeSelector']:\n    {'additionalProperties': {'type': ['string', 'null']},\n     'description': 'nodeSelector lists labels that must be present on '\n                    'nodes that support this RuntimeClass. Pods using this '\n                    'RuntimeClass can only be scheduled to a node matched '\n                    'by this selector. The RuntimeClass nodeSelector is '\n                    \"merged with a pod's existing nodeSelector. Any \"\n                    'conflicts will cause the pod to be rejected in '\n                    'admission.',\n     'type': ['object', 'null']}\n\nOn instance['nodeSelector']:\n    123",
+      "data": {
+        "nodeSelector": 123,
+        "tolerations": [
+          {
+            "effect": "NoSchedule",
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "InvalidOperator",
+            "tolerationSeconds": 3600,
+            "value": ""
+          },
+          {
+            "effect": "PreferNoSchedule",
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Equal",
+            "tolerationSeconds": 0,
+            "value": "true"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of types \"null\", \"string\"",
+      "python_error": "123 is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['nodeSelector']['additionalProperties']:\n    {'type': ['string', 'null']}\n\nOn instance['nodeSelector']['foo']:\n    123",
+      "data": {
+        "nodeSelector": {
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/os": "linux",
+          "foo": 123
+        },
+        "tolerations": [
+          {
+            "effect": "NoSchedule",
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "tolerationSeconds": 3600,
+            "value": ""
+          },
+          {
+            "effect": "PreferNoSchedule",
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Equal",
+            "tolerationSeconds": 0,
+            "value": "true"
+          }
+        ]
+      }
+    }
+  ]
+}

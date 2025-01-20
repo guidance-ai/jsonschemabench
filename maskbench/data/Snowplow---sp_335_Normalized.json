@@ -1,0 +1,158 @@
+{
+  "description": "sample Snowplow/sp_335_Normalized.json",
+  "meta": {
+    "full_size": 1103,
+    "stripped_size": 418,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for storage loader errors with unknown data, e.g. invalid enriched event",
+    "properties": {
+      "errors": {
+        "description": "Errors that happened when not recognizing the event as an enriched event",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "payload": {
+        "description": "Data blob which was not recognized as an enriched event by the storage loader",
+        "type": "string"
+      },
+      "processor": {
+        "additionalProperties": false,
+        "description": "Information about the piece of software responsible for the creation of enrichment failures",
+        "properties": {
+          "artifact": {
+            "description": "Artifact responsible for the creation of enrichment failures",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of the artifact responsible for the creation of enrichment failures",
+            "maxLength": 32,
+            "pattern": "^(\\d+\\.\\d+\\.\\d+.*)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact",
+          "version"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "payload",
+      "errors",
+      "processor"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "loader_parsing_error",
+      "vendor": "com.snowplowanalytics.snowplow.badrows",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "errors": [
+          "Error 1: Invalid event format",
+          "Error 2: Missing required field"
+        ],
+        "payload": "{\"event\":\"invalid_event\",\"data\":\"some_data\"}",
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "errors": [
+          "Invalid event format",
+          "Missing required fields"
+        ],
+        "payload": "{\"event\":\"unknown\",\"data\":\"some data\"}",
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"abc\" does not match \"^(\\d+\\.\\d+\\.\\d+.*)$\"",
+      "python_error": "'abc' does not match '^(\\\\d+\\\\.\\\\d+\\\\.\\\\d+.*)$'\n\nFailed validating 'pattern' in schema['properties']['processor']['properties']['version']:\n    {'description': 'Version of the artifact responsible for the creation '\n                    'of enrichment failures',\n     'maxLength': 32,\n     'pattern': '^(\\\\d+\\\\.\\\\d+\\\\.\\\\d+.*)$',\n     'type': 'string'}\n\nOn instance['processor']['version']:\n    'abc'",
+      "data": {
+        "errors": [
+          "Invalid event format",
+          "Missing required fields"
+        ],
+        "payload": "{\"event\":\"unknown\",\"data\":\"some data\"}",
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "abc"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader\" is longer than 512 characters",
+      "python_error": "'snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader' is too long\n\nFailed validating 'maxLen.. (1250 more)",
+      "data": {
+        "errors": [
+          "Invalid event format",
+          "Missing required fields"
+        ],
+        "payload": "{\"event\":\"unknown\",\"data\":\"some data\"}",
+        "processor": {
+          "artifact": "snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader-snowplow-storage-loader",
+          "version": "1.2.3"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['processor']:\n    {'additionalProperties': False,\n     'description': 'Information about the piece of software responsible '\n                    'for the creation of enrichment failures',\n     'properties': {'artifact': {'description': 'Artifact responsible for '\n                                                'the creation of '\n                                                'enrichment failures',\n                                 'maxLength': 512,\n                                 'type': 'string'},\n                    'version': {'description': 'Version of the artifact '\n                                               'responsible for the '\n                                               'creation of enrichment '\n                                               'failures',\n                                'maxLength': 32,\n                                'pattern': '^(\\\\d+\\\\.\\\\d+.. (262 more)",
+      "data": {
+        "errors": [
+          "Invalid event format",
+          "Missing required fields"
+        ],
+        "payload": "{\"event\":\"unknown\",\"data\":\"some data\"}",
+        "processor": {
+          "artifact": "snowplow-storage-loader",
+          "version": "1.2.3",
+          "extraProperty": "extraValue"
+        }
+      }
+    }
+  ]
+}

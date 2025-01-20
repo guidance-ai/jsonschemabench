@@ -1,0 +1,153 @@
+{
+  "description": "sample Github_medium/o23174.json",
+  "meta": {
+    "full_size": 848,
+    "stripped_size": 458,
+    "features": [
+      "@minmaxLength",
+      "format",
+      "format:date-time",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "id",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://example.phpsx.org/population#",
+    "title": "entity",
+    "description": "Represents an internet population entity",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "description": "Unique id for each entry"
+      },
+      "place": {
+        "type": "integer",
+        "min": 1,
+        "max": 64,
+        "description": "Position in the top list"
+      },
+      "region": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 64,
+        "pattern": "[A-z]+",
+        "description": "Name of the region"
+      },
+      "population": {
+        "type": "integer",
+        "description": "Complete number of population"
+      },
+      "users": {
+        "type": "integer",
+        "description": "Number of internet users"
+      },
+      "worldUsers": {
+        "type": "number",
+        "description": "Percentage users of the world"
+      },
+      "datetime": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Date when the entity was created"
+      }
+    },
+    "required": [
+      "place",
+      "region",
+      "population",
+      "users",
+      "worldUsers"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": 1,
+        "place": 1,
+        "region": "Asia",
+        "population": 4567890,
+        "users": 123456,
+        "worldUsers": 12.34,
+        "datetime": "2022-01-01T12:00:00Z"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": 1,
+        "place": 1,
+        "region": "Asia",
+        "population": 4567890,
+        "users": 123456,
+        "worldUsers": 0.5,
+        "datetime": "2022-01-01T12:00:00Z"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2022-01-01T12:00:00\" is not a \"date-time\"",
+      "python_error": "'2022-01-01T12:00:00' is not a 'date-time'\n\nFailed validating 'format' in schema['properties']['datetime']:\n    {'type': 'string',\n     'format': 'date-time',\n     'description': 'Date when the entity was created'}\n\nOn instance['datetime']:\n    '2022-01-01T12:00:00'",
+      "data": {
+        "id": 1,
+        "place": 1,
+        "region": "Asia",
+        "population": 4567890,
+        "users": 123456,
+        "worldUsers": 0.5,
+        "datetime": "2022-01-01T12:00:00"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 3 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['region']:\n    {'type': 'string',\n     'minLength': 3,\n     'maxLength': 64,\n     'pattern': '[A-z]+',\n     'description': 'Name of the region'}\n\nOn instance['region']:\n    'a'",
+      "data": {
+        "id": 1,
+        "place": 1,
+        "region": "a",
+        "population": 4567890,
+        "users": 123456,
+        "worldUsers": 0.5,
+        "datetime": "2022-01-01T12:00:00Z"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"non-integer-value\" is not of type \"integer\"",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['region']:\n    {'type': 'string',\n     'minLength': 3,\n     'maxLength': 64,\n     'pattern': '[A-z]+',\n     'description': 'Name of the region'}\n\nOn instance['region']:\n    'a'",
+      "data": {
+        "id": 1,
+        "place": "non-integer-value",
+        "region": "a",
+        "population": 4567890,
+        "users": 123456,
+        "worldUsers": 0.5,
+        "datetime": "2022-01-01T12:00:00Z",
+        "extraField": "extraValue",
+        "usersInRegion": {
+          "subfield": "subvalue"
+        }
+      }
+    }
+  ]
+}

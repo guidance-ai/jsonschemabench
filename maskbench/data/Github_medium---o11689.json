@@ -1,0 +1,460 @@
+{
+  "description": "sample Github_medium/o11689.json",
+  "meta": {
+    "full_size": 1289,
+    "stripped_size": 1145,
+    "features": [
+      "$ref",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Git Workflow",
+    "description": "a use of branches in git called git workflow",
+    "type": "object",
+    "required": [
+      "workflow_name",
+      "branches",
+      "scenarios"
+    ],
+    "properties": {
+      "workflow_name": {
+        "type": "string"
+      },
+      "branches": {
+        "description": "The list of branches who exist all the time",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "scenarios": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/scenarios"
+        }
+      }
+    },
+    "definitions": {
+      "scenarios": {
+        "type": "object",
+        "required": [
+          "name",
+          "commands"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "commands": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/startCommand"
+                },
+                {
+                  "$ref": "#/definitions/finishCommand"
+                },
+                {
+                  "$ref": "#/definitions/nowCommand"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "startCommand": {
+        "type": "object",
+        "required": [
+          "name",
+          "branch_start"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "start"
+            ]
+          },
+          "branch_start": {
+            "type": "string"
+          }
+        }
+      },
+      "finishCommand": {
+        "type": "object",
+        "required": [
+          "name",
+          "branch_finish"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "finish"
+            ]
+          },
+          "branch_finish": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tagOn": {
+            "type": "string"
+          }
+        }
+      },
+      "nowCommand": {
+        "type": "object",
+        "required": [
+          "branch_start",
+          "branch_finish"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "now"
+            ]
+          },
+          "branch_start": {
+            "type": "string"
+          },
+          "branch_finish": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tagOn": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "workflow_name": "Git Workflow Example",
+        "branches": [
+          "main",
+          "dev"
+        ],
+        "scenarios": [
+          {
+            "name": "Feature Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "dev"
+              },
+              {
+                "name": "now",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          },
+          {
+            "name": "Hotfix Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "main"
+              },
+              {
+                "name": "finish",
+                "branch_finish": [
+                  "main",
+                  "dev"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"unknown\",\"branch_start\":\"dev\",\"branch_finish\":[\"main\"],\"tagOn\":\"main\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'name': 'unknown', 'branch_start': 'dev', 'branch_finish': ['main'], 'tagOn': 'main'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['scenarios']['items']['properties']['commands']['items']:\n    {'anyOf': [{'$ref': '#/definitions/startCommand'},\n               {'$ref': '#/definitions/finishCommand'},\n               {'$ref': '#/definitions/nowCommand'}]}\n\nOn instance['scenarios'][0]['commands'][2]:\n    {'name': 'unknown',\n     'branch_start': 'dev',\n     'branch_finish': ['main'],\n     'tagOn': 'main'}",
+      "data": {
+        "workflow_name": "Git Workflow Example",
+        "branches": [
+          "main",
+          "dev"
+        ],
+        "scenarios": [
+          {
+            "name": "Feature Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "dev"
+              },
+              {
+                "name": "now",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              },
+              {
+                "name": "unknown",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          },
+          {
+            "name": "Hotfix Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "main"
+              },
+              {
+                "name": "finish",
+                "branch_finish": [
+                  "main",
+                  "dev"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"name\":\"finish\",\"branch_finish\":[\"main\",\"dev\"],\"tagOn\":123} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'name': 'finish', 'branch_finish': ['main', 'dev'], 'tagOn': 123} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['scenarios']['items']['properties']['commands']['items']:\n    {'anyOf': [{'$ref': '#/definitions/startCommand'},\n               {'$ref': '#/definitions/finishCommand'},\n               {'$ref': '#/definitions/nowCommand'}]}\n\nOn instance['scenarios'][1]['commands'][1]:\n    {'name': 'finish', 'branch_finish': ['main', 'dev'], 'tagOn': 123}",
+      "data": {
+        "workflow_name": "Git Workflow Example",
+        "branches": [
+          "main",
+          "dev"
+        ],
+        "scenarios": [
+          {
+            "name": "Feature Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "dev"
+              },
+              {
+                "name": "now",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          },
+          {
+            "name": "Hotfix Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "main"
+              },
+              {
+                "name": "finish",
+                "branch_finish": [
+                  "main",
+                  "dev"
+                ],
+                "tagOn": 123
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"name\":\"unknown\",\"branch_start\":\"dev\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'name': 'unknown', 'branch_start': 'dev'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['scenarios']['items']['properties']['commands']['items']:\n    {'anyOf': [{'$ref': '#/definitions/startCommand'},\n               {'$ref': '#/definitions/finishCommand'},\n               {'$ref': '#/definitions/nowCommand'}]}\n\nOn instance['scenarios'][0]['commands'][2]:\n    {'name': 'unknown', 'branch_start': 'dev'}",
+      "data": {
+        "workflow_name": "Git Workflow Example",
+        "branches": [
+          "main",
+          "dev"
+        ],
+        "scenarios": [
+          {
+            "name": "Feature Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "dev"
+              },
+              {
+                "name": "now",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              },
+              {
+                "name": "unknown",
+                "branch_start": "dev"
+              }
+            ]
+          },
+          {
+            "name": "Hotfix Branch",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "main"
+              },
+              {
+                "name": "finish",
+                "branch_finish": [
+                  "main",
+                  "dev"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "workflow_name": "Git Workflow Example",
+        "branches": [
+          "main",
+          "dev"
+        ],
+        "scenarios": [
+          {
+            "name": "Feature Development",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "dev"
+              },
+              {
+                "name": "now",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          },
+          {
+            "name": "Hotfix",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "main"
+              },
+              {
+                "name": "finish",
+                "branch_finish": [
+                  "main",
+                  "dev"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"name\":\"invalid\",\"branch_start\":\"dev\",\"branch_finish\":[\"main\"],\"tagOn\":\"main\"} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "{'name': 'invalid', 'branch_start': 'dev', 'branch_finish': ['main'], 'tagOn': 'main'} is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['scenarios']['items']['properties']['commands']['items']:\n    {'anyOf': [{'$ref': '#/definitions/startCommand'},\n               {'$ref': '#/definitions/finishCommand'},\n               {'$ref': '#/definitions/nowCommand'}]}\n\nOn instance['scenarios'][0]['commands'][2]:\n    {'name': 'invalid',\n     'branch_start': 'dev',\n     'branch_finish': ['main'],\n     'tagOn': 'main'}",
+      "data": {
+        "workflow_name": "Git Workflow Example",
+        "branches": [
+          "main",
+          "dev"
+        ],
+        "scenarios": [
+          {
+            "name": "Feature Development",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "dev"
+              },
+              {
+                "name": "now",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              },
+              {
+                "name": "invalid",
+                "branch_start": "dev",
+                "branch_finish": [
+                  "main"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          },
+          {
+            "name": "Hotfix",
+            "commands": [
+              {
+                "name": "start",
+                "branch_start": "main"
+              },
+              {
+                "name": "finish",
+                "branch_finish": [
+                  "main",
+                  "dev"
+                ],
+                "tagOn": "main"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

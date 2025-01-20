@@ -1,0 +1,182 @@
+{
+  "description": "sample Github_medium/o70374.json",
+  "meta": {
+    "full_size": 745,
+    "stripped_size": 745,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "IDType": {
+        "pattern": "^\\d{10}$",
+        "type": "string"
+      },
+      "ISO8601-Date": {
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+      },
+      "ISO8601-Timestamp": {
+        "pattern": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?(([+-]\\d{2}(:\\d{2})?)|Z)",
+        "type": "string"
+      },
+      "NINOType": {
+        "pattern": "^[A-Z]{2}\\d{6}[A-D]$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "DoB": {
+        "$ref": "#/definitions/ISO8601-Date"
+      },
+      "_links": {
+        "type": "object"
+      },
+      "firstname": {
+        "type": "string"
+      },
+      "investorID": {
+        "$ref": "#/definitions/IDType"
+      },
+      "investorNINO": {
+        "$ref": "#/definitions/NINOType"
+      },
+      "lastname": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "investorNINO",
+      "title",
+      "firstname",
+      "lastname",
+      "DoB"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "DoB": "1990-01-01",
+        "_links": {},
+        "firstname": "John",
+        "investorID": "1234567890",
+        "investorNINO": "AB123456D",
+        "lastname": "Doe",
+        "title": "Mr"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"1990-01\" does not match \"^\\d{4}-\\d{2}-\\d{2}$\"",
+      "python_error": "'AB123456E' does not match '^[A-Z]{2}\\\\d{6}[A-D]$'\n\nFailed validating 'pattern' in schema['properties']['investorNINO']:\n    {'pattern': '^[A-Z]{2}\\\\d{6}[A-D]$', 'type': 'string'}\n\nOn instance['investorNINO']:\n    'AB123456E'",
+      "data": {
+        "DoB": "1990-01",
+        "_links": {},
+        "firstname": "John",
+        "investorID": "123456789",
+        "investorNINO": "AB123456E",
+        "lastname": "Doe",
+        "title": "Mr"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123456789\" does not match \"^\\d{10}$\"",
+      "python_error": "'123456789' does not match '^\\\\d{10}$'\n\nFailed validating 'pattern' in schema['properties']['investorID']:\n    {'pattern': '^\\\\d{10}$', 'type': 'string'}\n\nOn instance['investorID']:\n    '123456789'",
+      "data": {
+        "DoB": "1990-01-01",
+        "_links": {},
+        "firstname": "John",
+        "investorID": "123456789",
+        "investorNINO": "AB123456D",
+        "lastname": "Doe",
+        "title": "Mr"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"123456789\" does not match \"^\\d{10}$\"",
+      "python_error": "Additional properties are not allowed ('Invalid: IDType should be exactly 10 digits', \"Invalid: property name should be 'investorNINO' not ':investorNINO'\", 'extraProperty' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'definitions': {'IDType': {'pattern': '^\\\\d{10}$', 'type': 'string'},\n                     'ISO8601-Date': {'pattern': '^\\\\d{4}-\\\\d{2}-\\\\d{2}$',\n                                      'type': 'string'},\n                     'ISO8601-Timestamp': {'pattern': '\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}(:\\\\d{2})?(([+-]\\\\d{2}(:\\\\d{2})?)|Z)',\n                                           'type': 'string'},\n                     'NINOType': {'pattern': '^[A-Z]{2}\\\\d{6}[A-D]$',\n                                  'type': 'string'}},\n     'properties': {'DoB': {'$ref': '#/definitions/ISO8601-Date'},\n                    '_links': {'type': 'object'},\n                    'firstname': {'type': 'strin.. (699 more)",
+      "data": {
+        "DoB": "1990-01-01",
+        "_links": {},
+        "firstname": "John",
+        "investorID": "123456789",
+        "Invalid: IDType should be exactly 10 digits": "investorNINO",
+        "Invalid: property name should be 'investorNINO' not ':investorNINO'": "AB123456D",
+        "lastname": "Doe",
+        "title": "Mr",
+        "extraProperty": "extraValue"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "DoB": "1990-01-01",
+        "_links": {},
+        "firstname": "John",
+        "investorID": "1234567890",
+        "investorNINO": "AB123456D",
+        "lastname": "Doe",
+        "title": "Mr"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"AB123456F\" does not match \"^[A-Z]{2}\\d{6}[A-D]$\"",
+      "python_error": "'AB123456F' does not match '^[A-Z]{2}\\\\d{6}[A-D]$'\n\nFailed validating 'pattern' in schema['properties']['investorNINO']:\n    {'pattern': '^[A-Z]{2}\\\\d{6}[A-D]$', 'type': 'string'}\n\nOn instance['investorNINO']:\n    'AB123456F'",
+      "data": {
+        "investorNINO": "AB123456F",
+        "title": "Mr",
+        "firstname": "John",
+        "lastname": "Doe",
+        "DoB": "1990-01-01",
+        "investorID": "1234567890",
+        "_links": {}
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"123456789\" does not match \"^\\d{10}$\"",
+      "python_error": "Additional properties are not allowed ('additionalProperty', 'investorNINO2' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'additionalProperties': False,\n     'definitions': {'IDType': {'pattern': '^\\\\d{10}$', 'type': 'string'},\n                     'ISO8601-Date': {'pattern': '^\\\\d{4}-\\\\d{2}-\\\\d{2}$',\n                                      'type': 'string'},\n                     'ISO8601-Timestamp': {'pattern': '\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}(:\\\\d{2})?(([+-]\\\\d{2}(:\\\\d{2})?)|Z)',\n                                           'type': 'string'},\n                     'NINOType': {'pattern': '^[A-Z]{2}\\\\d{6}[A-D]$',\n                                  'type': 'string'}},\n     'properties': {'DoB': {'$ref': '#/definitions/ISO8601-Date'},\n                    '_links': {'type': 'object'},\n                    'firstname': {'type': 'string'},\n                    'investorID': {'$ref': '#/definitions/IDType'},\n                    'in.. (517 more)",
+      "data": {
+        "investorNINO": "AB123456D",
+        "title": "Mr",
+        "firstname": "John",
+        "lastname": "Doe",
+        "DoB": "1990-01-01",
+        "investorID": "123456789",
+        "_links": {},
+        "additionalProperty": "Invalid",
+        "investorNINO2": "AB123456E"
+      }
+    }
+  ]
+}

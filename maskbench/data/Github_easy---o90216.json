@@ -1,0 +1,119 @@
+{
+  "description": "sample Github_easy/o90216.json",
+  "meta": {
+    "full_size": 832,
+    "stripped_size": 451,
+    "features": [
+      "@siblingKeys",
+      "additionalProperties",
+      "enum",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "IconSymbol3DLayer Resource",
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "description": "The shape (primitive) or image URL (href) used to visualize the features.",
+    "properties": {
+      "dataURI": {
+        "type": "string",
+        "description": "an image encoded as base64 string, starting with `data:image/`",
+        "pattern": "^data:image/(.|\\n|\\r)+$"
+      },
+      "href": {
+        "description": "URL to the returned image.",
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "An absolute URL",
+            "pattern": "^https?://.+$"
+          },
+          {
+            "type": "string",
+            "description": "A relative path starting with ./",
+            "pattern": "^\\./.+$"
+          }
+        ]
+      },
+      "primitive": {
+        "type": "string",
+        "description": "Specifies the type of symbol used.",
+        "enum": [
+          "circle",
+          "cross",
+          "kite",
+          "square",
+          "triangle",
+          "x"
+        ]
+      }
+    },
+    "oneOf": [
+      {
+        "required": [
+          "primitive"
+        ]
+      },
+      {
+        "required": [
+          "href"
+        ]
+      },
+      {
+        "required": [
+          "dataURI"
+        ]
+      }
+    ],
+    "additionalProperties": false
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "primitive": "circle"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"data:image/\" does not match \"^data:image/(.|\\n|\\r)+$\"",
+      "python_error": "'data:image/' does not match '^data:image/(.|\\\\n|\\\\r)+$'\n\nFailed validating 'pattern' in schema['properties']['dataURI']:\n    {'type': 'string',\n     'description': 'an image encoded as base64 string, starting with '\n                    '`data:image/`',\n     'pattern': '^data:image/(.|\\\\n|\\\\r)+$'}\n\nOn instance['dataURI']:\n    'data:image/'",
+      "data": {
+        "dataURI": "data:image/"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"primitive\":\"circle\",\"href\":\"https://example.com\"} is valid under more than one of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'primitive': 'circle', 'href': 'https://example.com'} is valid under each of {'required': ['href']}, {'required': ['primitive']}\n\nFailed validating 'oneOf' in schema:\n    {'title': 'IconSymbol3DLayer Resource',\n     'type': 'object',\n     '$schema': 'http://json-schema.org/draft-04/schema',\n     'description': 'The shape (primitive) or image URL (href) used to '\n                    'visualize the features.',\n     'properties': {'dataURI': {'type': 'string',\n                                'description': 'an image encoded as base64 '\n                                               'string, starting with '\n                                               '`data:image/`',\n                                'pattern': '^data:image/(.|\\\\n|\\\\r)+$'},\n                    'href': {'description': 'URL to the returned image.',\n                             'oneOf': [{'type': 'string',\n                                        'description': 'An absolute URL',\n                                        'pattern': '^https?://.+$'},\n.. (1013 more)",
+      "data": {
+        "primitive": "circle",
+        "href": "https://example.com"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extraProperty' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'title': 'IconSymbol3DLayer Resource',\n     'type': 'object',\n     '$schema': 'http://json-schema.org/draft-04/schema',\n     'description': 'The shape (primitive) or image URL (href) used to '\n                    'visualize the features.',\n     'properties': {'dataURI': {'type': 'string',\n                                'description': 'an image encoded as base64 '\n                                               'string, starting with '\n                                               '`data:image/`',\n                                'pattern': '^data:image/(.|\\\\n|\\\\r)+$'},\n                    'href': {'description': 'URL to the returned image.',\n                             'oneOf': [{'type': 'string',\n                                        'description': 'An absolute URL',\n                                        'pattern': '^https?://.+$'},\n                                       {'typ.. (966 more)",
+      "data": {
+        "primitive": "circle",
+        "extraProperty": "Invalid"
+      }
+    }
+  ]
+}

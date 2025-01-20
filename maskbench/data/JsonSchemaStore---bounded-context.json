@@ -1,0 +1,255 @@
+{
+  "description": "sample JsonSchemaStore/bounded-context.json",
+  "meta": {
+    "full_size": 3094,
+    "stripped_size": 1421,
+    "features": [
+      "$ref",
+      "enum",
+      "format",
+      "format:uri-reference",
+      "items"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "dolittle.io/schemas/Runtime/Applications.Configuration/bounded-context.json",
+    "title": "Bounded Context Configuration",
+    "description": "The bounded context configuration",
+    "type": "object",
+    "properties": {
+      "application": {
+        "description": "The application id that represents the application that this bounded context is a part of",
+        "type": "string"
+      },
+      "boundedContext": {
+        "description": "The bounded context id that represents this bounded context",
+        "type": "string"
+      },
+      "boundedContextName": {
+        "description": "The bounded context name that represents the name of this bounded context",
+        "type": "string"
+      },
+      "core": {
+        "$ref": "#/definitions/coreConfiguration"
+      },
+      "interaction": {
+        "description": "A list of configurations for the interaction layers that this bounded context exposes",
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/interactionLayerConfiguration"
+        }
+      },
+      "resources": {
+        "description": "A map of describing the resource type implementation mapping of resource types",
+        "type": "object",
+        "properties": {
+          "readModels": {
+            "$ref": "#/definitions/resourceTypeImplementationConfiguration"
+          },
+          "eventStore": {
+            "$ref": "#/definitions/resourceTypeImplementationConfiguration"
+          }
+        },
+        "required": [
+          "readModels",
+          "eventStore"
+        ]
+      }
+    },
+    "required": [
+      "application",
+      "boundedContext",
+      "boundedContextName",
+      "core",
+      "interaction",
+      "resources"
+    ],
+    "definitions": {
+      "coreConfiguration": {
+        "description": "A configuration describing the Core of this bounded context",
+        "type": "object",
+        "properties": {
+          "language": {
+            "$comment": "This schema definition allows only a set of core languages by hard coding it here in the enum property. Can probably be done better",
+            "description": "Describes which programming language the Core is written in",
+            "type": "string",
+            "enum": [
+              "csharp"
+            ]
+          },
+          "entryPoint": {
+            "$comment": "This property is optional. The default value is \"Core\"",
+            "description": "The entry point of the bounded context's Core.  A relative path to the folder",
+            "type": "string",
+            "format": "uri-reference"
+          }
+        },
+        "required": [
+          "language"
+        ]
+      },
+      "interactionLayerConfiguration": {
+        "description": "The configuration of an interaction layer",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$comment": "This schema definition allows only a set of types by hard coding it here in the enum property. Can probably be done better",
+            "description": "The type of the interaction layer",
+            "type": "string",
+            "enum": [
+              "web"
+            ]
+          },
+          "language": {
+            "description": "The programming language of the interaction layer",
+            "type": "string"
+          },
+          "entryPoint": {
+            "description": "The entry point of the interaction layer. A relative path to the folder",
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "framework": {
+            "$comment": "This schema definition allows only a set of frameworks by hard coding it here in the enum property. Can probably be done better",
+            "description": "The framework of the interaction layer",
+            "type": "string",
+            "enum": [
+              "react",
+              "aurelia"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "language",
+          "entryPoint"
+        ]
+      },
+      "resourceTypeImplementationConfiguration": {
+        "description": "Resource type implementation configuration",
+        "type": "object",
+        "properties": {
+          "production": {
+            "type": "string"
+          },
+          "development": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "production",
+          "development"
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "application": "my-application",
+        "boundedContext": "my-bounded-context",
+        "boundedContextName": "My Bounded Context",
+        "core": {
+          "language": "csharp",
+          "entryPoint": "Core"
+        },
+        "interaction": [
+          {
+            "type": "web",
+            "language": "csharp",
+            "entryPoint": "Web",
+            "framework": "react"
+          }
+        ],
+        "resources": {
+          "readModels": {
+            "production": "sql-server",
+            "development": "in-memory"
+          },
+          "eventStore": {
+            "production": "event-store",
+            "development": "in-memory"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "application": "my-application",
+        "boundedContext": "my-bounded-context",
+        "boundedContextName": "My Bounded Context",
+        "core": {
+          "language": "csharp",
+          "entryPoint": "Core"
+        },
+        "interaction": [
+          {
+            "type": "web",
+            "language": "javascript",
+            "entryPoint": "Web",
+            "framework": "react"
+          }
+        ],
+        "resources": {
+          "readModels": {
+            "production": "sql-server",
+            "development": "sqlite"
+          },
+          "eventStore": {
+            "production": "event-store",
+            "development": "in-memory-event-store"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"://\" is not a \"uri-reference\"",
+      "python_error": "'://' is not a 'uri-reference'\n\nFailed validating 'format' in schema['properties']['core']['properties']['entryPoint']:\n    {'$comment': 'This property is optional. The default value is \"Core\"',\n     'description': \"The entry point of the bounded context's Core.  A \"\n                    'relative path to the folder',\n     'type': 'string',\n     'format': 'uri-reference'}\n\nOn instance['core']['entryPoint']:\n    '://'",
+      "data": {
+        "application": "my-application",
+        "boundedContext": "my-bounded-context",
+        "boundedContextName": "My Bounded Context",
+        "core": {
+          "language": "csharp",
+          "entryPoint": "://"
+        },
+        "interaction": [
+          {
+            "type": "web",
+            "language": "javascript",
+            "entryPoint": "Web",
+            "framework": "react"
+          }
+        ],
+        "resources": {
+          "readModels": {
+            "production": "sql-server",
+            "development": "sqlite"
+          },
+          "eventStore": {
+            "production": "event-store",
+            "development": "in-memory-event-store"
+          }
+        }
+      }
+    }
+  ]
+}

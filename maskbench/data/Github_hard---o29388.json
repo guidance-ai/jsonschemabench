@@ -1,0 +1,1993 @@
+{
+  "description": "sample Github_hard/o29388.json",
+  "meta": {
+    "full_size": 9456,
+    "stripped_size": 5112,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@minmaxItems",
+      "additionalProperties",
+      "allOf",
+      "const",
+      "enum",
+      "items",
+      "multipleOf",
+      "multipleOf:1.0",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://antha.com/actions-schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "JSON Schema for describing actions carried out during liquidhandling",
+    "type": "object",
+    "required": [
+      "version",
+      "actions"
+    ],
+    "properties": {
+      "version": {
+        "description": "the version of the schema, for validation",
+        "const": "1.0"
+      },
+      "actions": {
+        "description": "the actions carried out during the liquidhandling operation",
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/transferAction"
+            },
+            {
+              "$ref": "#/definitions/promptAction"
+            },
+            {
+              "$ref": "#/definitions/waitAction"
+            }
+          ]
+        }
+      }
+    },
+    "definitions": {
+      "liquid": {
+        "description": "Describe a liquid in a plate well",
+        "type": "object",
+        "required": [
+          "name",
+          "total_volume"
+        ],
+        "properties": {
+          "name": {
+            "description": "The display name of the liquid",
+            "type": "string"
+          },
+          "total_volume": {
+            "description": "The total volume present of the liquid",
+            "$ref": "#/definitions/measurement"
+          },
+          "components": {
+            "description": "The sub-components which make up this liquid",
+            "type": "array",
+            "items": {
+              "description": "A sub component",
+              "type": "object",
+              "required": [
+                "name",
+                "concentration",
+                "unit"
+              ],
+              "properties": {
+                "name": {
+                  "description": "the display name of the sub-component",
+                  "type": "string"
+                },
+                "concentration": {
+                  "description": "the concentration of the sub-component",
+                  "type": "number",
+                  "minimum": 0.0
+                },
+                "unit": {
+                  "description": "the units in which the concentration is expressed",
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "measurement": {
+        "description": "A measurement, typically of a Volume",
+        "type": "object",
+        "required": [
+          "value",
+          "unit"
+        ],
+        "properties": {
+          "value": {
+            "description": "The value of the measurement",
+            "type": "number"
+          },
+          "unit": {
+            "description": "The units in which the measurement is expressed",
+            "type": "string"
+          }
+        }
+      },
+      "wellLocation": {
+        "description": "the location of a well within a liquidhandling robot",
+        "type": "object",
+        "required": [
+          "deck_item_id",
+          "row",
+          "col"
+        ],
+        "properties": {
+          "deck_item_id": {
+            "type": "string",
+            "description": "The ID of an item (prior to liquidhandling)"
+          },
+          "row": {
+            "type": "number",
+            "description": "the row of the location",
+            "multipleOf": 1.0,
+            "minimum": 0.0
+          },
+          "col": {
+            "type": "number",
+            "description": "the column of the location",
+            "multipleOf": 1.0,
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false
+      },
+      "contentUpdate": {
+        "description": "updates the contents of a well",
+        "type": "object",
+        "required": [
+          "loc",
+          "new_content"
+        ],
+        "properties": {
+          "loc": {
+            "$ref": "#/definitions/wellLocation"
+          },
+          "new_content": {
+            "$ref": "#/definitions/liquid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "height": {
+        "description": "The height of the end of the tip relative to something",
+        "type": "object",
+        "required": [
+          "reference",
+          "value",
+          "unit"
+        ],
+        "properties": {
+          "reference": {
+            "description": "The datum for the height",
+            "enum": [
+              "well_bottom",
+              "well_top",
+              "liquid_level"
+            ]
+          },
+          "value": {
+            "description": "The value of the height",
+            "type": "number"
+          },
+          "unit": {
+            "description": "The units in which the height is expressed",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "singleTransfer": {
+        "description": "Describe a single channel transfer",
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "volume",
+          "wasted",
+          "policy",
+          "asp",
+          "dsp",
+          "head"
+        ],
+        "properties": {
+          "from": {
+            "description": "the source location of the transfer",
+            "$ref": "#/definitions/contentUpdate"
+          },
+          "to": {
+            "description": "the destination(s) of the transfer, multiple implies multi-dispense",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/contentUpdate"
+            },
+            "minItems": 1
+          },
+          "volume": {
+            "description": "the volume of liquid transferred in this operation",
+            "$ref": "#/definitions/measurement"
+          },
+          "wasted": {
+            "description": "the volume of liquid wasted in this operation",
+            "$ref": "#/definitions/measurement"
+          },
+          "policy": {
+            "description": "the name of the liquid type for this transfer",
+            "type": "string"
+          },
+          "asp": {
+            "description": "Parameters related to the way in which aspiration was performed",
+            "$ref": "#/definitions/pipettingOptions"
+          },
+          "dsp": {
+            "description": "Parameters related to the way in which dispensing was performed",
+            "allOf": [
+              {
+                "$ref": "#/definitions/pipettingOptions"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "touchoff"
+                ],
+                "parameters": {
+                  "blowout": {
+                    "description": "parameters related to a blowout operation",
+                    "type": "object",
+                    "required": [
+                      "volume",
+                      "height",
+                      "flow_rate"
+                    ],
+                    "properties": {
+                      "volume": {
+                        "description": "the volume used for a blowout, if performed",
+                        "$ref": "#/definitions/measurement"
+                      },
+                      "height": {
+                        "description": "the height from which to perform a blowout",
+                        "$ref": "#/definitions/height"
+                      },
+                      "flow_rate": {
+                        "description": "the flow rate for the blowout operation",
+                        "$ref": "#/definitions/measurement"
+                      }
+                    }
+                  },
+                  "touchoff": {
+                    "description": "whether or not a touchoff is performed",
+                    "type": "boolean"
+                  }
+                }
+              }
+            ]
+          },
+          "head": {
+            "description": "the head to load tips to or unload tips from",
+            "type": "number",
+            "multipleOf": 1.0,
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false
+      },
+      "pipettingOptions": {
+        "description": "describes options about how pipetting was carried out",
+        "type": "object",
+        "required": [
+          "height",
+          "flow_rate",
+          "liquid_level_follow"
+        ],
+        "properties": {
+          "height": {
+            "$ref": "#/definitions/height"
+          },
+          "flow_rate": {
+            "$ref": "#/definitions/measurement"
+          },
+          "liquid_level_follow": {
+            "description": "if true, follow the liquid level during the operation",
+            "type": "boolean"
+          },
+          "mixing": {
+            "description": "summarize the properties of an optional mixing operation",
+            "type": "object",
+            "required": [
+              "cycles",
+              "volume",
+              "height",
+              "flow_rate",
+              "liquid_level_follow"
+            ],
+            "properties": {
+              "cycles": {
+                "description": "The number of mix cycles that were carried out",
+                "type": "number",
+                "multipleOf": 1.0,
+                "minimum": 0.0
+              },
+              "volume": {
+                "$ref": "#/definitions/measurement"
+              },
+              "height": {
+                "$ref": "#/definitions/height"
+              },
+              "flow_rate": {
+                "$ref": "#/definitions/measurement"
+              },
+              "liquid_level_follow": {
+                "description": "if true, follow the liquid level during the operation",
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "parallelTransfer": {
+        "description": "represents a list of transfers that are carried out simultaneously by a set of channels",
+        "type": "object",
+        "required": [
+          "channels",
+          "kind",
+          "time_estimate",
+          "cumulative_time_estimate"
+        ],
+        "properties": {
+          "kind": {
+            "const": "parallel_transfer"
+          },
+          "channels": {
+            "description": "the array of channels, indexed by channel number",
+            "type": "object",
+            "patternProperties": {
+              "^[0-9]+": {
+                "$ref": "#/definitions/singleTransfer"
+              }
+            },
+            "additionalProperties": false
+          },
+          "time_estimate": {
+            "description": "estimate of time taken for this instruction, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          },
+          "cumulative_time_estimate": {
+            "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false
+      },
+      "tipAction": {
+        "description": "describe the action of loading or unloading tips",
+        "type": "object",
+        "required": [
+          "channels",
+          "kind",
+          "head",
+          "time_estimate",
+          "cumulative_time_estimate"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "load",
+              "unload"
+            ]
+          },
+          "head": {
+            "description": "the head to load tips to or unload tips from",
+            "type": "number",
+            "multipleOf": 1.0,
+            "minimum": 0.0
+          },
+          "channels": {
+            "description": "the position(s) to load tips from or drop tips to for each channel.",
+            "type": "object",
+            "patternProperties": {
+              "^[0-9]+": {
+                "$ref": "#/definitions/wellLocation"
+              }
+            },
+            "additionalProperties": false
+          },
+          "time_estimate": {
+            "description": "estimate of time taken for this instruction, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          },
+          "cumulative_time_estimate": {
+            "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          }
+        }
+      },
+      "transferAction": {
+        "description": "describe an entire transfer action, which is a list of load, unload & parallelTransfer operations that are logically grouped",
+        "type": "object",
+        "required": [
+          "kind",
+          "children",
+          "time_estimate",
+          "cumulative_time_estimate"
+        ],
+        "properties": {
+          "kind": {
+            "const": "transfer"
+          },
+          "children": {
+            "description": "the child actions carried out during this transfer",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/tipAction"
+                },
+                {
+                  "$ref": "#/definitions/parallelTransfer"
+                }
+              ]
+            },
+            "minItems": 1
+          },
+          "time_estimate": {
+            "description": "estimate of time taken for this instruction, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          },
+          "cumulative_time_estimate": {
+            "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false
+      },
+      "promptAction": {
+        "description": "describes an on-screen prompt which waits for user input",
+        "type": "object",
+        "required": [
+          "kind",
+          "message",
+          "time_estimate",
+          "cumulative_time_estimate"
+        ],
+        "properties": {
+          "kind": {
+            "const": "prompt"
+          },
+          "message": {
+            "description": "the message that is shown to the user",
+            "type": "string"
+          },
+          "time_estimate": {
+            "description": "estimate of time taken for this instruction, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          },
+          "cumulative_time_estimate": {
+            "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false
+      },
+      "waitAction": {
+        "description": "describes an on-screen prompt which waits for user input",
+        "type": "object",
+        "required": [
+          "kind",
+          "duration_seconds",
+          "time_estimate",
+          "cumulative_time_estimate"
+        ],
+        "properties": {
+          "kind": {
+            "const": "wait"
+          },
+          "duration_seconds": {
+            "description": "how long to wait for, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          },
+          "time_estimate": {
+            "description": "estimate of time taken for this instruction, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          },
+          "cumulative_time_estimate": {
+            "description": "estimate of total time taken for the run so far after this instruction has completed, in seconds",
+            "type": "number",
+            "minimum": 0.0
+          },
+          "message": {
+            "description": "the (optional) message that is shown to the user while waiting",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0",
+        "actions": [
+          {
+            "kind": "transfer",
+            "children": [
+              {
+                "kind": "load",
+                "head": 1,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10,
+                "cumulative_time_estimate": 10
+              },
+              {
+                "kind": "parallel_transfer",
+                "channels": {
+                  "0": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 0
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 0
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 1,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 100,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 1,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 100,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "touchoff": true,
+                      "blowout": {
+                        "volume": {
+                          "value": 10,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_top",
+                          "value": 1,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 100,
+                          "unit": "microliters/second"
+                        }
+                      }
+                    },
+                    "head": 1
+                  },
+                  "1": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 1
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 1
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 1,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 100,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 1,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 100,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "touchoff": true,
+                      "blowout": {
+                        "volume": {
+                          "value": 10,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_top",
+                          "value": 1,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 100,
+                          "unit": "microliters/second"
+                        }
+                      }
+                    },
+                    "head": 1
+                  }
+                },
+                "time_estimate": 10,
+                "cumulative_time_estimate": 20
+              },
+              {
+                "kind": "unload",
+                "head": 1,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10,
+                "cumulative_time_estimate": 30
+              }
+            ],
+            "time_estimate": 30,
+            "cumulative_time_estimate": 30
+          },
+          {
+            "kind": "prompt",
+            "message": "Please replace the tip rack",
+            "time_estimate": 10,
+            "cumulative_time_estimate": 40
+          },
+          {
+            "kind": "wait",
+            "duration_seconds": 10,
+            "time_estimate": 10,
+            "cumulative_time_estimate": 50,
+            "message": "Waiting for 10 seconds"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0",
+        "actions": [
+          {
+            "kind": "transfer",
+            "children": [
+              {
+                "kind": "load",
+                "head": 0,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 10.0
+              },
+              {
+                "kind": "parallel_transfer",
+                "channels": {
+                  "0": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 0
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 0
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      },
+                      "touchoff": true
+                    },
+                    "head": 0
+                  },
+                  "1": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 1
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 1
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      },
+                      "touchoff": true
+                    },
+                    "head": 0
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 20.0
+              },
+              {
+                "kind": "unload",
+                "head": 0,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 30.0
+              }
+            ],
+            "time_estimate": 30.0,
+            "cumulative_time_estimate": 30.0
+          },
+          {
+            "kind": "prompt",
+            "message": "Please replace the tip rack",
+            "time_estimate": 10.0,
+            "cumulative_time_estimate": 40.0
+          },
+          {
+            "kind": "wait",
+            "duration_seconds": 10.0,
+            "message": "Waiting for 10 seconds",
+            "time_estimate": 10.0,
+            "cumulative_time_estimate": 50.0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on multipleOf keyword",
+      "valid": false,
+      "rust_error": "{\"kind\":\"transfer\",\"children\":[{\"kind\":\"load\",\"head\":1.5,\"channels\":{\"0\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":0},\"1\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":1}},\"time_estimate\":10.0,\"cumulative_time_estimate\":10.0},{\"kind\":\"parallel_transfer\",\"channels\":{\"0\":{\"from\":{\"loc\":{\"deck_item_id\":\"plate-1\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":100.0,\"unit\":\"microliters\"}}},\"to\":[{\"loc\":{\"deck_item_id\":\"plate-2\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":100.0,\"unit\":\"microliters\"}}}],\"volume\":{\"value\":100.0,\"unit\":\"microliters\"},\"wasted\":{\"value\":0.0,\"unit\":\"microliters\"},\"policy\":\"water\",\"asp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level_follow\":false},\"dsp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level_follow\":false,\"blowout\":{\"volume\":{\"value\":10.0,\"unit\":\"mic.. (1466 more)",
+      "python_error": "{'kind': 'load', 'head': 1.5, 'channels': {'0': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 0}, '1': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 1}}, 'time_estimate': 10.0, 'cumulative_time_estimate': 10.0} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema[0]['properties']['children']['items']:\n    {'oneOf': [{'$ref': '#/definitions/tipAction'},\n               {'$ref': '#/definitions/parallelTransfer'}]}\n\nOn instance['children'][0]:\n    {'kind': 'load',\n     'head': 1.5,\n     'channels': {'0': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 0},\n                  '1': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 1}},\n     'time_estimate': 10.0,\n     'cumulative_time_estimate': 10.0}",
+      "data": {
+        "version": "1.0",
+        "actions": [
+          {
+            "kind": "transfer",
+            "children": [
+              {
+                "kind": "load",
+                "head": 1.5,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 10.0
+              },
+              {
+                "kind": "parallel_transfer",
+                "channels": {
+                  "0": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 0
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 0
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      },
+                      "touchoff": true
+                    },
+                    "head": 1.5
+                  },
+                  "1": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 1
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 1
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      },
+                      "touchoff": true
+                    },
+                    "head": 1.5
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 20.0
+              },
+              {
+                "kind": "unload",
+                "head": 1.5,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 30.0
+              }
+            ],
+            "time_estimate": 30.0,
+            "cumulative_time_estimate": 30.0
+          },
+          {
+            "kind": "prompt",
+            "message": "Please replace the tip rack",
+            "time_estimate": 10.0,
+            "cumulative_time_estimate": 40.0
+          },
+          {
+            "kind": "wait",
+            "duration_seconds": 10.0,
+            "message": "Waiting for 10 seconds",
+            "time_estimate": 10.0,
+            "cumulative_time_estimate": 50.0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"kind\":\"transfer\",\"children\":[{\"kind\":\"load\",\"head\":0,\"channels\":{\"0\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":0},\"1\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":1}},\"time_estimate\":10.0,\"cumulative_time_estimate\":10.0},{\"kind\":\"parallel_transfer\",\"channels\":{\"0\":{\"from\":{\"loc\":{\"deck_item_id\":\"plate-1\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":100.0,\"unit\":\"microliters\"}}},\"to\":[{\"loc\":{\"deck_item_id\":\"plate-2\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":100.0,\"unit\":\"microliters\"}}}],\"volume\":{\"value\":100.0,\"unit\":\"microliters\"},\"wasted\":{\"value\":0.0,\"unit\":\"microliters\"},\"policy\":\"water\",\"asp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level_follow\":false},\"dsp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level_follow\":false,\"blowout\":{\"volume\":{\"value\":10.0,\"unit\":\"micro.. (1534 more)",
+      "python_error": "{'kind': 'parallel_transfer', 'channels': {'0': {'from': {'loc': {'deck_item_id': 'plate-1', 'row': 0, 'col': 0}, 'new_content': {'name': 'water', 'total_volume': {'value': 100.0, 'unit': 'microliters'}}}, 'to': [{'loc': {'deck_item_id': 'plate-2', 'row': 0, 'col': 0}, 'new_content': {'name': 'water', 'total_volume': {'value': 100.0, 'unit': 'microliters'}}}], 'volume': {'value': 100.0, 'unit': 'microliters'}, 'wasted': {'value': 0.0, 'unit': 'microliters'}, 'policy': 'water', 'asp': {'height': {'reference': 'well_bottom', 'value': 10.0, 'unit': 'millimeters'}, 'flow_rate': {'value': 10.0, 'unit': 'microliters/second'}, 'liquid_level_follow': False}, 'dsp': {'height': {'reference': 'well_bottom', 'value': 10.0, 'unit': 'millimeters'}, 'flow_rate': {'value': 10.0, 'unit': 'microliters/second'}, 'liquid_level_follow': False, 'blowout': {'volume': {'value': 10.0, 'unit': 'microliters'}, 'height': {'reference': 'well_bottom', 'value': 10.0, 'unit': 'millimeters'}, 'flow_rate': {'value': 10.0, 'unit': 'microliters.. (6555 more)",
+      "data": {
+        "version": "1.0",
+        "actions": [
+          {
+            "kind": "transfer",
+            "children": [
+              {
+                "kind": "load",
+                "head": 0,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 10.0
+              },
+              {
+                "kind": "parallel_transfer",
+                "channels": {
+                  "0": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 0
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 0
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      },
+                      "touchoff": true
+                    },
+                    "head": 0
+                  },
+                  "1": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 1
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 1
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      },
+                      "touchoff": true
+                    },
+                    "head": 0
+                  },
+                  "2": {
+                    "kind": "promptAction",
+                    "message": "Invalid action in parallel transfer"
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 20.0
+              },
+              {
+                "kind": "unload",
+                "head": 0,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 30.0
+              }
+            ],
+            "time_estimate": 30.0,
+            "cumulative_time_estimate": 30.0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "{\"kind\":\"transfer\",\"children\":[{\"kind\":\"load\",\"head\":-1,\"channels\":{\"0\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":0},\"1\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":1}},\"time_estimate\":10.0,\"cumulative_time_estimate\":10.0}],\"time_estimate\":30.0,\"cumulative_time_estimate\":30.0} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'kind': 'load', 'head': -1, 'channels': {'0': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 0}, '1': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 1}}, 'time_estimate': 10.0, 'cumulative_time_estimate': 10.0} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema[0]['properties']['children']['items']:\n    {'oneOf': [{'$ref': '#/definitions/tipAction'},\n               {'$ref': '#/definitions/parallelTransfer'}]}\n\nOn instance['children'][0]:\n    {'kind': 'load',\n     'head': -1,\n     'channels': {'0': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 0},\n                  '1': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 1}},\n     'time_estimate': 10.0,\n     'cumulative_time_estimate': 10.0}",
+      "data": {
+        "version": "1.0",
+        "actions": [
+          {
+            "kind": "transfer",
+            "children": [
+              {
+                "kind": "load",
+                "head": -1,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 10.0
+              }
+            ],
+            "time_estimate": 30.0,
+            "cumulative_time_estimate": 30.0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{\"kind\":\"transfer\",\"children\":[{\"kind\":\"load\",\"head\":0,\"channels\":{\"0\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":0},\"1\":{\"deck_item_id\":\"tiprack-1\",\"row\":0,\"col\":1}},\"time_estimate\":10.0,\"cumulative_time_estimate\":10.0},{\"kind\":\"parallel_transfer\",\"channels\":{\"0\":{\"from\":{\"loc\":{\"deck_item_id\":\"plate-1\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":100.0,\"unit\":\"microliters\"}}},\"to\":[{\"loc\":{\"deck_item_id\":\"plate-2\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":100.0,\"unit\":\"microliters\"}}}],\"volume\":{\"value\":100.0,\"unit\":\"microliters\"},\"wasted\":{\"value\":0.0,\"unit\":\"microliters\"},\"policy\":\"water\",\"asp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level_follow\":false},\"dsp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level_follow\":false,\"blowout\":{\"volume\":{\"value\":10.0,\"unit\":\"micro.. (1443 more)",
+      "python_error": "'touchoff' is a required property\n\nFailed validating 'required' in schema[1]['properties']['channels']['patternProperties']['^[0-9]+']['properties']['dsp']['allOf'][1]:\n    {'type': 'object',\n     'required': ['touchoff'],\n     'parameters': {'blowout': {'description': 'parameters related to a '\n                                               'blowout operation',\n                                'type': 'object',\n                                'required': ['volume',\n                                             'height',\n                                             'flow_rate'],\n                                'properties': {'volume': {'description': 'the '\n                                                                         'volume '\n                                                                         'used '\n                                                                         'for '\n                                                                         'a '\n                                      .. (2518 more)",
+      "data": {
+        "version": "1.0",
+        "actions": [
+          {
+            "kind": "transfer",
+            "children": [
+              {
+                "kind": "load",
+                "head": 0,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 10.0
+              },
+              {
+                "kind": "parallel_transfer",
+                "channels": {
+                  "0": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 0
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 0
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      }
+                    },
+                    "head": 0
+                  },
+                  "1": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 1
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    },
+                    "to": [
+                      {
+                        "loc": {
+                          "deck_item_id": "plate-2",
+                          "row": 0,
+                          "col": 1
+                        },
+                        "new_content": {
+                          "name": "water",
+                          "total_volume": {
+                            "value": 100.0,
+                            "unit": "microliters"
+                          }
+                        }
+                      }
+                    ],
+                    "volume": {
+                      "value": 100.0,
+                      "unit": "microliters"
+                    },
+                    "wasted": {
+                      "value": 0.0,
+                      "unit": "microliters"
+                    },
+                    "policy": "water",
+                    "asp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false
+                    },
+                    "dsp": {
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      },
+                      "liquid_level_follow": false,
+                      "blowout": {
+                        "volume": {
+                          "value": 10.0,
+                          "unit": "microliters"
+                        },
+                        "height": {
+                          "reference": "well_bottom",
+                          "value": 10.0,
+                          "unit": "millimeters"
+                        },
+                        "flow_rate": {
+                          "value": 10.0,
+                          "unit": "microliters/second"
+                        }
+                      },
+                      "touchoff": false
+                    },
+                    "head": 0
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 20.0
+              },
+              {
+                "kind": "unload",
+                "head": 0,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 0
+                  },
+                  "1": {
+                    "deck_item_id": "tiprack-1",
+                    "row": 0,
+                    "col": 1
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 30.0
+              }
+            ],
+            "time_estimate": 30.0,
+            "cumulative_time_estimate": 30.0
+          },
+          {
+            "kind": "prompt",
+            "message": "Please replace the tip rack",
+            "time_estimate": 10.0,
+            "cumulative_time_estimate": 40.0
+          },
+          {
+            "kind": "wait",
+            "duration_seconds": 10.0,
+            "message": "Waiting for 10 seconds",
+            "time_estimate": 10.0,
+            "cumulative_time_estimate": 50.0
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['actions']:\n    {'description': 'the actions carried out during the liquidhandling '\n                    'operation',\n     'type': 'array',\n     'minItems': 1,\n     'items': {'oneOf': [{'$ref': '#/definitions/transferAction'},\n                         {'$ref': '#/definitions/promptAction'},\n                         {'$ref': '#/definitions/waitAction'}]}}\n\nOn instance['actions']:\n    []",
+      "data": {
+        "version": "1.0",
+        "actions": []
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"kind\":\"transfer\",\"children\":[{\"kind\":\"load\",\"head\":0,\"channels\":{\"0\":{\"deck_item_id\":\"tiprack-1\",\"row\":-1,\"Invalid row value\":\"col\"}},\"time_estimate\":10.0,\"cumulative_time_estimate\":10.0},{\"kind\":\"parallel_transfer\",\"channels\":{\"0\":{\"from\":{\"loc\":{\"deck_item_id\":\"plate-1\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":-100.0,\"Invalid volume value\":\"unit\"}},\"Invalid properties, components is not allowed to be present here.\":\"components\"}},\"to\":[{\"loc\":{\"deck_item_id\":\"plate-2\",\"row\":0,\"col\":0},\"new_content\":{\"name\":\"water\",\"total_volume\":{\"value\":100.0,\"unit\":\"microliters\"}}}],\"volume\":{\"value\":100.0,\"unit\":\"microliters\"},\"wasted\":{\"value\":0.0,\"unit\":\"microliters\"},\"policy\":\"water\",\"asp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level_follow\":false},\"dsp\":{\"height\":{\"reference\":\"well_bottom\",\"value\":10.0,\"unit\":\"millimeters\"},\"flow_rate\":{\"value\":10.0,\"unit\":\"microliters/second\"},\"liquid_level.. (1270 more)",
+      "python_error": "{'kind': 'unload', 'head': 0, 'channels': {'0': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 0}, '1': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 1}}, 'time_estimate': 10.0, 'cumulative_time_estimate': 30.0} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['actions']['items']:\n    {'oneOf': [{'$ref': '#/definitions/transferAction'},\n               {'$ref': '#/definitions/promptAction'},\n               {'$ref': '#/definitions/waitAction'}]}\n\nOn instance['actions'][1]:\n    {'kind': 'unload',\n     'head': 0,\n     'channels': {'0': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 0},\n                  '1': {'deck_item_id': 'tiprack-1', 'row': 0, 'col': 1}},\n     'time_estimate': 10.0,\n     'cumulative_time_estimate': 30.0}",
+      "data": {
+        "version": "1.0",
+        "actions": [
+          {
+            "kind": "transfer",
+            "children": [
+              {
+                "kind": "load",
+                "head": 0,
+                "channels": {
+                  "0": {
+                    "deck_item_id": "tiprack-1",
+                    "row": -1,
+                    "Invalid row value": "col"
+                  }
+                },
+                "time_estimate": 10.0,
+                "cumulative_time_estimate": 10.0
+              },
+              {
+                "kind": "parallel_transfer",
+                "channels": {
+                  "0": {
+                    "from": {
+                      "loc": {
+                        "deck_item_id": "plate-1",
+                        "row": 0,
+                        "col": 0
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": -100.0,
+                          "Invalid volume value": "unit"
+                        }
+                      },
+                      "Invalid properties, components is not allowed to be present here.": "components"
+                    }
+                  },
+                  "to": [
+                    {
+                      "loc": {
+                        "deck_item_id": "plate-2",
+                        "row": 0,
+                        "col": 0
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    }
+                  ],
+                  "volume": {
+                    "value": 100.0,
+                    "unit": "microliters"
+                  },
+                  "wasted": {
+                    "value": 0.0,
+                    "unit": "microliters"
+                  },
+                  "policy": "water",
+                  "asp": {
+                    "height": {
+                      "reference": "well_bottom",
+                      "value": 10.0,
+                      "unit": "millimeters"
+                    },
+                    "flow_rate": {
+                      "value": 10.0,
+                      "unit": "microliters/second"
+                    },
+                    "liquid_level_follow": false
+                  },
+                  "dsp": {
+                    "height": {
+                      "reference": "well_bottom",
+                      "value": 10.0,
+                      "unit": "millimeters"
+                    },
+                    "flow_rate": {
+                      "value": 10.0,
+                      "unit": "microliters/second"
+                    },
+                    "liquid_level_follow": false,
+                    "blowout": {
+                      "volume": {
+                        "value": 10.0,
+                        "unit": "microliters"
+                      },
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      }
+                    },
+                    "touchoff": true
+                  },
+                  "head": 0
+                },
+                "1": {
+                  "from": {
+                    "loc": {
+                      "deck_item_id": "plate-1",
+                      "row": 0,
+                      "col": 1
+                    },
+                    "new_content": {
+                      "name": "water",
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "microliters"
+                      }
+                    }
+                  },
+                  "to": [
+                    {
+                      "loc": {
+                        "deck_item_id": "plate-2",
+                        "row": 0,
+                        "col": 1
+                      },
+                      "new_content": {
+                        "name": "water",
+                        "total_volume": {
+                          "value": 100.0,
+                          "unit": "microliters"
+                        }
+                      }
+                    }
+                  ],
+                  "volume": {
+                    "value": 100.0,
+                    "unit": "microliters"
+                  },
+                  "wasted": {
+                    "value": 0.0,
+                    "unit": "microliters"
+                  },
+                  "policy": "water",
+                  "asp": {
+                    "height": {
+                      "reference": "well_bottom",
+                      "value": 10.0,
+                      "unit": "millimeters"
+                    },
+                    "flow_rate": {
+                      "value": 10.0,
+                      "unit": "microliters/second"
+                    },
+                    "liquid_level_follow": false
+                  },
+                  "dsp": {
+                    "height": {
+                      "reference": "well_bottom",
+                      "value": 10.0,
+                      "unit": "millimeters"
+                    },
+                    "flow_rate": {
+                      "value": 10.0,
+                      "unit": "microliters/second"
+                    },
+                    "liquid_level_follow": false,
+                    "blowout": {
+                      "volume": {
+                        "value": 10.0,
+                        "unit": "microliters"
+                      },
+                      "height": {
+                        "reference": "well_bottom",
+                        "value": 10.0,
+                        "unit": "millimeters"
+                      },
+                      "flow_rate": {
+                        "value": 10.0,
+                        "unit": "microliters/second"
+                      }
+                    },
+                    "touchoff": true
+                  },
+                  "head": 0
+                }
+              },
+              "time_estimate"
+            ],
+            "cumulative_time_estimate": 20.0
+          },
+          {
+            "kind": "unload",
+            "head": 0,
+            "channels": {
+              "0": {
+                "deck_item_id": "tiprack-1",
+                "row": 0,
+                "col": 0
+              },
+              "1": {
+                "deck_item_id": "tiprack-1",
+                "row": 0,
+                "col": 1
+              }
+            },
+            "time_estimate": 10.0,
+            "cumulative_time_estimate": 30.0
+          }
+        ],
+        "time_estimate": 30.0,
+        "cumulative_time_estimate": 30.0
+      }
+    }
+  ]
+}

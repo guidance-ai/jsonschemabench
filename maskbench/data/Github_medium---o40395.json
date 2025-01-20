@@ -1,0 +1,501 @@
+{
+  "description": "sample Github_medium/o40395.json",
+  "meta": {
+    "full_size": 2377,
+    "stripped_size": 990,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "ConfigSite": {
+        "properties": {
+          "branch": {
+            "description": "The branch to use for the site. e.g. \"master\"",
+            "type": "string"
+          },
+          "build": {
+            "description": "The generator system to use. \"jekyll\" or \"hugo\" or \"copy\"",
+            "enum": [
+              "copy",
+              "hugo",
+              "jekyll"
+            ],
+            "type": "string"
+          },
+          "build_path": {
+            "description": "The path where the project is build locally e.g. \"./data/myawesomesite.org/build\"",
+            "type": "string"
+          },
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Environment settings applied while building the site e.g. {\"JEKYLL_ENV\": \"production\"}",
+            "type": "object"
+          },
+          "hugo": {
+            "description": "If building with hugo you must define a version",
+            "properties": {
+              "extended": {
+                "description": "Download extended version of hugo e.g. true",
+                "type": "boolean"
+              },
+              "version": {
+                "description": "Version of hugo e.g. \"0.51\"",
+                "type": "string"
+              }
+            },
+            "required": [
+              "extended",
+              "version"
+            ],
+            "type": "object"
+          },
+          "name": {
+            "description": "The name and url path to use for the site. e.g. \"myawesomesite.org/master\"",
+            "type": "string"
+          },
+          "publish_path": {
+            "description": "The path where the project is published locally e.g. \"/var/www/myawesomesite.org/site\"",
+            "type": "string"
+          },
+          "repository": {
+            "description": "The git repository for the site e.g. \"https://github.com/ffalt/myawesomesite.git\"",
+            "type": "string"
+          }
+        },
+        "required": [
+          "branch",
+          "build",
+          "build_path",
+          "name",
+          "publish_path",
+          "repository"
+        ],
+        "type": "object"
+      }
+    },
+    "description": "Hookay Configuration",
+    "properties": {
+      "$schema": {
+        "description": "The schema file for the config.json e.g. \"config-schema.json\"",
+        "type": "string"
+      },
+      "secret": {
+        "description": "The secret token to validate a hook call (https://developer.github.com/webhooks/securing/)",
+        "type": "string"
+      },
+      "server": {
+        "description": "Server settings",
+        "properties": {
+          "host": {
+            "description": "The address to listen on. e.g. \"127.0.0.1\" or \"0.0.0.0\"",
+            "type": "string"
+          },
+          "path": {
+            "description": "The url path to listen for hooks on. e.g. \"/hooks/*\"",
+            "type": "string"
+          },
+          "port": {
+            "description": "The port to listen on. e.g. 8181",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "host",
+          "path",
+          "port"
+        ],
+        "type": "object"
+      },
+      "sites": {
+        "description": "List of Hookay Sites",
+        "items": {
+          "$ref": "#/definitions/ConfigSite"
+        },
+        "type": "array"
+      },
+      "version": {
+        "description": "The version of the config file format, must be 2 at the moment",
+        "enum": [
+          2
+        ],
+        "type": "number"
+      }
+    },
+    "required": [
+      "secret",
+      "server",
+      "sites",
+      "version"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "$schema": "config-schema.json",
+        "secret": "your_secret_token",
+        "server": {
+          "host": "127.0.0.1",
+          "path": "/hooks/*",
+          "port": 8181
+        },
+        "sites": [
+          {
+            "branch": "master",
+            "build": "hugo",
+            "build_path": "./data/myawesomesite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "hugo": {
+              "extended": true,
+              "version": "0.51"
+            },
+            "name": "myawesomesite.org/master",
+            "publish_path": "/var/www/myawesomesite.org/site",
+            "repository": "https://github.com/ffalt/myawesomesite.git"
+          },
+          {
+            "branch": "main",
+            "build": "jekyll",
+            "build_path": "./data/myjekyllsite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "name": "myjekyllsite.org/main",
+            "publish_path": "/var/www/myjekyllsite.org/site",
+            "repository": "https://github.com/ffalt/myjekyllsite.git"
+          },
+          {
+            "branch": "dev",
+            "build": "copy",
+            "build_path": "./data/mycopysite.org/build",
+            "env": {},
+            "name": "mycopysite.org/dev",
+            "publish_path": "/var/www/mycopysite.org/site",
+            "repository": "https://github.com/ffalt/mycopysite.git"
+          }
+        ],
+        "version": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sites']['items']['properties']['env']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['sites'][0]['env']['INVALID_PROPERTY']:\n    123",
+      "data": {
+        "$schema": "config-schema.json",
+        "secret": "your_secret_token",
+        "server": {
+          "host": "127.0.0.1",
+          "path": "/hooks/*",
+          "port": 8181
+        },
+        "sites": [
+          {
+            "branch": "master",
+            "build": "hugo",
+            "build_path": "./data/myawesomesite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production",
+              "INVALID_PROPERTY": 123
+            },
+            "hugo": {
+              "extended": true,
+              "version": "0.51"
+            },
+            "name": "myawesomesite.org/master",
+            "publish_path": "/var/www/myawesomesite.org/site",
+            "repository": "https://github.com/ffalt/myawesomesite.git"
+          },
+          {
+            "branch": "main",
+            "build": "jekyll",
+            "build_path": "./data/myjekyllsite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "name": "myjekyllsite.org/main",
+            "publish_path": "/var/www/myjekyllsite.org/site",
+            "repository": "https://github.com/ffalt/myjekyllsite.git"
+          },
+          {
+            "branch": "dev",
+            "build": "copy",
+            "build_path": "./data/mycopysite.org/build",
+            "env": {},
+            "name": "mycopysite.org/dev",
+            "publish_path": "/var/www/mycopysite.org/site",
+            "repository": "https://github.com/ffalt/mycopysite.git"
+          }
+        ],
+        "version": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid\" is not one of [\"copy\",\"hugo\",\"jekyll\"]",
+      "python_error": "'build_path' is a required property\n\nFailed validating 'required' in schema['properties']['sites']['items']:\n    {'properties': {'branch': {'description': 'The branch to use for the '\n                                              'site. e.g. \"master\"',\n                               'type': 'string'},\n                    'build': {'description': 'The generator system to use. '\n                                             '\"jekyll\" or \"hugo\" or \"copy\"',\n                              'enum': ['copy', 'hugo', 'jekyll'],\n                              'type': 'string'},\n                    'build_path': {'description': 'The path where the '\n                                                  'project is build '\n                                                  'locally e.g. '\n                                                  '\"./data/myawesomesite.org/build\"',\n                                   'type': 'string'},\n                    'env': {'additionalProperties': {'type': 'string'},\n                            'des.. (2809 more)",
+      "data": {
+        "$schema": "config-schema.json",
+        "secret": "your_secret_token",
+        "server": {
+          "host": "127.0.0.1",
+          "path": "/hooks/*",
+          "port": 8181
+        },
+        "sites": [
+          {
+            "branch": "master",
+            "build": "hugo",
+            "build_path": "./data/myawesomesite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "hugo": {
+              "extended": true,
+              "version": "0.51"
+            },
+            "name": "myawesomesite.org/master",
+            "publish_path": "/var/www/myawesomesite.org/site",
+            "repository": "https://github.com/ffalt/myawesomesite.git"
+          },
+          {
+            "branch": "main",
+            "build": "jekyll",
+            "build_path": "./data/myjekyllsite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "name": "myjekyllsite.org/main",
+            "publish_path": "/var/www/myjekyllsite.org/site",
+            "repository": "https://github.com/ffalt/myjekyllsite.git"
+          },
+          {
+            "branch": "dev",
+            "build": "invalid"
+          }
+        ],
+        "version": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sites']['items']['properties']['env']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['sites'][0]['env']['extra_key']:\n    123",
+      "data": {
+        "$schema": "config-schema.json",
+        "secret": "your_secret_token",
+        "server": {
+          "host": "127.0.0.1",
+          "path": "/hooks/*",
+          "port": 8181
+        },
+        "sites": [
+          {
+            "branch": "master",
+            "build": "hugo",
+            "build_path": "./data/myawesomesite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production",
+              "extra_key": 123
+            },
+            "hugo": {
+              "extended": true,
+              "version": "0.51"
+            },
+            "name": "myawesomesite.org/master",
+            "publish_path": "/var/www/myawesomesite.org/site",
+            "repository": "https://github.com/ffalt/myawesomesite.git"
+          },
+          {
+            "branch": "main",
+            "build": "jekyll",
+            "build_path": "./data/myjekyllsite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "name": "myjekyllsite.org/main",
+            "publish_path": "/var/www/myjekyllsite.org/site",
+            "repository": "https://github.com/ffalt/myjekyllsite.git"
+          },
+          {
+            "branch": "dev",
+            "build": "copy",
+            "build_path": "./data/mycopysite.org/build",
+            "env": {},
+            "name": "mycopysite.org/dev",
+            "publish_path": "/var/www/mycopysite.org/site",
+            "repository": "https://github.com/ffalt/mycopysite.git"
+          }
+        ],
+        "version": 2
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "config-schema.json",
+        "secret": "my_secret_token",
+        "server": {
+          "host": "127.0.0.1",
+          "path": "/hooks/*",
+          "port": 8181
+        },
+        "sites": [
+          {
+            "branch": "master",
+            "build": "hugo",
+            "build_path": "./data/myawesomesite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "hugo": {
+              "extended": true,
+              "version": "0.51"
+            },
+            "name": "myawesomesite.org/master",
+            "publish_path": "/var/www/myawesomesite.org/site",
+            "repository": "https://github.com/ffalt/myawesomesite.git"
+          },
+          {
+            "branch": "main",
+            "build": "jekyll",
+            "build_path": "./data/myjekyllsite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "name": "myjekyllsite.org/main",
+            "publish_path": "/var/www/myjekyllsite.org/site",
+            "repository": "https://github.com/ffalt/myjekyllsite.git"
+          },
+          {
+            "branch": "dev",
+            "build": "copy",
+            "build_path": "./data/mycopysite.org/build",
+            "env": {},
+            "name": "mycopysite.org/dev",
+            "publish_path": "/var/www/mycopysite.org/site",
+            "repository": "https://github.com/ffalt/mycopysite.git"
+          }
+        ],
+        "version": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['sites']['items']['properties']['env']['additionalProperties']:\n    {'type': 'string'}\n\nOn instance['sites'][0]['env']['MY_INVALID_PROPERTY']:\n    123",
+      "data": {
+        "$schema": "config-schema.json",
+        "secret": "my_secret_token",
+        "server": {
+          "host": "127.0.0.1",
+          "path": "/hooks/*",
+          "port": 8181
+        },
+        "sites": [
+          {
+            "branch": "master",
+            "build": "hugo",
+            "build_path": "./data/myawesomesite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production",
+              "MY_INVALID_PROPERTY": 123
+            },
+            "hugo": {
+              "extended": true,
+              "version": "0.51"
+            },
+            "name": "myawesomesite.org/master",
+            "publish_path": "/var/www/myawesomesite.org/site",
+            "repository": "https://github.com/ffalt/myawesomesite.git"
+          },
+          {
+            "branch": "main",
+            "build": "jekyll",
+            "build_path": "./data/myjekyllsite.org/build",
+            "env": {
+              "JEKYLL_ENV": "production"
+            },
+            "name": "myjekyllsite.org/main",
+            "publish_path": "/var/www/myjekyllsite.org/site",
+            "repository": "https://github.com/ffalt/myjekyllsite.git"
+          },
+          {
+            "branch": "dev",
+            "build": "copy",
+            "build_path": "./data/mycopysite.org/build",
+            "env": {},
+            "name": "mycopysite.org/dev",
+            "publish_path": "/var/www/mycopysite.org/site",
+            "repository": "https://github.com/ffalt/mycopysite.git"
+          }
+        ],
+        "version": 2
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "3 is not one of [2]\n\nFailed validating 'enum' in schema['properties']['version']:\n    {'description': 'The version of the config file format, must be 2 at '\n                    'the moment',\n     'enum': [2],\n     'type': 'number'}\n\nOn instance['version']:\n    3",
+      "data": {
+        "$schema": "config-schema.json",
+        "secret": "my_secret_token",
+        "server": {
+          "host": "127.0.0.1",
+          "path": "/hooks/*",
+          "port": 8181
+        },
+        "sites": [
+          {
+            "branch": "master",
+            "build": "hugo",
+            "build_path": "./data/myawesomesite.org/build",
+            "env": {
+              "JEKYLL_ENV": 12345
+            },
+            "hugo": {
+              "extended": true,
+              "version": "0.51"
+            },
+            "name": "myawesomesite.org/master",
+            "publish_path": "/var/www/myawesomesite.org/site",
+            "repository": "https://github.com/ffalt/myawesomesite.git"
+          }
+        ],
+        "version": 3
+      }
+    }
+  ]
+}

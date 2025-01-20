@@ -1,0 +1,212 @@
+{
+  "description": "sample Github_medium/o76764.json",
+  "meta": {
+    "full_size": 681,
+    "stripped_size": 628,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:uri",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
+      },
+      "username": {
+        "type": "string"
+      },
+      "time": {
+        "description": "UNIX time at which the post was made",
+        "minimum": 1136091600,
+        "type": "integer"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "image",
+          "video"
+        ]
+      },
+      "isRetweet": {
+        "type": "boolean"
+      },
+      "retweet": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "favorite": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "reply": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "text": {
+        "type": "string"
+      },
+      "images": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "username",
+      "time",
+      "type",
+      "isRetweet",
+      "retweet",
+      "favorite",
+      "reply",
+      "text",
+      "images"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "1234567890",
+        "username": "johnDoe",
+        "time": 1643723400,
+        "type": "image",
+        "isRetweet": false,
+        "retweet": 10,
+        "favorite": 20,
+        "reply": 5,
+        "text": "This is a sample tweet.",
+        "images": [
+          "https://example.com/image1.jpg",
+          "https://example.com/image2.jpg"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "id": "12345",
+        "username": "johnDoe",
+        "time": 1643723400,
+        "type": "image",
+        "isRetweet": false,
+        "retweet": 10,
+        "favorite": 20,
+        "reply": 5,
+        "text": "This is a sample post.",
+        "images": [
+          "https://example.com/image1.jpg",
+          "https://example.com/image2.jpg"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "1136091599 is less than the minimum of 1136091600",
+      "python_error": "1136091599 is less than the minimum of 1136091600\n\nFailed validating 'minimum' in schema['properties']['time']:\n    {'description': 'UNIX time at which the post was made',\n     'minimum': 1136091600,\n     'type': 'integer'}\n\nOn instance['time']:\n    1136091599",
+      "data": {
+        "id": "12345",
+        "username": "johnDoe",
+        "time": 1136091599,
+        "type": "image",
+        "isRetweet": false,
+        "retweet": 10,
+        "favorite": 20,
+        "reply": 5,
+        "text": "This is a sample post.",
+        "images": [
+          "https://example.com/image1.jpg",
+          "https://example.com/image2.jpg"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"abcde\" does not match \"^[0-9]+$\"",
+      "python_error": "'abcde' does not match '^[0-9]+$'\n\nFailed validating 'pattern' in schema['properties']['id']:\n    {'type': 'string', 'pattern': '^[0-9]+$'}\n\nOn instance['id']:\n    'abcde'",
+      "data": {
+        "id": "abcde",
+        "username": "johnDoe",
+        "time": 1643723400,
+        "type": "image",
+        "isRetweet": false,
+        "retweet": 10,
+        "favorite": 20,
+        "reply": 5,
+        "text": "This is a sample post.",
+        "images": [
+          "https://example.com/image1.jpg",
+          "https://example.com/image2.jpg"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a uri\" is not a \"uri\"",
+      "python_error": "'not a uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['images']['items']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['images'][0]:\n    'not a uri'",
+      "data": {
+        "id": "12345",
+        "username": "johnDoe",
+        "time": 1643723400,
+        "type": "image",
+        "isRetweet": false,
+        "retweet": 10,
+        "favorite": 20,
+        "reply": 5,
+        "text": "This is a sample post.",
+        "images": [
+          "not a uri",
+          "https://example.com/image2.jpg"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "1136091599 is less than the minimum of 1136091600",
+      "python_error": "Additional properties are not allowed ('additionalProperties set to false', \"enum type was supposed to be one of 'image' or 'video', here no type was specified, this invalidates the JSON as additionalProperties is set to false, so no additional/unspecified keys are allowed\", 'minimum time is 1136091600', 'required property' were unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'id': {'type': 'string', 'pattern': '^[0-9]+$'},\n                    'username': {'type': 'string'},\n                    'time': {'description': 'UNIX time at which the post '\n                                            'was made',\n                             'minimum': 1136091600,\n                             'type': 'integer'},\n                    'type': {'type': 'string', 'enum': ['image', 'video']},\n                    'isRetweet': {'type': 'boolean'},\n                    'retweet': {'type': 'integer', 'minimum': 0.. (1098 more)",
+      "data": {
+        "id": "12345",
+        "username": "johnDoe",
+        "time": 1136091599,
+        "minimum time is 1136091600": "type",
+        "enum type was supposed to be one of 'image' or 'video', here no type was specified, this invalidates the JSON as additionalProperties is set to false, so no additional/unspecified keys are allowed": "isRetweet",
+        "required property": "extra",
+        "additionalProperties set to false": {
+          "a": 1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,381 @@
+{
+  "description": "sample Github_medium/o9875.json",
+  "meta": {
+    "full_size": 1255,
+    "stripped_size": 1185,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxItems",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "description": {
+        "type": "string",
+        "maxLength": 32767
+      },
+      "route": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "method": {
+        "type": "string",
+        "enum": [
+          "delete",
+          "get",
+          "options",
+          "patch",
+          "post",
+          "put"
+        ]
+      },
+      "access": {
+        "type": "string",
+        "enum": [
+          "public",
+          "authenticated",
+          "group"
+        ]
+      },
+      "endpointTags": {
+        "type": "object",
+        "patternProperties": {
+          "^[0-9a-zA-Z_-]{1,255}$": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "additionalProperties": false
+      },
+      "experienceGroupIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Fa-f\\d]{24}$"
+        },
+        "maxItems": 1000
+      },
+      "staticReply": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "statusCode": {
+                "type": "number",
+                "min": 100,
+                "max": 599,
+                "integer": true
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "page",
+                  "redirect"
+                ]
+              }
+            },
+            "required": [
+              "value",
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "unauthorizedReply": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "statusCode": {
+                "type": "number",
+                "min": 100,
+                "max": 599,
+                "integer": true
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "page",
+                  "redirect"
+                ]
+              }
+            },
+            "required": [
+              "value",
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "route",
+      "method"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "description": "Example endpoint",
+        "route": "/example",
+        "enabled": true,
+        "method": "get",
+        "access": "public",
+        "endpointTags": {
+          "tag1": "Tag 1 description",
+          "tag2": "Tag 2 description"
+        },
+        "experienceGroupIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "staticReply": {
+          "value": "https://example.com",
+          "statusCode": 301,
+          "type": "redirect"
+        },
+        "unauthorizedReply": {
+          "value": "https://example.com/unauthorized",
+          "statusCode": 401,
+          "type": "redirect"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "description": "Example endpoint",
+        "route": "/example",
+        "enabled": true,
+        "method": "get",
+        "access": "public",
+        "endpointTags": {
+          "tag1": "Tag 1 description",
+          "tag2": "Tag 2 description"
+        },
+        "experienceGroupIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "staticReply": {
+          "value": "https://example.com",
+          "statusCode": 301,
+          "type": "redirect"
+        },
+        "unauthorizedReply": {
+          "value": "You are not authorized to access this endpoint.",
+          "statusCode": 401,
+          "type": "page"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!@#$' was unexpected)",
+      "python_error": "'!@#$' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema['properties']['endpointTags']:\n    {'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': 'string',\n                                                      'minLength': 1,\n                                                      'maxLength': 255}},\n     'additionalProperties': False}\n\nOn instance['endpointTags']:\n    {'tag1': 'Tag 1 description',\n     'tag2': 'Tag 2 description',\n     '!@#$': 'Invalid tag'}",
+      "data": {
+        "description": "Example endpoint",
+        "route": "/example",
+        "enabled": true,
+        "method": "get",
+        "access": "public",
+        "endpointTags": {
+          "tag1": "Tag 1 description",
+          "tag2": "Tag 2 description",
+          "!@#$": "Invalid tag"
+        },
+        "experienceGroupIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "staticReply": {
+          "value": "https://example.com",
+          "statusCode": 301,
+          "type": "redirect"
+        },
+        "unauthorizedReply": {
+          "value": "You are not authorized to access this endpoint.",
+          "statusCode": 401,
+          "type": "page"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"value\":\"You are not authorized to access this endpoint.\",\"statusCode\":401,\"type\":\"page\",\"extraProperty\":\"Invalid property\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extraProperty' was unexpected)\n\nFailed validating 'additionalProperties' in schema[0]:\n    {'type': 'object',\n     'properties': {'value': {'type': 'string'},\n                    'statusCode': {'type': 'number',\n                                   'min': 100,\n                                   'max': 599,\n                                   'integer': True},\n                    'type': {'type': 'string',\n                             'enum': ['page', 'redirect']}},\n     'required': ['value', 'type'],\n     'additionalProperties': False}\n\nOn instance:\n    {'value': 'You are not authorized to access this endpoint.',\n     'statusCode': 401,\n     'type': 'page',\n     'extraProperty': 'Invalid property'}",
+      "data": {
+        "description": "Example endpoint",
+        "route": "/example",
+        "enabled": true,
+        "method": "get",
+        "access": "public",
+        "endpointTags": {
+          "tag1": "Tag 1 description",
+          "tag2": "Tag 2 description"
+        },
+        "experienceGroupIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "staticReply": {
+          "value": "https://example.com",
+          "statusCode": 301,
+          "type": "redirect"
+        },
+        "unauthorizedReply": {
+          "value": "You are not authorized to access this endpoint.",
+          "statusCode": 401,
+          "type": "page",
+          "extraProperty": "Invalid property"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"\" is shorter than 1 character",
+      "python_error": "'' should be non-empty\n\nFailed validating 'minLength' in schema['properties']['endpointTags']['patternProperties']['^[0-9a-zA-Z_-]{1,255}$']:\n    {'type': 'string', 'minLength': 1, 'maxLength': 255}\n\nOn instance['endpointTags']['tag1']:\n    ''",
+      "data": {
+        "description": "Example endpoint",
+        "route": "/example",
+        "enabled": true,
+        "method": "get",
+        "access": "public",
+        "endpointTags": {
+          "tag1": "",
+          "tag2": "Tag 2 description"
+        },
+        "experienceGroupIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "staticReply": {
+          "value": "https://example.com",
+          "statusCode": 301,
+          "type": "redirect"
+        },
+        "unauthorizedReply": {
+          "value": "You are not authorized to access this endpoint.",
+          "statusCode": 401,
+          "type": "page"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('tag2~' was unexpected)",
+      "python_error": "'tag2~' does not match any of the regexes: '^[0-9a-zA-Z_-]{1,255}$'\n\nFailed validating 'additionalProperties' in schema['properties']['endpointTags']:\n    {'type': 'object',\n     'patternProperties': {'^[0-9a-zA-Z_-]{1,255}$': {'type': 'string',\n                                                      'minLength': 1,\n                                                      'maxLength': 255}},\n     'additionalProperties': False}\n\nOn instance['endpointTags']:\n    {'tag1': 'Tag 1 description', 'tag2~': 'Tag 2 description'}",
+      "data": {
+        "description": "Example endpoint",
+        "route": "/example",
+        "enabled": true,
+        "method": "get",
+        "access": "public",
+        "endpointTags": {
+          "tag1": "Tag 1 description",
+          "tag2~": "Tag 2 description"
+        },
+        "experienceGroupIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98"
+        ],
+        "staticReply": {
+          "value": "https://example.com",
+          "statusCode": 301,
+          "type": "redirect"
+        },
+        "unauthorizedReply": {
+          "value": "You are not authorized to access this endpoint.",
+          "statusCode": 401,
+          "type": "page"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!@#$%^&*()_+' was unexpected)",
+      "python_error": "Additional properties are not allowed ('additionalField' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'type': 'object',\n     'properties': {'description': {'type': 'string', 'maxLength': 32767},\n                    'route': {'type': 'string',\n                              'minLength': 1,\n                              'maxLength': 1024},\n                    'enabled': {'type': 'boolean'},\n                    'method': {'type': 'string',\n                               'enum': ['delete',\n                                        'get',\n                                        'options',\n                                        'patch',\n                                        'post',\n                                        'put']},\n                    'access': {'type': 'string',\n                               'enum': ['public',\n                                        'authenticated',\n                                        'group.. (4016 more)",
+      "data": {
+        "description": "Example endpoint",
+        "route": "/example",
+        "enabled": true,
+        "method": "get",
+        "access": "public",
+        "endpointTags": {
+          "tag1": "Tag 1 description",
+          "tag2": "Tag 2 description",
+          "!@#$%^&*()_+": "Invalid character"
+        },
+        "experienceGroupIds": [
+          "1234567890abcdef12345678",
+          "fedcba9876543210fedcba98",
+          "1234567890abcdef123456789",
+          "InvalidId"
+        ],
+        "staticReply": {
+          "value": "https://example.com",
+          "statusCode": 600,
+          "type": "redirect"
+        },
+        "unauthorizedReply": {
+          "value": "You are not authorized to access this endpoint.",
+          "statusCode": 401,
+          "type": "invalidType"
+        },
+        "additionalField": "This field should not exist according to the schema"
+      }
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "description": "sample Github_medium/o9207.json",
+  "meta": {
+    "full_size": 823,
+    "stripped_size": 754,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$ref": "#/definitions/IConfiguration",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "IConfiguration": {
+        "defaultProperties": [],
+        "properties": {
+          "pull": {
+            "$ref": "#/definitions/IPullOptions"
+          }
+        },
+        "type": "object"
+      },
+      "IPullOptions": {
+        "defaultProperties": [],
+        "properties": {
+          "connection": {
+            "$ref": "#/definitions/MysqlConnectionOptions"
+          },
+          "index": {
+            "type": "boolean"
+          },
+          "interactive": {
+            "type": "boolean"
+          },
+          "output": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection"
+        ],
+        "type": "object"
+      },
+      "MysqlConnectionOptions": {
+        "defaultProperties": [],
+        "properties": {
+          "adapter": {
+            "enum": [
+              "mysql"
+            ],
+            "type": "string"
+          },
+          "connectTimeout": {
+            "type": "number"
+          },
+          "database": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "port": {
+            "type": "number"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "adapter",
+          "database",
+          "host",
+          "password",
+          "user"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "pull": {
+          "connection": {
+            "adapter": "mysql",
+            "database": "my_database",
+            "host": "localhost",
+            "password": "my_password",
+            "user": "my_user",
+            "port ": 3306,
+            "connectTimeout ": 5000
+          },
+          "index": true,
+          "interactive": false,
+          "output": "output.txt"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"postgres\" is not one of [\"mysql\"]",
+      "python_error": "'postgres' is not one of ['mysql']\n\nFailed validating 'enum' in schema['properties']['pull']['properties']['connection']['properties']['adapter']:\n    {'enum': ['mysql'], 'type': 'string'}\n\nOn instance['pull']['connection']['adapter']:\n    'postgres'",
+      "data": {
+        "pull": {
+          "connection": {
+            "adapter": "postgres",
+            "database": "my_database",
+            "host": "localhost",
+            "password": "my_password",
+            "user": "my_user",
+            "port": 3306,
+            "connectTimeout": 5000
+          },
+          "index": true,
+          "interactive": false,
+          "output": "output.txt"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"5000\" is not of type \"number\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['pull']['properties']['output']:\n    {'type': 'string'}\n\nOn instance['pull']['output']:\n    123",
+      "data": {
+        "pull": {
+          "connection": {
+            "adapter": "mysql",
+            "database": "my_database",
+            "host": "localhost",
+            "password": "my_password",
+            "user": "my_user",
+            "port": "3306",
+            "connectTimeout": "5000"
+          },
+          "index": true,
+          "interactive": false,
+          "output": 123
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "pull": {
+          "connection": {
+            "adapter": "mysql",
+            "connectTimeout": 5000,
+            "database": "my_database",
+            "host": "localhost",
+            "password": "my_password",
+            "port": 3306,
+            "user": "my_user"
+          },
+          "index": true,
+          "interactive": false,
+          "output": "/path/to/output"
+        }
+      }
+    }
+  ]
+}

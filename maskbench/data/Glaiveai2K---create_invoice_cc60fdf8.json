@@ -1,0 +1,132 @@
+{
+  "description": "sample Glaiveai2K/create_invoice_cc60fdf8.json",
+  "meta": {
+    "full_size": 582,
+    "stripped_size": 369,
+    "features": [
+      "format",
+      "format:date",
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "customer_name": {
+        "description": "The name of the customer",
+        "type": "string"
+      },
+      "due_date": {
+        "description": "The due date of the invoice",
+        "format": "date",
+        "type": "string"
+      },
+      "items": {
+        "items": {
+          "properties": {
+            "description": {
+              "description": "The description of the item",
+              "type": "string"
+            },
+            "quantity": {
+              "description": "The quantity of the item",
+              "type": "integer"
+            },
+            "unit_price": {
+              "description": "The unit price of the item",
+              "type": "number"
+            }
+          },
+          "required": [
+            "description",
+            "quantity",
+            "unit_price"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "customer_name",
+      "due_date",
+      "items"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "customer_name": "John Doe",
+        "due_date": "2024-12-31",
+        "items": [
+          {
+            "description": "Item A",
+            "quantity": 2,
+            "unit_price": 10.99
+          },
+          {
+            "description": "Item B",
+            "quantity": 3,
+            "unit_price": 5.99
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"2024-02-31\" is not a \"date\"",
+      "python_error": "'2024-02-31' is not a 'date'\n\nFailed validating 'format' in schema['properties']['due_date']:\n    {'description': 'The due date of the invoice',\n     'format': 'date',\n     'type': 'string'}\n\nOn instance['due_date']:\n    '2024-02-31'",
+      "data": {
+        "customer_name": "John Doe",
+        "due_date": "2024-02-31",
+        "items": [
+          {
+            "description": "Item A",
+            "quantity": 2,
+            "unit_price": 10.99
+          },
+          {
+            "description": "Item B",
+            "quantity": 3,
+            "unit_price": 5.99
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"2024-02-30\" is not a \"date\"",
+      "python_error": "'2024-02-30' is not a 'date'\n\nFailed validating 'format' in schema['properties']['due_date']:\n    {'description': 'The due date of the invoice',\n     'format': 'date',\n     'type': 'string'}\n\nOn instance['due_date']:\n    '2024-02-30'",
+      "data": {
+        "customer_name": "",
+        "due_date": "2024-02-30",
+        "items": [
+          {
+            "description": "Item A",
+            "quantity": -1,
+            "unit_price": 10.99
+          },
+          {
+            "description": "Item B",
+            "quantity": 0,
+            "unit_price": -5.99
+          }
+        ]
+      }
+    }
+  ]
+}

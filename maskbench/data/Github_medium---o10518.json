@@ -1,0 +1,331 @@
+{
+  "description": "sample Github_medium/o10518.json",
+  "meta": {
+    "full_size": 837,
+    "stripped_size": 802,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "additionalProperties",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "minItems",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "shiporder": {
+        "additionalProperties": false,
+        "properties": {
+          "invoiceid": {
+            "type": "string"
+          },
+          "item": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "note": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "quantity",
+                "price"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "orderid": {
+            "type": "string"
+          },
+          "orderperson": {
+            "type": "string"
+          },
+          "shipto": {
+            "additionalProperties": false,
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "address",
+              "city",
+              "country"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "orderperson",
+          "shipto",
+          "item",
+          "orderid"
+        ]
+      }
+    },
+    "required": [
+      "shiporder"
+    ],
+    "title": "test/shiporderSchema.xsd",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "shiporder": {
+          "invoiceid": "INV001",
+          "item": [
+            {
+              "note": [
+                "Special handling required"
+              ],
+              "price": 10.99,
+              "quantity": 2,
+              "title": "Product A"
+            },
+            {
+              "price": 5.99,
+              "quantity": 1,
+              "title": "Product B"
+            }
+          ],
+          "orderid": "ORD001",
+          "orderperson": "John Doe",
+          "shipto": {
+            "address": "123 Main St",
+            "city": "Anytown",
+            "country": "USA",
+            "name": "Jane Doe"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['shiporder']['properties']['item']:\n    {'items': {'additionalProperties': False,\n               'properties': {'note': {'items': {'type': 'string'},\n                                       'type': 'array'},\n                              'price': {'type': 'number'},\n                              'quantity': {'minimum': 1, 'type': 'integer'},\n                              'title': {'type': 'string'}},\n               'required': ['title', 'quantity', 'price'],\n               'type': 'object'},\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['shiporder']['item']:\n    []",
+      "data": {
+        "shiporder": {
+          "invoiceid": "INV001",
+          "item": [],
+          "orderid": "ORD001",
+          "orderperson": "John Doe",
+          "shipto": {
+            "address": "123 Main St",
+            "city": "Anytown",
+            "country": "USA",
+            "name": "Jane Doe"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['shiporder']['properties']['item']['items']['properties']['quantity']:\n    {'minimum': 1, 'type': 'integer'}\n\nOn instance['shiporder']['item'][0]['quantity']:\n    0",
+      "data": {
+        "shiporder": {
+          "invoiceid": "INV001",
+          "item": [
+            {
+              "note": [
+                "Special handling required"
+              ],
+              "price": 10.99,
+              "quantity": 0,
+              "title": "Product A"
+            },
+            {
+              "price": 5.99,
+              "quantity": 1,
+              "title": "Product B"
+            }
+          ],
+          "orderid": "ORD001",
+          "orderperson": "John Doe",
+          "shipto": {
+            "address": "123 Main St",
+            "city": "Anytown",
+            "country": "USA",
+            "name": "Jane Doe"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "shiporder": {
+          "invoiceid": "INV001",
+          "item": [
+            {
+              "note": [
+                "Special instructions for Product A"
+              ],
+              "price": 10.99,
+              "quantity": 2,
+              "title": "Product A"
+            },
+            {
+              "note": [
+                "Special instructions for Product B",
+                "Additional note for Product B"
+              ],
+              "price": 5.99,
+              "quantity": 1,
+              "title": "Product B"
+            }
+          ],
+          "orderid": "12345",
+          "orderperson": "John Doe",
+          "shipto": {
+            "address": "123 Main St",
+            "city": "Anytown",
+            "country": "USA",
+            "name": "Jane Doe"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['shiporder']['properties']['item']['items']['properties']['quantity']:\n    {'minimum': 1, 'type': 'integer'}\n\nOn instance['shiporder']['item'][0]['quantity']:\n    0",
+      "data": {
+        "shiporder": {
+          "invoiceid": "INV001",
+          "item": [
+            {
+              "note": [
+                "Special instructions for Product A"
+              ],
+              "price": 10.99,
+              "quantity": 0,
+              "title": "Product A"
+            },
+            {
+              "note": [
+                "Special instructions for Product B",
+                "Additional note for Product B"
+              ],
+              "price": 5.99,
+              "quantity": 1,
+              "title": "Product B"
+            }
+          ],
+          "orderid": "12345",
+          "orderperson": "John Doe",
+          "shipto": {
+            "address": "123 Main St",
+            "city": "Anytown",
+            "country": "USA",
+            "name": "Jane Doe"
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['shiporder']['properties']['item']:\n    {'items': {'additionalProperties': False,\n               'properties': {'note': {'items': {'type': 'string'},\n                                       'type': 'array'},\n                              'price': {'type': 'number'},\n                              'quantity': {'minimum': 1, 'type': 'integer'},\n                              'title': {'type': 'string'}},\n               'required': ['title', 'quantity', 'price'],\n               'type': 'object'},\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['shiporder']['item']:\n    []",
+      "data": {
+        "shiporder": {
+          "orderid": "12345",
+          "orderperson": "John Doe",
+          "shipto": {
+            "name": "Jane Doe",
+            "address": "123 Main St",
+            "city": "Anytown",
+            "country": "USA"
+          },
+          "invoiceid": "INV001",
+          "item": []
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "Additional properties are not allowed ('Invalid, quantity should be at least 1' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['shiporder']['properties']['item']['items']:\n    {'additionalProperties': False,\n     'properties': {'note': {'items': {'type': 'string'}, 'type': 'array'},\n                    'price': {'type': 'number'},\n                    'quantity': {'minimum': 1, 'type': 'integer'},\n                    'title': {'type': 'string'}},\n     'required': ['title', 'quantity', 'price'],\n     'type': 'object'}\n\nOn instance['shiporder']['item'][0]:\n    {'title': 'Product A',\n     'quantity': 0,\n     'Invalid, quantity should be at least 1': 'price',\n     'note': ['Special instructions for Product A']}",
+      "data": {
+        "shiporder": {
+          "orderid": "12345",
+          "orderperson": "John Doe",
+          "shipto": {
+            "name": "Jane Doe",
+            "address": "123 Main St",
+            "city": "Anytown",
+            "country": "USA"
+          },
+          "invoiceid": "INV001",
+          "item": [
+            {
+              "title": "Product A",
+              "quantity": 0,
+              "Invalid, quantity should be at least 1": "price",
+              "note": [
+                "Special instructions for Product A"
+              ]
+            },
+            {
+              "title": "Product B",
+              "quantity": 1,
+              "price": 5.99,
+              "note": [
+                "Special instructions for Product B",
+                "Additional note for Product B"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

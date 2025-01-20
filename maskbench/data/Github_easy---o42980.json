@@ -1,0 +1,195 @@
+{
+  "description": "sample Github_easy/o42980.json",
+  "meta": {
+    "full_size": 600,
+    "stripped_size": 386,
+    "features": [
+      "@minmaxItems",
+      "anyOf",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxItems",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "name": "Material Asset",
+    "description": "asset.json specification for materials.",
+    "type": "object",
+    "properties": {
+      "asset_type": {
+        "type": "string",
+        "pattern": "material"
+      },
+      "shader": {
+        "type": "string",
+        "description": "path to a shader asset"
+      },
+      "parameters": {
+        "description": "The parameters to override from the shader",
+        "type": "object",
+        "patternProperties": {
+          ".*": {
+            "description": "The overrided value",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 4
+              },
+              {
+                "type": "number"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "required": [
+      "asset_type",
+      "shader",
+      "parameters"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "asset_type": "material",
+        "shader": "path/to/shader.asset",
+        "parameters": {
+          "color": [
+            1.0,
+            0.5,
+            0.2
+          ],
+          "metallic": 0.8,
+          "roughness": "value_from_shader",
+          "normal_map": [
+            0.1,
+            0.2,
+            0.3,
+            0.4
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "asset_type": "material",
+        "shader": "path/to/shader.asset",
+        "parameters": {
+          "color": [
+            1.0,
+            0.5,
+            0.2
+          ],
+          "texture": "path/to/texture.asset",
+          "metallic": 0.8,
+          "roughness": [
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "[1.0,\"invalid\"] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalid' is not of type 'number'\n\nFailed validating 'type' in schema[1]['items']:\n    {'type': 'number'}\n\nOn instance[1]:\n    'invalid'",
+      "data": {
+        "asset_type": "material",
+        "shader": "path/to/shader.asset",
+        "parameters": {
+          "color": [
+            1.0,
+            "invalid"
+          ],
+          "texture": "path/to/texture.asset",
+          "metallic": 0.8,
+          "roughness": [
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[1.0] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[0.4, 0.6, 0.8, 1.0, 1.1] is too long\n\nFailed validating 'maxItems' in schema[1]:\n    {'type': 'array',\n     'items': {'type': 'number'},\n     'minItems': 2,\n     'maxItems': 4}\n\nOn instance:\n    [0.4, 0.6, 0.8, 1.0, 1.1]",
+      "data": {
+        "asset_type": "material",
+        "shader": "path/to/shader.asset",
+        "parameters": {
+          "color": [
+            1.0
+          ],
+          "texture": "path/to/texture.asset",
+          "metallic": 0.8,
+          "roughness": [
+            0.4,
+            0.6,
+            0.8,
+            1.0,
+            1.1
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[1.0,0.5,0.2,0.3,0.4,0.5,0.6] is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "[1.0, 0.5, 0.2, 0.3, 0.4, 0.5, 0.6] is too long\n\nFailed validating 'maxItems' in schema[1]:\n    {'type': 'array',\n     'items': {'type': 'number'},\n     'minItems': 2,\n     'maxItems': 4}\n\nOn instance:\n    [1.0, 0.5, 0.2, 0.3, 0.4, 0.5, 0.6]",
+      "data": {
+        "asset_type": "material",
+        "shader": "path/to/shader.asset",
+        "parameters": {
+          "color": [
+            1.0,
+            0.5,
+            0.2,
+            0.3,
+            0.4,
+            0.5,
+            0.6
+          ],
+          "texture": "path/to/texture.asset",
+          "metallic": 0.8,
+          "roughness": [
+            0.4,
+            0.6
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,721 @@
+{
+  "description": "sample Github_hard/o27348.json",
+  "meta": {
+    "full_size": 2559,
+    "stripped_size": 2500,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items",
+      "oneOf",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "absolute_path": {
+        "pattern": "^/[^\u0000]+$",
+        "type": "string"
+      },
+      "bytes": {
+        "pattern": "^\\d+([KMGT]i?B|B)$",
+        "type": "string"
+      },
+      "no_partitions": {
+        "additionalProperties": false,
+        "properties": {
+          "root": {
+            "$ref": "#/definitions/partition"
+          },
+          "type": {
+            "enum": [
+              "none"
+            ]
+          }
+        },
+        "required": [
+          "root"
+        ],
+        "type": "object"
+      },
+      "partition": {
+        "properties": {
+          "filesystem": {
+            "enum": [
+              "ext2",
+              "ext3",
+              "ext4",
+              "xfs"
+            ]
+          },
+          "size": {
+            "$ref": "#/definitions/bytes"
+          }
+        },
+        "required": [
+          "size",
+          "filesystem"
+        ],
+        "type": "object"
+      },
+      "partition_table": {
+        "additionalProperties": false,
+        "properties": {
+          "boot": {
+            "$ref": "#/definitions/partition"
+          },
+          "root": {
+            "$ref": "#/definitions/partition"
+          },
+          "swap": {
+            "properties": {
+              "size": {
+                "$ref": "#/definitions/bytes"
+              }
+            },
+            "required": [
+              "size"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "enum": [
+              "msdos",
+              "gpt"
+            ]
+          }
+        },
+        "required": [
+          "root"
+        ],
+        "type": "object"
+      },
+      "path": {
+        "pattern": "^[^\u0000]+$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "bootstrapper": {
+        "properties": {
+          "mirror": {
+            "_format": "uri",
+            "type": "string"
+          },
+          "tarball": {
+            "type": "boolean"
+          },
+          "workspace": {
+            "$ref": "#/definitions/path"
+          }
+        },
+        "required": [
+          "workspace"
+        ],
+        "type": "object"
+      },
+      "image": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "packages": {
+        "additionalProperties": false,
+        "properties": {
+          "install": {
+            "items": {
+              "anyOf": [
+                {
+                  "pattern": "^[^/]+(/[^/]+)?$"
+                },
+                {
+                  "$ref": "#/definitions/absolute_path"
+                }
+              ]
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "mirror": {
+            "_format": "uri",
+            "type": "string"
+          },
+          "sources": {
+            "additionalProperties": false,
+            "minItems": 1,
+            "patternProperties": {
+              "^\\w+$": {
+                "items": {
+                  "pattern": "^(deb|deb-src)\\s+(\\[\\s*(.+\\S)?\\s*\\]\\s+)?\\S+\\s+\\S+(\\s+(.+\\S))?\\s*$",
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "trusted-keys": {
+            "items": {
+              "$ref": "#/definitions/absolute_path"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "plugins": {
+        "additionalProperties": false,
+        "patternProperties": {
+          "^\\w+$": {
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "provider": {
+        "type": "string"
+      },
+      "system": {
+        "properties": {
+          "architecture": {
+            "enum": [
+              "i386",
+              "amd64"
+            ]
+          },
+          "bootloader": {
+            "enum": [
+              "pvgrub",
+              "grub",
+              "extlinux"
+            ]
+          },
+          "charmap": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "release": {
+            "enum": [
+              "wheezy",
+              "testing",
+              "unstable"
+            ]
+          },
+          "sections": {
+            "minItems": 1,
+            "type": "array"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "release",
+          "architecture",
+          "bootloader",
+          "timezone",
+          "locale",
+          "charmap"
+        ],
+        "type": "object"
+      },
+      "volume": {
+        "properties": {
+          "backing": {
+            "type": "string"
+          },
+          "partitions": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/no_partitions"
+              },
+              {
+                "$ref": "#/definitions/partition_table"
+              }
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "partitions"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "provider",
+      "bootstrapper",
+      "system",
+      "packages",
+      "volume"
+    ],
+    "title": "Generic manifest",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "provider": "aws",
+        "bootstrapper": {
+          "workspace": "/tmp/bootstrapper",
+          "mirror": "http://mirror.example.com/debian/",
+          "tarball": true
+        },
+        "image": {
+          "name": "my-image"
+        },
+        "packages": {
+          "install": [
+            "apt",
+            "/usr/bin/perl",
+            "vim"
+          ],
+          "mirror": "http://mirror.example.com/debian/",
+          "sources": {
+            "main": [
+              "deb http://mirror.example.com/debian/ wheezy main",
+              "deb-src http://mirror.example.com/debian/ wheezy main"
+            ],
+            "security": [
+              "deb http://security.debian.org/ wheezy/updates main",
+              "deb-src http://security.debian.org/ wheezy/updates main"
+            ]
+          },
+          "trusted-keys": [
+            "/usr/share/keyrings/debian-archive-keyring.gpg"
+          ]
+        },
+        "plugins": {
+          "plugin1": {
+            "key": "value"
+          }
+        },
+        "system": {
+          "architecture": "amd64",
+          "bootloader": "grub",
+          "charmap": "UTF-8",
+          "locale": "en_US.UTF-8",
+          "release": "wheezy",
+          "sections": [
+            "main",
+            "contrib",
+            "non-free"
+          ],
+          "timezone": "America/New_York"
+        },
+        "volume": {
+          "backing": "sda",
+          "partitions": {
+            "type": "msdos",
+            "root": {
+              "filesystem": "ext4",
+              "size": "10GB"
+            },
+            "boot": {
+              "filesystem": "ext2",
+              "size": "1GB"
+            },
+            "swap": {
+              "size": "2GB"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"type\":\"none\",\"root\":{\"filesystem\":\"ext4\",\"size\":\"10GB\",\"extra\":\"value\"},\"boot\":{\"filesystem\":\"ext2\",\"size\":\"1GB\"},\"swap\":{\"size\":\"2GB\"}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'none' is not one of ['msdos', 'gpt']\n\nFailed validating 'enum' in schema[1]['properties']['type']:\n    {'enum': ['msdos', 'gpt']}\n\nOn instance['type']:\n    'none'",
+      "data": {
+        "provider": "aws",
+        "bootstrapper": {
+          "workspace": "/tmp/bootstrapper",
+          "mirror": "http://mirror.example.com/debian/",
+          "tarball": true
+        },
+        "image": {
+          "name": "my-image"
+        },
+        "packages": {
+          "install": [
+            "apt",
+            "/usr/bin/perl",
+            "vim"
+          ],
+          "mirror": "http://mirror.example.com/debian/",
+          "sources": {
+            "main": [
+              "deb http://mirror.example.com/debian/ wheezy main",
+              "deb-src http://mirror.example.com/debian/ wheezy main"
+            ],
+            "security": [
+              "deb http://security.debian.org/ wheezy/updates main",
+              "deb-src http://security.debian.org/ wheezy/updates main"
+            ]
+          },
+          "trusted-keys": [
+            "/usr/share/keyrings/debian-archive-keyring.gpg"
+          ]
+        },
+        "plugins": {
+          "plugin1": {
+            "key": "value"
+          }
+        },
+        "system": {
+          "architecture": "amd64",
+          "bootloader": "grub",
+          "charmap": "UTF-8",
+          "locale": "en_US.UTF-8",
+          "release": "wheezy",
+          "sections": [
+            "main",
+            "contrib",
+            "non-free"
+          ],
+          "timezone": "America/New_York"
+        },
+        "volume": {
+          "backing": "sda",
+          "partitions": {
+            "type": "none",
+            "root": {
+              "filesystem": "ext4",
+              "size": "10GB",
+              "extra": "value"
+            },
+            "boot": {
+              "filesystem": "ext2",
+              "size": "1GB"
+            },
+            "swap": {
+              "size": "2GB"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('!@#$' was unexpected)",
+      "python_error": "'!@#$' does not match any of the regexes: '^\\\\w+$'\n\nFailed validating 'additionalProperties' in schema['properties']['plugins']:\n    {'additionalProperties': False,\n     'patternProperties': {'^\\\\w+$': {'type': 'object'}},\n     'type': 'object'}\n\nOn instance['plugins']:\n    {'!@#$': {'key': 'value'}}",
+      "data": {
+        "provider": "aws",
+        "bootstrapper": {
+          "workspace": "/tmp/bootstrapper",
+          "mirror": "http://mirror.example.com/debian/",
+          "tarball": true
+        },
+        "image": {
+          "name": "my-image"
+        },
+        "packages": {
+          "install": [
+            "apt",
+            "/usr/bin/perl",
+            "vim"
+          ],
+          "mirror": "http://mirror.example.com/debian/",
+          "sources": {
+            "!@#$": [
+              "deb http://mirror.example.com/debian/ wheezy main",
+              "deb-src http://mirror.example.com/debian/ wheezy main"
+            ],
+            "security": [
+              "deb http://security.debian.org/ wheezy/updates main",
+              "deb-src http://security.debian.org/ wheezy/updates main"
+            ]
+          },
+          "trusted-keys": [
+            "/usr/share/keyrings/debian-archive-keyring.gpg"
+          ]
+        },
+        "plugins": {
+          "!@#$": {
+            "key": "value"
+          }
+        },
+        "system": {
+          "architecture": "amd64",
+          "bootloader": "grub",
+          "charmap": "UTF-8",
+          "locale": "en_US.UTF-8",
+          "release": "wheezy",
+          "sections": [
+            "main",
+            "contrib",
+            "non-free"
+          ],
+          "timezone": "America/New_York"
+        },
+        "volume": {
+          "backing": "sda",
+          "partitions": {
+            "type": "msdos",
+            "root": {
+              "filesystem": "ext4",
+              "size": "10GB"
+            },
+            "boot": {
+              "filesystem": "ext2",
+              "size": "1GB"
+            },
+            "swap": {
+              "size": "2GB"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['packages']['properties']['install']:\n    {'items': {'anyOf': [{'pattern': '^[^/]+(/[^/]+)?$'},\n                         {'$ref': '#/definitions/absolute_path'}]},\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['packages']['install']:\n    []",
+      "data": {
+        "provider": "aws",
+        "bootstrapper": {
+          "workspace": "/tmp/bootstrapper",
+          "mirror": "http://mirror.example.com/debian/",
+          "tarball": true
+        },
+        "image": {
+          "name": "my-image"
+        },
+        "packages": {
+          "install": [],
+          "mirror": "http://mirror.example.com/debian/",
+          "sources": {
+            "main": [
+              "deb http://mirror.example.com/debian/ wheezy main",
+              "deb-src http://mirror.example.com/debian/ wheezy main"
+            ],
+            "security": [
+              "deb http://security.debian.org/ wheezy/updates main",
+              "deb-src http://security.debian.org/ wheezy/updates main"
+            ]
+          },
+          "trusted-keys": [
+            "/usr/share/keyrings/debian-archive-keyring.gpg"
+          ]
+        },
+        "plugins": {
+          "plugin1": {
+            "key": "value"
+          }
+        },
+        "system": {
+          "architecture": "amd64",
+          "bootloader": "grub",
+          "charmap": "UTF-8",
+          "locale": "en_US.UTF-8",
+          "release": "wheezy",
+          "sections": [
+            "main",
+            "contrib",
+            "non-free"
+          ],
+          "timezone": "America/New_York"
+        },
+        "volume": {
+          "backing": "sda",
+          "partitions": {
+            "type": "msdos",
+            "root": {
+              "filesystem": "ext4",
+              "size": "10GB"
+            },
+            "boot": {
+              "filesystem": "ext2",
+              "size": "1GB"
+            },
+            "swap": {
+              "size": "2GB"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "\"invalid/path/to/perl\" is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "'invalid/path/to/perl' does not match '^/[^\\x00]+$'\n\nFailed validating 'pattern' in schema[1]:\n    {'pattern': '^/[^\\x00]+$', 'type': 'string'}\n\nOn instance:\n    'invalid/path/to/perl'",
+      "data": {
+        "provider": "aws",
+        "bootstrapper": {
+          "workspace": "/tmp/bootstrapper",
+          "mirror": "http://mirror.example.com/debian/",
+          "tarball": true
+        },
+        "image": {
+          "name": "my-image"
+        },
+        "packages": {
+          "install": [
+            "apt",
+            "invalid/path/to/perl",
+            "/usr/bin/perl",
+            "vim"
+          ],
+          "mirror": "http://mirror.example.com/debian/",
+          "sources": {
+            "main": [
+              "deb http://mirror.example.com/debian/ wheezy main",
+              "deb-src http://mirror.example.com/debian/ wheezy main"
+            ],
+            "security": [
+              "deb http://security.debian.org/ wheezy/updates main",
+              "deb-src http://security.debian.org/ wheezy/updates main"
+            ]
+          },
+          "trusted-keys": [
+            "/usr/share/keyrings/debian-archive-keyring.gpg"
+          ]
+        },
+        "plugins": {
+          "plugin1": {
+            "key": "value"
+          }
+        },
+        "system": {
+          "architecture": "amd64",
+          "bootloader": "grub",
+          "charmap": "UTF-8",
+          "locale": "en_US.UTF-8",
+          "release": "wheezy",
+          "sections": [
+            "main",
+            "contrib",
+            "non-free"
+          ],
+          "timezone": "America/New_York"
+        },
+        "volume": {
+          "backing": "sda",
+          "partitions": {
+            "type": "msdos",
+            "root": {
+              "filesystem": "ext4",
+              "size": "10GB"
+            },
+            "boot": {
+              "filesystem": "ext2",
+              "size": "1GB"
+            },
+            "swap": {
+              "size": "2GB"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-source-line\" does not match \"^(deb|deb-src)\\s+(\\[\\s*(.+\\S)?\\s*\\]\\s+)?\\S+\\s+\\S+(\\s+(.+\\S))?\\s*$\"",
+      "python_error": "{'type': 'non-existent-type', 'root': {'filesystem': 'ext4', 'size': '10GB'}, 'boot': {'filesystem': 'ext2', 'size': '1GB'}, 'swap': {'size': '2GB'}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['volume']['properties']['partitions']:\n    {'oneOf': [{'$ref': '#/definitions/no_partitions'},\n               {'$ref': '#/definitions/partition_table'}],\n     'type': 'object'}\n\nOn instance['volume']['partitions']:\n    {'type': 'non-existent-type',\n     'root': {'filesystem': 'ext4', 'size': '10GB'},\n     'boot': {'filesystem': 'ext2', 'size': '1GB'},\n     'swap': {'size': '2GB'}}",
+      "data": {
+        "provider": "aws",
+        "bootstrapper": {
+          "workspace": "/tmp/bootstrapper",
+          "mirror": "http://mirror.example.com/debian/",
+          "tarball": true
+        },
+        "image": {
+          "name": "my-image"
+        },
+        "packages": {
+          "install": [
+            "apt",
+            "/usr/bin/perl",
+            "vim",
+            "/path/to/non-existent/directory"
+          ],
+          "mirror": "http://mirror.example.com/debian/",
+          "sources": {
+            "main": [
+              "deb http://mirror.example.com/debian/ wheezy main",
+              "deb-src http://mirror.example.com/debian/ wheezy main"
+            ],
+            "security": [
+              "deb http://security.debian.org/ wheezy/updates main",
+              "invalid-source-line",
+              "deb-src http://security.debian.org/ wheezy/updates main"
+            ]
+          },
+          "trusted-keys": [
+            "/usr/share/keyrings/debian-archive-keyring.gpg",
+            "/path/to/non-existent/keyring.gpg"
+          ]
+        },
+        "plugins": {
+          "plugin1": {
+            "key": "value"
+          }
+        },
+        "system": {
+          "architecture": "amd64",
+          "bootloader": "grub",
+          "charmap": "UTF-8",
+          "locale": "en_US.UTF-8",
+          "release": "non-existent-release",
+          "sections": [
+            "main",
+            "contrib",
+            "non-free"
+          ],
+          "timezone": "America/New_York"
+        },
+        "volume": {
+          "backing": "sda",
+          "partitions": {
+            "type": "non-existent-type",
+            "root": {
+              "filesystem": "ext4",
+              "size": "10GB"
+            },
+            "boot": {
+              "filesystem": "ext2",
+              "size": "1GB"
+            },
+            "swap": {
+              "size": "2GB"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

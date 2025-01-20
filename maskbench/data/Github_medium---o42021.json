@@ -1,0 +1,322 @@
+{
+  "description": "sample Github_medium/o42021.json",
+  "meta": {
+    "full_size": 685,
+    "stripped_size": 685,
+    "features": [
+      "@minmaxLength",
+      "@minmaxProperties",
+      "@siblingKeys",
+      "format",
+      "format:uri",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxProperties",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [
+      "pipeline"
+    ],
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "environment": {
+        "type": "object"
+      },
+      "schedule": {
+        "type": "object",
+        "properties": {
+          "crontab": {
+            "type": "string"
+          }
+        }
+      },
+      "pipeline": {
+        "type": "array",
+        "minLength": 1,
+        "items": {
+          "type": "object",
+          "oneOf": [
+            {
+              "required": [
+                "run"
+              ]
+            },
+            {
+              "required": [
+                "flow"
+              ]
+            }
+          ],
+          "properties": {
+            "run": {
+              "type": "string"
+            },
+            "parameters": {
+              "type": "object"
+            },
+            "cache": {
+              "type": "boolean"
+            },
+            "validate": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "dependencies": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "maxProperties": 1,
+          "properties": {
+            "datapackage": {
+              "type": "string",
+              "format": "uri"
+            },
+            "pipeline": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "title": "Example Pipeline",
+        "description": "This is an example pipeline",
+        "environment": {},
+        "schedule": {
+          "crontab": "* * * * *"
+        },
+        "pipeline": [
+          {
+            "run": "python script.py",
+            "parameters": {
+              "input_file": "input.csv",
+              "output_file": "output.csv"
+            },
+            "cache": true,
+            "validate": true
+          },
+          {
+            "flow": "flow1",
+            "parameters": {
+              "input_file": "input.csv",
+              "output_file": "output.csv"
+            },
+            "cache": false,
+            "validate": false
+          }
+        ],
+        "dependencies": [
+          {
+            "datapackage": "https://example.com/datapackage.json"
+          },
+          {
+            "pipeline": "https://example.com/pipeline.json"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "title": "Example Pipeline",
+        "description": "This is an example pipeline",
+        "environment": {},
+        "schedule": {
+          "crontab": "0 0 * * *"
+        },
+        "pipeline": [
+          {
+            "run": "python script.py",
+            "parameters": {
+              "input_file": "input.csv",
+              "output_file": "output.csv"
+            },
+            "cache": true,
+            "validate": false
+          },
+          {
+            "flow": "flow1"
+          }
+        ],
+        "dependencies": [
+          {
+            "datapackage": "https://example.com/datapackage.json"
+          },
+          {
+            "pipeline": "pipeline1"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxProperties keyword",
+      "valid": false,
+      "rust_error": "{\"datapackage\":\"https://example.com/datapackage.json\",\"pipeline\":\"pipeline1\",\"extra\":\"extra value\"} has more than 1 property",
+      "python_error": "{'datapackage': 'https://example.com/datapackage.json', 'pipeline': 'pipeline1', 'extra': 'extra value'} has too many properties\n\nFailed validating 'maxProperties' in schema['properties']['dependencies']['items']:\n    {'type': 'object',\n     'maxProperties': 1,\n     'properties': {'datapackage': {'type': 'string', 'format': 'uri'},\n                    'pipeline': {'type': 'string'}}}\n\nOn instance['dependencies'][0]:\n    {'datapackage': 'https://example.com/datapackage.json',\n     'pipeline': 'pipeline1',\n     'extra': 'extra value'}",
+      "data": {
+        "title": "Example Pipeline",
+        "description": "This is an example pipeline",
+        "environment": {},
+        "schedule": {
+          "crontab": "0 0 * * *"
+        },
+        "pipeline": [
+          {
+            "run": "python script.py",
+            "parameters": {
+              "input_file": "input.csv",
+              "output_file": "output.csv"
+            },
+            "cache": true,
+            "validate": false
+          },
+          {
+            "flow": "flow1"
+          }
+        ],
+        "dependencies": [
+          {
+            "datapackage": "https://example.com/datapackage.json",
+            "pipeline": "pipeline1",
+            "extra": "extra value"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"invalid uri\" is not a \"uri\"",
+      "python_error": "'invalid uri' is not a 'uri'\n\nFailed validating 'format' in schema['properties']['dependencies']['items']['properties']['datapackage']:\n    {'type': 'string', 'format': 'uri'}\n\nOn instance['dependencies'][0]['datapackage']:\n    'invalid uri'",
+      "data": {
+        "title": "Example Pipeline",
+        "description": "This is an example pipeline",
+        "environment": {},
+        "schedule": {
+          "crontab": "0 0 * * *"
+        },
+        "pipeline": [
+          {
+            "run": "python script.py",
+            "parameters": {
+              "input_file": "input.csv",
+              "output_file": "output.csv"
+            },
+            "cache": true,
+            "validate": false
+          },
+          {
+            "flow": "flow1"
+          }
+        ],
+        "dependencies": [
+          {
+            "datapackage": "invalid uri"
+          },
+          {
+            "pipeline": "pipeline1"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"run\":\"python script.py\",\"flow\":\"flow1\",\"parameters\":{\"input_file\":\"input.csv\",\"output_file\":\"output.csv\"},\"cache\":true,\"validate\":false} is valid under more than one of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'run': 'python script.py', 'flow': 'flow1', 'parameters': {'input_file': 'input.csv', 'output_file': 'output.csv'}, 'cache': True, 'validate': False} is valid under each of {'required': ['flow']}, {'required': ['run']}\n\nFailed validating 'oneOf' in schema['properties']['pipeline']['items']:\n    {'type': 'object',\n     'oneOf': [{'required': ['run']}, {'required': ['flow']}],\n     'properties': {'run': {'type': 'string'},\n                    'parameters': {'type': 'object'},\n                    'cache': {'type': 'boolean'},\n                    'validate': {'type': 'boolean'}}}\n\nOn instance['pipeline'][0]:\n    {'run': 'python script.py',\n     'flow': 'flow1',\n     'parameters': {'input_file': 'input.csv', 'output_file': 'output.csv'},\n     'cache': True,\n     'validate': False}",
+      "data": {
+        "title": "Example Pipeline",
+        "description": "This is an example pipeline",
+        "environment": {},
+        "schedule": {
+          "crontab": "0 0 * * *"
+        },
+        "pipeline": [
+          {
+            "run": "python script.py",
+            "flow": "flow1",
+            "parameters": {
+              "input_file": "input.csv",
+              "output_file": "output.csv"
+            },
+            "cache": true,
+            "validate": false
+          }
+        ],
+        "dependencies": [
+          {
+            "datapackage": "https://example.com/datapackage.json"
+          },
+          {
+            "pipeline": "pipeline1"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"run\":\"another python script.py\",\"flow\":\"flow1\"} is valid under more than one of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'run': 'another python script.py', 'flow': 'flow1'} is valid under each of {'required': ['flow']}, {'required': ['run']}\n\nFailed validating 'oneOf' in schema['properties']['pipeline']['items']:\n    {'type': 'object',\n     'oneOf': [{'required': ['run']}, {'required': ['flow']}],\n     'properties': {'run': {'type': 'string'},\n                    'parameters': {'type': 'object'},\n                    'cache': {'type': 'boolean'},\n                    'validate': {'type': 'boolean'}}}\n\nOn instance['pipeline'][1]:\n    {'run': 'another python script.py', 'flow': 'flow1'}",
+      "data": {
+        "title": "Example Pipeline",
+        "description": "This is an example pipeline",
+        "environment": {},
+        "schedule": {
+          "crontab": "0 0 * * *"
+        },
+        "pipeline": [
+          {
+            "run": "python script.py",
+            "parameters": {
+              "input_file": "input.csv",
+              "output_file": "output.csv"
+            },
+            "cache": true,
+            "validate": false
+          },
+          {
+            "run": "another python script.py",
+            "flow": "flow1"
+          }
+        ],
+        "dependencies": [
+          {
+            "datapackage": "https://example.com/datapackage.json",
+            "pipeline": "pipeline1"
+          },
+          {
+            "pipeline": "pipeline1"
+          }
+        ]
+      }
+    }
+  ]
+}

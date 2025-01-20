@@ -1,0 +1,258 @@
+{
+  "description": "sample Github_medium/o34851.json",
+  "meta": {
+    "full_size": 1392,
+    "stripped_size": 1118,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "additionalProperties",
+      "enum",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Describes the header of the import",
+    "type": "object",
+    "required": [
+      "expectedHeader",
+      "fieldNames",
+      "caseSensitive",
+      "strict",
+      "additionalColumns",
+      "severity"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "expectedHeader": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "_uniqueItems": true
+      },
+      "fieldNames": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string"
+        },
+        "_uniqueItems": true
+      },
+      "caseSensitive": {
+        "type": "boolean"
+      },
+      "strict": {
+        "$ref": "#/definitions/boolean"
+      },
+      "additionalColumns": {
+        "$ref": "#/definitions/boolean"
+      },
+      "missingColumns": {
+        "$ref": "#/definitions/boolean"
+      },
+      "mandatoryColumns": {
+        "oneOf": [
+          {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "_uniqueItems": true
+          },
+          {
+            "type": "object",
+            "properties": {
+              "val": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                "_uniqueItems": true
+              },
+              "severity": {
+                "$ref": "#/definitions/severity"
+              }
+            }
+          }
+        ]
+      },
+      "severity": {
+        "$ref": "#/definitions/severity"
+      }
+    },
+    "definitions": {
+      "severity": {
+        "type": "string",
+        "enum": [
+          "abort_file",
+          "abort_scope",
+          "skip_record",
+          "skip_field"
+        ]
+      },
+      "boolean": {
+        "onOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "val": {
+                "type": "boolean"
+              },
+              "severity": {
+                "$ref": "#/definitions/severity"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "expectedHeader": [
+          "Name",
+          "Age",
+          "Address"
+        ],
+        "fieldNames": [
+          "Name",
+          "Age",
+          "Address"
+        ],
+        "caseSensitive": false,
+        "strict": {
+          "val": true,
+          "severity": "abort_file"
+        },
+        "additionalColumns": {
+          "val": false,
+          "severity": "skip_record"
+        },
+        "missingColumns": {
+          "val": true,
+          "severity": "abort_scope"
+        },
+        "mandatoryColumns": {
+          "val": [
+            "Name",
+            "Age"
+          ],
+          "severity": "abort_file"
+        },
+        "severity": "abort_file"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "expectedHeader": [
+          "Name",
+          "Age",
+          "City"
+        ],
+        "fieldNames": [
+          "Name",
+          "Age",
+          "City"
+        ],
+        "caseSensitive": false,
+        "strict": true,
+        "additionalColumns": false,
+        "missingColumns": false,
+        "mandatoryColumns": {
+          "val": [
+            "Name",
+            "Age"
+          ],
+          "severity": "abort_file"
+        },
+        "severity": "abort_file"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['expectedHeader']:\n    {'type': 'array',\n     'minItems': 1,\n     'items': {'oneOf': [{'type': 'string'},\n                         {'type': 'array',\n                          'minItems': 1,\n                          'items': {'type': 'string'}}]},\n     '_uniqueItems': True}\n\nOn instance['expectedHeader']:\n    []",
+      "data": {
+        "expectedHeader": [],
+        "fieldNames": [
+          "Name",
+          "Age",
+          "City"
+        ],
+        "caseSensitive": false,
+        "strict": true,
+        "additionalColumns": false,
+        "missingColumns": false,
+        "mandatoryColumns": {
+          "val": [
+            "Name",
+            "Age"
+          ],
+          "severity": "abort_file"
+        },
+        "severity": "abort_file"
+      }
+    }
+  ]
+}

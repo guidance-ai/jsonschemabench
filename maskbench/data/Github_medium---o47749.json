@@ -1,0 +1,465 @@
+{
+  "description": "sample Github_medium/o47749.json",
+  "meta": {
+    "full_size": 1606,
+    "stripped_size": 1031,
+    "features": [
+      "$ref",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "cpu": {
+        "description": "The virtual CPU",
+        "properties": {
+          "features": {
+            "items": {
+              "enum": [
+                "xsave",
+                "avx",
+                "aes"
+              ]
+            },
+            "type": "array"
+          },
+          "model": {
+            "enum": [
+              "host",
+              "pentium",
+              "qemu64",
+              "kvm64"
+            ]
+          }
+        },
+        "type": "object"
+      }
+    },
+    "properties": {
+      "bios": {
+        "description": "64k BIOS image",
+        "type": "string"
+      },
+      "cpu": {
+        "$ref": "#/definitions/cpu"
+      },
+      "description": {
+        "description": "A human-readable description of this config",
+        "type": "string"
+      },
+      "drives": {
+        "description": "Additional virtual hard drives",
+        "items": {
+          "properties": {
+            "file": {
+              "type": "string"
+            },
+            "format": {
+              "enum": [
+                "raw",
+                "qcow2",
+                "vdi"
+              ]
+            },
+            "media": {
+              "enum": [
+                "disk"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "ide",
+                "virtio"
+              ]
+            }
+          },
+          "required": [
+            "file",
+            "type",
+            "format",
+            "media"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "image": {
+        "default": "service.img",
+        "description": "A bootable virtual machine image",
+        "type": "string"
+      },
+      "mem": {
+        "default": 128,
+        "description": "Amount of memory in megabytes",
+        "type": "number"
+      },
+      "modules": {
+        "description": "Multiboot 'modules', e.g. extra files provided at boot",
+        "items": {
+          "properties": {
+            "args": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "net": {
+        "description": "Network devices",
+        "items": {
+          "properties": {
+            "backend": {
+              "default": "tap",
+              "enum": [
+                "tap",
+                "user"
+              ]
+            },
+            "device": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "device"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "smp": {
+        "description": "Number of virtual CPU's",
+        "type": "number"
+      },
+      "vfio": {
+        "description": "VFIO PCI-passthrough on device",
+        "type": "string"
+      },
+      "vga": {
+        "description": "Enable VGA screen",
+        "enum": [
+          "std",
+          "cirrus",
+          "vmware",
+          "qxl",
+          "xenfb",
+          "tcx",
+          "cg3",
+          "virtio",
+          "none"
+        ]
+      }
+    },
+    "title": "Virtual Machine Image",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "bios": "bios.bin",
+        "cpu": {
+          "features": [
+            "xsave",
+            "avx"
+          ],
+          "model": "qemu64"
+        },
+        "description": "Example virtual machine configuration",
+        "drives": [
+          {
+            "file": "drive1.img",
+            "format": "qcow2",
+            "media": "disk",
+            "name": "Drive 1",
+            "type": "virtio"
+          },
+          {
+            "file": "drive2.img",
+            "format": "raw",
+            "media": "disk",
+            "name": "Drive 2",
+            "type": "ide"
+          }
+        ],
+        "image": "service.img",
+        "mem": 256,
+        "modules": [
+          {
+            "args": "module1 args",
+            "path": "module1.bin"
+          },
+          {
+            "args": "module2 args",
+            "path": "module2.bin"
+          }
+        ],
+        "net": [
+          {
+            "backend": "tap",
+            "device": "virtio-net-pci"
+          },
+          {
+            "backend": "user",
+            "device": "virtio-net-pci"
+          }
+        ],
+        "smp": 2,
+        "vfio": "0000:00:02.0",
+        "vga": "std"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-feature\" is not one of [\"xsave\",\"avx\",\"aes\"]",
+      "python_error": "'invalid-vga' is not one of ['std', 'cirrus', 'vmware', 'qxl', 'xenfb', 'tcx', 'cg3', 'virtio', 'none']\n\nFailed validating 'enum' in schema['properties']['vga']:\n    {'description': 'Enable VGA screen',\n     'enum': ['std',\n              'cirrus',\n              'vmware',\n              'qxl',\n              'xenfb',\n              'tcx',\n              'cg3',\n              'virtio',\n              'none']}\n\nOn instance['vga']:\n    'invalid-vga'",
+      "data": {
+        "bios": "bios.bin",
+        "cpu": {
+          "features": [
+            "xsave",
+            "avx",
+            "invalid-feature"
+          ],
+          "model": "qemu64"
+        },
+        "description": "Example virtual machine configuration",
+        "drives": [
+          {
+            "file": "drive1.img",
+            "format": "qcow2",
+            "media": "disk",
+            "name": "Drive 1",
+            "type": "virtio"
+          },
+          {
+            "file": "drive2.img",
+            "format": "raw",
+            "media": "disk",
+            "name": "Drive 2",
+            "type": "invalid-type"
+          }
+        ],
+        "image": "service.img",
+        "mem": 256,
+        "modules": [
+          {
+            "args": "module1 args",
+            "path": "module1.bin"
+          },
+          {
+            "args": "module2 args"
+          }
+        ],
+        "net": [
+          {
+            "backend": "tap",
+            "device": "virtio-net-pci"
+          },
+          {
+            "backend": "invalid-backend",
+            "device": "virtio-net-pci"
+          }
+        ],
+        "smp": 2,
+        "vfio": "0000:00:02.0",
+        "vga": "invalid-vga"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"invalid-feature\" is not one of [\"xsave\",\"avx\",\"aes\"]",
+      "python_error": "'invalid-vga' is not one of ['std', 'cirrus', 'vmware', 'qxl', 'xenfb', 'tcx', 'cg3', 'virtio', 'none']\n\nFailed validating 'enum' in schema['properties']['vga']:\n    {'description': 'Enable VGA screen',\n     'enum': ['std',\n              'cirrus',\n              'vmware',\n              'qxl',\n              'xenfb',\n              'tcx',\n              'cg3',\n              'virtio',\n              'none']}\n\nOn instance['vga']:\n    'invalid-vga'",
+      "data": {
+        "bios": "bios.bin",
+        "cpu": {
+          "features": [
+            "xsave",
+            "avx",
+            "invalid-feature"
+          ],
+          "model": "qemu64"
+        },
+        "description": "Example virtual machine configuration",
+        "drives": [
+          {
+            "file": "drive1.img",
+            "format": "qcow2",
+            "media": "disk",
+            "name": "Drive 1",
+            "type": "virtio"
+          },
+          {
+            "file": "drive2.img",
+            "format": "raw",
+            "media": "cdrom",
+            "cdrom": "cdrom",
+            "name": "Drive 2",
+            "type": "ide"
+          }
+        ],
+        "image": "service.img",
+        "mem": 256,
+        "modules": [
+          {
+            "args": "module1 args",
+            "path": "module1.bin"
+          },
+          {
+            "args": "module2 args"
+          }
+        ],
+        "net": [
+          {
+            "backend": "tap",
+            "device": "virtio-net-pci"
+          },
+          {
+            "backend": "user",
+            "device": "virtio-net-pci"
+          }
+        ],
+        "smp": 2,
+        "vfio": "0000:00:02.0",
+        "vga": "invalid-vga"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "bios": "bios.bin",
+        "cpu": {
+          "features": [
+            "xsave",
+            "avx"
+          ],
+          "model": "qemu64"
+        },
+        "description": "Example virtual machine configuration",
+        "drives": [
+          {
+            "file": "drive1.img",
+            "format": "qcow2",
+            "media": "disk",
+            "name": "drive1",
+            "type": "virtio"
+          },
+          {
+            "file": "drive2.img",
+            "format": "raw",
+            "media": "disk",
+            "name": "drive2",
+            "type": "ide"
+          }
+        ],
+        "image": "service.img",
+        "mem": 256,
+        "modules": [
+          {
+            "args": "arg1 arg2",
+            "path": "/path/to/module1"
+          },
+          {
+            "args": "arg3 arg4",
+            "path": "/path/to/module2"
+          }
+        ],
+        "net": [
+          {
+            "backend": "tap",
+            "device": "virtio-net-pci"
+          },
+          {
+            "backend": "user",
+            "device": "virtio-net-pci"
+          }
+        ],
+        "smp": 2,
+        "vfio": "0000:01:00.0",
+        "vga": "std"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "'invalid-vga' is not one of ['std', 'cirrus', 'vmware', 'qxl', 'xenfb', 'tcx', 'cg3', 'virtio', 'none']\n\nFailed validating 'enum' in schema['properties']['vga']:\n    {'description': 'Enable VGA screen',\n     'enum': ['std',\n              'cirrus',\n              'vmware',\n              'qxl',\n              'xenfb',\n              'tcx',\n              'cg3',\n              'virtio',\n              'none']}\n\nOn instance['vga']:\n    'invalid-vga'",
+      "data": {
+        "bios": null,
+        "cpu": {
+          "features": [
+            "xsave",
+            "avx",
+            "invalid-feature"
+          ],
+          "model": "qemu64"
+        },
+        "description": "Example virtual machine configuration",
+        "drives": [
+          {
+            "file": "drive1.img",
+            "format": "invalid-format",
+            "media": "disk",
+            "name": "drive1",
+            "type": "virtio"
+          },
+          {
+            "file": "drive2.img",
+            "format": "raw",
+            "media": "invalid-media",
+            "name": "drive2",
+            "type": "ide"
+          }
+        ],
+        "image": 123,
+        "mem": "256",
+        "modules": [
+          {
+            "args": "arg1 arg2",
+            "path": "/path/to/module1"
+          },
+          {
+            "path": "/path/to/module2"
+          }
+        ],
+        "net": [
+          {
+            "backend": "tap",
+            "device": "virtio-net-pci"
+          },
+          {
+            "backend": "invalid-backend",
+            "device": "virtio-net-pci"
+          }
+        ],
+        "smp": "2",
+        "vfio": true,
+        "vga": "invalid-vga"
+      }
+    }
+  ]
+}

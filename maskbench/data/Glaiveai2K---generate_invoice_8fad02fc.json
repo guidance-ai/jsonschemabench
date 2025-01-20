@@ -1,0 +1,115 @@
+{
+  "description": "sample Glaiveai2K/generate_invoice_8fad02fc.json",
+  "meta": {
+    "full_size": 499,
+    "stripped_size": 289,
+    "features": [
+      "items"
+    ],
+    "raw_features": [
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "customer_name": {
+        "description": "The name of the customer",
+        "type": "string"
+      },
+      "items": {
+        "description": "The list of items purchased",
+        "items": {
+          "properties": {
+            "name": {
+              "description": "The name of the item",
+              "type": "string"
+            },
+            "price": {
+              "description": "The price per unit of the item",
+              "type": "number"
+            },
+            "quantity": {
+              "description": "The quantity of the item",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "name",
+            "quantity",
+            "price"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "customer_name",
+      "items"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "customer_name": "John Doe",
+        "items": [
+          {
+            "name": "Apple iPhone",
+            "price": 999.99,
+            "quantity": 1
+          },
+          {
+            "name": "Samsung TV",
+            "price": 1299.99,
+            "quantity": 1
+          },
+          {
+            "name": "Sony Headphones",
+            "price": 99.99,
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"99.99\" is not of type \"number\"",
+      "python_error": "2.5 is not of type 'integer'\n\nFailed validating 'type' in schema['properties']['items']['items']['properties']['quantity']:\n    {'description': 'The quantity of the item', 'type': 'integer'}\n\nOn instance['items'][2]['quantity']:\n    2.5",
+      "data": {
+        "customer_name": "John Doe",
+        "items": [
+          {
+            "name": "Apple iPhone",
+            "price": 999.99,
+            "quantity": 1,
+            "extra_field": "This field is not allowed"
+          },
+          {
+            "name": "Samsung TV",
+            "price": 1299.99,
+            "quantity": 1,
+            "price_unit": "USD"
+          },
+          {
+            "name": "Sony Headphones",
+            "price": "99.99",
+            "price should be a number, not a string": "quantity should be a positive integer, not float or negative number, also extra field is not allowed in schema",
+            "quantity": 2.5,
+            "extra_field": "extra field"
+          }
+        ]
+      }
+    }
+  ]
+}

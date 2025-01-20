@@ -1,0 +1,1368 @@
+{
+  "description": "sample Github_hard/o29389.json",
+  "meta": {
+    "full_size": 5946,
+    "stripped_size": 3365,
+    "features": [
+      "$ref",
+      "@minmaxInteger",
+      "@siblingKeys",
+      "additionalProperties",
+      "additionalProperties:object",
+      "allOf",
+      "const",
+      "enum",
+      "items",
+      "multipleOf",
+      "multipleOf:1.0",
+      "oneOf",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$id": "https://antha.com/layout-schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "JSON Schema for deck layout description",
+    "type": "object",
+    "required": [
+      "before",
+      "after",
+      "new_ids",
+      "version"
+    ],
+    "properties": {
+      "version": {
+        "description": "the version of this schema for validation",
+        "const": "1.0"
+      },
+      "before": {
+        "$ref": "#/definitions/deckSummary"
+      },
+      "after": {
+        "$ref": "#/definitions/deckSummary"
+      },
+      "new_ids": {
+        "type": "object",
+        "description": "maps from the object IDs in 'before' to 'after'",
+        "additionalProperties": {
+          "type": "string",
+          "description": "An ID in 'after'"
+        }
+      }
+    },
+    "definitions": {
+      "deckSummary": {
+        "type": "object",
+        "description": "Describes the layout of a liquidhandling deck at a given point in time",
+        "required": [
+          "positions"
+        ],
+        "properties": {
+          "positions": {
+            "type": "object",
+            "description": "Keys are the names of positions on the deck of the liquidhandling deck",
+            "additionalProperties": {
+              "$ref": "#/definitions/deckPosition"
+            }
+          }
+        }
+      },
+      "deckPosition": {
+        "type": "object",
+        "description": "a position on the liquidhandling deck",
+        "required": [
+          "position",
+          "size"
+        ],
+        "properties": {
+          "position": {
+            "$ref": "#/definitions/coordinates3"
+          },
+          "size": {
+            "$ref": "#/definitions/coordinates2"
+          },
+          "item": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/definitions/plate"
+              },
+              {
+                "$ref": "#/definitions/tipbox"
+              },
+              {
+                "$ref": "#/definitions/tipwaste"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "coordinates2": {
+        "type": "object",
+        "description": "Two dimensional coordinates",
+        "required": [
+          "x_mm",
+          "y_mm"
+        ],
+        "properties": {
+          "x_mm": {
+            "type": "number",
+            "description": "x coordinate in mm"
+          },
+          "y_mm": {
+            "type": "number",
+            "description": "y coordinate in mm"
+          }
+        },
+        "additionalProperties": false
+      },
+      "coordinates3": {
+        "type": "object",
+        "description": "Three dimensional coordinates",
+        "required": [
+          "x_mm",
+          "y_mm"
+        ],
+        "properties": {
+          "x_mm": {
+            "type": "number",
+            "description": "x coordinate in mm"
+          },
+          "y_mm": {
+            "type": "number",
+            "description": "y coordinate in mm"
+          },
+          "z_mm": {
+            "type": "number",
+            "description": "z coordinate in mm"
+          }
+        },
+        "additionalProperties": false
+      },
+      "item": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "manufacturer",
+          "description",
+          "rows",
+          "columns",
+          "dimensions",
+          "well_dimensions",
+          "well_start",
+          "well_type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the object"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of this particular object"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type name of this object, e.g. 'pcrplate'"
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "The name of the manufacturer of this object"
+          },
+          "description": {
+            "type": "string",
+            "description": "A handy description of this object"
+          },
+          "rows": {
+            "type": "number",
+            "description": "The number of rows of wells or tips in this object",
+            "multipleOf": 1.0,
+            "minimum": 0.0
+          },
+          "columns": {
+            "type": "number",
+            "description": "The number of columns of wells or tips in this object",
+            "multipleOf": 1.0,
+            "minimum": 0.0
+          },
+          "dimensions": {
+            "description": "The size of this object",
+            "$ref": "#/definitions/coordinates3"
+          },
+          "well_dimensions": {
+            "description": "The size of the wells or tips in this object",
+            "$ref": "#/definitions/coordinates3"
+          },
+          "well_start": {
+            "description": "The position of the center of the upper left-most well or tip in this object",
+            "$ref": "#/definitions/coordinates3"
+          },
+          "well_type": {
+            "description": "The type, or rather the shape, of the wells in this plate",
+            "type": "string",
+            "enum": [
+              "cylinder",
+              "cuboid"
+            ]
+          }
+        }
+      },
+      "plate": {
+        "description": "Represent a plate on the deck",
+        "allOf": [
+          {
+            "$ref": "#/definitions/item"
+          },
+          {
+            "properties": {
+              "kind": {
+                "description": "used to verify the type",
+                "const": "plate"
+              },
+              "residual_volume": {
+                "description": "volume which cannot be removed from the wells of a plate",
+                "$ref": "#/definitions/measurement"
+              },
+              "contents": {
+                "patternProperties": {
+                  "^[0-9]+$": {
+                    "description": "a column of wells",
+                    "type": "object",
+                    "patternProperties": {
+                      "^[0-9]+$": {
+                        "description": "the contents of the well at the given position in the column",
+                        "$ref": "#/definitions/liquid"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "kind",
+              "residual_volume"
+            ]
+          }
+        ]
+      },
+      "tipbox": {
+        "description": "Represent a tipbox on the deck",
+        "allOf": [
+          {
+            "$ref": "#/definitions/item"
+          },
+          {
+            "properties": {
+              "kind": {
+                "description": "used to verify the type",
+                "const": "tipbox"
+              },
+              "missing_tips": {
+                "description": "Lists the positions at which tips are not present",
+                "type": "array",
+                "items": {
+                  "description": "Well coordinates of the missing tip",
+                  "type": "object",
+                  "required": [
+                    "row",
+                    "col"
+                  ],
+                  "properties": {
+                    "row": {
+                      "type": "number",
+                      "multipleOf": 1.0,
+                      "minimum": 0.0
+                    },
+                    "col": {
+                      "type": "number",
+                      "multipleOf": 1.0,
+                      "minimum": 0.0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        ]
+      },
+      "tipwaste": {
+        "description": "Represent a tipwaste on the deck",
+        "allOf": [
+          {
+            "$ref": "#/definitions/item"
+          },
+          {
+            "properties": {
+              "kind": {
+                "description": "used to verify the type",
+                "const": "tipwaste"
+              },
+              "discarded_tips": {
+                "type": "number",
+                "description": "The number of discarded tips in the waste",
+                "multipleOf": 1.0,
+                "minimum": 0.0
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        ]
+      },
+      "liquid": {
+        "description": "Describe a liquid in a plate well",
+        "type": "object",
+        "required": [
+          "name",
+          "total_volume"
+        ],
+        "properties": {
+          "name": {
+            "description": "The display name of the liquid",
+            "type": "string"
+          },
+          "total_volume": {
+            "description": "The total volume present of the liquid",
+            "$ref": "#/definitions/measurement"
+          },
+          "components": {
+            "description": "The sub-components which make up this liquid",
+            "type": "array",
+            "items": {
+              "description": "A sub component",
+              "type": "object",
+              "required": [
+                "name",
+                "concentration",
+                "unit"
+              ],
+              "properties": {
+                "name": {
+                  "description": "the display name of the sub-component",
+                  "type": "string"
+                },
+                "concentration": {
+                  "description": "the concentration of the sub-component",
+                  "type": "number",
+                  "minimum": 0.0
+                },
+                "unit": {
+                  "description": "the units in which the concentration is expressed",
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "measurement": {
+        "description": "A measurement, typically of a Volume",
+        "type": "object",
+        "required": [
+          "value",
+          "unit"
+        ],
+        "properties": {
+          "value": {
+            "description": "The value of the measurement",
+            "type": "number"
+          },
+          "unit": {
+            "description": "The units in which the measurement is expressed",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0",
+        "before": {
+          "positions": {
+            "position1": {
+              "position": {
+                "x_mm": 10.0,
+                "y_mm": 20.0,
+                "z_mm": 30.0
+              },
+              "size": {
+                "x_mm": 40.0,
+                "y_mm": 50.0
+              },
+              "item": {
+                "id": "item1",
+                "name": "plate1",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer1",
+                "description": "description1",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 100.0,
+                  "y_mm": 150.0,
+                  "z_mm": 20.0
+                },
+                "well_dimensions": {
+                  "x_mm": 5.0,
+                  "y_mm": 5.0,
+                  "z_mm": 10.0
+                },
+                "well_start": {
+                  "x_mm": 10.0,
+                  "y_mm": 20.0,
+                  "z_mm": 30.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 10.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid1",
+                      "total_volume": {
+                        "value": 50.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component1",
+                          "concentration": 10.0,
+                          "unit": "mg/ml"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "after": {
+          "positions": {
+            "position2": {
+              "position": {
+                "x_mm": 40.0,
+                "y_mm": 50.0,
+                "z_mm": 60.0
+              },
+              "size": {
+                "x_mm": 80.0,
+                "y_mm": 100.0
+              },
+              "item": {
+                "id": "item2",
+                "name": "tipbox1",
+                "type": "tipbox",
+                "manufacturer": "manufacturer2",
+                "description": "description2",
+                "rows": 96,
+                "columns": 1,
+                "dimensions": {
+                  "x_mm": 150.0,
+                  "y_mm": 200.0,
+                  "z_mm": 30.0
+                },
+                "well_dimensions": {
+                  "x_mm": 10.0,
+                  "y_mm": 10.0,
+                  "z_mm": 20.0
+                },
+                "well_start": {
+                  "x_mm": 20.0,
+                  "y_mm": 30.0,
+                  "z_mm": 40.0
+                },
+                "well_type": "cylinder",
+                "kind": "tipbox",
+                "missing_tips": [
+                  {
+                    "row": 0,
+                    "col": 0
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "new_ids": {
+          "item1": "item2"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "version": "1.0",
+        "before": {
+          "positions": {
+            "position1": {
+              "position": {
+                "x_mm": 10.0,
+                "y_mm": 20.0,
+                "z_mm": 30.0
+              },
+              "size": {
+                "x_mm": 40.0,
+                "y_mm": 50.0
+              },
+              "item": {
+                "id": "item1",
+                "name": "plate1",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer1",
+                "description": "description1",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 120.0,
+                  "y_mm": 80.0,
+                  "z_mm": 10.0
+                },
+                "well_dimensions": {
+                  "x_mm": 10.0,
+                  "y_mm": 10.0,
+                  "z_mm": 10.0
+                },
+                "well_start": {
+                  "x_mm": 5.0,
+                  "y_mm": 5.0,
+                  "z_mm": 5.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 10.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid1",
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component1",
+                          "concentration": 10.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "after": {
+          "positions": {
+            "position2": {
+              "position": {
+                "x_mm": 15.0,
+                "y_mm": 25.0,
+                "z_mm": 35.0
+              },
+              "size": {
+                "x_mm": 45.0,
+                "y_mm": 55.0
+              },
+              "item": {
+                "id": "item2",
+                "name": "plate2",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer2",
+                "description": "description2",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 125.0,
+                  "y_mm": 85.0,
+                  "z_mm": 15.0
+                },
+                "well_dimensions": {
+                  "x_mm": 11.0,
+                  "y_mm": 11.0,
+                  "z_mm": 11.0
+                },
+                "well_start": {
+                  "x_mm": 6.0,
+                  "y_mm": 6.0,
+                  "z_mm": 6.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 15.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid2",
+                      "total_volume": {
+                        "value": 150.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component2",
+                          "concentration": 15.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "new_ids": {
+          "item1": "item2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on multipleOf keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"item1\",\"name\":\"plate1\",\"type\":\"pcrplate\",\"manufacturer\":\"manufacturer1\",\"description\":\"description1\",\"rows\":8.5,\"Changed from integer to float to test multipleOf\":12,\"dimensions\":{\"x_mm\":120.0,\"y_mm\":80.0,\"z_mm\":10.0},\"well_dimensions\":{\"x_mm\":10.0,\"y_mm\":10.0,\"z_mm\":10.0},\"well_start\":{\"x_mm\":5.0,\"y_mm\":5.0,\"z_mm\":5.0},\"well_type\":\"cylinder\",\"kind\":\"plate\",\"residual_volume\":{\"value\":10.0,\"unit\":\"ul\"},\"contents\":{\"0\":{\"0\":{\"name\":\"liquid1\",\"total_volume\":{\"value\":100.0,\"unit\":\"ul\"},\"components\":[{\"name\":\"component1\",\"concentration\":10.0,\"unit\":\"mM\"}]}}}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'id': 'item1', 'name': 'plate1', 'type': 'pcrplate', 'manufacturer': 'manufacturer1', 'description': 'description1', 'rows': 8.5, 'Changed from integer to float to test multipleOf': 12, 'dimensions': {'x_mm': 120.0, 'y_mm': 80.0, 'z_mm': 10.0}, 'well_dimensions': {'x_mm': 10.0, 'y_mm': 10.0, 'z_mm': 10.0}, 'well_start': {'x_mm': 5.0, 'y_mm': 5.0, 'z_mm': 5.0}, 'well_type': 'cylinder', 'kind': 'plate', 'residual_volume': {'value': 10.0, 'unit': 'ul'}, 'contents': {'0': {'0': {'name': 'liquid1', 'total_volume': {'value': 100.0, 'unit': 'ul'}, 'components': [{'name': 'component1', 'concentration': 10.0, 'unit': 'mM'}]}}}} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['before']['properties']['positions']['additionalProperties']['properties']['item']:\n    {'type': 'object',\n     'oneOf': [{'$ref': '#/definitions/plate'},\n               {'$ref': '#/definitions/tipbox'},\n               {'$ref': '#/definitions/tipwaste'}]}\n\nOn instance['before']['positions']['position.. (908 more)",
+      "data": {
+        "version": "1.0",
+        "before": {
+          "positions": {
+            "position1": {
+              "position": {
+                "x_mm": 10.0,
+                "y_mm": 20.0,
+                "z_mm": 30.0
+              },
+              "size": {
+                "x_mm": 40.0,
+                "y_mm": 50.0
+              },
+              "item": {
+                "id": "item1",
+                "name": "plate1",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer1",
+                "description": "description1",
+                "rows": 8.5,
+                "Changed from integer to float to test multipleOf": 12,
+                "dimensions": {
+                  "x_mm": 120.0,
+                  "y_mm": 80.0,
+                  "z_mm": 10.0
+                },
+                "well_dimensions": {
+                  "x_mm": 10.0,
+                  "y_mm": 10.0,
+                  "z_mm": 10.0
+                },
+                "well_start": {
+                  "x_mm": 5.0,
+                  "y_mm": 5.0,
+                  "z_mm": 5.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 10.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid1",
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component1",
+                          "concentration": 10.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "after": {
+          "positions": {
+            "position2": {
+              "position": {
+                "x_mm": 15.0,
+                "y_mm": 25.0,
+                "z_mm": 35.0
+              },
+              "size": {
+                "x_mm": 45.0,
+                "y_mm": 55.0
+              },
+              "item": {
+                "id": "item2",
+                "name": "plate2",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer2",
+                "description": "description2",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 125.0,
+                  "y_mm": 85.0,
+                  "z_mm": 15.0
+                },
+                "well_dimensions": {
+                  "x_mm": 11.0,
+                  "y_mm": 11.0,
+                  "z_mm": 11.0
+                },
+                "well_start": {
+                  "x_mm": 6.0,
+                  "y_mm": 6.0,
+                  "z_mm": 6.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 15.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid2",
+                      "total_volume": {
+                        "value": 150.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component2",
+                          "concentration": 15.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "new_ids": {
+          "item1": "item2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"item1\",\"name\":\"plate1\",\"type\":\"pcrplate\",\"manufacturer\":\"manufacturer1\",\"description\":\"description1\",\"rows\":-1,\"columns\":12,\"dimensions\":{\"x_mm\":120.0,\"y_mm\":80.0,\"z_mm\":10.0},\"well_dimensions\":{\"x_mm\":10.0,\"y_mm\":10.0,\"z_mm\":10.0},\"well_start\":{\"x_mm\":5.0,\"y_mm\":5.0,\"z_mm\":5.0},\"well_type\":\"cylinder\",\"kind\":\"plate\",\"residual_volume\":{\"value\":10.0,\"unit\":\"ul\"},\"contents\":{\"0\":{\"0\":{\"name\":\"liquid1\",\"total_volume\":{\"value\":100.0,\"unit\":\"ul\"},\"components\":[{\"name\":\"component1\",\"concentration\":-10.0,\"unit\":\"mM\"}]}}}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "-10.0 is less than the minimum of 0.0\n\nFailed validating 'minimum' in schema[0]['allOf'][1]['properties']['contents']['patternProperties']['^[0-9]+$']['patternProperties']['^[0-9]+$']['properties']['components']['items']['properties']['concentration']:\n    {'description': 'the concentration of the sub-component',\n     'type': 'number',\n     'minimum': 0.0}\n\nOn instance['contents']['0']['0']['components'][0]['concentration']:\n    -10.0",
+      "data": {
+        "version": "1.0",
+        "before": {
+          "positions": {
+            "position1": {
+              "position": {
+                "x_mm": 10.0,
+                "y_mm": 20.0,
+                "z_mm": 30.0
+              },
+              "size": {
+                "x_mm": 40.0,
+                "y_mm": 50.0
+              },
+              "item": {
+                "id": "item1",
+                "name": "plate1",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer1",
+                "description": "description1",
+                "rows": -1,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 120.0,
+                  "y_mm": 80.0,
+                  "z_mm": 10.0
+                },
+                "well_dimensions": {
+                  "x_mm": 10.0,
+                  "y_mm": 10.0,
+                  "z_mm": 10.0
+                },
+                "well_start": {
+                  "x_mm": 5.0,
+                  "y_mm": 5.0,
+                  "z_mm": 5.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 10.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid1",
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component1",
+                          "concentration": -10.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "after": {
+          "positions": {
+            "position2": {
+              "position": {
+                "x_mm": 15.0,
+                "y_mm": 25.0,
+                "z_mm": 35.0
+              },
+              "size": {
+                "x_mm": 45.0,
+                "y_mm": 55.0
+              },
+              "item": {
+                "id": "item2",
+                "name": "plate2",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer2",
+                "description": "description2",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 125.0,
+                  "y_mm": 85.0,
+                  "z_mm": 15.0
+                },
+                "well_dimensions": {
+                  "x_mm": 11.0,
+                  "y_mm": 11.0,
+                  "z_mm": 11.0
+                },
+                "well_start": {
+                  "x_mm": 6.0,
+                  "y_mm": 6.0,
+                  "z_mm": 6.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 15.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid2",
+                      "total_volume": {
+                        "value": 150.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component2",
+                          "concentration": 15.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "new_ids": {
+          "item1": "item2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on patternProperties keyword",
+      "valid": false,
+      "rust_error": "{\"id\":\"item1\",\"name\":\"plate1\",\"type\":\"pcrplate\",\"manufacturer\":\"manufacturer1\",\"description\":\"description1\",\"rows\":8,\"columns\":12,\"dimensions\":{\"x_mm\":120.0,\"y_mm\":80.0,\"z_mm\":10.0},\"well_dimensions\":{\"x_mm\":10.0,\"y_mm\":10.0,\"z_mm\":10.0},\"well_start\":{\"x_mm\":5.0,\"y_mm\":5.0,\"z_mm\":5.0},\"well_type\":\"cylinder\",\"kind\":\"plate\",\"residual_volume\":{\"value\":10.0,\"unit\":\"ul\"},\"contents\":{\"0\":{\"0\":{\"name\":\"liquid1\",\"total_volume\":{\"value\":100.0,\"unit\":\"ul\"},\"components\":[{\"name\":\"component1\",\"concentration\":10.0,\"unit\":\"mM\"}]},\"abc\":{\"total_volume\":{\"value\":100.0,\"unit\":\"ul\"}}}}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'abc' does not match any of the regexes: '^[0-9]+$'\n\nFailed validating 'additionalProperties' in schema[0]['allOf'][1]['properties']['contents']['patternProperties']['^[0-9]+$']:\n    {'description': 'a column of wells',\n     'type': 'object',\n     'patternProperties': {'^[0-9]+$': {'description': 'the contents of '\n                                                       'the well at the '\n                                                       'given position in '\n                                                       'the column',\n                                        '$ref': '#/definitions/liquid'}},\n     'additionalProperties': False}\n\nOn instance['contents']['0']:\n    {'0': {'name': 'liquid1',\n           'total_volume': {'value': 100.0, 'unit': 'ul'},\n           'components': [{'name': 'component1',\n                           'concentration': 10.0,\n                           'unit': 'mM'}]},\n     'abc': {'total_volume': {'value': 100.0, 'unit': 'ul'}}}",
+      "data": {
+        "version": "1.0",
+        "before": {
+          "positions": {
+            "position1": {
+              "position": {
+                "x_mm": 10.0,
+                "y_mm": 20.0,
+                "z_mm": 30.0
+              },
+              "size": {
+                "x_mm": 40.0,
+                "y_mm": 50.0
+              },
+              "item": {
+                "id": "item1",
+                "name": "plate1",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer1",
+                "description": "description1",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 120.0,
+                  "y_mm": 80.0,
+                  "z_mm": 10.0
+                },
+                "well_dimensions": {
+                  "x_mm": 10.0,
+                  "y_mm": 10.0,
+                  "z_mm": 10.0
+                },
+                "well_start": {
+                  "x_mm": 5.0,
+                  "y_mm": 5.0,
+                  "z_mm": 5.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 10.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid1",
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component1",
+                          "concentration": 10.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    },
+                    "abc": {
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "ul"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "after": {
+          "positions": {
+            "position2": {
+              "position": {
+                "x_mm": 15.0,
+                "y_mm": 25.0,
+                "z_mm": 35.0
+              },
+              "size": {
+                "x_mm": 45.0,
+                "y_mm": 55.0
+              },
+              "item": {
+                "id": "item2",
+                "name": "plate2",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer2",
+                "description": "description2",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 125.0,
+                  "y_mm": 85.0,
+                  "z_mm": 15.0
+                },
+                "well_dimensions": {
+                  "x_mm": 11.0,
+                  "y_mm": 11.0,
+                  "z_mm": 11.0
+                },
+                "well_start": {
+                  "x_mm": 6.0,
+                  "y_mm": 6.0,
+                  "z_mm": 6.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 15.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid2",
+                      "total_volume": {
+                        "value": 150.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component2",
+                          "concentration": 15.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "new_ids": {
+          "item1": "item2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"id\":\"item1\",\"name\":\"plate1\",\"type\":\"pcrplate\",\"manufacturer\":\"manufacturer1\",\"description\":\"description1\",\"rows\":8,\"columns\":12,\"dimensions\":{\"x_mm\":120.0,\"y_mm\":80.0,\"z_mm\":10.0},\"well_dimensions\":{\"x_mm\":10.0,\"y_mm\":10.0,\"z_mm\":10.0},\"well_start\":{\"x_mm\":5.0,\"y_mm\":5.0,\"z_mm\":5.0},\"well_type\":\"cylinder\",\"kind\":\"plate\",\"residual_volume\":{\"value\":10.0,\"unit\":\"ul\"},\"contents\":{\"0\":{\"0\":{\"name\":\"liquid1\",\"total_volume\":{\"value\":100.0,\"unit\":\"ul\"},\"components\":[{\"name\":\"component1\",\"concentration\":10.0,\"unit\":\"mM\"}],\"invalid_key\":\"invalid_value\"}}}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('invalid_key' was unexpected)\n\nFailed validating 'additionalProperties' in schema[0]['allOf'][1]['properties']['contents']['patternProperties']['^[0-9]+$']['patternProperties']['^[0-9]+$']:\n    {'description': 'Describe a liquid in a plate well',\n     'type': 'object',\n     'required': ['name', 'total_volume'],\n     'properties': {'name': {'description': 'The display name of the '\n                                            'liquid',\n                             'type': 'string'},\n                    'total_volume': {'description': 'The total volume '\n                                                    'present of the liquid',\n                                     '$ref': '#/definitions/measurement'},\n                    'components': {'description': 'The sub-components '\n                                                  'which make up this '\n                                                  'liquid',\n                                   'type': 'array',\n                   .. (3041 more)",
+      "data": {
+        "version": "1.0",
+        "before": {
+          "positions": {
+            "position1": {
+              "position": {
+                "x_mm": 10.0,
+                "y_mm": 20.0,
+                "z_mm": 30.0
+              },
+              "size": {
+                "x_mm": 40.0,
+                "y_mm": 50.0
+              },
+              "item": {
+                "id": "item1",
+                "name": "plate1",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer1",
+                "description": "description1",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 120.0,
+                  "y_mm": 80.0,
+                  "z_mm": 10.0
+                },
+                "well_dimensions": {
+                  "x_mm": 10.0,
+                  "y_mm": 10.0,
+                  "z_mm": 10.0
+                },
+                "well_start": {
+                  "x_mm": 5.0,
+                  "y_mm": 5.0,
+                  "z_mm": 5.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 10.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid1",
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component1",
+                          "concentration": 10.0,
+                          "unit": "mM"
+                        }
+                      ],
+                      "invalid_key": "invalid_value"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "after": {
+          "positions": {
+            "position2": {
+              "position": {
+                "x_mm": 15.0,
+                "y_mm": 25.0,
+                "z_mm": 35.0
+              },
+              "size": {
+                "x_mm": 45.0,
+                "y_mm": 55.0
+              },
+              "item": {
+                "id": "item2",
+                "name": "plate2",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer2",
+                "description": "description2",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 125.0,
+                  "y_mm": 85.0,
+                  "z_mm": 15.0
+                },
+                "well_dimensions": {
+                  "x_mm": 11.0,
+                  "y_mm": 11.0,
+                  "z_mm": 11.0
+                },
+                "well_start": {
+                  "x_mm": 6.0,
+                  "y_mm": 6.0,
+                  "z_mm": 6.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 15.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid2",
+                      "total_volume": {
+                        "value": 150.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component2",
+                          "concentration": 15.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "new_ids": {
+          "item1": "item2"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"id\":\"item1\",\"name\":\"plate1\",\"type\":\"pcrplate\",\"manufacturer\":\"manufacturer1\",\"description\":\"description1\",\"rows\":8.5,\"Invalid: rows must be an integer\":\"columns\",\"dimensions\":{\"x_mm\":120.0,\"y_mm\":80.0,\"z_mm\":10.0},\"well_dimensions\":{\"x_mm\":10.0,\"y_mm\":10.0,\"z_mm\":10.0},\"well_start\":{\"x_mm\":5.0,\"y_mm\":5.0,\"z_mm\":5.0},\"well_type\":\"cylinder\",\"kind\":\"plate\",\"residual_volume\":{\"value\":10.0,\"unit\":\"ul\"},\"contents\":{\"0\":{\"0\":{\"name\":\"liquid1\",\"total_volume\":{\"value\":100.0,\"unit\":\"ul\"},\"components\":[{\"name\":\"component1\",\"concentration\":-1.0,\"Invalid: concentration must be non-negative\":\"unit\",\"unit\":\"mM\"}]}}}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{} is not of type 'string'\n\nFailed validating 'type' in schema['properties']['new_ids']['additionalProperties']:\n    {'type': 'string', 'description': \"An ID in 'after'\"}\n\nOn instance['new_ids'][\"Invalid: 'extra' is not a valid id in 'before'\"]:\n    {}",
+      "data": {
+        "version": "1.0",
+        "before": {
+          "positions": {
+            "position1": {
+              "position": {
+                "x_mm": 10.0,
+                "y_mm": 20.0,
+                "z_mm": 30.0
+              },
+              "size": {
+                "x_mm": 40.0,
+                "y_mm": 50.0
+              },
+              "item": {
+                "id": "item1",
+                "name": "plate1",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer1",
+                "description": "description1",
+                "rows": 8.5,
+                "Invalid: rows must be an integer": "columns",
+                "dimensions": {
+                  "x_mm": 120.0,
+                  "y_mm": 80.0,
+                  "z_mm": 10.0
+                },
+                "well_dimensions": {
+                  "x_mm": 10.0,
+                  "y_mm": 10.0,
+                  "z_mm": 10.0
+                },
+                "well_start": {
+                  "x_mm": 5.0,
+                  "y_mm": 5.0,
+                  "z_mm": 5.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 10.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid1",
+                      "total_volume": {
+                        "value": 100.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component1",
+                          "concentration": -1.0,
+                          "Invalid: concentration must be non-negative": "unit",
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "after": {
+          "positions": {
+            "position2": {
+              "position": {
+                "x_mm": 15.0,
+                "y_mm": 25.0,
+                "z_mm": 35.0
+              },
+              "size": {
+                "x_mm": 45.0,
+                "y_mm": 55.0
+              },
+              "item": {
+                "id": "item2",
+                "name": "plate2",
+                "type": "pcrplate",
+                "manufacturer": "manufacturer2",
+                "description": "description2",
+                "rows": 8,
+                "columns": 12,
+                "dimensions": {
+                  "x_mm": 125.0,
+                  "y_mm": 85.0,
+                  "z_mm": 15.0
+                },
+                "well_dimensions": {
+                  "x_mm": 11.0,
+                  "y_mm": 11.0,
+                  "z_mm": 11.0
+                },
+                "well_start": {
+                  "x_mm": 6.0,
+                  "y_mm": 6.0,
+                  "z_mm": 6.0
+                },
+                "well_type": "cylinder",
+                "kind": "plate",
+                "residual_volume": {
+                  "value": 15.0,
+                  "unit": "ul"
+                },
+                "contents": {
+                  "0": {
+                    "0": {
+                      "name": "liquid2",
+                      "total_volume": {
+                        "value": 150.0,
+                        "unit": "ul"
+                      },
+                      "components": [
+                        {
+                          "name": "component2",
+                          "concentration": 15.0,
+                          "unit": "mM"
+                        }
+                      ]
+                    }
+                  },
+                  "additional": {
+                    "Invalid: 'additional' is not a valid property": "invalid value"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "new_ids": {
+          "item1": "item2",
+          "extra": "extra",
+          "Invalid: 'extra' is not a valid id in 'before'": {}
+        },
+        "Invalid: a non-object value": "invalid value"
+      }
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "description": "sample Snowplow/sp_308_Normalized.json",
+  "meta": {
+    "full_size": 2715,
+    "stripped_size": 1061,
+    "features": [
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "Schema for an array of recovery scenarios",
+    "items": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "error": {
+              "description": "Error filter used to discriminate the bad rows that will be affected by this recovery scenario",
+              "type": "string"
+            },
+            "name": {
+              "description": "The PassThrough recovery scenario doesn't modify the payload",
+              "enum": [
+                "PassThrough"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "error"
+          ]
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "error": {
+              "description": "Error filter used to discriminate the bad rows that will be affected by this recovery scenario",
+              "type": "string"
+            },
+            "name": {
+              "description": "The RemoveFrom{Body,QueryString} will remove part of the payload",
+              "enum": [
+                "RemoveFromQueryString",
+                "RemoveFromBody"
+              ]
+            },
+            "toRemove": {
+              "description": "String or regex to remove from the {body, query string}",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "error",
+            "toRemove"
+          ]
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "error": {
+              "description": "Error filter used to discriminate the bad rows that will be affected by this recovery scenario",
+              "type": "string"
+            },
+            "name": {
+              "description": "The ReplaceIn{Body,QueryString} will replace part of the payload",
+              "enum": [
+                "ReplaceInQueryString",
+                "ReplaceInBody"
+              ]
+            },
+            "replacement": {
+              "description": "Replacement for the {body, query string}",
+              "type": "string"
+            },
+            "toReplace": {
+              "description": "String or regex to replace in the {body, query string}",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "error",
+            "toReplace",
+            "replacement"
+          ]
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "base64Field": {
+              "description": "Name of the base64-encoded field to decoded and do a replacement in",
+              "enum": [
+                "ue_px",
+                "cx"
+              ]
+            },
+            "error": {
+              "description": "Error filter used to discriminate the bad rows that will be affected by this recovery scenario",
+              "type": "string"
+            },
+            "name": {
+              "description": "The ReplaceInBase64FieldIn{Body,QueryString} will replace part of a base64-encoded field",
+              "enum": [
+                "ReplaceInBase64FieldInQueryString",
+                "ReplaceInBase64FieldInBody"
+              ]
+            },
+            "replacement": {
+              "description": "Replacement in the specified base64-encoded field in the {body, query string}",
+              "type": "string"
+            },
+            "toReplace": {
+              "description": "String or regex to replace in the specified base64-encoded field in the {body, query string}",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "error",
+            "toReplace",
+            "replacement"
+          ]
+        },
+        {
+          "additionalProperties": true,
+          "properties": {
+            "error": {
+              "description": "Error filter used to discriminate the bad rows that will be affected by this recovery scenario",
+              "type": "string"
+            },
+            "name": {
+              "description": "Fallback for a custom recovery scenario",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "error"
+          ]
+        }
+      ],
+      "description": "Recovery scenario sum type",
+      "type": "object"
+    },
+    "self": {
+      "format": "jsonschema",
+      "name": "recoveries",
+      "vendor": "com.snowplowanalytics.snowplow",
+      "version": "1-0-0"
+    },
+    "type": "array"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": [
+        {
+          "error": "Error 1",
+          "name": "PassThrough"
+        },
+        {
+          "error": "Error 2",
+          "name": "RemoveFromQueryString",
+          "toRemove": "param1"
+        },
+        {
+          "error": "Error 3",
+          "name": "RemoveFromBody",
+          "toRemove": "field1"
+        },
+        {
+          "error": "Error 4",
+          "name": "ReplaceInQueryString",
+          "toReplace": "param2",
+          "replacement": "new_param2"
+        },
+        {
+          "error": "Error 5",
+          "name": "ReplaceInBody",
+          "toReplace": "field2",
+          "replacement": "new_field2"
+        },
+        {
+          "error": "Error 6",
+          "name": "ReplaceInBase64FieldInQueryString",
+          "base64Field": "ue_px",
+          "toReplace": "base64_value1",
+          "replacement": "new_base64_value1"
+        },
+        {
+          "error": "Error 7",
+          "name": "ReplaceInBase64FieldInBody",
+          "base64Field": "cx",
+          "toReplace": "base64_value2",
+          "replacement": "new_base64_value2"
+        },
+        {
+          "error": "Error 8",
+          "name": "Custom Recovery",
+          "customProperty": "customValue"
+        }
+      ]
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"error\":\"Error 1\",\"name\":\"PassThrough\",\"toRemove\":\"field1\"} is not of type \"array\"",
+      "python_error": "{'error': 'Error 1', 'name': 'PassThrough', 'toRemove': 'field1'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'Schema for an array of recovery scenarios',\n     'items': {'anyOf': [{'additionalProperties': False,\n                          'properties': {'error': {'description': 'Error '\n                                                                  'filter '\n                                                                  'used to '\n                                                                  'discriminate '\n                                                                  'the bad '\n                                                                  'rows '\n                                                                  'that '\n                                                                  'will be '\n                                                                  'affected '\n                                                                  'by this '\n         .. (14369 more)",
+      "data": {
+        "error": "Error 1",
+        "name": "PassThrough",
+        "toRemove": "field1"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"error\":\"Error 1\",\"name\":\"PassThrough\"} is not of type \"array\"",
+      "python_error": "{'error': 'Error 1', 'name': 'PassThrough'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'Schema for an array of recovery scenarios',\n     'items': {'anyOf': [{'additionalProperties': False,\n                          'properties': {'error': {'description': 'Error '\n                                                                  'filter '\n                                                                  'used to '\n                                                                  'discriminate '\n                                                                  'the bad '\n                                                                  'rows '\n                                                                  'that '\n                                                                  'will be '\n                                                                  'affected '\n                                                                  'by this '\n                               .. (14325 more)",
+      "data": {
+        "error": "Error 1",
+        "name": "PassThrough"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{\"error\":\"Error 1\",\"name\":\"PassThrough\",\"toRemove\":\"param1\"} is not of type \"array\"",
+      "python_error": "{'error': 'Error 1', 'name': 'PassThrough', 'toRemove': 'param1'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'Schema for an array of recovery scenarios',\n     'items': {'anyOf': [{'additionalProperties': False,\n                          'properties': {'error': {'description': 'Error '\n                                                                  'filter '\n                                                                  'used to '\n                                                                  'discriminate '\n                                                                  'the bad '\n                                                                  'rows '\n                                                                  'that '\n                                                                  'will be '\n                                                                  'affected '\n                                                                  'by this '\n         .. (14369 more)",
+      "data": {
+        "error": "Error 1",
+        "name": "PassThrough",
+        "toRemove": "param1"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"error\":\"Error 1\",\"name\":\"PassThrough\",\"extraProperty\":\"extraValue\"} is not of type \"array\"",
+      "python_error": "{'error': 'Error 1', 'name': 'PassThrough', 'extraProperty': 'extraValue'} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'description': 'Schema for an array of recovery scenarios',\n     'items': {'anyOf': [{'additionalProperties': False,\n                          'properties': {'error': {'description': 'Error '\n                                                                  'filter '\n                                                                  'used to '\n                                                                  'discriminate '\n                                                                  'the bad '\n                                                                  'rows '\n                                                                  'that '\n                                                                  'will be '\n                                                                  'affected '\n                                                                  'by this '\n.. (14397 more)",
+      "data": {
+        "error": "Error 1",
+        "name": "PassThrough",
+        "extraProperty": "extraValue"
+      }
+    }
+  ]
+}

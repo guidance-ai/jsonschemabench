@@ -1,0 +1,919 @@
+{
+  "description": "sample Github_medium/o28953.json",
+  "meta": {
+    "full_size": 2597,
+    "stripped_size": 737,
+    "features": [
+      "@minmaxInteger",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items",
+      "pattern"
+    ],
+    "raw_features": [
+      "id",
+      "minimum",
+      "properties",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "description": "This schema documents and guides creation of a config file for the osvr_server application.",
+    "properties": {
+      "aliases": {
+        "description": "Aliases to manually add to the path tree, optionally with transforms. These take the same format as automatic aliases, so they should share a schema.",
+        "title": "Aliases - TODO",
+        "type": "object"
+      },
+      "display": {
+        "title": "Display descriptor - TODO - filename, reference, or object"
+      },
+      "drivers": {
+        "items": {
+          "properties": {
+            "driver": {
+              "id": "driver",
+              "type": "string"
+            },
+            "params": {
+              "id": "params",
+              "properties": {},
+              "type": "object"
+            },
+            "plugin": {
+              "id": "plugin",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "title": "Drivers to manually instantiate",
+        "type": "array"
+      },
+      "externalDevices": {
+        "additionalProperties": {
+          "description": "Describes an external device. The key associated with this object is the path it will be accessible under.",
+          "properties": {
+            "descriptor": {
+              "description": "TODO - can either be an embedded descriptor object, or a reference to an external file with the descriptor.",
+              "title": "Device descriptor"
+            },
+            "deviceName": {
+              "description": "For example, Tracker0 - the part preceding @ in the full VRPN device name.",
+              "title": "Device name",
+              "type": "string"
+            },
+            "server": {
+              "description": "Server host (IP address or hostname), optionally with port if not the default 3883",
+              "title": "Device server",
+              "type": "string"
+            }
+          },
+          "title": "External device definition",
+          "type": "object"
+        },
+        "description": "Contains entries defining path tree names and device descriptors for external VRPN devices",
+        "title": "External devices object",
+        "type": "object"
+      },
+      "plugins": {
+        "description": "Manual-load plugins that should be loaded. Provide plugin name only, not filename.",
+        "items": {
+          "pattern": "^[a-zA-Z]+[a-zA-Z0-9_]*$",
+          "type": "string"
+        },
+        "title": "Plugins to manually load",
+        "type": "array"
+      },
+      "routes": {
+        "description": "Deprecated way to specify aliases, or as they were known earlier, routes. Replaced fully by aliases.",
+        "title": "DEPRECATED - Route specifications",
+        "type": "array"
+      },
+      "server": {
+        "properties": {
+          "interface": {
+            "description": "Network interface (IP address) to listen on - implies a non-local-only server",
+            "type": "string"
+          },
+          "local": {
+            "default": "true",
+            "description": "Whether the server should be local-only or shared (open to networks)",
+            "type": "boolean"
+          },
+          "port": {
+            "default": 3883,
+            "description": "Port to listen on - note that a non-default port may impair the ability of client applications to contact the server!",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sleep": {
+            "default": 1,
+            "description": "Mainloop sleep duration, in milliseconds",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "title": "Server options",
+        "type": "object"
+      }
+    },
+    "title": "OSVR Server Config",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_descriptor.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {},
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "deviceName": "Tracker0",
+              "deviceType": "tracker"
+            },
+            "deviceName": "Tracker0",
+            "server": "localhost:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "deviceName": "Controller0",
+              "deviceType": "controller"
+            },
+            "deviceName": "Controller0",
+            "server": "localhost:3883"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "localhost",
+          "local": true,
+          "port": 3883,
+          "sleep": 1
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"plugin-3\" does not match \"^[a-zA-Z]+[a-zA-Z0-9_]*$\"",
+      "python_error": "'plugin-3' does not match '^[a-zA-Z]+[a-zA-Z0-9_]*$'\n\nFailed validating 'pattern' in schema['properties']['plugins']['items']:\n    {'pattern': '^[a-zA-Z]+[a-zA-Z0-9_]*$', 'type': 'string'}\n\nOn instance['plugins'][2]:\n    'plugin-3'",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_descriptor.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {},
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "deviceName": "Tracker0",
+              "deviceType": "tracker"
+            },
+            "deviceName": "Tracker0",
+            "server": "localhost:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "deviceName": "Controller0",
+              "deviceType": "controller"
+            },
+            "deviceName": "Controller0",
+            "server": "localhost:3883"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2",
+          "plugin-3"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "localhost",
+          "local": true,
+          "port": 3883,
+          "sleep": 1
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['server']['properties']['sleep']:\n    {'default': 1,\n     'description': 'Mainloop sleep duration, in milliseconds',\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['server']['sleep']:\n    -1",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_descriptor.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {},
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "deviceName": "Tracker0",
+              "deviceType": "tracker"
+            },
+            "deviceName": "Tracker0",
+            "server": "localhost:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "deviceName": "Controller0",
+              "deviceType": "controller"
+            },
+            "deviceName": "Controller0",
+            "server": "localhost:3883"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "localhost",
+          "local": true,
+          "port": 0,
+          "sleep": -1
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"plugin-3\" does not match \"^[a-zA-Z]+[a-zA-Z0-9_]*$\"",
+      "python_error": "'plugin-3' does not match '^[a-zA-Z]+[a-zA-Z0-9_]*$'\n\nFailed validating 'pattern' in schema['properties']['plugins']['items']:\n    {'pattern': '^[a-zA-Z]+[a-zA-Z0-9_]*$', 'type': 'string'}\n\nOn instance['plugins'][2]:\n    'plugin-3'",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": 123
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {},
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "deviceName": "Tracker0",
+              "deviceType": "tracker"
+            },
+            "deviceName": "Tracker0",
+            "server": "localhost:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "deviceName": "Controller0",
+              "deviceType": "controller"
+            },
+            "deviceName": "Controller0",
+            "server": "localhost:3883"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2",
+          "plugin-3"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "localhost",
+          "local": true,
+          "port": 3883,
+          "sleep": 1
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123\" does not match \"^[a-zA-Z]+[a-zA-Z0-9_]*$\"",
+      "python_error": "'123' does not match '^[a-zA-Z]+[a-zA-Z0-9_]*$'\n\nFailed validating 'pattern' in schema['properties']['plugins']['items']:\n    {'pattern': '^[a-zA-Z]+[a-zA-Z0-9_]*$', 'type': 'string'}\n\nOn instance['plugins'][2]:\n    '123'",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_descriptor.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {},
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "deviceName": "Tracker0",
+              "deviceType": "tracker"
+            },
+            "deviceName": "Tracker0",
+            "server": "localhost:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "deviceName": "Controller0",
+              "deviceType": "controller"
+            },
+            "deviceName": "Controller0",
+            "server": "localhost:3883"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2",
+          "123"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "localhost",
+          "local": true,
+          "port": 3883,
+          "sleep": 1
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"plugin-3\" does not match \"^[a-zA-Z]+[a-zA-Z0-9_]*$\"",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['server']['properties']['sleep']:\n    {'default': 1,\n     'description': 'Mainloop sleep duration, in milliseconds',\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['server']['sleep']:\n    -1",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": 123
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {},
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "deviceName": "Tracker0",
+              "deviceType": "tracker"
+            },
+            "deviceName": "Tracker0",
+            "server": "localhost:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "deviceName": "Controller0",
+              "deviceType": "controller"
+            },
+            "deviceName": "Controller0",
+            "server": "localhost:3883"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2",
+          "plugin-3"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "localhost",
+          "local": true,
+          "port": 3883,
+          "sleep": -1
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_config.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {
+              "param3": "value3",
+              "param4": 4
+            },
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "type": "tracker",
+              "serialNumber": "1234567890"
+            },
+            "deviceName": "Tracker0",
+            "server": "192.168.1.100:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "type": "controller",
+              "serialNumber": "9876543210"
+            },
+            "deviceName": "Controller0",
+            "server": "192.168.1.101"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2",
+          "plugin3"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "192.168.1.100",
+          "local": false,
+          "port": 3883,
+          "sleep": 1
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0 is less than the minimum of 1",
+      "python_error": "0 is less than the minimum of 1\n\nFailed validating 'minimum' in schema['properties']['server']['properties']['port']:\n    {'default': 3883,\n     'description': 'Port to listen on - note that a non-default port may '\n                    'impair the ability of client applications to contact '\n                    'the server!',\n     'minimum': 1,\n     'type': 'integer'}\n\nOn instance['server']['port']:\n    0",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_config.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {
+              "param3": "value3",
+              "param4": 4
+            },
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "type": "tracker",
+              "serialNumber": "1234567890"
+            },
+            "deviceName": "Tracker0",
+            "server": "192.168.1.100:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "type": "controller",
+              "serialNumber": "9876543210"
+            },
+            "deviceName": "Controller0",
+            "server": "192.168.1.101"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2",
+          "plugin3"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "192.168.1.100",
+          "local": false,
+          "port": 0,
+          "sleep": 1,
+          "minimum keyword constraint is violated here": ""
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"_plugin1\" does not match \"^[a-zA-Z]+[a-zA-Z0-9_]*$\"",
+      "python_error": "'-plugin2' does not match '^[a-zA-Z]+[a-zA-Z0-9_]*$'\n\nFailed validating 'pattern' in schema['properties']['plugins']['items']:\n    {'pattern': '^[a-zA-Z]+[a-zA-Z0-9_]*$', 'type': 'string'}\n\nOn instance['plugins'][2]:\n    '-plugin2'",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": "/path/to/alias1",
+            "transform": {
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "translation": [
+                0,
+                0,
+                0
+              ]
+            }
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_config.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {
+              "param3": "value3",
+              "param4": 4
+            },
+            "plugin": "plugin2"
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "type": "tracker",
+              "serialNumber": "1234567890"
+            },
+            "deviceName": "Tracker0",
+            "server": "192.168.1.100:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "type": "controller",
+              "serialNumber": "9876543210"
+            },
+            "deviceName": "Controller0",
+            "server": "192.168.1.101"
+          }
+        },
+        "plugins": [
+          "_plugin1",
+          -1,
+          "-plugin2",
+          "plugin3"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "192.168.1.100",
+          "local": false,
+          "port": 3883,
+          "sleep": 1
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "-1 is less than the minimum of 0\n\nFailed validating 'minimum' in schema['properties']['server']['properties']['sleep']:\n    {'default': 1,\n     'description': 'Mainloop sleep duration, in milliseconds',\n     'minimum': 0,\n     'type': 'number'}\n\nOn instance['server']['sleep']:\n    -1",
+      "data": {
+        "aliases": {
+          "/alias1": {
+            "path": []
+          },
+          "/alias2": {
+            "path": "/path/to/alias2"
+          }
+        },
+        "display": {
+          "filename": "display_config.json"
+        },
+        "drivers": [
+          {
+            "driver": "driver1",
+            "params": {
+              "param1": "value1",
+              "param2": 2
+            },
+            "plugin": "plugin1"
+          },
+          {
+            "driver": "driver2",
+            "params": {
+              "param3": "value3",
+              "param4": 4
+            },
+            "plugin": null
+          }
+        ],
+        "externalDevices": {
+          "/Tracker0": {
+            "descriptor": {
+              "type": "tracker",
+              "serialNumber": "1234567890"
+            },
+            "deviceName": "Tracker0",
+            "server": "192.168.1.100:3883"
+          },
+          "/Controller0": {
+            "descriptor": {
+              "type": "controller",
+              "serialNumber": "9876543210"
+            },
+            "deviceName": 123,
+            "server": "192.168.1.101"
+          }
+        },
+        "plugins": [
+          "plugin1",
+          "plugin2",
+          "plugin3",
+          "plugin-4"
+        ],
+        "routes": [],
+        "server": {
+          "interface": "192.168.1.100",
+          "local": false,
+          "port": -3883,
+          "sleep": -1
+        }
+      }
+    }
+  ]
+}

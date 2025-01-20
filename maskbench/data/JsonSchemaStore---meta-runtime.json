@@ -1,0 +1,383 @@
+{
+  "description": "sample JsonSchemaStore/meta-runtime.json",
+  "meta": {
+    "full_size": 2285,
+    "stripped_size": 881,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$defs",
+      "$id",
+      "$schema",
+      "_boolSchema",
+      "properties",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$defs": {
+      "ActionGroup": {
+        "items": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Metadata"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "Metadata": {
+        "properties": {
+          "metadata": {
+            "properties": {
+              "extend_group": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Redirect": {
+        "properties": {
+          "redirect": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "$id": "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/meta-runtime.json",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "additionalProperties": false,
+    "description": "See https://docs.ansible.com/ansible/devel/dev_guide/developing_collections_structure.html#meta-directory",
+    "examples": [
+      "**/meta/runtime.yml"
+    ],
+    "properties": {
+      "action_groups": {
+        "additionalProperties": {
+          "$ref": "#/$defs/ActionGroup"
+        },
+        "description": "A mapping of groups and the list of action plugin and module names they contain. They may also have a special ‘metadata’ dictionary in the list, which can be used to include actions from other groups.",
+        "title": "Action Groups",
+        "type": "object"
+      },
+      "import_redirection": {
+        "additionalProperties": {
+          "$ref": "#/$defs/Redirect"
+        },
+        "description": "A mapping of names for Python import statements and their redirected locations.",
+        "title": "Import Redirection",
+        "type": "object"
+      },
+      "plugin_routing": {
+        "markdownDescription": "Content in a collection that Ansible needs to load from another location or that has been deprecated/removed. The top level keys of plugin_routing are types of plugins, with individual plugin names as subkeys. To define a new location for a plugin, set the redirect field to another name. To deprecate a plugin, use the deprecation field to provide a custom warning message and the removal version or date. If the plugin has been renamed or moved to a new location, the redirect field should also be provided. If a plugin is being removed entirely, tombstone can be used for the fatal error message and removal version or date.",
+        "properties": {
+          "inventory": {},
+          "module_utils": {},
+          "modules": {}
+        },
+        "title": "Plugin Routing",
+        "type": "object"
+      },
+      "requires_ansible": {
+        "examples": [
+          ">=2.10,<2.11"
+        ],
+        "pattern": "^[^\\s]*$",
+        "title": "The version of Ansible Core (ansible-core) required to use the collection. Multiple versions can be separated with a comma.",
+        "type": "string"
+      }
+    },
+    "title": "Ansible Meta Runtime Schema",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "action_groups": {
+          "group1": [
+            "action_plugin1",
+            "module1",
+            {
+              "metadata": {
+                "extend_group": [
+                  "group2"
+                ]
+              }
+            }
+          ],
+          "group2": [
+            "action_plugin2",
+            "module2"
+          ]
+        },
+        "import_redirection": {
+          "module1": {
+            "redirect": "module1_redirect"
+          },
+          "module2": {
+            "redirect": "module2_redirect"
+          }
+        },
+        "plugin_routing": {
+          "inventory": {
+            "inventory_plugin1": {
+              "redirect": "inventory_plugin1_redirect"
+            },
+            "inventory_plugin2": {
+              "deprecation": "inventory_plugin2 is deprecated",
+              "removal_version": "2.11"
+            }
+          },
+          "module_utils": {
+            "module_util1": {
+              "redirect": "module_util1_redirect"
+            }
+          },
+          "modules": {
+            "module1": {
+              "redirect": "module1_redirect"
+            },
+            "module2": {
+              "deprecation": "module2 is deprecated",
+              "removal_version": "2.11",
+              "redirect": "module2_redirect"
+            }
+          }
+        },
+        "requires_ansible": ">=2.10,<2.11"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "action_groups": {
+          "group1": [
+            "action_plugin1",
+            "module_name1",
+            {
+              "metadata": {
+                "extend_group": [
+                  "group2"
+                ]
+              }
+            }
+          ],
+          "group2": [
+            "action_plugin2",
+            "module_name2"
+          ]
+        },
+        "import_redirection": {
+          "old_module": {
+            "redirect": "new_module"
+          }
+        },
+        "plugin_routing": {
+          "inventory": {
+            "old_inventory": {
+              "redirect": "new_inventory",
+              "deprecation": "This inventory plugin has been deprecated and will be removed in Ansible 2.12."
+            }
+          },
+          "module_utils": {
+            "old_module_util": {
+              "redirect": "new_module_util",
+              "tombstone": "This module utility has been removed in Ansible 2.11."
+            }
+          },
+          "modules": {
+            "old_module": {
+              "redirect": "new_module",
+              "deprecation": "This module has been deprecated and will be removed in Ansible 2.12."
+            }
+          }
+        },
+        "requires_ansible": ">=2.10,<2.11"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\">=2.10, <2.11  \" does not match \"^[^\\s]*$\"",
+      "python_error": "'>=2.10, <2.11  ' does not match '^[^\\\\s]*$'\n\nFailed validating 'pattern' in schema['properties']['requires_ansible']:\n    {'examples': ['>=2.10,<2.11'],\n     'pattern': '^[^\\\\s]*$',\n     'title': 'The version of Ansible Core (ansible-core) required to use '\n              'the collection. Multiple versions can be separated with a '\n              'comma.',\n     'type': 'string'}\n\nOn instance['requires_ansible']:\n    '>=2.10, <2.11  '",
+      "data": {
+        "action_groups": {
+          "group1": [
+            "action_plugin1",
+            "module_name1",
+            {
+              "metadata": {
+                "extend_group": [
+                  "group2"
+                ]
+              }
+            }
+          ],
+          "group2": [
+            "action_plugin2",
+            "module_name2"
+          ]
+        },
+        "import_redirection": {
+          "old_module": {
+            "redirect": "new_module"
+          }
+        },
+        "plugin_routing": {
+          "inventory": {
+            "old_inventory": {
+              "redirect": "new_inventory",
+              "deprecation": "This inventory plugin has been deprecated and will be removed in Ansible 2.12."
+            }
+          },
+          "module_utils": {
+            "old_module_util": {
+              "redirect": "new_module_util",
+              "tombstone": "This module utility has been removed in Ansible 2.11."
+            }
+          },
+          "modules": {
+            "old_module": {
+              "redirect": "new_module",
+              "deprecation": "This module has been deprecated and will be removed in Ansible 2.12."
+            }
+          }
+        },
+        "requires_ansible": ">=2.10, <2.11  "
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"metadata\":{\"extend_group\":[\"group2\",123]}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['metadata']['properties']['extend_group']['items']:\n    {'type': 'string'}\n\nOn instance['metadata']['extend_group'][1]:\n    123",
+      "data": {
+        "action_groups": {
+          "group1": [
+            "action_plugin1",
+            "module_name1",
+            {
+              "metadata": {
+                "extend_group": [
+                  "group2",
+                  123
+                ]
+              }
+            }
+          ],
+          "group2": [
+            "action_plugin2",
+            "module_name2"
+          ]
+        },
+        "import_redirection": {
+          "old_module": {
+            "redirect": "new_module"
+          }
+        },
+        "plugin_routing": {
+          "inventory": {
+            "old_inventory": {
+              "redirect": "new_inventory",
+              "deprecation": "This inventory plugin has been deprecated and will be removed in Ansible 2.12."
+            }
+          },
+          "module_utils": {
+            "old_module_util": {
+              "redirect": "new_module_util",
+              "tombstone": "This module utility has been removed in Ansible 2.11."
+            }
+          },
+          "modules": {
+            "old_module": {
+              "redirect": "new_module",
+              "deprecation": "This module has been deprecated and will be removed in Ansible 2.12."
+            }
+          }
+        },
+        "requires_ansible": ">=2.10,<2.11"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"metadata\":{\"extend_group\":[\"group2\",123,\",  This will cause the schema to fail because 'extend_group' is expected to be an array of strings, but '123' is an integer.\"]}} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'version': '>=2.10,<2.11', \",  This will cause the schema to fail because 'requires_ansible' is expected to be a string, but it is an object.\": \", 'requires_ansible' is expected to be a string, but it is an object.\"} is not of type 'string'\n\nFailed validating 'type' in schema['properties']['requires_ansible']:\n    {'examples': ['>=2.10,<2.11'],\n     'pattern': '^[^\\\\s]*$',\n     'title': 'The version of Ansible Core (ansible-core) required to use '\n              'the collection. Multiple versions can be separated with a '\n              'comma.',\n     'type': 'string'}\n\nOn instance['requires_ansible']:\n    {'version': '>=2.10,<2.11',\n     \",  This will cause the schema to fail because 'requires_ansible' is expected to be a string, but it is an object.\": ', '\n                                                                                                                          \"'requires_ansible' \"\n                                                                                                                .. (1311 more)",
+      "data": {
+        "action_groups": {
+          "group1": [
+            "action_plugin1",
+            "module_name1",
+            {
+              "metadata": {
+                "extend_group": [
+                  "group2",
+                  123,
+                  ",  This will cause the schema to fail because 'extend_group' is expected to be an array of strings, but '123' is an integer."
+                ]
+              }
+            }
+          ],
+          "group2": [
+            "action_plugin2",
+            "module_name2"
+          ]
+        },
+        "import_redirection": {
+          "old_module": {
+            "redirect": 456,
+            ",  This will cause the schema to fail because 'redirect' is expected to be a string, but '456' is an integer.": ", 'redirect' is expected to be a string, but '456' is an integer."
+          }
+        },
+        "plugin_routing": {
+          "inventory": {
+            "old_inventory": {
+              "redirect": "new_inventory",
+              "deprecation": 789,
+              ",  This will cause the schema to fail because 'deprecation' is not defined in the schema as an expected key. However this is not a problem since additionalProperties is not set to false for this object, so this key will be allowed. To make it invalid, we should add a key that has an unexpected type, like setting 'redirect' to an array.": ", 'redirect' is expected to be a string, but '456' is an integer."
+            }
+          },
+          "module_utils": {
+            "old_module_util": {
+              "redirect": "new_module_util",
+              ",  This will cause the schema to fail because 'redirect' is expected to be a string, but it is an array.": ", 'redirect' is expected to be a string, but it is an array.",
+              "tombstone": "This module utility has been removed in Ansible 2.11."
+            }
+          },
+          "modules": {
+            "old_module": {
+              "redirect": "new_module",
+              "deprecation": "This module has been deprecated and will be removed in Ansible 2.12."
+            }
+          }
+        },
+        "requires_ansible": {
+          "version": ">=2.10,<2.11",
+          ",  This will cause the schema to fail because 'requires_ansible' is expected to be a string, but it is an object.": ", 'requires_ansible' is expected to be a string, but it is an object."
+        }
+      }
+    }
+  ]
+}

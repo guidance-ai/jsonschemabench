@@ -1,0 +1,131 @@
+{
+  "description": "sample Github_easy/o12649.json",
+  "meta": {
+    "full_size": 353,
+    "stripped_size": 353,
+    "features": [
+      "$ref",
+      "allOf",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "address": {
+        "type": "object",
+        "properties": {
+          "street_address": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "billing_address": {
+        "$ref": "#/definitions/address"
+      },
+      "shipping_address": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/address"
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "residential",
+                  "business"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "billing_address": {
+          "street_address": "123 Main St"
+        },
+        "shipping_address": {
+          "street_address": "456 Elm St",
+          "type": "residential"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "\"invalid\" is not one of [\"residential\",\"business\"]",
+      "python_error": "'invalid' is not one of ['residential', 'business']\n\nFailed validating 'enum' in schema['properties']['shipping_address']['allOf'][1]['properties']['type']:\n    {'enum': ['residential', 'business']}\n\nOn instance['shipping_address']['type']:\n    'invalid'",
+      "data": {
+        "billing_address": {
+          "street_address": "123 Main St"
+        },
+        "shipping_address": {
+          "street_address": "456 Elm St",
+          "type": "invalid"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"other\" is not one of [\"residential\",\"business\"]",
+      "python_error": "'other' is not one of ['residential', 'business']\n\nFailed validating 'enum' in schema['properties']['shipping_address']['allOf'][1]['properties']['type']:\n    {'enum': ['residential', 'business']}\n\nOn instance['shipping_address']['type']:\n    'other'",
+      "data": {
+        "billing_address": {
+          "street_address": "123 Main St"
+        },
+        "shipping_address": {
+          "street_address": "456 Elm St",
+          "type": "other"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['billing_address']['properties']['street_address']:\n    {'type': 'string'}\n\nOn instance['billing_address']['street_address']:\n    None",
+      "data": {
+        "billing_address": {
+          "street_address": null
+        },
+        "shipping_address": {
+          "street_address": "456 Elm St",
+          "type": "residential"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['billing_address']['properties']['street_address']:\n    {'type': 'string'}\n\nOn instance['billing_address']['street_address']:\n    123",
+      "data": {
+        "billing_address": {
+          "street_address": 123
+        },
+        "shipping_address": {
+          "street_address": "456 Elm St",
+          "type": "residential"
+        }
+      }
+    }
+  ]
+}

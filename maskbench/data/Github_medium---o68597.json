@@ -1,0 +1,310 @@
+{
+  "description": "sample Github_medium/o68597.json",
+  "meta": {
+    "full_size": 1004,
+    "stripped_size": 835,
+    "features": [
+      "@minmaxItems",
+      "@minmaxLength",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "minItems",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Agent set",
+    "type": "array",
+    "items": {
+      "title": "Agent",
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "enum": [
+            "v1beta1",
+            "v1.0",
+            "v1"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "Agent",
+            "agent"
+          ],
+          "readOnly": true
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 30
+            },
+            "createdOn": {
+              "type": "string",
+              "readOnly": true
+            },
+            "modifiedOn": {
+              "type": "string",
+              "readOnly": true
+            },
+            "ref": {
+              "type": "string",
+              "readOnly": true,
+              "minLength": 3,
+              "maxLength": 24
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "spec": {
+          "type": "object",
+          "properties": {
+            "privacy": {
+              "enum": [
+                "Private",
+                "private",
+                "None",
+                "none"
+              ]
+            },
+            "credentials": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "readOnly": true,
+                  "minLength": 3,
+                  "maxLength": 30
+                },
+                "secret": {
+                  "type": "string",
+                  "writeOnly": true
+                }
+              },
+              "required": [
+                "username",
+                "secret"
+              ]
+            },
+            "domains": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "readOnly": true
+              },
+              "minItems": 1,
+              "_uniqueItems": true
+            }
+          },
+          "required": [
+            "credentials",
+            "domains"
+          ]
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "spec",
+        "metadata"
+      ]
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": [
+        {
+          "apiVersion": "v1",
+          "kind": "Agent",
+          "metadata": {
+            "name": "Test Agent",
+            "createdOn": "2022-01-01T00:00:00.000Z",
+            "modifiedOn": "2022-01-01T00:00:00.000Z",
+            "ref": "abc123"
+          },
+          "spec": {
+            "privacy": "Private",
+            "credentials": {
+              "username": "testuser",
+              "secret": "testpassword"
+            },
+            "domains": [
+              "example.com",
+              "test.com"
+            ]
+          }
+        },
+        {
+          "apiVersion": "v1beta1",
+          "kind": "Agent",
+          "metadata": {
+            "name": "Another Agent",
+            "createdOn": "2022-01-02T00:00:00.000Z",
+            "modifiedOn": "2022-01-02T00:00:00.000Z",
+            "ref": "def456"
+          },
+          "spec": {
+            "privacy": "None",
+            "credentials": {
+              "username": "anotheruser",
+              "secret": "anotherpassword"
+            },
+            "domains": [
+              "anotherexample.com",
+              "anothertest.com"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Agent\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T00:00:00.000Z\",\"modifiedOn\":\"2022-01-01T00:00:00.000Z\",\"ref\":\"ab\"},\"spec\":{\"privacy\":\"Private\",\"credentials\":{\"username\":\"te\",\"secret\":\"testpassword\"},\"domains\":[\"example.com\",\"test.com\"]}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Agent', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T00:00:00.000Z', 'modifiedOn': '2022-01-01T00:00:00.000Z', 'ref': 'ab'}, 'spec': {'privacy': 'Private', 'credentials': {'username': 'te', 'secret': 'testpassword'}, 'domains': ['example.com', 'test.com']}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Agent set',\n     'type': 'array',\n     'items': {'title': 'Agent',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Agent', 'agent'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                    .. (3321 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Agent",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T00:00:00.000Z",
+          "modifiedOn": "2022-01-01T00:00:00.000Z",
+          "ref": "ab"
+        },
+        "spec": {
+          "privacy": "Private",
+          "credentials": {
+            "username": "te",
+            "secret": "testpassword"
+          },
+          "domains": [
+            "example.com",
+            "test.com"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Agent\",\"metadata\":{\"name\":\"Test Agent\",\"createdOn\":\"2022-01-01T00:00:00.000Z\",\"modifiedOn\":\"2022-01-01T00:00:00.000Z\",\"ref\":\"abc123\"},\"spec\":{\"privacy\":\"Private\",\"credentials\":{\"username\":\"testuser\",\"secret\":\"testpassword\"},\"domains\":[]}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Agent', 'metadata': {'name': 'Test Agent', 'createdOn': '2022-01-01T00:00:00.000Z', 'modifiedOn': '2022-01-01T00:00:00.000Z', 'ref': 'abc123'}, 'spec': {'privacy': 'Private', 'credentials': {'username': 'testuser', 'secret': 'testpassword'}, 'domains': []}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Agent set',\n     'type': 'array',\n     'items': {'title': 'Agent',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Agent', 'agent'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                          .. (3339 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Agent",
+        "metadata": {
+          "name": "Test Agent",
+          "createdOn": "2022-01-01T00:00:00.000Z",
+          "modifiedOn": "2022-01-01T00:00:00.000Z",
+          "ref": "abc123"
+        },
+        "spec": {
+          "privacy": "Private",
+          "credentials": {
+            "username": "testuser",
+            "secret": "testpassword"
+          },
+          "domains": []
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Agent\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T00:00:00.000Z\",\"modifiedOn\":\"2022-01-01T00:00:00.000Z\",\"ref\":\"abc123\"},\"spec\":{\"privacy\":\"Private\",\"credentials\":{\"username\":\"a\",\"secret\":\"testpassword\"},\"domains\":[\"example.com\",\"test.com\"]}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Agent', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T00:00:00.000Z', 'modifiedOn': '2022-01-01T00:00:00.000Z', 'ref': 'abc123'}, 'spec': {'privacy': 'Private', 'credentials': {'username': 'a', 'secret': 'testpassword'}, 'domains': ['example.com', 'test.com']}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Agent set',\n     'type': 'array',\n     'items': {'title': 'Agent',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Agent', 'agent'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                                 .. (3327 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Agent",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T00:00:00.000Z",
+          "modifiedOn": "2022-01-01T00:00:00.000Z",
+          "ref": "abc123"
+        },
+        "spec": {
+          "privacy": "Private",
+          "credentials": {
+            "username": "a",
+            "secret": "testpassword"
+          },
+          "domains": [
+            "example.com",
+            "test.com"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Agent\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T00:00:00.000Z\",\"modifiedOn\":\"2022-01-01T00:00:00.000Z\",\"ref\":\"abc123\"},\"spec\":{\"privacy\":\"Private\",\"credentials\":{\"username\":\"testuser\",\"secret\":\"testpassword\"},\"domains\":[\"example.com\",\"test.com\"]}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Agent', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T00:00:00.000Z', 'modifiedOn': '2022-01-01T00:00:00.000Z', 'ref': 'abc123'}, 'spec': {'privacy': 'Private', 'credentials': {'username': 'testuser', 'secret': 'testpassword'}, 'domains': ['example.com', 'test.com']}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Agent set',\n     'type': 'array',\n     'items': {'title': 'Agent',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Agent', 'agent'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                          .. (3371 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Agent",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T00:00:00.000Z",
+          "modifiedOn": "2022-01-01T00:00:00.000Z",
+          "ref": "abc123"
+        },
+        "spec": {
+          "privacy": "Private",
+          "credentials": {
+            "username": "testuser",
+            "secret": "testpassword"
+          },
+          "domains": [
+            "example.com",
+            "test.com"
+          ]
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"apiVersion\":\"v1\",\"kind\":\"Agent\",\"metadata\":{\"name\":\"a\",\"createdOn\":\"2022-01-01T00:00:00.000Z\",\"modifiedOn\":\"2022-01-01T00:00:00.000Z\",\"ref\":\"abc123\"},\"spec\":{\"privacy\":\"Private\",\"credentials\":{\"username\":\"testuser\",\"secret\":\"testpassword\"},\"domains\":[\"example.com\",\"example.com\"]}} is not of type \"array\"",
+      "python_error": "{'apiVersion': 'v1', 'kind': 'Agent', 'metadata': {'name': 'a', 'createdOn': '2022-01-01T00:00:00.000Z', 'modifiedOn': '2022-01-01T00:00:00.000Z', 'ref': 'abc123'}, 'spec': {'privacy': 'Private', 'credentials': {'username': 'testuser', 'secret': 'testpassword'}, 'domains': ['example.com', 'example.com']}} is not of type 'array'\n\nFailed validating 'type' in schema:\n    {'$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'Agent set',\n     'type': 'array',\n     'items': {'title': 'Agent',\n               'type': 'object',\n               'properties': {'apiVersion': {'enum': ['v1beta1',\n                                                      'v1.0',\n                                                      'v1']},\n                              'kind': {'enum': ['Agent', 'agent'],\n                                       'readOnly': True},\n                              'metadata': {'type': 'object',\n                                           'properties': {'name': {'type': 'string',\n                       .. (3377 more)",
+      "data": {
+        "apiVersion": "v1",
+        "kind": "Agent",
+        "metadata": {
+          "name": "a",
+          "createdOn": "2022-01-01T00:00:00.000Z",
+          "modifiedOn": "2022-01-01T00:00:00.000Z",
+          "ref": "abc123"
+        },
+        "spec": {
+          "privacy": "Private",
+          "credentials": {
+            "username": "testuser",
+            "secret": "testpassword"
+          },
+          "domains": [
+            "example.com",
+            "example.com"
+          ]
+        }
+      }
+    }
+  ]
+}

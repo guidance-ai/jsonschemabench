@@ -1,0 +1,214 @@
+{
+  "description": "sample Github_medium/o24621.json",
+  "meta": {
+    "full_size": 1232,
+    "stripped_size": 1078,
+    "features": [
+      "$ref",
+      "@minmaxLength",
+      "enum",
+      "items",
+      "not",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "maxLength",
+      "minLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "yotta-shrinkwrap.json schema",
+    "properties": {
+      "modules": {
+        "$ref": "#/definitions/modulesArray"
+      },
+      "targets": {
+        "$ref": "#/definitions/targetsArray"
+      },
+      "additionalProperties": false
+    },
+    "definitions": {
+      "module": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/definitions/name"
+          },
+          "version": {
+            "$ref": "#/definitions/semverSpecification"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ]
+      },
+      "target": {
+        "comment": "targets are specified in the same way as modules (name and version spec)",
+        "$ref": "#/definitions/module"
+      },
+      "name": {
+        "type": "string",
+        "pattern": "^[a-z]+[a-z0-9-]*$",
+        "minLength": 2,
+        "maxLength": 64,
+        "not": {
+          "enum": [
+            "test",
+            "source",
+            "yotta_modules",
+            "yotta_targets",
+            "include"
+          ]
+        }
+      },
+      "path": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000,
+        "pattern": "^[a-zA-Z0-9 ()._/-]*$"
+      },
+      "semver": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)(-[a-zA-Z0-9]+[a-zA-Z0-9-]*([.][a-zA-Z0-9]+[a-zA-Z0-9-]*)*)?([+][a-zA-Z0-9]+[a-zA-Z0-9-]*([.][a-zA-Z0-9]+[a-zA-Z0-9-]*)*)?$"
+      },
+      "semverSpecification": {
+        "comment": "!!! TODO: pattern",
+        "type": "string",
+        "pattern": ".*"
+      },
+      "modulesArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/module"
+        }
+      },
+      "targetsArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/target"
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "modules": [
+          {
+            "name": "example-module",
+            "version": "1.2.3"
+          },
+          {
+            "name": "another-module",
+            "version": "2.0.0"
+          }
+        ],
+        "targets": [
+          {
+            "name": "example-target",
+            "version": "1.0.0"
+          },
+          {
+            "name": "another-target",
+            "version": "3.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "modules": [
+          {
+            "name": "example-module",
+            "version": "1.2.3"
+          },
+          {
+            "name": "another-module",
+            "version": "4.5.6"
+          }
+        ],
+        "targets": [
+          {
+            "name": "example-target",
+            "version": "7.8.9"
+          },
+          {
+            "name": "another-target",
+            "version": "10.11.12"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"Another-Module\" does not match \"^[a-z]+[a-z0-9-]*$\"",
+      "python_error": "'Another-Module' does not match '^[a-z]+[a-z0-9-]*$'\n\nFailed validating 'pattern' in schema['properties']['modules']['items']['properties']['name']:\n    {'type': 'string',\n     'pattern': '^[a-z]+[a-z0-9-]*$',\n     'minLength': 2,\n     'maxLength': 64,\n     'not': {'enum': ['test',\n                      'source',\n                      'yotta_modules',\n                      'yotta_targets',\n                      'include']}}\n\nOn instance['modules'][1]['name']:\n    'Another-Module'",
+      "data": {
+        "modules": [
+          {
+            "name": "example-module",
+            "version": "1.2.3"
+          },
+          {
+            "name": "Another-Module",
+            "version": "4.5.6"
+          }
+        ],
+        "targets": [
+          {
+            "name": "example-target",
+            "version": "7.8.9"
+          },
+          {
+            "name": "another-target",
+            "version": "10.11.12"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 2 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['modules']['items']['properties']['name']:\n    {'type': 'string',\n     'pattern': '^[a-z]+[a-z0-9-]*$',\n     'minLength': 2,\n     'maxLength': 64,\n     'not': {'enum': ['test',\n                      'source',\n                      'yotta_modules',\n                      'yotta_targets',\n                      'include']}}\n\nOn instance['modules'][0]['name']:\n    'a'",
+      "data": {
+        "modules": [
+          {
+            "name": "a",
+            "version": "1.2.3"
+          },
+          {
+            "name": "another-module",
+            "version": "4.5.6"
+          }
+        ],
+        "targets": [
+          {
+            "name": "example-target",
+            "version": "7.8.9"
+          },
+          {
+            "name": "another-target",
+            "version": "10.11.12"
+          }
+        ]
+      }
+    }
+  ]
+}

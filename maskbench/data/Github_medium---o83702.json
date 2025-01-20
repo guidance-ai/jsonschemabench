@@ -1,0 +1,172 @@
+{
+  "description": "sample Github_medium/o83702.json",
+  "meta": {
+    "full_size": 761,
+    "stripped_size": 666,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Postal address for Canada",
+    "description": "Postal addresses for the country of Canada",
+    "type": "object",
+    "properties": {
+      "address": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "street2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "province": {
+            "$ref": "#/definitions/CAN_province"
+          },
+          "postalCode": {
+            "$ref": "#/definitions/CAN_postalCode"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "number",
+          "street",
+          "city",
+          "province",
+          "postalCode"
+        ]
+      }
+    },
+    "definitions": {
+      "CAN_province": {
+        "type": "string",
+        "enum": [
+          "AB",
+          "BC",
+          "MB",
+          "NB",
+          "NL",
+          "NS",
+          "NT",
+          "NU",
+          "ON",
+          "PE",
+          "QC",
+          "SK",
+          "YT"
+        ]
+      },
+      "CAN_postalCode": {
+        "type": "string",
+        "pattern": "^[A-Z][0-9][A-Z]( )?[0-9][A-Z][0-9]$"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "address": {
+          "name": "John Doe",
+          "number": "123",
+          "street": "Main Street",
+          "street2": "Apt 101",
+          "city": "Toronto",
+          "province": "ON",
+          "postalCode": "M5A 1A1"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"NY\" is not one of [\"AB\",\"BC\",\"MB\",\"NB\",\"NL\",\"NS\",\"NT\",\"NU\",\"ON\",\"PE\",\"QC\",\"SK\",\"YT\"]",
+      "python_error": "'NY' is not one of ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']\n\nFailed validating 'enum' in schema['properties']['address']['properties']['province']:\n    {'type': 'string',\n     'enum': ['AB',\n              'BC',\n              'MB',\n              'NB',\n              'NL',\n              'NS',\n              'NT',\n              'NU',\n              'ON',\n              'PE',\n              'QC',\n              'SK',\n              'YT']}\n\nOn instance['address']['province']:\n    'NY'",
+      "data": {
+        "address": {
+          "name": "John Doe",
+          "number": "123",
+          "street": "Main Street",
+          "street2": "Apt 101",
+          "city": "Toronto",
+          "province": "NY",
+          "postalCode": "M5A 1A1"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"M5A 1A\" does not match \"^[A-Z][0-9][A-Z]( )?[0-9][A-Z][0-9]$\"",
+      "python_error": "'M5A 1A' does not match '^[A-Z][0-9][A-Z]( )?[0-9][A-Z][0-9]$'\n\nFailed validating 'pattern' in schema['properties']['address']['properties']['postalCode']:\n    {'type': 'string', 'pattern': '^[A-Z][0-9][A-Z]( )?[0-9][A-Z][0-9]$'}\n\nOn instance['address']['postalCode']:\n    'M5A 1A'",
+      "data": {
+        "address": {
+          "name": "John Doe",
+          "number": "123",
+          "street": "Main Street",
+          "street2": "Apt 101",
+          "city": "Toronto",
+          "province": "ON",
+          "postalCode": "M5A 1A"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "address": {
+          "name": "John Doe",
+          "number": "123",
+          "street": "Main Street",
+          "street2": "Apt 101",
+          "city": "Toronto",
+          "province": "ON",
+          "postalCode": "M5V 1K4"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123 Main St\" does not match \"^[A-Z][0-9][A-Z]( )?[0-9][A-Z][0-9]$\"",
+      "python_error": "'123 Main St' does not match '^[A-Z][0-9][A-Z]( )?[0-9][A-Z][0-9]$'\n\nFailed validating 'pattern' in schema['properties']['address']['properties']['postalCode']:\n    {'type': 'string', 'pattern': '^[A-Z][0-9][A-Z]( )?[0-9][A-Z][0-9]$'}\n\nOn instance['address']['postalCode']:\n    '123 Main St'",
+      "data": {
+        "address": {
+          "name": "John Doe",
+          "number": "123",
+          "street": "Main Street",
+          "city": "Toronto",
+          "province": "ON",
+          "postalCode": "123 Main St"
+        }
+      }
+    }
+  ]
+}

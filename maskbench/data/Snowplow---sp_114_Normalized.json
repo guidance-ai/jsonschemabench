@@ -1,0 +1,183 @@
+{
+  "description": "sample Snowplow/sp_114_Normalized.json",
+  "meta": {
+    "full_size": 1931,
+    "stripped_size": 666,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minLength",
+      "properties",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": true,
+    "description": "Schema for a Mailgun message bounced event",
+    "properties": {
+      "attachmentCount": {
+        "description": "Number of attachments in attachment-x (where x is a number) fields.",
+        "maximum": 65535,
+        "type": "integer"
+      },
+      "campaignId": {
+        "description": "The id of campaign triggering the event.",
+        "type": "string"
+      },
+      "campaignName": {
+        "description": "The name of campaign triggering the event.",
+        "type": "string"
+      },
+      "code": {
+        "description": "SMTP bounce error code in form (X.X.X).",
+        "maxLength": 8,
+        "type": "string"
+      },
+      "domain": {
+        "_format": "hostname",
+        "description": "Domain that sent the original message.",
+        "maxLength": 256,
+        "type": "string"
+      },
+      "error": {
+        "description": "SMTP bounce error string.",
+        "type": "string"
+      },
+      "mailingList": {
+        "description": "The address of mailing list the original message was sent to.",
+        "type": "string"
+      },
+      "messageHeaders": {
+        "description": "String list of all MIME headers of the original message dumped to a JSON string (order of headers preserved).",
+        "type": "string"
+      },
+      "messageId": {
+        "description": "The Id of the message that bounced.",
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "notification": {
+        "description": "Detailed reason for bouncing (optional).",
+        "type": "string"
+      },
+      "recipient": {
+        "_format": "email",
+        "description": "Recipient who could not be reached.",
+        "maxLength": 256,
+        "type": "string"
+      },
+      "signature": {
+        "description": "String with hexadecimal digits generate by HMAC algorithm (see securing webhooks).",
+        "maxLength": 128,
+        "type": "string"
+      },
+      "tag": {
+        "description": "Message tag, if it was tagged. See Tagging.",
+        "type": "string"
+      },
+      "timestamp": {
+        "_format": "date-time",
+        "description": "Timestamp in ISO8601 format.",
+        "type": "string"
+      },
+      "token": {
+        "description": "Randomly generated string with length 50 (see securing webhooks).",
+        "maxLength": 50,
+        "minLength": 50,
+        "type": "string"
+      },
+      "xMailgunSid": {
+        "description": "Mailgun identifying header.",
+        "type": "string"
+      }
+    },
+    "self": {
+      "format": "jsonschema",
+      "name": "message_bounced",
+      "vendor": "com.mailgun",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "attachmentCount": 1,
+        "campaignId": "campaign123",
+        "campaignName": "My Campaign",
+        "code": "5.1.1",
+        "domain": "example.com",
+        "error": "User unknown",
+        "mailingList": "mylist@example.com",
+        "messageHeaders": "{\"From\": \"John Doe <john@example.com>\", \"To\": \"Jane Doe <jane@example.com>\", \"Subject\": \"Hello\"}",
+        "messageId": "<message-id@example.com>",
+        "notification": "User unknown",
+        "recipient": "jane@example.com",
+        "signature": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "tag": "mytag",
+        "timestamp": "2022-01-01T12:00:00Z",
+        "token": "01234567890123456789012345678901234567890123456789",
+        "xMailgunSid": "mailgun-sid-123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"0123456789012345678901234567890123456789012345678\" is shorter than 50 characters",
+      "python_error": "'0123456789012345678901234567890123456789012345678' is too short\n\nFailed validating 'minLength' in schema['properties']['token']:\n    {'description': 'Randomly generated string with length 50 (see '\n                    'securing webhooks).',\n     'maxLength': 50,\n     'minLength': 50,\n     'type': 'string'}\n\nOn instance['token']:\n    '0123456789012345678901234567890123456789012345678'",
+      "data": {
+        "attachmentCount": 1,
+        "campaignId": "campaign123",
+        "campaignName": "My Campaign",
+        "code": "5.1.1",
+        "domain": "example.com",
+        "error": "User unknown",
+        "mailingList": "mylist@example.com",
+        "messageHeaders": "{\"From\": \"John Doe <john@example.com>\", \"To\": \"Jane Doe <jane@example.com>\", \"Subject\": \"Hello\"}",
+        "messageId": "<message-id@example.com>",
+        "notification": "User unknown",
+        "recipient": "jane@example.com",
+        "signature": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "tag": "mytag",
+        "timestamp": "2022-01-01T12:00:00Z",
+        "token": "0123456789012345678901234567890123456789012345678",
+        "xMailgunSid": "mailgun-sid-123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maximum keyword",
+      "valid": false,
+      "rust_error": "65536 is greater than the maximum of 65535",
+      "python_error": "65536 is greater than the maximum of 65535\n\nFailed validating 'maximum' in schema['properties']['attachmentCount']:\n    {'description': 'Number of attachments in attachment-x (where x is a '\n                    'number) fields.',\n     'maximum': 65535,\n     'type': 'integer'}\n\nOn instance['attachmentCount']:\n    65536",
+      "data": {
+        "attachmentCount": 65536,
+        "campaignId": "campaign123",
+        "campaignName": "My Campaign",
+        "code": "5.1.1",
+        "domain": "example.com",
+        "error": "User unknown",
+        "mailingList": "mylist@example.com",
+        "messageHeaders": "{\"From\": \"John Doe <john@example.com>\", \"To\": \"Jane Doe <jane@example.com>\", \"Subject\": \"Hello\"}",
+        "messageId": "<message-id@example.com>",
+        "notification": "User unknown",
+        "recipient": "jane@example.com",
+        "signature": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "tag": "mytag",
+        "timestamp": "2022-01-01T12:00:00Z",
+        "token": "01234567890123456789012345678901234567890123456789",
+        "xMailgunSid": "mailgun-sid-123"
+      }
+    }
+  ]
+}

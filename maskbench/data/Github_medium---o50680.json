@@ -1,0 +1,152 @@
+{
+  "description": "sample Github_medium/o50680.json",
+  "meta": {
+    "full_size": 936,
+    "stripped_size": 490,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "maxLength",
+      "minLength",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+      "account_identifier": {
+        "description": "The identifier for the platform account to fund.",
+        "maxLength": 96,
+        "minLength": 5,
+        "pattern": "^[\\+\\w-]{5,96}$",
+        "type": "string"
+      },
+      "amount": {
+        "description": "The amount to add to the account (and thus, charge the credit card), in cents.",
+        "minimum": 100,
+        "type": "number"
+      },
+      "cc_token": {
+        "description": "The payment token issued at registration time.",
+        "type": "string"
+      },
+      "client_ip": {
+        "description": "The IP address of the person making the purchase.",
+        "type": "string"
+      },
+      "customer": {
+        "description": "The platform's customer.",
+        "maxLength": 96,
+        "minLength": 1,
+        "type": "string"
+      },
+      "security_code": {
+        "description": "The 3 or 4-digit card security code (CVV2, CVC2, or CID).",
+        "pattern": "^\\d{3,4}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "customer",
+      "account_identifier",
+      "amount",
+      "client_ip",
+      "cc_token",
+      "security_code"
+    ],
+    "title": "Fund a platform user's account.",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "account_identifier": "user123",
+        "amount": 100,
+        "cc_token": "payment-token-123",
+        "client_ip": "192.168.1.1",
+        "customer": "John Doe",
+        "security_code": "123"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "account_identifier": "user123",
+        "amount": 100,
+        "cc_token": "token123",
+        "client_ip": "192.168.1.1",
+        "customer": "John Doe",
+        "security_code": "123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "-100 is less than the minimum of 100",
+      "python_error": "-100 is less than the minimum of 100\n\nFailed validating 'minimum' in schema['properties']['amount']:\n    {'description': 'The amount to add to the account (and thus, charge '\n                    'the credit card), in cents.',\n     'minimum': 100,\n     'type': 'number'}\n\nOn instance['amount']:\n    -100",
+      "data": {
+        "account_identifier": "user123",
+        "amount": -100,
+        "cc_token": "token123",
+        "client_ip": "192.168.1.1",
+        "customer": "John Doe",
+        "security_code": "123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"123!\" does not match \"^\\d{3,4}$\"",
+      "python_error": "'123!' does not match '^\\\\d{3,4}$'\n\nFailed validating 'pattern' in schema['properties']['security_code']:\n    {'description': 'The 3 or 4-digit card security code (CVV2, CVC2, or '\n                    'CID).',\n     'pattern': '^\\\\d{3,4}$',\n     'type': 'string'}\n\nOn instance['security_code']:\n    '123!'",
+      "data": {
+        "account_identifier": "user123",
+        "amount": 100,
+        "cc_token": "token123",
+        "client_ip": "192.168.1.1",
+        "customer": "John Doe",
+        "security_code": "123!"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"a\" is shorter than 5 characters",
+      "python_error": "'a' is too short\n\nFailed validating 'minLength' in schema['properties']['account_identifier']:\n    {'description': 'The identifier for the platform account to fund.',\n     'maxLength': 96,\n     'minLength': 5,\n     'pattern': '^[\\\\+\\\\w-]{5,96}$',\n     'type': 'string'}\n\nOn instance['account_identifier']:\n    'a'",
+      "data": {
+        "account_identifier": "a",
+        "amount": 100,
+        "cc_token": "token123",
+        "client_ip": "192.168.1.1",
+        "customer": "John Doe",
+        "security_code": "123"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"us\" is shorter than 5 characters",
+      "python_error": "'us' is too short\n\nFailed validating 'minLength' in schema['properties']['account_identifier']:\n    {'description': 'The identifier for the platform account to fund.',\n     'maxLength': 96,\n     'minLength': 5,\n     'pattern': '^[\\\\+\\\\w-]{5,96}$',\n     'type': 'string'}\n\nOn instance['account_identifier']:\n    'us'",
+      "data": {
+        "account_identifier": "us",
+        "amount": 100,
+        "cc_token": "token123",
+        "client_ip": "192.168.1.1",
+        "customer": "John Doe",
+        "security_code": "123"
+      }
+    }
+  ]
+}

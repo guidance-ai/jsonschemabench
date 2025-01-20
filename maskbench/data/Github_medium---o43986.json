@@ -1,0 +1,543 @@
+{
+  "description": "sample Github_medium/o43986.json",
+  "meta": {
+    "full_size": 1397,
+    "stripped_size": 1357,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "format",
+      "format:date-time",
+      "items",
+      "multipleOf",
+      "multipleOf:0.1"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "maxLength",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "RemoteStartTransactionRequest",
+    "type": "object",
+    "properties": {
+      "connectorId": {
+        "type": "integer"
+      },
+      "idTag": {
+        "type": "string",
+        "maxLength": 20
+      },
+      "chargingProfile": {
+        "type": "object",
+        "properties": {
+          "chargingProfileId": {
+            "type": "integer"
+          },
+          "transactionId": {
+            "type": "integer"
+          },
+          "stackLevel": {
+            "type": "integer"
+          },
+          "chargingProfilePurpose": {
+            "type": "string",
+            "enum": [
+              "ChargePointMaxProfile",
+              "TxDefaultProfile",
+              "TxProfile"
+            ]
+          },
+          "chargingProfileKind": {
+            "type": "string",
+            "enum": [
+              "Absolute",
+              "Recurring",
+              "Relative"
+            ]
+          },
+          "recurrencyKind": {
+            "type": "string",
+            "enum": [
+              "Daily",
+              "Weekly"
+            ]
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "chargingSchedule": {
+            "type": "object",
+            "properties": {
+              "duration": {
+                "type": "integer"
+              },
+              "startSchedule": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "chargingRateUnit": {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "W"
+                ]
+              },
+              "chargingSchedulePeriod": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "startPeriod": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "number",
+                      "multipleOf": 0.1
+                    },
+                    "numberPhases": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "startPeriod",
+                    "limit"
+                  ]
+                }
+              },
+              "minChargingRate": {
+                "type": "number",
+                "multipleOf": 0.1
+              }
+            },
+            "required": [
+              "chargingRateUnit",
+              "chargingSchedulePeriod"
+            ]
+          }
+        },
+        "required": [
+          "chargingProfileId",
+          "stackLevel",
+          "chargingProfilePurpose",
+          "chargingProfileKind",
+          "chargingSchedule"
+        ]
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "idTag"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "connectorId": 1,
+        "idTag": "ABC123",
+        "chargingProfile": {
+          "chargingProfileId": 1,
+          "transactionId": 1,
+          "stackLevel": 1,
+          "chargingProfilePurpose": "TxDefaultProfile",
+          "chargingProfileKind": "Absolute",
+          "recurrencyKind": "Daily",
+          "validFrom": "2022-01-01T00:00:00Z",
+          "validTo": "2022-01-31T23:59:59Z",
+          "chargingSchedule": {
+            "duration": 3600,
+            "startSchedule": "2022-01-01T00:00:00Z",
+            "chargingRateUnit": "A",
+            "chargingSchedulePeriod": [
+              {
+                "startPeriod": 0,
+                "limit": 32.0,
+                "numberPhases": 1
+              },
+              {
+                "startPeriod": 1800,
+                "limit": 16.0,
+                "numberPhases": 1
+              }
+            ],
+            "minChargingRate": 8.0
+          }
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "connectorId": 1,
+        "idTag": "12345678901234567890",
+        "chargingProfile": {
+          "chargingProfileId": 1,
+          "transactionId": 1,
+          "stackLevel": 1,
+          "chargingProfilePurpose": "TxProfile",
+          "chargingProfileKind": "Absolute",
+          "recurrencyKind": "Daily",
+          "validFrom": "2022-01-01T00:00:00Z",
+          "validTo": "2022-01-31T23:59:59Z",
+          "chargingSchedule": {
+            "duration": 3600,
+            "startSchedule": "2022-01-01T00:00:00Z",
+            "chargingRateUnit": "A",
+            "chargingSchedulePeriod": [
+              {
+                "startPeriod": 0,
+                "limit": 16.0,
+                "numberPhases": 3
+              },
+              {
+                "startPeriod": 3600,
+                "limit": 8.0,
+                "numberPhases": 1
+              }
+            ],
+            "minChargingRate": 8.0
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on multipleOf keyword",
+      "valid": false,
+      "rust_error": "15.999 is not a multiple of 0.1",
+      "python_error": "15.999 is not a multiple of 0.1\n\nFailed validating 'multipleOf' in schema['properties']['chargingProfile']['properties']['chargingSchedule']['properties']['chargingSchedulePeriod']['items']['properties']['limit']:\n    {'type': 'number', 'multipleOf': 0.1}\n\nOn instance['chargingProfile']['chargingSchedule']['chargingSchedulePeriod'][0]['limit']:\n    15.999",
+      "data": {
+        "connectorId": 1,
+        "idTag": "12345678901234567890",
+        "chargingProfile": {
+          "chargingProfileId": 1,
+          "transactionId": 1,
+          "stackLevel": 1,
+          "chargingProfilePurpose": "TxProfile",
+          "chargingProfileKind": "Absolute",
+          "recurrencyKind": "Daily",
+          "validFrom": "2022-01-01T00:00:00Z",
+          "validTo": "2022-01-31T23:59:59Z",
+          "chargingSchedule": {
+            "duration": 3600,
+            "startSchedule": "2022-01-01T00:00:00Z",
+            "chargingRateUnit": "A",
+            "chargingSchedulePeriod": [
+              {
+                "startPeriod": 0,
+                "limit": 15.999,
+                "numberPhases": 3
+              },
+              {
+                "startPeriod": 3600,
+                "limit": 8.0,
+                "numberPhases": 1
+              }
+            ],
+            "minChargingRate": 8.0
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maxLength keyword",
+      "valid": false,
+      "rust_error": "\"123456789012345678901\" is longer than 20 characters",
+      "python_error": "'123456789012345678901' is too long\n\nFailed validating 'maxLength' in schema['properties']['idTag']:\n    {'type': 'string', 'maxLength': 20}\n\nOn instance['idTag']:\n    '123456789012345678901'",
+      "data": {
+        "connectorId": 1,
+        "idTag": "123456789012345678901",
+        "chargingProfile": {
+          "chargingProfileId": 1,
+          "transactionId": 1,
+          "stackLevel": 1,
+          "chargingProfilePurpose": "TxProfile",
+          "chargingProfileKind": "Absolute",
+          "recurrencyKind": "Daily",
+          "validFrom": "2022-01-01T00:00:00Z",
+          "validTo": "2022-01-31T23:59:59Z",
+          "chargingSchedule": {
+            "duration": 3600,
+            "startSchedule": "2022-01-01T00:00:00Z",
+            "chargingRateUnit": "A",
+            "chargingSchedulePeriod": [
+              {
+                "startPeriod": 0,
+                "limit": 16.0,
+                "numberPhases": 3
+              },
+              {
+                "startPeriod": 3600,
+                "limit": 8.0,
+                "numberPhases": 1
+              }
+            ],
+            "minChargingRate": 8.0
+          }
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"123456789012345678901\" is longer than 20 characters",
+      "python_error": "Additional properties are not allowed ('additionalProperties: false, chargingProfile2 is not defined', 'additionalProperties: false, chargingProfileKind2 is not defined', 'additionalProperties: false, connectorId2 is not defined', 'additionalProperties: false, idTag10 is not defined', 'additionalProperties: false, idTag100 is not defined', 'additionalProperties: false, idTag101 is not defined', 'additionalProperties: false, idTag102 is not defined', 'additionalProperties: false, idTag103 is not defined', 'additionalProperties: false, idTag104 is not defined', 'additionalProperties: false, idTag105 is not defined', 'additionalProperties: false, idTag106 is not defined', 'additionalProperties: false, idTag107 is not defined', 'additionalProperties: false, idTag108 is not defined', 'additionalProperties: false, idTag109 is not defined', 'additionalProperties: false, idTag11 is not defined', 'additionalProperties: false, idTag110 is not defined', 'additionalProperties: false, idTag111 is not defined', 'additional.. (31838 more)",
+      "data": {
+        "connectorId": 1,
+        "idTag": "123456789012345678901",
+        "maxLength: 20 exceeded": "chargingProfileKind2",
+        "additionalProperties: false, chargingProfileKind2 is not defined": "chargingProfile2",
+        "additionalProperties: false, chargingProfile2 is not defined": "idTag2",
+        "additionalProperties: false, idTag2 is not defined": "connectorId2",
+        "additionalProperties: false, connectorId2 is not defined": "idTag3",
+        "additionalProperties: false, idTag3 is not defined": "idTag4",
+        "additionalProperties: false, idTag4 is not defined": "idTag5",
+        "additionalProperties: false, idTag5 is not defined": "idTag6",
+        "additionalProperties: false, idTag6 is not defined": "idTag7",
+        "additionalProperties: false, idTag7 is not defined": "idTag8",
+        "additionalProperties: false, idTag8 is not defined": "idTag9",
+        "additionalProperties: false, idTag9 is not defined": "idTag10",
+        "additionalProperties: false, idTag10 is not defined": "idTag11",
+        "additionalProperties: false, idTag11 is not defined": "idTag12",
+        "additionalProperties: false, idTag12 is not defined": "idTag13",
+        "additionalProperties: false, idTag13 is not defined": "idTag14",
+        "additionalProperties: false, idTag14 is not defined": "idTag15",
+        "additionalProperties: false, idTag15 is not defined": "idTag16",
+        "additionalProperties: false, idTag16 is not defined": "idTag17",
+        "additionalProperties: false, idTag17 is not defined": "idTag18",
+        "additionalProperties: false, idTag18 is not defined": "idTag19",
+        "additionalProperties: false, idTag19 is not defined": "idTag20",
+        "additionalProperties: false, idTag20 is not defined": "idTag21",
+        "additionalProperties: false, idTag21 is not defined": "idTag22",
+        "additionalProperties: false, idTag22 is not defined": "idTag23",
+        "additionalProperties: false, idTag23 is not defined": "idTag24",
+        "additionalProperties: false, idTag24 is not defined": "idTag25",
+        "additionalProperties: false, idTag25 is not defined": "idTag26",
+        "additionalProperties: false, idTag26 is not defined": "idTag27",
+        "additionalProperties: false, idTag27 is not defined": "idTag28",
+        "additionalProperties: false, idTag28 is not defined": "idTag29",
+        "additionalProperties: false, idTag29 is not defined": "idTag30",
+        "additionalProperties: false, idTag30 is not defined": "idTag31",
+        "additionalProperties: false, idTag31 is not defined": "idTag32",
+        "additionalProperties: false, idTag32 is not defined": "idTag33",
+        "additionalProperties: false, idTag33 is not defined": "idTag34",
+        "additionalProperties: false, idTag34 is not defined": "idTag35",
+        "additionalProperties: false, idTag35 is not defined": "idTag36",
+        "additionalProperties: false, idTag36 is not defined": "idTag37",
+        "additionalProperties: false, idTag37 is not defined": "idTag38",
+        "additionalProperties: false, idTag38 is not defined": "idTag39",
+        "additionalProperties: false, idTag39 is not defined": "idTag40",
+        "additionalProperties: false, idTag40 is not defined": "idTag41",
+        "additionalProperties: false, idTag41 is not defined": "idTag42",
+        "additionalProperties: false, idTag42 is not defined": "idTag43",
+        "additionalProperties: false, idTag43 is not defined": "idTag44",
+        "additionalProperties: false, idTag44 is not defined": "idTag45",
+        "additionalProperties: false, idTag45 is not defined": "idTag46",
+        "additionalProperties: false, idTag46 is not defined": "idTag47",
+        "additionalProperties: false, idTag47 is not defined": "idTag48",
+        "additionalProperties: false, idTag48 is not defined": "idTag49",
+        "additionalProperties: false, idTag49 is not defined": "idTag50",
+        "additionalProperties: false, idTag50 is not defined": "idTag51",
+        "additionalProperties: false, idTag51 is not defined": "idTag52",
+        "additionalProperties: false, idTag52 is not defined": "idTag53",
+        "additionalProperties: false, idTag53 is not defined": "idTag54",
+        "additionalProperties: false, idTag54 is not defined": "idTag55",
+        "additionalProperties: false, idTag55 is not defined": "idTag56",
+        "additionalProperties: false, idTag56 is not defined": "idTag57",
+        "additionalProperties: false, idTag57 is not defined": "idTag58",
+        "additionalProperties: false, idTag58 is not defined": "idTag59",
+        "additionalProperties: false, idTag59 is not defined": "idTag60",
+        "additionalProperties: false, idTag60 is not defined": "idTag61",
+        "additionalProperties: false, idTag61 is not defined": "idTag62",
+        "additionalProperties: false, idTag62 is not defined": "idTag63",
+        "additionalProperties: false, idTag63 is not defined": "idTag64",
+        "additionalProperties: false, idTag64 is not defined": "idTag65",
+        "additionalProperties: false, idTag65 is not defined": "idTag66",
+        "additionalProperties: false, idTag66 is not defined": "idTag67",
+        "additionalProperties: false, idTag67 is not defined": "idTag68",
+        "additionalProperties: false, idTag68 is not defined": "idTag69",
+        "additionalProperties: false, idTag69 is not defined": "idTag70",
+        "additionalProperties: false, idTag70 is not defined": "idTag71",
+        "additionalProperties: false, idTag71 is not defined": "idTag72",
+        "additionalProperties: false, idTag72 is not defined": "idTag73",
+        "additionalProperties: false, idTag73 is not defined": "idTag74",
+        "additionalProperties: false, idTag74 is not defined": "idTag75",
+        "additionalProperties: false, idTag75 is not defined": "idTag76",
+        "additionalProperties: false, idTag76 is not defined": "idTag77",
+        "additionalProperties: false, idTag77 is not defined": "idTag78",
+        "additionalProperties: false, idTag78 is not defined": "idTag79",
+        "additionalProperties: false, idTag79 is not defined": "idTag80",
+        "additionalProperties: false, idTag80 is not defined": "idTag81",
+        "additionalProperties: false, idTag81 is not defined": "idTag82",
+        "additionalProperties: false, idTag82 is not defined": "idTag83",
+        "additionalProperties: false, idTag83 is not defined": "idTag84",
+        "additionalProperties: false, idTag84 is not defined": "idTag85",
+        "additionalProperties: false, idTag85 is not defined": "idTag86",
+        "additionalProperties: false, idTag86 is not defined": "idTag87",
+        "additionalProperties: false, idTag87 is not defined": "idTag88",
+        "additionalProperties: false, idTag88 is not defined": "idTag89",
+        "additionalProperties: false, idTag89 is not defined": "idTag90",
+        "additionalProperties: false, idTag90 is not defined": "idTag91",
+        "additionalProperties: false, idTag91 is not defined": "idTag92",
+        "additionalProperties: false, idTag92 is not defined": "idTag93",
+        "additionalProperties: false, idTag93 is not defined": "idTag94",
+        "additionalProperties: false, idTag94 is not defined": "idTag95",
+        "additionalProperties: false, idTag95 is not defined": "idTag96",
+        "additionalProperties: false, idTag96 is not defined": "idTag97",
+        "additionalProperties: false, idTag97 is not defined": "idTag98",
+        "additionalProperties: false, idTag98 is not defined": "idTag99",
+        "additionalProperties: false, idTag99 is not defined": "idTag100",
+        "additionalProperties: false, idTag100 is not defined": "idTag101",
+        "additionalProperties: false, idTag101 is not defined": "idTag102",
+        "additionalProperties: false, idTag102 is not defined": "idTag103",
+        "additionalProperties: false, idTag103 is not defined": "idTag104",
+        "additionalProperties: false, idTag104 is not defined": "idTag105",
+        "additionalProperties: false, idTag105 is not defined": "idTag106",
+        "additionalProperties: false, idTag106 is not defined": "idTag107",
+        "additionalProperties: false, idTag107 is not defined": "idTag108",
+        "additionalProperties: false, idTag108 is not defined": "idTag109",
+        "additionalProperties: false, idTag109 is not defined": "idTag110",
+        "additionalProperties: false, idTag110 is not defined": "idTag111",
+        "additionalProperties: false, idTag111 is not defined": "idTag112",
+        "additionalProperties: false, idTag112 is not defined": "idTag113",
+        "additionalProperties: false, idTag113 is not defined": "idTag114",
+        "additionalProperties: false, idTag114 is not defined": "idTag115",
+        "additionalProperties: false, idTag115 is not defined": "idTag116",
+        "additionalProperties: false, idTag116 is not defined": "idTag117",
+        "additionalProperties: false, idTag117 is not defined": "idTag118",
+        "additionalProperties: false, idTag118 is not defined": "idTag119",
+        "additionalProperties: false, idTag119 is not defined": "idTag120",
+        "additionalProperties: false, idTag120 is not defined": "idTag121",
+        "additionalProperties: false, idTag121 is not defined": "idTag122",
+        "additionalProperties: false, idTag122 is not defined": "idTag123",
+        "additionalProperties: false, idTag123 is not defined": "idTag124",
+        "additionalProperties: false, idTag124 is not defined": "idTag125",
+        "additionalProperties: false, idTag125 is not defined": "idTag126",
+        "additionalProperties: false, idTag126 is not defined": "idTag127",
+        "additionalProperties: false, idTag127 is not defined": "idTag128",
+        "additionalProperties: false, idTag128 is not defined": "idTag129",
+        "additionalProperties: false, idTag129 is not defined": "idTag130",
+        "additionalProperties: false, idTag130 is not defined": "idTag131",
+        "additionalProperties: false, idTag131 is not defined": "idTag132",
+        "additionalProperties: false, idTag132 is not defined": "idTag133",
+        "additionalProperties: false, idTag133 is not defined": "idTag134",
+        "additionalProperties: false, idTag134 is not defined": "idTag135",
+        "additionalProperties: false, idTag135 is not defined": "idTag136",
+        "additionalProperties: false, idTag136 is not defined": "idTag137",
+        "additionalProperties: false, idTag137 is not defined": "idTag138",
+        "additionalProperties: false, idTag138 is not defined": "idTag139",
+        "additionalProperties: false, idTag139 is not defined": "idTag140",
+        "additionalProperties: false, idTag140 is not defined": "idTag141",
+        "additionalProperties: false, idTag141 is not defined": "idTag142",
+        "additionalProperties: false, idTag142 is not defined": "idTag143",
+        "additionalProperties: false, idTag143 is not defined": "idTag144",
+        "additionalProperties: false, idTag144 is not defined": "idTag145",
+        "additionalProperties: false, idTag145 is not defined": "idTag146",
+        "additionalProperties: false, idTag146 is not defined": "idTag147",
+        "additionalProperties: false, idTag147 is not defined": "idTag148",
+        "additionalProperties: false, idTag148 is not defined": "idTag149",
+        "additionalProperties: false, idTag149 is not defined": "idTag150",
+        "additionalProperties: false, idTag150 is not defined": "idTag151",
+        "additionalProperties: false, idTag151 is not defined": "idTag152",
+        "additionalProperties: false, idTag152 is not defined": "idTag153",
+        "additionalProperties: false, idTag153 is not defined": "idTag154",
+        "additionalProperties: false, idTag154 is not defined": "idTag155",
+        "additionalProperties: false, idTag155 is not defined": "idTag156",
+        "additionalProperties: false, idTag156 is not defined": "idTag157",
+        "additionalProperties: false, idTag157 is not defined": "idTag158",
+        "additionalProperties: false, idTag158 is not defined": "idTag159",
+        "additionalProperties: false, idTag159 is not defined": "idTag160",
+        "additionalProperties: false, idTag160 is not defined": "idTag161",
+        "additionalProperties: false, idTag161 is not defined": "idTag162",
+        "additionalProperties: false, idTag162 is not defined": "idTag163",
+        "additionalProperties: false, idTag163 is not defined": "idTag164",
+        "additionalProperties: false, idTag164 is not defined": "idTag165",
+        "additionalProperties: false, idTag165 is not defined": "idTag166",
+        "additionalProperties: false, idTag166 is not defined": "idTag167",
+        "additionalProperties: false, idTag167 is not defined": "idTag168",
+        "additionalProperties: false, idTag168 is not defined": "idTag169",
+        "additionalProperties: false, idTag169 is not defined": "idTag170",
+        "additionalProperties: false, idTag170 is not defined": "idTag171",
+        "additionalProperties: false, idTag171 is not defined": "idTag172",
+        "additionalProperties: false, idTag172 is not defined": "idTag173",
+        "additionalProperties: false, idTag173 is not defined": "idTag174",
+        "additionalProperties: false, idTag174 is not defined": "idTag175",
+        "additionalProperties: false, idTag175 is not defined": "idTag176",
+        "additionalProperties: false, idTag176 is not defined": "idTag177",
+        "additionalProperties: false, idTag177 is not defined": "idTag178",
+        "additionalProperties: false, idTag178 is not defined": "idTag179",
+        "additionalProperties: false, idTag179 is not defined": "idTag180",
+        "additionalProperties: false, idTag180 is not defined": "idTag181",
+        "additionalProperties: false, idTag181 is not defined": "idTag182",
+        "additionalProperties: false, idTag182 is not defined": "idTag183",
+        "additionalProperties: false, idTag183 is not defined": "idTag184",
+        "additionalProperties: false, idTag184 is not defined": "idTag185",
+        "additionalProperties: false, idTag185 is not defined": "idTag186",
+        "additionalProperties: false, idTag186 is not defined": "idTag187",
+        "additionalProperties: false, idTag187 is not defined": "idTag188",
+        "additionalProperties: false, idTag188 is not defined": "idTag189",
+        "additionalProperties: false, idTag189 is not defined": "idTag190",
+        "additionalProperties: false, idTag190 is not defined": "idTag191",
+        "additionalProperties: false, idTag191 is not defined": "idTag192",
+        "additionalProperties: false, idTag192 is not defined": "idTag193",
+        "additionalProperties: false, idTag193 is not defined": "idTag194",
+        "additionalProperties: false, idTag194 is not defined": "idTag195",
+        "additionalProperties: false, idTag195 is not defined": "idTag196",
+        "additionalProperties: false, idTag196 is not defined": "idTag197",
+        "additionalProperties: false, idTag197 is not defined": "idTag198",
+        "additionalProperties: false, idTag198 is not defined": "idTag199",
+        "additionalProperties: false, idTag199 is not defined": "idTag200",
+        "additionalProperties: false, idTag200 is not defined": [
+          "idTag201",
+          "additionalProperties: false, idTag201 is not defined"
+        ],
+        "chargingProfile": {
+          "chargingProfileId": 1,
+          "transactionId": 1,
+          "stackLevel": 1,
+          "chargingProfilePurpose": "TxProfile",
+          "chargingProfileKind": "Absolute",
+          "recurrencyKind": "Daily",
+          "validFrom": "2022-01-01T00:00:00Z",
+          "validTo": "2022-01-31T23:59:59Z",
+          "chargingSchedule": {
+            "duration": 3600,
+            "startSchedule": "2022-01-01T00:00:00Z",
+            "chargingRateUnit": "A",
+            "chargingSchedulePeriod": [
+              {
+                "startPeriod": 0,
+                "limit": 16.0,
+                "numberPhases": 3
+              },
+              {
+                "startPeriod": 3600,
+                "limit": 8.0,
+                "numberPhases": 1
+              }
+            ],
+            "minChargingRate": 8.0
+          }
+        }
+      }
+    }
+  ]
+}

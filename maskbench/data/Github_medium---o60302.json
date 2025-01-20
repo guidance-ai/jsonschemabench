@@ -1,0 +1,288 @@
+{
+  "description": "sample Github_medium/o60302.json",
+  "meta": {
+    "full_size": 1993,
+    "stripped_size": 691,
+    "features": [
+      "@minmaxInteger"
+    ],
+    "raw_features": [
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "properties": {
+      "kafka-manager": {
+        "description": "Kafka-manager configuration properties",
+        "properties": {
+          "application_secret": {
+            "description": "The application secret key is used to secure cryptographics functions",
+            "type": "string"
+          },
+          "config": {
+            "default": "./conf/application.conf",
+            "description": "Path to kafka-manager config",
+            "type": "string"
+          },
+          "loglevel": {
+            "default": "INFO",
+            "description": "Java log level",
+            "type": "string"
+          },
+          "zk": {
+            "default": "zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181",
+            "description": "Zookeeper URL for Kafka-manager",
+            "type": "string"
+          },
+          "zk-args": {
+            "description": "Kafka manager extra arguments",
+            "type": "string"
+          },
+          "zk-base-path": {
+            "description": "Base path for storing configuration in ZooKeeper",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zk",
+          "application_secret"
+        ],
+        "type": "object"
+      },
+      "marathon-lb": {
+        "description": "Kafka-manager works best when deployed on a virtual host",
+        "properties": {
+          "enable": {
+            "default": true,
+            "description": "Enable or disable creating a VIP for external access through a public node running Marathon-LB.",
+            "type": "boolean"
+          },
+          "external_access_port": {
+            "default": 13005,
+            "description": "For external access, port number to be used for clear communication in the external Marathon-LB load balancer",
+            "type": "number"
+          },
+          "group": {
+            "default": "external",
+            "description": "HAProxy group.",
+            "type": "string"
+          },
+          "virtual_host": {
+            "description": "For external access, Virtual Host URL to be used in the external load balancer.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "service": {
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "cpus": {
+            "default": 1.0,
+            "description": "CPU shares to allocate",
+            "minimum": 0.1,
+            "type": "number"
+          },
+          "instances": {
+            "default": 1,
+            "description": "Number of desired instances",
+            "type": "integer"
+          },
+          "mem": {
+            "default": 1024.0,
+            "description": "Memory to allocate",
+            "minimum": 1024.0,
+            "type": "number"
+          },
+          "name": {
+            "default": "kafka-manager",
+            "description": "The name of the kafka-manager service instance.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cpus",
+          "mem",
+          "instances"
+        ],
+        "type": "object"
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "kafka-manager": {
+          "application_secret": "my_secret_key",
+          "config": "./conf/application.conf",
+          "loglevel": "INFO",
+          "zk": "zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181",
+          "zk-args": "",
+          "zk-base-path": "/kafka-manager"
+        },
+        "marathon-lb": {
+          "enable": true,
+          "external_access_port": 13005,
+          "group": "external",
+          "virtual_host": "kafka-manager.example.com"
+        },
+        "service": {
+          "cpus": 1.0,
+          "instances": 1,
+          "mem": 1024.0,
+          "name": "kafka-manager"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.0 is less than the minimum of 0.1",
+      "python_error": "512.0 is less than the minimum of 1024.0\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['mem']:\n    {'default': 1024.0,\n     'description': 'Memory to allocate',\n     'minimum': 1024.0,\n     'type': 'number'}\n\nOn instance['service']['mem']:\n    512.0",
+      "data": {
+        "kafka-manager": {
+          "application_secret": "my_secret_key",
+          "config": "./conf/application.conf",
+          "loglevel": "INFO",
+          "zk": "zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181",
+          "zk-args": "",
+          "zk-base-path": "/kafka-manager"
+        },
+        "marathon-lb": {
+          "enable": true,
+          "external_access_port": 13005,
+          "group": "external",
+          "virtual_host": "kafka-manager.example.com"
+        },
+        "service": {
+          "cpus": 0.0,
+          "instances": 1,
+          "mem": 512.0,
+          "name": "kafka-manager"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"zk\" is a required property",
+      "python_error": "'zk' is a required property\n\nFailed validating 'required' in schema['properties']['kafka-manager']:\n    {'description': 'Kafka-manager configuration properties',\n     'properties': {'application_secret': {'description': 'The application '\n                                                          'secret key is '\n                                                          'used to secure '\n                                                          'cryptographics '\n                                                          'functions',\n                                           'type': 'string'},\n                    'config': {'default': './conf/application.conf',\n                               'description': 'Path to kafka-manager '\n                                              'config',\n                               'type': 'string'},\n                    'loglevel': {'default': 'INFO',\n                                 'description': 'Java log level',\n                                 'type': 'string'},\n         .. (942 more)",
+      "data": {
+        "kafka-manager": {
+          "application_secret": "my_secret_key",
+          "config": "./conf/application.conf",
+          "loglevel": "INFO",
+          "zk-args": "",
+          "zk-base-path": "/kafka-manager"
+        },
+        "marathon-lb": {
+          "enable": true,
+          "external_access_port": 13005,
+          "group": "external",
+          "virtual_host": "kafka-manager.example.com"
+        },
+        "service": {
+          "cpus": 1.0,
+          "instances": 1,
+          "mem": 1024.0,
+          "name": "kafka-manager"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.01 is less than the minimum of 0.1",
+      "python_error": "512.0 is less than the minimum of 1024.0\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['mem']:\n    {'default': 1024.0,\n     'description': 'Memory to allocate',\n     'minimum': 1024.0,\n     'type': 'number'}\n\nOn instance['service']['mem']:\n    512.0",
+      "data": {
+        "kafka-manager": {
+          "application_secret": "my_secret_key",
+          "config": "./conf/application.conf",
+          "loglevel": "INFO",
+          "zk": "zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181",
+          "zk-args": "",
+          "zk-base-path": "/kafka-manager"
+        },
+        "marathon-lb": {
+          "enable": true,
+          "external_access_port": 13005,
+          "group": "external",
+          "virtual_host": "kafka-manager.example.com"
+        },
+        "service": {
+          "cpus": 0.01,
+          "instances": 1,
+          "mem": 512.0,
+          "name": "kafka-manager"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword",
+      "valid": false,
+      "rust_error": "0.01 is less than the minimum of 0.1",
+      "python_error": "1023.9 is less than the minimum of 1024.0\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['mem']:\n    {'default': 1024.0,\n     'description': 'Memory to allocate',\n     'minimum': 1024.0,\n     'type': 'number'}\n\nOn instance['service']['mem']:\n    1023.9",
+      "data": {
+        "kafka-manager": {
+          "application_secret": "my_secret_key",
+          "config": "./conf/application.conf",
+          "loglevel": "INFO",
+          "zk": "zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181",
+          "zk-args": "",
+          "zk-base-path": "/kafka-manager"
+        },
+        "marathon-lb": {
+          "enable": true,
+          "external_access_port": 13005,
+          "group": "external",
+          "virtual_host": "kafka-manager.example.com"
+        },
+        "service": {
+          "cpus": 0.01,
+          "instances": 1,
+          "mem": 1023.9,
+          "name": "kafka-manager"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "0.0 is less than the minimum of 0.1\n\nFailed validating 'minimum' in schema['properties']['service']['properties']['cpus']:\n    {'default': 1.0,\n     'description': 'CPU shares to allocate',\n     'minimum': 0.1,\n     'type': 'number'}\n\nOn instance['service']['cpus']:\n    0.0",
+      "data": {
+        "kafka-manager": {
+          "application_secret": 12345,
+          "config": "./conf/application.conf",
+          "loglevel": "INFO",
+          "zk": "zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181",
+          "zk-args": "",
+          "zk-base-path": "/kafka-manager"
+        },
+        "marathon-lb": {
+          "enable": true,
+          "external_access_port": 13005,
+          "group": "external",
+          "virtual_host": "kafka-manager.example.com"
+        },
+        "service": {
+          "cpus": 0.0,
+          "instances": 1,
+          "mem": 1024.0,
+          "name": "kafka-manager"
+        }
+      }
+    }
+  ]
+}

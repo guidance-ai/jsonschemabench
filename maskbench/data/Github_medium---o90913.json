@@ -1,0 +1,379 @@
+{
+  "description": "sample Github_medium/o90913.json",
+  "meta": {
+    "full_size": 832,
+    "stripped_size": 722,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "SHARE ChangeSet JSONLD",
+    "description": "A sub-set of JSONLD",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "primitives": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
+      },
+      "reference": {
+        "type": "object",
+        "required": [
+          "@id",
+          "@type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "@type": {
+            "type": "string"
+          },
+          "@id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required": [
+      "@graph"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "@context": {
+        "type": "object"
+      },
+      "@graph": {
+        "description": "Used to express a graph.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "@id",
+            "@type"
+          ],
+          "properties": {
+            "extra": {
+              "type": "object"
+            },
+            "@type": {
+              "type": "string"
+            },
+            "@id": {
+              "type": [
+                "string",
+                "integer"
+              ]
+            }
+          },
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/reference"
+              },
+              {
+                "$ref": "#/definitions/primitives"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/reference"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "@context": {},
+        "@graph": [
+          {
+            "@id": "1",
+            "@type": "Person",
+            "name": "John Doe",
+            "age": 30,
+            "friend": {
+              "@id": "2",
+              "@type": "Person"
+            },
+            "hobbies": [
+              {
+                "@id": "3",
+                "@type": "Hobby"
+              },
+              {
+                "@id": "4",
+                "@type": "Hobby"
+              }
+            ],
+            "isMarried": true
+          },
+          {
+            "@id": "2",
+            "@type": "Person",
+            "name": "Jane Doe"
+          },
+          {
+            "@id": "3",
+            "@type": "Hobby",
+            "name": "Reading"
+          },
+          {
+            "@id": "4",
+            "@type": "Hobby",
+            "name": "Writing"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "@context": {
+          "schema": "http://schema.org/"
+        },
+        "@graph": [
+          {
+            "@id": "1",
+            "@type": "Person",
+            "name": "John Doe",
+            "age": 30,
+            "friend": {
+              "@id": "2",
+              "@type": "Person"
+            },
+            "hobbies": [
+              {
+                "@id": "http://example.org/hobbies/reading",
+                "@type": "Thing"
+              },
+              {
+                "@id": "http://example.org/hobbies/writing",
+                "@type": "Thing"
+              }
+            ]
+          },
+          {
+            "@id": "2",
+            "@type": "Person",
+            "name": "Jane Doe",
+            "age": 25,
+            "friend": {
+              "@id": "1",
+              "@type": "Person"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "null is not of type \"string\"",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema['properties']['@graph']['items']['properties']['@type']:\n    {'type': 'string'}\n\nOn instance['@graph'][0]['@type']:\n    None",
+      "data": {
+        "@context": {
+          "schema": "http://schema.org/"
+        },
+        "@graph": [
+          {
+            "@id": "1",
+            "@type": null,
+            "name": "John Doe",
+            "age": 30,
+            "friend": {
+              "@id": "2",
+              "@type": "Person"
+            },
+            "hobbies": [
+              {
+                "@id": "http://example.org/hobbies/reading",
+                "@type": "Thing"
+              },
+              {
+                "@id": "http://example.org/hobbies/writing",
+                "@type": "Thing"
+              }
+            ]
+          },
+          {
+            "@id": "2",
+            "@type": "Person",
+            "name": "Jane Doe",
+            "age": 25,
+            "friend": {
+              "@id": "1",
+              "@type": "Person"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "[{\"@id\":\"http://example.org/hobbies/reading\",\"@type\":\"Thing\"},{\"@id\":\"http://example.org/hobbies/writing\",\"@type\":\"Thing\"},{\"illegalProperty\":\"This should be illegal\"}] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "[{'@id': 'http://example.org/hobbies/reading', '@type': 'Thing'}, {'@id': 'http://example.org/hobbies/writing', '@type': 'Thing'}, {'illegalProperty': 'This should be illegal'}] is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['@graph']['items']['additionalProperties']:\n    {'oneOf': [{'$ref': '#/definitions/reference'},\n               {'$ref': '#/definitions/primitives'},\n               {'type': 'array',\n                'items': {'$ref': '#/definitions/reference'}}]}\n\nOn instance['@graph'][0]['hobbies']:\n    [{'@id': 'http://example.org/hobbies/reading', '@type': 'Thing'},\n     {'@id': 'http://example.org/hobbies/writing', '@type': 'Thing'},\n     {'illegalProperty': 'This should be illegal'}]",
+      "data": {
+        "@context": {
+          "schema": "http://schema.org/"
+        },
+        "@graph": [
+          {
+            "@id": "1",
+            "@type": "Person",
+            "name": "John Doe",
+            "age": 30,
+            "friend": {
+              "@id": "2",
+              "@type": "Person"
+            },
+            "hobbies": [
+              {
+                "@id": "http://example.org/hobbies/reading",
+                "@type": "Thing"
+              },
+              {
+                "@id": "http://example.org/hobbies/writing",
+                "@type": "Thing"
+              },
+              {
+                "illegalProperty": "This should be illegal"
+              }
+            ]
+          },
+          {
+            "@id": "2",
+            "@type": "Person",
+            "name": "Jane Doe",
+            "age": 25,
+            "friend": {
+              "@id": "1",
+              "@type": "Person"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on additionalProperties keyword with an object schema",
+      "valid": false,
+      "rust_error": "{\"@id\":\"2\",\"@type\":\"Person\",\"extra\":{},\"this_is_extra_key\":true} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "Additional properties are not allowed ('extra', 'this_is_extra_key' were unexpected)\n\nFailed validating 'additionalProperties' in schema[0]:\n    {'type': 'object',\n     'required': ['@id', '@type'],\n     'additionalProperties': False,\n     'properties': {'@type': {'type': 'string'}, '@id': {'type': 'string'}}}\n\nOn instance:\n    {'@id': '2', '@type': 'Person', 'extra': {}, 'this_is_extra_key': True}",
+      "data": {
+        "@context": {
+          "schema": "http://schema.org/"
+        },
+        "@graph": [
+          {
+            "@id": "1",
+            "@type": "Person",
+            "name": "John Doe",
+            "age": 30,
+            "friend": {
+              "@id": "2",
+              "@type": "Person",
+              "extra": {},
+              "this_is_extra_key": true
+            },
+            "hobbies": [
+              {
+                "@id": "http://example.org/hobbies/reading",
+                "@type": "Thing"
+              },
+              {
+                "@id": "http://example.org/hobbies/writing",
+                "@type": "Thing"
+              }
+            ]
+          },
+          {
+            "@id": "2",
+            "@type": "Person",
+            "name": "Jane Doe",
+            "age": 25,
+            "friend": {
+              "@id": "1",
+              "@type": "Person"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[{\"@id\":\"http://example.org/hobbies/reading\",\"@type\":\"Thing\"},{\"@id\":\"http://example.org/hobbies/writing\",\"@type\":\"Thing\"},{\"not-a-reference\":\"some value\"}] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "[{'@id': 'http://example.org/hobbies/reading', '@type': 'Thing'}, {'@id': 'http://example.org/hobbies/writing', '@type': 'Thing'}, {'not-a-reference': 'some value'}] is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['@graph']['items']['additionalProperties']:\n    {'oneOf': [{'$ref': '#/definitions/reference'},\n               {'$ref': '#/definitions/primitives'},\n               {'type': 'array',\n                'items': {'$ref': '#/definitions/reference'}}]}\n\nOn instance['@graph'][0]['hobbies']:\n    [{'@id': 'http://example.org/hobbies/reading', '@type': 'Thing'},\n     {'@id': 'http://example.org/hobbies/writing', '@type': 'Thing'},\n     {'not-a-reference': 'some value'}]",
+      "data": {
+        "@context": {
+          "schema": "http://schema.org/"
+        },
+        "@graph": [
+          {
+            "@id": "1",
+            "@type": "Person",
+            "name": "John Doe",
+            "age": 30,
+            "friend": {
+              "@id": "2",
+              "@type": "Person"
+            },
+            "hobbies": [
+              {
+                "@id": "http://example.org/hobbies/reading",
+                "@type": "Thing"
+              },
+              {
+                "@id": "http://example.org/hobbies/writing",
+                "@type": "Thing"
+              },
+              {
+                "not-a-reference": "some value"
+              }
+            ]
+          },
+          {
+            "@id": "2",
+            "@type": "Person",
+            "name": "Jane Doe",
+            "age": 25,
+            "friend": {
+              "@id": "1",
+              "@type": "Person"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

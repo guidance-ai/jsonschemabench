@@ -1,0 +1,118 @@
+{
+  "description": "sample Snowplow/sp_31_Normalized.json",
+  "meta": {
+    "full_size": 497,
+    "stripped_size": 319,
+    "features": [
+      "@minmaxLength",
+      "additionalProperties",
+      "multipleOf",
+      "multipleOf:0.01"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "minLength",
+      "properties",
+      "type",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "Schema for a Google Analytics Ecommerce transaction item",
+    "properties": {
+      "category": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "code": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "currency": {
+        "maxLength": 3,
+        "minLength": 3,
+        "type": "string"
+      },
+      "name": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "price": {
+        "multipleOf": 0.01,
+        "type": "number"
+      },
+      "quantity": {
+        "type": "integer"
+      }
+    },
+    "self": {
+      "format": "jsonschema",
+      "name": "item",
+      "vendor": "com.google.analytics.ecommerce",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "category": "Electronics",
+        "code": "ABC123",
+        "currency": "USD",
+        "name": "Smartphone",
+        "price": 599.99,
+        "quantity": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on multipleOf keyword",
+      "valid": false,
+      "rust_error": "599.995 is not a multiple of 0.01",
+      "python_error": "599.995 is not a multiple of 0.01\n\nFailed validating 'multipleOf' in schema['properties']['price']:\n    {'multipleOf': 0.01, 'type': 'number'}\n\nOn instance['price']:\n    599.995",
+      "data": {
+        "category": "Electronics",
+        "code": "ABC123",
+        "currency": "USD",
+        "name": "Smartphone",
+        "price": 599.995,
+        "quantity": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minLength keyword or maxLength keyword",
+      "valid": false,
+      "rust_error": "\"US\" is shorter than 3 characters",
+      "python_error": "'US' is too short\n\nFailed validating 'minLength' in schema['properties']['currency']:\n    {'maxLength': 3, 'minLength': 3, 'type': 'string'}\n\nOn instance['currency']:\n    'US'",
+      "data": {
+        "category": "Electronics",
+        "code": "ABC123",
+        "currency": "US",
+        "name": "Smartphone",
+        "price": 599.99,
+        "quantity": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "599.991 is not a multiple of 0.01",
+      "python_error": "Additional properties are not allowed ('extraField' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'Schema for a Google Analytics Ecommerce transaction '\n                    'item',\n     'properties': {'category': {'maxLength': 500, 'type': 'string'},\n                    'code': {'maxLength': 500, 'type': 'string'},\n                    'currency': {'maxLength': 3,\n                                 'minLength': 3,\n                                 'type': 'string'},\n                    'name': {'maxLength': 500, 'type': 'string'},\n                    'price': {'multipleOf': 0.01, 'type': 'number'},\n                    'quantity': {'type': 'integer'}},\n     'self': {'format': 'jsonschema',\n              'name': 'item',\n              'vendor': 'com.google.analytics.ecommerce',\n              'version': '1-0-0'},\n     'type': 'object'}\n\nOn instance:\n    {'category': 'Electronics',\n     'code': 'ABC123',\n     'currency': 'USD',\n     'name':.. (87 more)",
+      "data": {
+        "category": "Electronics",
+        "code": "ABC123",
+        "currency": "USD",
+        "name": "Smartphone",
+        "price": 599.991,
+        "quantity": 1,
+        "extraField": "Invalid"
+      }
+    }
+  ]
+}

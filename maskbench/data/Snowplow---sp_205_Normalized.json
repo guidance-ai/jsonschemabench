@@ -1,0 +1,400 @@
+{
+  "description": "sample Snowplow/sp_205_Normalized.json",
+  "meta": {
+    "full_size": 1736,
+    "stripped_size": 1580,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxLength",
+      "additionalProperties",
+      "enum",
+      "items",
+      "pattern",
+      "patternProperties"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "maxLength",
+      "maximum",
+      "minimum",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "applicationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "pattern": "\\d+\\.\\d+\\.\\d+-?.*",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "name"
+        ],
+        "type": "object"
+      },
+      "factfile": {
+        "maxLength": 1000000,
+        "type": "string"
+      },
+      "jobName": {
+        "type": "string"
+      },
+      "jobReference": {
+        "type": "string"
+      },
+      "runDuration": {
+        "type": "string"
+      },
+      "runReference": {
+        "type": "string"
+      },
+      "runState": {
+        "enum": [
+          "RUNNING",
+          "WAITING",
+          "SUCCEEDED",
+          "FAILED"
+        ]
+      },
+      "startTime": {
+        "_format": "date-time",
+        "type": "string"
+      },
+      "tags": {
+        "patternProperties": {
+          ".*": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "taskStates": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "duration": {
+              "type": "string"
+            },
+            "errorMessage": {
+              "type": "string"
+            },
+            "returnCode": {
+              "maximum": 32767,
+              "minimum": -32767,
+              "type": "integer"
+            },
+            "started": {
+              "_format": "date-time",
+              "type": "string"
+            },
+            "state": {
+              "enum": [
+                "RUNNING",
+                "WAITING",
+                "SUCCEEDED",
+                "SUCCEEDED_NO_OP",
+                "FAILED",
+                "SKIPPED"
+              ]
+            },
+            "stderr": {
+              "type": "string"
+            },
+            "stdout": {
+              "type": "string"
+            },
+            "taskName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "taskName",
+            "state"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "taskTransitions": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "currentState": {
+              "enum": [
+                "RUNNING",
+                "WAITING",
+                "SUCCEEDED",
+                "SUCCEEDED_NO_OP",
+                "FAILED",
+                "SKIPPED"
+              ]
+            },
+            "previousState": {
+              "enum": [
+                "RUNNING",
+                "WAITING",
+                "SUCCEEDED",
+                "SUCCEEDED_NO_OP",
+                "FAILED",
+                "SKIPPED"
+              ]
+            },
+            "taskName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "taskName",
+            "previousState",
+            "currentState"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "jobName",
+      "jobReference",
+      "runReference",
+      "runState",
+      "factfile",
+      "applicationContext",
+      "startTime",
+      "runDuration",
+      "taskStates",
+      "tags"
+    ],
+    "self": {
+      "format": "jsonschema",
+      "name": "task_update",
+      "vendor": "com.snowplowanalytics.factotum",
+      "version": "1-0-0"
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "applicationContext": {
+          "name": "My Application",
+          "version": "1.2.3-rc.1"
+        },
+        "factfile": "This is a sample factfile",
+        "jobName": "My Job",
+        "jobReference": "my-job-reference",
+        "runDuration": "PT1M",
+        "runReference": "my-run-reference",
+        "runState": "SUCCEEDED",
+        "startTime": "2022-01-01T12:00:00Z",
+        "tags": {
+          "tag1": "value1",
+          "tag2": "value2"
+        },
+        "taskStates": [
+          {
+            "taskName": "Task 1",
+            "state": "SUCCEEDED",
+            "duration": "PT1M",
+            "started": "2022-01-01T12:00:00Z",
+            "returnCode": 0,
+            "stdout": "This is the stdout",
+            "stderr": "This is the stderr"
+          },
+          {
+            "taskName": "Task 2",
+            "state": "FAILED",
+            "duration": "PT2M",
+            "started": "2022-01-01T12:01:00Z",
+            "returnCode": 1,
+            "stdout": "This is the stdout",
+            "stderr": "This is the stderr",
+            "errorMessage": "This is the error message"
+          }
+        ],
+        "taskTransitions": [
+          {
+            "taskName": "Task 1",
+            "previousState": "WAITING",
+            "currentState": "RUNNING"
+          },
+          {
+            "taskName": "Task 1",
+            "previousState": "RUNNING",
+            "currentState": "SUCCEEDED"
+          },
+          {
+            "taskName": "Task 2",
+            "previousState": "WAITING",
+            "currentState": "RUNNING"
+          },
+          {
+            "taskName": "Task 2",
+            "previousState": "RUNNING",
+            "currentState": "FAILED"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "applicationContext": {
+          "name": "My Application",
+          "version": "1.2.3"
+        },
+        "factfile": "This is a very long factfile that is less than 1000000 characters.",
+        "jobName": "My Job",
+        "jobReference": "job-123",
+        "runDuration": "10 minutes",
+        "runReference": "run-456",
+        "runState": "SUCCEEDED",
+        "startTime": "2022-01-01T12:00:00.000Z",
+        "tags": {
+          "tag1": "value1",
+          "tag2": "value2"
+        },
+        "taskStates": [
+          {
+            "taskName": "Task 1",
+            "state": "SUCCEEDED",
+            "duration": "5 minutes",
+            "started": "2022-01-01T12:00:00.000Z",
+            "returnCode": 0,
+            "stderr": "",
+            "stdout": "Task 1 output"
+          },
+          {
+            "taskName": "Task 2",
+            "state": "FAILED",
+            "duration": "3 minutes",
+            "started": "2022-01-01T12:05:00.000Z",
+            "returnCode": 1,
+            "errorMessage": "Task 2 failed",
+            "stderr": "Task 2 error",
+            "stdout": ""
+          }
+        ],
+        "taskTransitions": [
+          {
+            "taskName": "Task 1",
+            "previousState": "WAITING",
+            "currentState": "RUNNING"
+          },
+          {
+            "taskName": "Task 1",
+            "previousState": "RUNNING",
+            "currentState": "SUCCEEDED"
+          },
+          {
+            "taskName": "Task 2",
+            "previousState": "WAITING",
+            "currentState": "RUNNING"
+          },
+          {
+            "taskName": "Task 2",
+            "previousState": "RUNNING",
+            "currentState": "FAILED"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minimum keyword or maximum keyword",
+      "valid": false,
+      "rust_error": "32768 is greater than the maximum of 32767",
+      "python_error": "Additional properties are not allowed ('Return Code less than minimum' was unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['taskStates']['items']:\n    {'additionalProperties': False,\n     'properties': {'duration': {'type': 'string'},\n                    'errorMessage': {'type': 'string'},\n                    'returnCode': {'maximum': 32767,\n                                   'minimum': -32767,\n                                   'type': 'integer'},\n                    'started': {'_format': 'date-time', 'type': 'string'},\n                    'state': {'enum': ['RUNNING',\n                                       'WAITING',\n                                       'SUCCEEDED',\n                                       'SUCCEEDED_NO_OP',\n                                       'FAILED',\n                                       'SKIPPED']},\n                    'stderr': {'type': 'string'},\n                    'stdout': {'type': 'string'},\n                    'taskName': {'type': 'string'}},\n  .. (466 more)",
+      "data": {
+        "applicationContext": {
+          "name": "My Application",
+          "version": "1.2.3"
+        },
+        "factfile": "This is a very long factfile that is less than 1000000 characters.",
+        "jobName": "My Job",
+        "jobReference": "job-123",
+        "runDuration": "10 minutes",
+        "runReference": "run-456",
+        "runState": "SUCCEEDED",
+        "startTime": "2022-01-01T12:00:00.000Z",
+        "tags": {
+          "tag1": "value1",
+          "tag2": "value2"
+        },
+        "taskStates": [
+          {
+            "taskName": "Task 1",
+            "state": "SUCCEEDED",
+            "duration": "5 minutes",
+            "started": "2022-01-01T12:00:00.000Z",
+            "returnCode": 32768,
+            "Return Code greater than maximum": "This property does not exist in the taskstate schema",
+            "stderr": "",
+            "stdout": "Task 1 output"
+          },
+          {
+            "taskName": "Task 2",
+            "state": "FAILED",
+            "duration": "3 minutes",
+            "started": "2022-01-01T12:05:00.000Z",
+            "returnCode": -32768,
+            "Return Code less than minimum": "This property does not exist in the taskstate schema",
+            "errorMessage": "Task 2 failed",
+            "stderr": "Task 2 error",
+            "stdout": ""
+          }
+        ],
+        "taskTransitions": [
+          {
+            "taskName": "Task 1",
+            "previousState": "WAITING",
+            "currentState": "RUNNING"
+          },
+          {
+            "taskName": "Task 1",
+            "previousState": "RUNNING",
+            "currentState": "SUCCEEDED"
+          },
+          {
+            "taskName": "Task 2",
+            "previousState": "WAITING",
+            "currentState": "RUNNING"
+          },
+          {
+            "taskName": "Task 2",
+            "previousState": "RUNNING",
+            "currentState": "FAILED"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"1.2\" does not match \"\\d+\\.\\d+\\.\\d+-?.*\"",
+      "python_error": "'jobName' is a required property\n\nFailed validating 'required' in schema:\n    {'additionalProperties': False,\n     'properties': {'applicationContext': {'additionalProperties': False,\n                                           'properties': {'name': {'type': 'string'},\n                                                          'version': {'pattern': '\\\\d+\\\\.\\\\d+\\\\.\\\\d+-?.*',\n                                                                      'type': 'string'}},\n                                           'required': ['version', 'name'],\n                                           'type': 'object'},\n                    'factfile': {'maxLength': 1000000, 'type': 'string'},\n                    'jobName': {'type': 'string'},\n                    'jobReference': {'type': 'string'},\n                    'runDuration': {'type': 'string'},\n                    'runReference': {'type': 'string'},\n                    'runState': {'enum': ['RUNNING',\n                                          'WAITING',\n                     .. (4494 more)",
+      "data": {
+        "applicationContext": {
+          "name": "My Application",
+          "version": "1.2"
+        }
+      }
+    }
+  ]
+}

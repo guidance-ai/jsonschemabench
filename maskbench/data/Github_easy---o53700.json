@@ -1,0 +1,173 @@
+{
+  "description": "sample Github_easy/o53700.json",
+  "meta": {
+    "full_size": 736,
+    "stripped_size": 602,
+    "features": [
+      "$ref",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "title": "conda environment file",
+    "description": "Support for conda's enviroment.yml files (e.g. `conda env export > environment.yml`)",
+    "id": "https://raw.githubusercontent.com/Microsoft/vscode-python/master/schemas/conda-environment.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+      "channel": {
+        "type": "string"
+      },
+      "package": {
+        "type": "string"
+      },
+      "path": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "channels": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/channel"
+        }
+      },
+      "dependencies": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/package"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "pip": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/package"
+                  }
+                }
+              },
+              "required": [
+                "pip"
+              ]
+            }
+          ]
+        }
+      },
+      "prefix": {
+        "$ref": "#/definitions/path"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "name": "my-environment",
+        "channels": [
+          "conda-forge",
+          "defaults"
+        ],
+        "dependencies": [
+          "python=3.9",
+          "numpy",
+          {
+            "pip": [
+              "scikit-learn",
+              "pandas"
+            ]
+          }
+        ],
+        "prefix": "/home/user/miniconda3/envs/my-environment"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"pip\":[\"scikit-learn\",123]} is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['pip']['items']:\n    {'type': 'string'}\n\nOn instance['pip'][1]:\n    123",
+      "data": {
+        "name": "my-environment",
+        "channels": [
+          "conda-forge",
+          "defaults"
+        ],
+        "dependencies": [
+          "python=3.9",
+          "numpy",
+          {
+            "pip": [
+              "scikit-learn",
+              123
+            ]
+          }
+        ],
+        "prefix": "/home/user/miniconda3/envs/my-environment"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "456 is not of type 'string'\n\nFailed validating 'type' in schema[1]['properties']['pip']['items']:\n    {'type': 'string'}\n\nOn instance['pip'][1]:\n    456",
+      "data": {
+        "name": "my-environment",
+        "channels": [
+          "conda-forge",
+          123,
+          "defaults"
+        ],
+        "dependencies": [
+          "python=3.9",
+          "numpy",
+          {
+            "pip": [
+              "scikit-learn",
+              456
+            ]
+          }
+        ],
+        "prefix": "/home/user/miniconda3/envs/my-environment"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "name": "my_conda_environment",
+        "channels": [
+          "conda-forge",
+          "defaults"
+        ],
+        "dependencies": [
+          "python=3.9",
+          "numpy",
+          {
+            "pip": [
+              "scikit-learn",
+              "pandas"
+            ]
+          }
+        ],
+        "prefix": "/home/user/miniconda3/envs/my_conda_environment"
+      }
+    }
+  ]
+}

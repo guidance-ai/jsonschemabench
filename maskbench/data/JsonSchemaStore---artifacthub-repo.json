@@ -1,0 +1,231 @@
+{
+  "description": "sample JsonSchemaStore/artifacthub-repo.json",
+  "meta": {
+    "full_size": 1074,
+    "stripped_size": 591,
+    "features": [
+      "additionalProperties",
+      "format",
+      "format:email",
+      "format:uuid",
+      "items",
+      "uniqueItems"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "id",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "id": "https://json.schemastore.org/artifacthub-repo.json",
+    "properties": {
+      "repositoryID": {
+        "description": "An identifier of the Artifact Hub repository where the packages will be published to",
+        "type": "string",
+        "format": "uuid"
+      },
+      "owners": {
+        "description": "Repository owners",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "title": "owner",
+          "description": "A repository owner",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "description": "A repository owner name",
+              "type": "string"
+            },
+            "email": {
+              "description": "A repository owner email",
+              "type": "string",
+              "format": "email"
+            }
+          }
+        }
+      },
+      "ignore": {
+        "description": "Packages that should not be indexed by Artifact Hub",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "title": "package",
+          "description": "A package",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "description": "A package name",
+              "type": "string"
+            },
+            "version": {
+              "description": "Regular expression",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "title": "An Artifact Hub config file",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "repositoryID": "123e4567-e89b-12d3-a456-426655440000",
+        "owners": [
+          {
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane.doe@example.com"
+          }
+        ],
+        "ignore": [
+          {
+            "name": "package1",
+            "version": "^1.0.0"
+          },
+          {
+            "name": "package2"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "repositoryID": "123e4567-e89b-12d3-a456-426655440000",
+        "owners": [
+          {
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane.doe@example.com"
+          }
+        ],
+        "ignore": [
+          {
+            "name": "package1",
+            "version": "1.0.0"
+          },
+          {
+            "name": "package2",
+            "version": ".*"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on format keyword",
+      "valid": false,
+      "rust_error": "\"not a uuid\" is not a \"uuid\"",
+      "python_error": "'not a uuid' is not a 'uuid'\n\nFailed validating 'format' in schema['properties']['repositoryID']:\n    {'description': 'An identifier of the Artifact Hub repository where '\n                    'the packages will be published to',\n     'type': 'string',\n     'format': 'uuid'}\n\nOn instance['repositoryID']:\n    'not a uuid'",
+      "data": {
+        "repositoryID": "not a uuid",
+        "owners": [
+          {
+            "name": "John Doe",
+            "email": "not an email"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane.doe@example.com"
+          }
+        ],
+        "ignore": [
+          {
+            "name": "package1",
+            "version": "1.0.0"
+          },
+          {
+            "name": "package2",
+            "version": ".*"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on uniqueItems keyword",
+      "valid": false,
+      "rust_error": "[{\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"},{\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}] has non-unique elements",
+      "python_error": "[{'name': 'John Doe', 'email': 'john.doe@example.com'}, {'name': 'John Doe', 'email': 'john.doe@example.com'}] has non-unique elements\n\nFailed validating 'uniqueItems' in schema['properties']['owners']:\n    {'description': 'Repository owners',\n     'type': 'array',\n     'uniqueItems': True,\n     'items': {'title': 'owner',\n               'description': 'A repository owner',\n               'type': 'object',\n               'additionalProperties': False,\n               'properties': {'name': {'description': 'A repository owner '\n                                                      'name',\n                                       'type': 'string'},\n                              'email': {'description': 'A repository owner '\n                                                       'email',\n                                        'type': 'string',\n                                        'format': 'email'}}}}\n\nOn instance['owners']:\n    [{'name': 'John Doe', 'email': 'john.doe@example.com'},\n     {'name': 'John Doe', 'email': 'john.doe@example.com'}]",
+      "data": {
+        "repositoryID": "123e4567-e89b-12d3-a456-426655440000",
+        "owners": [
+          {
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+          },
+          {
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+          }
+        ],
+        "ignore": [
+          {
+            "name": "package1",
+            "version": "1.0.0"
+          },
+          {
+            "name": "package1",
+            "version": ".*"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"abcdef\" is not a \"uuid\"",
+      "python_error": "'abcdef' is not a 'uuid'\n\nFailed validating 'format' in schema['properties']['repositoryID']:\n    {'description': 'An identifier of the Artifact Hub repository where '\n                    'the packages will be published to',\n     'type': 'string',\n     'format': 'uuid'}\n\nOn instance['repositoryID']:\n    'abcdef'",
+      "data": {
+        "repositoryID": "abcdef",
+        "owners": [
+          {
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+          },
+          {
+            "name": "Jane Doe",
+            "email": "jane.doe@example.com"
+          }
+        ],
+        "ignore": [
+          {
+            "name": "package1",
+            "version": "1.0.0"
+          },
+          {
+            "name": "package2",
+            "version": ".*"
+          },
+          {
+            "name": "package3"
+          }
+        ]
+      }
+    }
+  ]
+}

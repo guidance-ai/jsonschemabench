@@ -1,0 +1,92 @@
+{
+  "description": "sample Github_easy/o10475.json",
+  "meta": {
+    "full_size": 424,
+    "stripped_size": 311,
+    "features": [
+      "@siblingKeys",
+      "const",
+      "oneOf"
+    ],
+    "raw_features": [
+      "$schema",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "description": "400 error returned on user creation, if bad data was probvided, or the user exists in the system",
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "integer"
+      },
+      "message": {
+        "type": "string",
+        "oneOf": [
+          {
+            "const": "user already exists"
+          },
+          {
+            "const": "invalid request. Validate data using provided schema"
+          }
+        ]
+      },
+      "link": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "status",
+      "message",
+      "link"
+    ]
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": 400,
+        "message": "user already exists",
+        "link": "https://example.com/validation-schema"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": 400,
+        "message": "user already exists",
+        "link": "https://example.com/schema"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "\"user already exists and has invalid data\" is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'user already exists and has invalid data' is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['message']:\n    {'type': 'string',\n     'oneOf': [{'const': 'user already exists'},\n               {'const': 'invalid request. Validate data using provided '\n                         'schema'}]}\n\nOn instance['message']:\n    'user already exists and has invalid data'",
+      "data": {
+        "status": 400,
+        "message": "user already exists and has invalid data",
+        "link": "https://example.com/schema"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "12345 is not of type \"string\"",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['link']:\n    {'type': 'string'}\n\nOn instance['link']:\n    12345",
+      "data": {
+        "status": 400,
+        "message": "user already exists",
+        "link": 12345
+      }
+    }
+  ]
+}

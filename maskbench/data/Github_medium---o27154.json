@@ -1,0 +1,296 @@
+{
+  "description": "sample Github_medium/o27154.json",
+  "meta": {
+    "full_size": 969,
+    "stripped_size": 857,
+    "features": [
+      "@minmaxInteger",
+      "@minmaxItems",
+      "@siblingKeys",
+      "additionalProperties",
+      "anyOf",
+      "dependencies",
+      "enum",
+      "items",
+      "not"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "exclusiveMinimum",
+      "maxItems",
+      "maximum",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "additionalProperties": false,
+    "allOf": [
+      {
+        "anyOf": [
+          {
+            "required": [
+              "num_input"
+            ]
+          },
+          {
+            "required": [
+              "enum_input"
+            ]
+          }
+        ]
+      }
+    ],
+    "dependencies": {
+      "enum_input": {
+        "properties": {
+          "num_input": {
+            "not": {}
+          }
+        }
+      },
+      "flag_input": {
+        "anyOf": [
+          {
+            "properties": {
+              "num_input": {
+                "not": {}
+              }
+            },
+            "required": [
+              "file_input"
+            ]
+          },
+          {
+            "properties": {
+              "flag_input": {
+                "enum": [
+                  false
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "num_input": {
+        "properties": {
+          "enum_input": {
+            "not": {}
+          }
+        }
+      }
+    },
+    "description": "Invocation schema for example boutiques tool.",
+    "properties": {
+      "config_num": {
+        "enum": [
+          4
+        ]
+      },
+      "enum_input": {
+        "enum": [
+          "val1",
+          "val2",
+          "val3"
+        ]
+      },
+      "file_input": {
+        "type": "string"
+      },
+      "flag_input": {
+        "type": "boolean"
+      },
+      "list_int_input": {
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "num_input": {
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "type": "number"
+      },
+      "str_input": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 3,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "str_input",
+      "list_int_input",
+      "config_num"
+    ],
+    "title": "Example Boutiques Tool.invocationSchema",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "config_num": 4,
+        "enum_input": "val1",
+        "list_int_input": [
+          1,
+          2,
+          3
+        ],
+        "str_input": [
+          "string1",
+          "string2"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "config_num": 4,
+        "enum_input": "val1",
+        "list_int_input": [
+          1,
+          2,
+          3
+        ],
+        "str_input": [
+          "hello",
+          "world"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on maximum keyword or exclusiveMinimum keyword",
+      "valid": false,
+      "rust_error": "1.1 is greater than the maximum of 1",
+      "python_error": "1.1 should not be valid under {}\n\nFailed validating 'not' in schema['dependencies']['enum_input']['properties']['num_input']:\n    {'not': {}}\n\nOn instance['num_input']:\n    1.1",
+      "data": {
+        "config_num": 4,
+        "enum_input": "val1",
+        "list_int_input": [
+          1,
+          2,
+          3
+        ],
+        "str_input": [
+          "hello",
+          "world"
+        ],
+        "num_input": 1.1
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword or maxItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['list_int_input']:\n    {'items': {'type': 'integer'}, 'minItems': 1, 'type': 'array'}\n\nOn instance['list_int_input']:\n    []",
+      "data": {
+        "config_num": 4,
+        "enum_input": "val1",
+        "list_int_input": [],
+        "str_input": [
+          "hello",
+          "world"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on allOf keyword",
+      "valid": false,
+      "rust_error": "{} is not allowed for 0.5",
+      "python_error": "0.5 should not be valid under {}\n\nFailed validating 'not' in schema['dependencies']['enum_input']['properties']['num_input']:\n    {'not': {}}\n\nOn instance['num_input']:\n    0.5",
+      "data": {
+        "config_num": 4,
+        "list_int_input": [
+          1,
+          2,
+          3
+        ],
+        "num_input": 0.5,
+        "enum_input": "val1",
+        "str_input": [
+          "hello",
+          "world"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "{} is not allowed for 0.5",
+      "python_error": "0.5 should not be valid under {}\n\nFailed validating 'not' in schema['dependencies']['enum_input']['properties']['num_input']:\n    {'not': {}}\n\nOn instance['num_input']:\n    0.5",
+      "data": {
+        "config_num": 4,
+        "enum_input": "val1",
+        "list_int_input": [
+          1,
+          2,
+          3
+        ],
+        "str_input": [
+          "hello",
+          "world"
+        ],
+        "num_input": 0.5
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on dependencies keyword",
+      "valid": false,
+      "rust_error": "{} is not allowed for 1",
+      "python_error": "True is not one of [False]\n\nFailed validating 'enum' in schema[1]['properties']['flag_input']:\n    {'enum': [False]}\n\nOn instance['flag_input']:\n    True",
+      "data": {
+        "config_num": 4,
+        "enum_input": "val1",
+        "list_int_input": [
+          1,
+          2,
+          3
+        ],
+        "str_input": [
+          "hello",
+          "world"
+        ],
+        "flag_input": true,
+        "num_input": 1
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "[\"hello\",\"world\",\"foo\",\"bar\"] has more than 3 items",
+      "python_error": "['hello', 'world', 'foo', 'bar'] is too long\n\nFailed validating 'maxItems' in schema['properties']['str_input']:\n    {'items': {'type': 'string'},\n     'maxItems': 3,\n     'minItems': 1,\n     'type': 'array'}\n\nOn instance['str_input']:\n    ['hello', 'world', 'foo', 'bar']",
+      "data": {
+        "config_num": 4,
+        "enum_input": "val1",
+        "list_int_input": [
+          1,
+          2,
+          3
+        ],
+        "str_input": [
+          "hello",
+          "world",
+          "foo",
+          "bar"
+        ]
+      }
+    }
+  ]
+}

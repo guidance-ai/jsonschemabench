@@ -1,0 +1,208 @@
+{
+  "description": "sample Github_easy/o39084.json",
+  "meta": {
+    "full_size": 1200,
+    "stripped_size": 531,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "const",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "description": "replace-in-file options.",
+    "properties": {
+      "$schema": {
+        "type": "string"
+      },
+      "$tool": {
+        "const": "replace-in-file",
+        "description": "Must be set to replace-in-file",
+        "type": "string"
+      },
+      "allowEmptyPaths": {
+        "description": "Specify if empty/invalid file paths are allowed (defaults to false). If set to true these paths will fail silently and no error will be thrown.",
+        "type": "boolean"
+      },
+      "encoding": {
+        "description": "Character encoding for reading/writing files (defaults to utf-8).",
+        "type": "string"
+      },
+      "files": {
+        "oneOf": [
+          {
+            "description": "File(glob) to proccess.",
+            "type": "string"
+          },
+          {
+            "description": "Files(glob) to proccess.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "from": {
+        "description": "RegExp(s) to find from files.",
+        "oneOf": [
+          {
+            "instanceof": "RegExp"
+          },
+          {
+            "preproccess": "regexp",
+            "type": "string"
+          },
+          {
+            "items": {
+              "oneOf": [
+                {
+                  "instanceof": "RegExp"
+                },
+                {
+                  "preproccess": "regexp",
+                  "type": "string"
+                }
+              ]
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        ]
+      },
+      "to": {
+        "description": "Multiple replacements with same/different strings (replaced sequentially).",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        ]
+      }
+    },
+    "required": [
+      "$tool",
+      "files",
+      "from",
+      "to"
+    ],
+    "title": "replace-in-file Config",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json-schema.org/draft-07/schema#",
+        "$tool": "replace-in-file",
+        "allowEmptyPaths": false,
+        "encoding": "utf-8",
+        "files": [
+          "path/to/file1.txt",
+          "path/to/file2.txt"
+        ],
+        "from": [
+          "pattern1",
+          "pattern2"
+        ],
+        "to": [
+          "replacement1",
+          "replacement2"
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "$schema": "https://json-schema.org/draft-07/schema#",
+        "$tool": "replace-in-file",
+        "allowEmptyPaths": false,
+        "encoding": "utf-8",
+        "files": [
+          "path/to/file1.txt",
+          "path/to/file2.txt"
+        ],
+        "from": [
+          "old-string-1",
+          "old-string-2"
+        ],
+        "to": [
+          "new-string-1",
+          "new-string-2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "[\"path/to/file1.txt\",\"path/to/file2.txt\",12345] is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "12345 is not of type 'string'\n\nFailed validating 'type' in schema[1]['items']:\n    {'type': 'string'}\n\nOn instance[2]:\n    12345",
+      "data": {
+        "$schema": "https://json-schema.org/draft-07/schema#",
+        "$tool": "replace-in-file",
+        "allowEmptyPaths": false,
+        "encoding": "utf-8",
+        "files": [
+          "path/to/file1.txt",
+          "path/to/file2.txt",
+          12345
+        ],
+        "from": [
+          "old-string-1",
+          "old-string-2"
+        ],
+        "to": [
+          "new-string-1",
+          "new-string-2"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra-key' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra-key' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'description': 'replace-in-file options.',\n     'properties': {'$schema': {'type': 'string'},\n                    '$tool': {'const': 'replace-in-file',\n                              'description': 'Must be set to '\n                                             'replace-in-file',\n                              'type': 'string'},\n                    'allowEmptyPaths': {'description': 'Specify if '\n                                                       'empty/invalid file '\n                                                       'paths are allowed '\n                                                       '(defaults to '\n                                                       'false). If set to '\n                                                       'true these paths '\n                                                       'will fail silently '\n              .. (2462 more)",
+      "data": {
+        "$schema": "https://json-schema.org/draft-07/schema#",
+        "$tool": "replace-in-file",
+        "allowEmptyPaths": false,
+        "encoding": "utf-8",
+        "files": [
+          "path/to/file1.txt",
+          "path/to/file2.txt"
+        ],
+        "from": [
+          "old-string-1",
+          123
+        ],
+        "to": [
+          "new-string-1",
+          "new-string-2"
+        ],
+        "extra-key": "value"
+      }
+    }
+  ]
+}

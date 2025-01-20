@@ -1,0 +1,104 @@
+{
+  "description": "sample MCPspec/LoggingMessageNotification.json",
+  "meta": {
+    "full_size": 1154,
+    "stripped_size": 539,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "const",
+      "enum"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/LoggingMessageNotification",
+    "definitions": {
+      "LoggingMessageNotification": {
+        "description": "Notification of a log message passed from server to client. If no logging/setLevel request has been sent from the client, the server MAY decide which messages to send automatically.",
+        "properties": {
+          "method": {
+            "const": "notifications/message",
+            "type": "string"
+          },
+          "params": {
+            "properties": {
+              "data": {
+                "description": "The data to be logged, such as a string message or an object. Any JSON serializable type is allowed here."
+              },
+              "level": {
+                "$ref": "#/definitions/LoggingLevel",
+                "description": "The severity of this log message."
+              },
+              "logger": {
+                "description": "An optional name of the logger issuing this message.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "data",
+              "level"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ],
+        "type": "object"
+      },
+      "LoggingLevel": {
+        "description": "The severity of a log message.\n\nThese map to syslog message severities, as specified in RFC-5424:\nhttps://datatracker.ietf.org/doc/html/rfc5424#section-6.2.1",
+        "enum": [
+          "alert",
+          "critical",
+          "debug",
+          "emergency",
+          "error",
+          "info",
+          "notice",
+          "warning"
+        ],
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "method": "notifications/message",
+        "params": {
+          "data": "This is an example log message.",
+          "level": "info",
+          "logger": "MyLogger"
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\" trace\" is not one of [\"alert\",\"critical\",\"debug\",\"emergency\",\"error\",\"info\",\"notice\",\"warning\"]",
+      "python_error": "' trace' is not one of ['alert', 'critical', 'debug', 'emergency', 'error', 'info', 'notice', 'warning']\n\nFailed validating 'enum' in schema['properties']['params']['properties']['level']:\n    {'description': 'The severity of a log message.\\n'\n                    '\\n'\n                    'These map to syslog message severities, as specified '\n                    'in RFC-5424:\\n'\n                    'https://datatracker.ietf.org/doc/html/rfc5424#section-6.2.1',\n     'enum': ['alert',\n              'critical',\n              'debug',\n              'emergency',\n              'error',\n              'info',\n              'notice',\n              'warning'],\n     'type': 'string'}\n\nOn instance['params']['level']:\n    ' trace'",
+      "data": {
+        "method": "notifications/message",
+        "params": {
+          "data": "This is an example log message.",
+          "level": " trace",
+          "logger": "MyLogger"
+        }
+      }
+    }
+  ]
+}

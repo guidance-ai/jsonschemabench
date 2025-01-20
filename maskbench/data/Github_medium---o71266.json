@@ -1,0 +1,237 @@
+{
+  "description": "sample Github_medium/o71266.json",
+  "meta": {
+    "full_size": 3945,
+    "stripped_size": 1215,
+    "features": [
+      "$ref",
+      "@minmaxItems",
+      "@siblingKeys",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "$schema",
+      "definitions",
+      "id",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "id": "https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-extend-json-schema.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "jsend-extend json schema",
+    "description": "This is a json-schema that extends the jsend format for json responses for applications. It provides structured information about the 'status':'fail' reason(s) by specifying the structure of the 'data' key. Since the returned data for 'status':'success' depends on the API, the JSend spec is enough. The data for 'status':'error' is in the key 'message'. Since an error is non-recoverable, the JSend spec suffices. The  returned data for 'status':'fail' should be in a format that is consumable by API consumers in a generic way. The JSend specification leaves this too open for interpretation. To provide a uniform way of consuming data for failures, this schema defines an array of objects in the 'data' key. Each item in that array has at least the key 'message' with a human readable description of the failure. In case it is possible to map it to an input field, an optional 'field' key can be used with a string representation of the map to the field. Even input in complex datastructures can be mapped this way. see https://labs.omniti.com/labs/jsend/wiki",
+    "type": "object",
+    "oneOf": [
+      {
+        "$ref": "#/definitions/success"
+      },
+      {
+        "$ref": "#/definitions/fail"
+      },
+      {
+        "$ref": "#/definitions/error"
+      }
+    ],
+    "definitions": {
+      "success": {
+        "description": "All went well, and (usually) some data was returned.",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^success$",
+            "description": "the status for a succesful handling"
+          },
+          "data": {
+            "description": "Acts as the wrapper for any data returned by the API call. If the call returns no data (as in the last example), data should be set to null.",
+            "$ref": "#/definitions/data"
+          }
+        }
+      },
+      "fail": {
+        "description": "There was a problem with the data submitted, or some pre-condition of the API call wasn't satisfied",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^fail$",
+            "description": "the status for a failure handling"
+          },
+          "data": {
+            "description": "provides the wrapper for the details of why the request failed.",
+            "$ref": "#/definitions/data-fail"
+          }
+        }
+      },
+      "error": {
+        "description": "An error occurred in processing the request, i.e. an exception was thrown",
+        "required": [
+          "status",
+          "message"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "pattern": "^error$",
+            "description": "the status for a error handling"
+          },
+          "message": {
+            "$ref": "#/definitions/message"
+          },
+          "code": {
+            "$ref": "#/definitions/code"
+          },
+          "data": {
+            "description": "A generic container for any other information about the error, i.e. the conditions that caused the error, stack traces, etc.",
+            "$ref": "#/definitions/data"
+          }
+        }
+      },
+      "code": {
+        "description": "A numeric code providing info about a failure or error in a result, if applicable",
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "data-fail": {
+        "description": "a container for information about failures",
+        "type": [
+          "array"
+        ],
+        "minItems": 0,
+        "items": {
+          "$ref": "#/definitions/data-fail-item"
+        }
+      },
+      "data-fail-item": {
+        "description": "an object that contains fields related to a failure",
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "description": "a human readable failure message",
+            "$ref": "#/definitions/message"
+          },
+          "code": {
+            "description": "an optional numeric code, could be used for translations (incl gettext .po strings)",
+            "$ref": "#/definitions/code"
+          },
+          "field": {
+            "description": "an optional string representation that maps to input. POST keys, a query parameter, a header key etc. For complex datastructures you could use different solutions like a dot seperated tree representation, an xpath expression etc.",
+            "type": "string"
+          }
+        }
+      },
+      "data": {
+        "description": "a generic container for data returned for success, fail or error",
+        "type": [
+          "string",
+          "null",
+          "array",
+          "object",
+          "integer",
+          "boolean"
+        ]
+      },
+      "message": {
+        "description": "A meaningful, end-user-readable (or at the least log-worthy) message, explaining what happened.",
+        "type": "string"
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "fail",
+        "data": [
+          {
+            "message": "Invalid email address",
+            "field": "email"
+          },
+          {
+            "message": "Password must be at least 8 characters long",
+            "field": "password"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "status": "fail",
+        "data": [
+          {
+            "message": "Invalid email address",
+            "field": "email",
+            "code": 1
+          },
+          {
+            "message": "Password must be at least 8 characters long",
+            "field": "password"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"status\":\"faiL\",\"data\":[{\"message\":\"Invalid email address\",\"field\":\"email\",\"code\":1},{\"message\":\"Password must be at least 8 characters long\",\"field\":\"password\"}]} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'status': 'faiL', 'data': [{'message': 'Invalid email address', 'field': 'email', 'code': 1}, {'message': 'Password must be at least 8 characters long', 'field': 'password'}]} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema:\n    {'id': 'https://raw.githubusercontent.com/rolfvreijdenberger/jsend-json-schema/master/jsend-extend-json-schema.json',\n     '$schema': 'http://json-schema.org/draft-04/schema#',\n     'title': 'jsend-extend json schema',\n     'description': 'This is a json-schema that extends the jsend format '\n                    'for json responses for applications. It provides '\n                    \"structured information about the 'status':'fail' \"\n                    \"reason(s) by specifying the structure of the 'data' \"\n                    \"key. Since the returned data for 'status':'success' \"\n                    'depends on the API, the JSend spec is enough. The '\n                    \"data for 'status':'error' is in the key 'message'. \"\n                    'Since.. (16592 more)",
+      "data": {
+        "status": "faiL",
+        "data": [
+          {
+            "message": "Invalid email address",
+            "field": "email",
+            "code": 1
+          },
+          {
+            "message": "Password must be at least 8 characters long",
+            "field": "password"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "{\"status\":\"fail\",\"data\":{\"message\":\"Invalid email address\",\"field\":\"email\",\"code\":1},\"extra\":\"foo\",\"missing_required_keys\":null} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'message': 'Invalid email address', 'field': 'email', 'code': 1} is not of type 'array'\n\nFailed validating 'type' in schema[1]['properties']['data']:\n    {'description': 'a container for information about failures',\n     'type': ['array'],\n     'minItems': 0,\n     'items': {'$ref': '#/definitions/data-fail-item'}}\n\nOn instance['data']:\n    {'message': 'Invalid email address', 'field': 'email', 'code': 1}",
+      "data": {
+        "status": "fail",
+        "data": {
+          "message": "Invalid email address",
+          "field": "email",
+          "code": 1
+        },
+        "extra": "foo",
+        "missing_required_keys": null
+      }
+    }
+  ]
+}

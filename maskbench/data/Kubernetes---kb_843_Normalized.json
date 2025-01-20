@@ -1,0 +1,123 @@
+{
+  "description": "sample Kubernetes/kb_843_Normalized.json",
+  "meta": {
+    "full_size": 898,
+    "stripped_size": 568,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "additionalProperties:object",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "type",
+      "type:[]",
+      "type:null",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "description": "ResourceQuotaStatus defines the enforced hard limits and observed use.",
+    "properties": {
+      "hard": {
+        "additionalProperties": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity"
+        },
+        "description": "Hard is the set of enforced hard limits for each named resource. More info: https://kubernetes.io/docs/concepts/policy/resource-quotas/",
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "used": {
+        "additionalProperties": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_api_resource_Quantity"
+        },
+        "description": "Used is the current observed total usage of the resource in the namespace.",
+        "type": [
+          "object",
+          "null"
+        ]
+      }
+    },
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "hard": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "used": {
+          "cpu": 1500,
+          "memory": "512Mi"
+        }
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "hard": {
+          "cpu": "200m",
+          "memory": 1024
+        },
+        "used": {
+          "cpu": "150m",
+          "memory": 512
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['used']['additionalProperties']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['used']['memory']:\n    True",
+      "data": {
+        "hard": {
+          "cpu": "200m",
+          "memory": 1024
+        },
+        "used": {
+          "cpu": "150m",
+          "memory": true
+        }
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "true is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "True is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['hard']['additionalProperties']:\n    {'oneOf': [{'type': 'string'}, {'type': 'number'}]}\n\nOn instance['hard']['cpu']:\n    True",
+      "data": {
+        "hard": {
+          "cpu": true,
+          "memory": 1024
+        },
+        "used": {
+          "cpu": "150m",
+          "memory": 512
+        }
+      }
+    }
+  ]
+}

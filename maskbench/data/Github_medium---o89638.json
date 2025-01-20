@@ -1,0 +1,257 @@
+{
+  "description": "sample Github_medium/o89638.json",
+  "meta": {
+    "full_size": 1256,
+    "stripped_size": 1243,
+    "features": [
+      "$ref",
+      "@siblingKeys",
+      "enum",
+      "pattern"
+    ],
+    "raw_features": [
+      "definitions",
+      "oneOf:trivial",
+      "properties",
+      "required",
+      "type",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "bitmap": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resource_type": {
+            "enum": [
+              "asset",
+              "file",
+              "resource",
+              "user"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "compressed",
+              "compressed_cubemap",
+              "cubemap",
+              "uncompressed"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "resource_type",
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "bitmap_texture_properties": {
+        "properties": {
+          "bitmap": {
+            "$ref": "#/definitions/bitmap"
+          },
+          "texture_parameters": {
+            "$ref": "#/definitions/texture_parameters"
+          },
+          "type": {
+            "pattern": "bitmap",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bitmap",
+          "type"
+        ],
+        "type": "object"
+      },
+      "texture": {},
+      "texture_filter_type": {
+        "enum": [
+          "GL_LINEAR",
+          "GL_NEAREST",
+          "GL_NEAREST_MIPMAP_NEAREST",
+          "GL_NEAREST_MIPMAP_LINEAR",
+          "GL_LINEAR_MIPMAP_NEAREST",
+          "GL_LINEAR_MIPMAP_LINEAR"
+        ],
+        "type": "string"
+      },
+      "texture_parameters": {
+        "properties": {
+          "anisotropic_value": {
+            "enum": [
+              1,
+              2,
+              4,
+              8,
+              16
+            ],
+            "type": "integer"
+          },
+          "mag_filter_type": {
+            "$ref": "#/definitions/texture_filter_type"
+          },
+          "min_filter_type": {
+            "$ref": "#/definitions/texture_filter_type"
+          },
+          "wrap_s_type": {
+            "$ref": "#/definitions/texture_wrap_type"
+          },
+          "wrap_t_type": {
+            "$ref": "#/definitions/texture_wrap_type"
+          }
+        },
+        "type": "object"
+      },
+      "texture_wrap_type": {
+        "enum": [
+          "GL_CLAMP_TO_EDGE",
+          "GL_MIRRORED_REPEAT",
+          "GL_REPEAT"
+        ],
+        "type": "string"
+      }
+    },
+    "oneOf": [
+      {
+        "$ref": "#/definitions/bitmap_texture_properties"
+      }
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "bitmap": {
+          "id": "texture-1",
+          "resource_type": "asset",
+          "type": "uncompressed"
+        },
+        "texture_parameters": {
+          "anisotropic_value": 4,
+          "mag_filter_type": "GL_LINEAR",
+          "min_filter_type": "GL_LINEAR_MIPMAP_LINEAR",
+          "wrap_s_type": "GL_REPEAT",
+          "wrap_t_type": "GL_REPEAT"
+        },
+        "type": "bitmap"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"bitmap\":{\"id\":\"texture-1\",\"resource_type\":\"asset\",\"type\":\"uncompressed\"},\"texture_parameters\":{\"anisotropic_value\":4,\"mag_filter_type\":\"GL_LINEAR\",\"min_filter_type\":\"GL_LINEAR_MIPMAP_LINEAR\",\"wrap_s_type\":\"GL_REPEAT\",\"wrap_t_type\":\"GL_REPEAT\"},\"type\":\"texture\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'texture' does not match 'bitmap'\n\nFailed validating 'pattern' in schema[0]['properties']['type']:\n    {'pattern': 'bitmap', 'type': 'string'}\n\nOn instance['type']:\n    'texture'",
+      "data": {
+        "bitmap": {
+          "id": "texture-1",
+          "resource_type": "asset",
+          "type": "uncompressed"
+        },
+        "texture_parameters": {
+          "anisotropic_value": 4,
+          "mag_filter_type": "GL_LINEAR",
+          "min_filter_type": "GL_LINEAR_MIPMAP_LINEAR",
+          "wrap_s_type": "GL_REPEAT",
+          "wrap_t_type": "GL_REPEAT"
+        },
+        "type": "texture"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"bitmap\":{\"id\":\"texture-1\",\"resource_type\":\"asset\",\"type\":\"uncompressed\"},\"texture_parameters\":{\"anisotropic_value\":32,\"Invalid anisotropic value, should be one of [1, 2, 4, 8, 16]\":\"mag_filter_type\",\"GL_LINEAR\":\"Missing mag_filter_type property\",\"min_filter_type\":\"GL_LINEAR_MIPMAP_LINEAR\",\"wrap_s_type\":\"GL_REPEAT\",\"wrap_t_type\":\"GL_REPEAT\"},\"type\":\"bitmap\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "32 is not one of [1, 2, 4, 8, 16]\n\nFailed validating 'enum' in schema[0]['properties']['texture_parameters']['properties']['anisotropic_value']:\n    {'enum': [1, 2, 4, 8, 16], 'type': 'integer'}\n\nOn instance['texture_parameters']['anisotropic_value']:\n    32",
+      "data": {
+        "bitmap": {
+          "id": "texture-1",
+          "resource_type": "asset",
+          "type": "uncompressed"
+        },
+        "texture_parameters": {
+          "anisotropic_value": 32,
+          "Invalid anisotropic value, should be one of [1, 2, 4, 8, 16]": "mag_filter_type",
+          "GL_LINEAR": "Missing mag_filter_type property",
+          "min_filter_type": "GL_LINEAR_MIPMAP_LINEAR",
+          "wrap_s_type": "GL_REPEAT",
+          "wrap_t_type": "GL_REPEAT"
+        },
+        "type": "bitmap"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "{\"bitmap\":{\"id\":\"texture-1\",\"resource_type\":\"asset\",\"type\":\"uncompressed\"},\"texture_parameters\":{\"anisotropic_value\":4,\"mag_filter_type\":\"GL_LINEAR\",\"min_filter_type\":\"GL_LINEAR_MIPMAP_LINEAR\",\"wrap_s_type\":\"GL_REPEAT\",\"wrap_t_type\":\"GL_REPEAT\"},\"type\":\"bitmaP\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "'bitmaP' does not match 'bitmap'\n\nFailed validating 'pattern' in schema[0]['properties']['type']:\n    {'pattern': 'bitmap', 'type': 'string'}\n\nOn instance['type']:\n    'bitmaP'",
+      "data": {
+        "bitmap": {
+          "id": "texture-1",
+          "resource_type": "asset",
+          "type": "uncompressed"
+        },
+        "texture_parameters": {
+          "anisotropic_value": 4,
+          "mag_filter_type": "GL_LINEAR",
+          "min_filter_type": "GL_LINEAR_MIPMAP_LINEAR",
+          "wrap_s_type": "GL_REPEAT",
+          "wrap_t_type": "GL_REPEAT"
+        },
+        "type": "bitmaP"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"bitmap\":{\"id\":123,\"resource_type\":\"asset\",\"type\":\"uncompressed\"},\"texture_parameters\":{\"anisotropic_value\":4,\"mag_filter_type\":\"GL_LINEAR\",\"min_filter_type\":\"GL_LINEAR_MIPMAP_LINEAR\",\"wrap_s_type\":\"GL_REPEAT\",\"wrap_t_type\":\"GL_REPEAT\"},\"type\":\"bitmap\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema[0]['properties']['bitmap']['properties']['id']:\n    {'type': 'string'}\n\nOn instance['bitmap']['id']:\n    123",
+      "data": {
+        "bitmap": {
+          "id": 123,
+          "resource_type": "asset",
+          "type": "uncompressed"
+        },
+        "texture_parameters": {
+          "anisotropic_value": 4,
+          "mag_filter_type": "GL_LINEAR",
+          "min_filter_type": "GL_LINEAR_MIPMAP_LINEAR",
+          "wrap_s_type": "GL_REPEAT",
+          "wrap_t_type": "GL_REPEAT"
+        },
+        "type": "bitmap"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "{\"bitmap\":{\"id\":null,\"resource_type\":\"asset\",\"type\":\"uncompressed\"},\"texture_parameters\":{\"anisotropic_value\":4,\"mag_filter_type\":\"GL_LINEAR\",\"min_filter_type\":\"GL_LINEAR_MIPMAP_LINEAR\",\"wrap_s_type\":\"GL_REPEAT\",\"wrap_t_type\":\"GL_REPEAT\"},\"type\":\"bitmap\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "None is not of type 'string'\n\nFailed validating 'type' in schema[0]['properties']['bitmap']['properties']['id']:\n    {'type': 'string'}\n\nOn instance['bitmap']['id']:\n    None",
+      "data": {
+        "bitmap": {
+          "id": null,
+          "resource_type": "asset",
+          "type": "uncompressed"
+        },
+        "texture_parameters": {
+          "anisotropic_value": 4,
+          "mag_filter_type": "GL_LINEAR",
+          "min_filter_type": "GL_LINEAR_MIPMAP_LINEAR",
+          "wrap_s_type": "GL_REPEAT",
+          "wrap_t_type": "GL_REPEAT"
+        },
+        "type": "bitmap"
+      }
+    }
+  ]
+}

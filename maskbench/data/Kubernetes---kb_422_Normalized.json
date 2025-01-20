@@ -1,0 +1,203 @@
+{
+  "description": "sample Kubernetes/kb_422_Normalized.json",
+  "meta": {
+    "full_size": 1532,
+    "stripped_size": 822,
+    "features": [
+      "$ref",
+      "items",
+      "oneOf"
+    ],
+    "raw_features": [
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:integer",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "definitions": {
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_HTTPHeader": {
+        "description": "HTTPHeader describes a custom header to be used in HTTP probes",
+        "properties": {
+          "name": {
+            "description": "The header field name",
+            "type": "string"
+          },
+          "value": {
+            "description": "The header field value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "type": "object"
+      },
+      "https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_util_intstr_IntOrString": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "description": "HTTPGetAction describes an action based on HTTP Get requests.",
+    "properties": {
+      "host": {
+        "description": "Host name to connect to, defaults to the pod IP. You probably want to set \"Host\" in httpHeaders instead.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "httpHeaders": {
+        "description": "Custom headers to set in the request. HTTP allows repeated headers.",
+        "items": {
+          "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_api_core_v1_HTTPHeader"
+        },
+        "type": [
+          "array",
+          "null"
+        ]
+      },
+      "path": {
+        "description": "Path to access on the HTTP server.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "port": {
+        "$ref": "#/definitions/https:__kubernetesjsonschema_dev_master__defs_json_defs_io_k8s_apimachinery_pkg_util_intstr_IntOrString",
+        "description": "Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME."
+      },
+      "scheme": {
+        "description": "Scheme to use for connecting to the host. Defaults to HTTP.",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "port"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "host": "example.com",
+        "httpHeaders": [
+          {
+            "name": "Authorization",
+            "value": "Bearer token"
+          },
+          {
+            "name": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "path": "/healthcheck",
+        "port": 8080,
+        "scheme": "HTTPS"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "host": "example.com",
+        "httpHeaders": [
+          {
+            "name": "Accept",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer token"
+          }
+        ],
+        "path": "/health",
+        "port": 8080,
+        "scheme": "HTTPS"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "123 is not of type \"object\"",
+      "python_error": "123 is not of type 'object'\n\nFailed validating 'type' in schema['properties']['httpHeaders']['items']:\n    {'description': 'HTTPHeader describes a custom header to be used in '\n                    'HTTP probes',\n     'properties': {'name': {'description': 'The header field name',\n                             'type': 'string'},\n                    'value': {'description': 'The header field value',\n                              'type': 'string'}},\n     'required': ['name', 'value'],\n     'type': 'object'}\n\nOn instance['httpHeaders'][2]:\n    123",
+      "data": {
+        "port": 8080,
+        "host": "example.com",
+        "path": "/health",
+        "scheme": "HTTPS",
+        "httpHeaders": [
+          {
+            "name": "Accept",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer token"
+          },
+          123
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "3.14 is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "3.14 is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['port']:\n    {'oneOf': [{'type': 'string'}, {'type': 'integer'}]}\n\nOn instance['port']:\n    3.14",
+      "data": {
+        "port": 3.14,
+        "host": "example.com",
+        "path": "/health",
+        "scheme": "HTTPS",
+        "httpHeaders": [
+          {
+            "name": "Accept",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer token"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['httpHeaders']['items']['properties']['name']:\n    {'description': 'The header field name', 'type': 'string'}\n\nOn instance['httpHeaders'][0]['name']:\n    123",
+      "data": {
+        "port": 8080,
+        "host": "example.com",
+        "path": "/health",
+        "scheme": "HTTPS",
+        "httpHeaders": [
+          {
+            "name": 123,
+            "value": "application/json"
+          }
+        ]
+      }
+    }
+  ]
+}

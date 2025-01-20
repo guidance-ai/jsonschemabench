@@ -1,0 +1,640 @@
+{
+  "description": "sample JsonSchemaStore/ffizer.schema.json",
+  "meta": {
+    "full_size": 2516,
+    "stripped_size": 1421,
+    "features": [
+      "$ref",
+      "additionalProperties",
+      "anyOf",
+      "items"
+    ],
+    "raw_features": [
+      "$schema",
+      "_boolSchema",
+      "allOf:trivial",
+      "definitions",
+      "properties",
+      "required",
+      "type",
+      "type:[]",
+      "type:array",
+      "type:boolean",
+      "type:null",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "TemplateCfg",
+    "type": "object",
+    "properties": {
+      "ignores": {
+        "description": "list of path from the current template to ignore",
+        "default": [],
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "imports": {
+        "description": "list of template to import and to apply as part of this template",
+        "default": [],
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ImportCfg"
+        }
+      },
+      "scripts": {
+        "description": "list of the scripts to apply at end of generation",
+        "default": [],
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ScriptCfg"
+        }
+      },
+      "use_template_dir": {
+        "description": "set to true if the template content is under a `template` folder (not mixed with metadata)",
+        "default": false,
+        "type": "boolean"
+      },
+      "variables": {
+        "description": "list of variables/parameters of the template",
+        "default": [],
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/VariableCfg"
+        }
+      }
+    },
+    "additionalProperties": false,
+    "definitions": {
+      "AnyValue": true,
+      "ImportCfg": {
+        "description": "define a template layer to import",
+        "type": "object",
+        "required": [
+          "uri"
+        ],
+        "properties": {
+          "rev": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subfolder": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uri": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelValueCfg": {
+        "type": "object",
+        "required": [
+          "label",
+          "value"
+        ],
+        "properties": {
+          "label": {
+            "description": "display of the value (in select)",
+            "type": "string"
+          },
+          "value": {
+            "description": "the value",
+            "allOf": [
+              {
+                "$ref": "#/definitions/AnyValue"
+              }
+            ]
+          }
+        }
+      },
+      "ScriptCfg": {
+        "type": "object",
+        "properties": {
+          "cmd": {
+            "description": "command to execute",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "default_confirm_answer": {
+            "description": "default answer for confirmation of execution",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "message": {
+            "description": "message to display",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "VariableCfg": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "ask": {
+            "description": "sentence to ask the value (default to the name on variable)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "default_value": {
+            "description": "optionnal default value",
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AnyValue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hidden": {
+            "description": "is the variable hidden to the user (could be usefull to cache shared variable/data)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "description": "name of variable used in the template",
+            "type": "string"
+          },
+          "select_in_values": {
+            "description": "if non-empty then the value should selected into the list of value",
+            "anyOf": [
+              {
+                "$ref": "#/definitions/VariableValuesCfg"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "VariableValuesCfg": {
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/LabelValueCfg"
+            }
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/AnyValue"
+            }
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "ignores": [
+          "path/to/ignore1",
+          "path/to/ignore2"
+        ],
+        "imports": [
+          {
+            "uri": "https://example.com/template1",
+            "rev ": "v1.0",
+            "subfolder ": "subfolder1"
+          },
+          {
+            "uri": "https://example.com/template2",
+            "subfolder ": "subfolder2"
+          }
+        ],
+        "scripts": [
+          {
+            "cmd": "echo 'Hello World!'",
+            "default_confirm_answer": "yes",
+            "message": "Execute command?"
+          },
+          {
+            "cmd": "ls -l",
+            "message": "List files?"
+          }
+        ],
+        "use_template_dir": true,
+        "variables": [
+          {
+            "name": "variable1",
+            "ask ": "Enter variable1 value",
+            "default_value ": "default_value1",
+            "hidden ": true,
+            "select_in_values ": [
+              {
+                "label": "Option 1",
+                "value": "option1"
+              },
+              {
+                "label": "Option 2",
+                "value": "option2"
+              }
+            ]
+          },
+          {
+            "name": "variable2",
+            "select_in_values ": [
+              "option1",
+              "option2",
+              "option3"
+            ]
+          },
+          {
+            "name": "variable3",
+            "select_in_values ": "option1,option2,option3"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "1.0 is not of types \"null\", \"string\"",
+      "python_error": "True is not of type 'string', 'null'\n\nFailed validating 'type' in schema['properties']['variables']['items']['properties']['hidden']:\n    {'description': 'is the variable hidden to the user (could be usefull '\n                    'to cache shared variable/data)',\n     'type': ['string', 'null']}\n\nOn instance['variables'][0]['hidden']:\n    True",
+      "data": {
+        "ignores": [
+          "path/to/ignore1",
+          "path/to/ignore2"
+        ],
+        "imports": [
+          {
+            "uri": "https://example.com/template1",
+            "rev": 1.0,
+            "subfolder": "subfolder1"
+          },
+          {
+            "uri": "https://example.com/template2",
+            "subfolder": "subfolder2"
+          }
+        ],
+        "scripts": [
+          {
+            "cmd": "echo 'Hello World!'",
+            "default_confirm_answer": "yes",
+            "message": "Execute command?"
+          },
+          {
+            "cmd": "ls -l",
+            "message": "List files?"
+          }
+        ],
+        "use_template_dir": true,
+        "variables": [
+          {
+            "name": "variable1",
+            "ask": "Enter variable1 value",
+            "default_value": "default_value1",
+            "hidden": true,
+            "select_in_values": [
+              {
+                "label": "Option 1",
+                "value": "option1"
+              },
+              {
+                "label": "Option 2",
+                "value": "option2"
+              }
+            ]
+          },
+          {
+            "name": "variable2",
+            "select_in_values": [
+              "option1",
+              "option2",
+              "option3"
+            ]
+          },
+          {
+            "name": "variable3",
+            "select_in_values": "option1,option2,option3"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "\"uri\" is a required property",
+      "python_error": "'name' is a required property\n\nFailed validating 'required' in schema['properties']['variables']['items']:\n    {'type': 'object',\n     'required': ['name'],\n     'properties': {'ask': {'description': 'sentence to ask the value '\n                                           '(default to the name on '\n                                           'variable)',\n                            'type': ['string', 'null']},\n                    'default_value': {'description': 'optionnal default '\n                                                     'value',\n                                      'anyOf': [{'$ref': '#/definitions/AnyValue'},\n                                                {'type': 'null'}]},\n                    'hidden': {'description': 'is the variable hidden to '\n                                              'the user (could be usefull '\n                                              'to cache shared '\n                                              'variable/data)',\n                               'type': ['str.. (748 more)",
+      "data": {
+        "ignores": [
+          "path/to/ignore1",
+          "path/to/ignore2"
+        ],
+        "imports": [
+          {
+            "rev": "v1.0",
+            "subfolder": "subfolder1",
+            "uri": "https://example.com/template1"
+          },
+          {
+            "subfolder": "subfolder2",
+            "uri": "https://example.com/template2"
+          },
+          {
+            "rev": "v3.0",
+            "subfolder": "subfolder3"
+          }
+        ],
+        "scripts": [
+          {
+            "cmd": "echo 'Hello World!'",
+            "default_confirm_answer": "yes",
+            "message": "Execute command?"
+          },
+          {
+            "cmd": "ls -l",
+            "message": "List files?"
+          }
+        ],
+        "use_template_dir": true,
+        "variables": [
+          {
+            "name": "variable1",
+            "ask": "Enter variable1 value",
+            "default_value": "default_value1",
+            "hidden": true,
+            "select_in_values": [
+              {
+                "label": "Option 1",
+                "value": "option1"
+              },
+              {
+                "label": "Option 2",
+                "value": "option2"
+              }
+            ]
+          },
+          {
+            "name": "variable2",
+            "select_in_values": [
+              "option1",
+              "option2",
+              "option3"
+            ]
+          },
+          {
+            "name": "variable3",
+            "select_in_values": "option1,option2,option3"
+          },
+          {
+            "select_in_values": "option1,option2,option3"
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on type keyword with an array of types",
+      "valid": false,
+      "rust_error": "true is not of types \"null\", \"string\"",
+      "python_error": "123 is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema[0]:\n    {'anyOf': [{'type': 'array',\n                'items': {'$ref': '#/definitions/LabelValueCfg'}},\n               {'type': 'array',\n                'items': {'$ref': '#/definitions/AnyValue'}},\n               {'type': 'string'}]}\n\nOn instance:\n    123",
+      "data": {
+        "ignores": [
+          "path/to/ignore1",
+          "path/to/ignore2"
+        ],
+        "imports": [
+          {
+            "rev": "v1.0",
+            "subfolder": "subfolder1",
+            "uri": "https://example.com/template1"
+          },
+          {
+            "subfolder": "subfolder2",
+            "uri": "https://example.com/template2"
+          }
+        ],
+        "scripts": [
+          {
+            "cmd": "echo 'Hello World!'",
+            "default_confirm_answer": "yes",
+            "message": "Execute command?"
+          },
+          {
+            "cmd": "ls -l",
+            "message": "List files?"
+          }
+        ],
+        "use_template_dir": true,
+        "variables": [
+          {
+            "name": "variable1",
+            "ask": "Enter variable1 value",
+            "default_value": "default_value1",
+            "hidden": true,
+            "select_in_values": [
+              {
+                "label": "Option 1",
+                "value": "option1"
+              },
+              {
+                "label": "Option 2",
+                "value": "option2"
+              }
+            ]
+          },
+          {
+            "name": "variable2",
+            "select_in_values": [
+              "option1",
+              "option2",
+              "option3"
+            ]
+          },
+          {
+            "name": "variable3",
+            "select_in_values": "option1,option2,option3"
+          },
+          {
+            "name": "variable4",
+            "select_in_values": 123
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "'name' is a required property\n\nFailed validating 'required' in schema['properties']['variables']['items']:\n    {'type': 'object',\n     'required': ['name'],\n     'properties': {'ask': {'description': 'sentence to ask the value '\n                                           '(default to the name on '\n                                           'variable)',\n                            'type': ['string', 'null']},\n                    'default_value': {'description': 'optionnal default '\n                                                     'value',\n                                      'anyOf': [{'$ref': '#/definitions/AnyValue'},\n                                                {'type': 'null'}]},\n                    'hidden': {'description': 'is the variable hidden to '\n                                              'the user (could be usefull '\n                                              'to cache shared '\n                                              'variable/data)',\n                               'type': ['str.. (938 more)",
+      "data": {
+        "ignores": [
+          "path/to/ignore1",
+          "path/to/ignore2",
+          123,
+          null
+        ],
+        "imports": [
+          {
+            "uri": "https://example.com/template1",
+            "rev ": "v1.0",
+            "subfolder ": "subfolder1"
+          },
+          {
+            "uri": "https://example.com/template2",
+            "subfolder ": "subfolder2"
+          },
+          {
+            "rev": "v1.0",
+            "subfolder ": "subfolder2"
+          }
+        ],
+        "scripts": [
+          {
+            "cmd": "echo 'Hello World!'",
+            "default_confirm_answer": "yes",
+            "message": "Execute command?"
+          },
+          {
+            "cmd": "ls -l",
+            "message": "List files?"
+          },
+          {
+            "default_confirm_answer": "yes",
+            "message": "Execute command?"
+          }
+        ],
+        "use_template_dir": true,
+        "variables": [
+          {
+            "name": "variable1",
+            "ask ": "Enter variable1 value",
+            "default_value ": "default_value1",
+            "hidden ": true,
+            "select_in_values ": [
+              {
+                "label": "Option 1",
+                "value": "option1"
+              },
+              {
+                "label": "Option 2",
+                "value": "option2"
+              }
+            ]
+          },
+          {
+            "name": "variable2",
+            "select_in_values ": [
+              "option1",
+              "option2",
+              "option3"
+            ]
+          },
+          {
+            "name": "variable3",
+            "select_in_values ": "option1,option2,option3"
+          },
+          {
+            "ask ": "Enter variable4 value",
+            "default_value ": "default_value4",
+            "hidden ": true,
+            "select_in_values ": [
+              {
+                "label": "Option 1",
+                "value": "option1"
+              },
+              {
+                "label": "Option 2",
+                "value": "option2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "'true' is not of type 'boolean'\n\nFailed validating 'type' in schema['properties']['use_template_dir']:\n    {'description': 'set to true if the template content is under a '\n                    '`template` folder (not mixed with metadata)',\n     'default': False,\n     'type': 'boolean'}\n\nOn instance['use_template_dir']:\n    'true'",
+      "data": {
+        "ignores": [
+          "path/to/ignore1",
+          123
+        ],
+        "imports": [
+          {
+            "rev": "v1.0",
+            "subfolder": "subfolder1",
+            "uri": "https://example.com/template1"
+          },
+          {
+            "uri": "https://example.com/template2",
+            "subfolder": 123
+          }
+        ],
+        "scripts": [
+          {
+            "cmd": "echo 'Hello World!'",
+            "default_confirm_answer": 123,
+            "message": "Execute command?"
+          },
+          {
+            "cmd": "ls -l",
+            "message": 123
+          }
+        ],
+        "use_template_dir": "true",
+        "variables": [
+          {
+            "name": 123,
+            "ask": "Enter variable1 value",
+            "default_value": "default_value1",
+            "hidden": true,
+            "select_in_values": [
+              {
+                "label": "Option 1",
+                "value": "option1"
+              },
+              {
+                "label": 123,
+                "value": "option2"
+              }
+            ]
+          },
+          {
+            "name": "variable2",
+            "select_in_values": [
+              "option1",
+              123,
+              "option3"
+            ]
+          },
+          {
+            "name": "variable3",
+            "select_in_values": 123
+          }
+        ]
+      }
+    }
+  ]
+}

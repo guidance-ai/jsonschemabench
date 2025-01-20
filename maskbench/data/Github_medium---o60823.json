@@ -1,0 +1,486 @@
+{
+  "description": "sample Github_medium/o60823.json",
+  "meta": {
+    "full_size": 744,
+    "stripped_size": 645,
+    "features": [
+      "@minmaxItems",
+      "additionalProperties",
+      "anyOf",
+      "enum",
+      "items"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "definitions",
+      "minItems",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:boolean",
+      "type:number",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "definitions": {},
+    "description": "api-box input json schema",
+    "properties": {
+      "endpoints": {
+        "items": {
+          "properties": {
+            "methods": {
+              "items": {
+                "properties": {
+                  "content_type": {
+                    "type": "string"
+                  },
+                  "input": {
+                    "type": "object"
+                  },
+                  "method": {
+                    "enum": [
+                      "GET",
+                      "POST",
+                      "PUT",
+                      "DELETE"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "object"
+                      },
+                      {
+                        "type": "array"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "method",
+                  "result"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array",
+              "_uniqueItems": true
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "type": "object"
+        },
+        "type": "array",
+        "_uniqueItems": true
+      },
+      "global": {
+        "type": "object"
+      },
+      "name": {
+        "type": "string"
+      },
+      "prefix": {
+        "type": "string"
+      },
+      "version": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "endpoints"
+    ],
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated valid",
+      "valid": true,
+      "data": {
+        "endpoints": [
+          {
+            "path": "/users",
+            "methods ": [
+              {
+                "method": "GET",
+                "result": {
+                  "users": [
+                    {
+                      "id": 1,
+                      "name": "John Doe"
+                    },
+                    {
+                      "id": 2,
+                      "name": "Jane Doe"
+                    }
+                  ]
+                }
+              },
+              {
+                "method": "POST",
+                "content_type": "application/json",
+                "input": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "result": {
+                  "id": 3,
+                  "name": "New User"
+                }
+              }
+            ]
+          },
+          {
+            "path": "/users/{id}",
+            "methods ": [
+              {
+                "method": "GET",
+                "result": {
+                  "id": 1,
+                  "name": "John Doe"
+                }
+              },
+              {
+                "method": "PUT",
+                "content_type": "application/json",
+                "input": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "result": {
+                  "id": 1,
+                  "name": "Updated User"
+                }
+              },
+              {
+                "method": "DELETE",
+                "result": true
+              }
+            ]
+          }
+        ],
+        "global": {},
+        "name": "User API",
+        "prefix": "/api/v1",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "None is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['endpoints']['items']['properties']['methods']['items']['properties']['result']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'number'},\n               {'type': 'boolean'},\n               {'type': 'object'},\n               {'type': 'array'}]}\n\nOn instance['endpoints'][0]['methods'][0]['result']:\n    None",
+      "data": {
+        "endpoints": [
+          {
+            "path": "/users",
+            "methods": [
+              {
+                "method": "GET",
+                "result": null
+              }
+            ]
+          }
+        ],
+        "global": {},
+        "name": "User API",
+        "prefix": "/api/v1",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['endpoints']['items']['properties']['methods']:\n    {'items': {'properties': {'content_type': {'type': 'string'},\n                              'input': {'type': 'object'},\n                              'method': {'enum': ['GET',\n                                                  'POST',\n                                                  'PUT',\n                                                  'DELETE']},\n                              'result': {'anyOf': [{'type': 'string'},\n                                                   {'type': 'number'},\n                                                   {'type': 'boolean'},\n                                                   {'type': 'object'},\n                                                   {'type': 'array'}]}},\n               'required': ['method', 'result'],\n               'type': 'object'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['endpoints'][0]['methods']:\n    []",
+      "data": {
+        "endpoints": [
+          {
+            "path": "/users",
+            "methods": []
+          },
+          {
+            "path": "/users/{id}",
+            "methods": [
+              {
+                "method": "GET",
+                "result": {
+                  "id": 1,
+                  "name": "John Doe"
+                }
+              },
+              {
+                "method": "PUT",
+                "content_type": "application/json",
+                "input": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "result": {
+                  "id": 1,
+                  "name": "Updated User"
+                }
+              },
+              {
+                "method": "DELETE",
+                "result": true
+              }
+            ]
+          }
+        ],
+        "global": {},
+        "name": "User API",
+        "prefix": "/api/v1",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "Additional properties are not allowed ('extra_property' was unexpected)",
+      "python_error": "Additional properties are not allowed ('extra_property' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'additionalProperties': False,\n     'definitions': {},\n     'description': 'api-box input json schema',\n     'properties': {'endpoints': {'items': {'properties': {'methods': {'items': {'properties': {'content_type': {'type': 'string'},\n                                                                                                'input': {'type': 'object'},\n                                                                                                'method': {'enum': ['GET',\n                                                                                                                    'POST',\n                                                                                                                    'PUT',\n                                                                                                                    'DELETE']},\n                                   .. (3433 more)",
+      "data": {
+        "endpoints": [
+          {
+            "methods": [
+              {
+                "method": "GET",
+                "result": {
+                  "users": [
+                    {
+                      "id": 1,
+                      "name": "John Doe"
+                    },
+                    {
+                      "id": 2,
+                      "name": "Jane Doe"
+                    }
+                  ]
+                }
+              },
+              {
+                "content_type": "application/json",
+                "input": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "method": "POST",
+                "result": {
+                  "id": 3,
+                  "name": "New User"
+                }
+              }
+            ],
+            "path": "/users"
+          },
+          {
+            "methods": [
+              {
+                "method": "GET",
+                "result": {
+                  "id": 1,
+                  "name": "John Doe"
+                }
+              },
+              {
+                "content_type": "application/json",
+                "input": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "method": "PUT",
+                "result": {
+                  "id": 1,
+                  "name": "Updated User"
+                }
+              },
+              {
+                "method": "DELETE",
+                "result": "Invalid result type"
+              }
+            ],
+            "path": "/users/{id}"
+          }
+        ],
+        "global": {},
+        "name": "User API",
+        "prefix": "/api/v1",
+        "version": "1.0.0",
+        "extra_property": "This is an extra property"
+      }
+    },
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "endpoints": [
+          {
+            "methods": [
+              {
+                "method": "GET",
+                "result": {
+                  "users": [
+                    {
+                      "id": 1,
+                      "name": "John Doe"
+                    },
+                    {
+                      "id": 2,
+                      "name": "Jane Doe"
+                    }
+                  ]
+                }
+              },
+              {
+                "content_type": "application/json",
+                "input": {
+                  "name": "string",
+                  "email": "string"
+                },
+                "method": "POST",
+                "result": {
+                  "id": 3,
+                  "name": "New User"
+                }
+              }
+            ],
+            "path": "/users"
+          },
+          {
+            "methods": [
+              {
+                "method": "GET",
+                "result": {
+                  "id": 1,
+                  "name": "John Doe"
+                }
+              },
+              {
+                "content_type": "application/json",
+                "input": {
+                  "name": "string",
+                  "email": "string"
+                },
+                "method": "PUT",
+                "result": true
+              },
+              {
+                "method": "DELETE",
+                "result": true
+              }
+            ],
+            "path": "/users/{id}"
+          }
+        ],
+        "global": {},
+        "name": "Example API",
+        "prefix": "/api",
+        "version": "1.0"
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on anyOf keyword",
+      "valid": false,
+      "rust_error": "null is not valid under any of the schemas listed in the 'anyOf' keyword",
+      "python_error": "None is not valid under any of the given schemas\n\nFailed validating 'anyOf' in schema['properties']['endpoints']['items']['properties']['methods']['items']['properties']['result']:\n    {'anyOf': [{'type': 'string'},\n               {'type': 'number'},\n               {'type': 'boolean'},\n               {'type': 'object'},\n               {'type': 'array'}]}\n\nOn instance['endpoints'][0]['methods'][0]['result']:\n    None",
+      "data": {
+        "name": "Example API",
+        "version": "1.0",
+        "prefix": "/api",
+        "global": {},
+        "endpoints": [
+          {
+            "path": "/users",
+            "methods": [
+              {
+                "method": "GET",
+                "result": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on minItems keyword",
+      "valid": false,
+      "rust_error": "[] has less than 1 item",
+      "python_error": "[] should be non-empty\n\nFailed validating 'minItems' in schema['properties']['endpoints']['items']['properties']['methods']:\n    {'items': {'properties': {'content_type': {'type': 'string'},\n                              'input': {'type': 'object'},\n                              'method': {'enum': ['GET',\n                                                  'POST',\n                                                  'PUT',\n                                                  'DELETE']},\n                              'result': {'anyOf': [{'type': 'string'},\n                                                   {'type': 'number'},\n                                                   {'type': 'boolean'},\n                                                   {'type': 'object'},\n                                                   {'type': 'array'}]}},\n               'required': ['method', 'result'],\n               'type': 'object'},\n     'minItems': 1,\n     'type': 'array',\n     '_uniqueItems': True}\n\nOn instance['endpoints'][0]['methods']:\n    []",
+      "data": {
+        "name": "Example API",
+        "version": "1.0",
+        "prefix": "/api",
+        "global": {},
+        "endpoints": [
+          {
+            "path": "/users",
+            "methods": []
+          },
+          {
+            "path": "/users/{id}",
+            "methods": [
+              {
+                "method": "GET",
+                "result": {
+                  "id": 1,
+                  "name": "John Doe"
+                }
+              },
+              {
+                "method": "PUT",
+                "content_type": "application/json",
+                "input": {
+                  "name": "string",
+                  "email": "string"
+                },
+                "result": true
+              },
+              {
+                "method": "DELETE",
+                "result": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

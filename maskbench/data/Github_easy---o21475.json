@@ -1,0 +1,158 @@
+{
+  "description": "sample Github_easy/o21475.json",
+  "meta": {
+    "full_size": 457,
+    "stripped_size": 406,
+    "features": [
+      "additionalProperties",
+      "items",
+      "oneOf",
+      "pattern"
+    ],
+    "raw_features": [
+      "_boolSchema",
+      "properties",
+      "required",
+      "type",
+      "type:array",
+      "type:integer",
+      "type:object",
+      "type:string"
+    ]
+  },
+  "schema": {
+    "additionalProperties": false,
+    "properties": {
+      "dimensions": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "filters": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "id": {
+        "pattern": "^[a-z0-9:]+$",
+        "type": "string"
+      },
+      "maxResults": {
+        "type": "integer"
+      },
+      "metrics": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "sort": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "metrics"
+    ],
+    "title": "Google Analytics Content Collector Query",
+    "type": "object"
+  },
+  "tests": [
+    {
+      "description": "llama 70b generated positive",
+      "valid": true,
+      "data": {
+        "dimensions": [
+          "ga:date",
+          "ga:source"
+        ],
+        "filters": [
+          "ga:medium==organic"
+        ],
+        "id": "ga:123456789",
+        "maxResults": 1000,
+        "metrics": "ga:users",
+        "sort": [
+          "-ga:users"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on pattern keyword",
+      "valid": false,
+      "rust_error": "\"ga:123456789!\" does not match \"^[a-z0-9:]+$\"",
+      "python_error": "'ga:123456789!' does not match '^[a-z0-9:]+$'\n\nFailed validating 'pattern' in schema['properties']['id']:\n    {'pattern': '^[a-z0-9:]+$', 'type': 'string'}\n\nOn instance['id']:\n    'ga:123456789!'",
+      "data": {
+        "dimensions": [
+          "ga:date",
+          "ga:source"
+        ],
+        "filters": [
+          "ga:medium==organic"
+        ],
+        "id": "ga:123456789!",
+        "maxResults": 1000,
+        "metrics": "ga:users",
+        "sort": [
+          "-ga:users"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative; focus on oneOf keyword",
+      "valid": false,
+      "rust_error": "{\"foo\":\"bar\"} is not valid under any of the schemas listed in the 'oneOf' keyword",
+      "python_error": "{'foo': 'bar'} is not valid under any of the given schemas\n\nFailed validating 'oneOf' in schema['properties']['metrics']:\n    {'oneOf': [{'type': 'string'},\n               {'items': {'type': 'string'}, 'type': 'array'}]}\n\nOn instance['metrics']:\n    {'foo': 'bar'}",
+      "data": {
+        "id": "ga:123456789",
+        "metrics": {
+          "foo": "bar"
+        },
+        "dimensions": [
+          "ga:date",
+          "ga:source"
+        ],
+        "filters": [
+          "ga:medium==organic"
+        ],
+        "maxResults": 1000,
+        "sort": [
+          "-ga:users"
+        ]
+      }
+    },
+    {
+      "description": "llama-70b generated negative",
+      "valid": false,
+      "rust_error": "123 is not of type \"string\"",
+      "python_error": "123 is not of type 'string'\n\nFailed validating 'type' in schema['properties']['dimensions']['items']:\n    {'type': 'string'}\n\nOn instance['dimensions'][1]:\n    123",
+      "data": {
+        "id": "ga:123456789",
+        "metrics": "ga:users",
+        "dimensions": [
+          "ga:date",
+          123,
+          "ga:source"
+        ],
+        "filters": [
+          "ga:medium==organic"
+        ],
+        "maxResults": 1000,
+        "sort": [
+          "-ga:users"
+        ]
+      }
+    }
+  ]
+}
