@@ -203,7 +203,7 @@ def main(folder: str):
     return stats, entries
 
 
-def print_markdown_table(data):
+def markdown_table(data):
     # Determine the column widths
     col_widths = [max(len(row[col]) for row in data) for col in range(len(data[0]))]
 
@@ -232,7 +232,6 @@ def print_markdown_table(data):
     for row in data[1:]:
         r += format_row(row)
 
-    print(r)
     return r
 
 
@@ -254,9 +253,18 @@ def format_time(time_us: int):
     return result
 
 
+plot_colors = {
+    "llg": "#000000",
+    "xgr": 9,
+    "llamacpp": 1,
+    "xgr-cpp": 0,
+    "outlines": 2,
+}
+
+
 def plot_metrics(data_list: list[dict], prefix: str, title: str):
     tbm_keys = [key for key in data_list[0].keys() if key.startswith(prefix)]
-    labels = [data["name"] for data in data_list]
+    labels = [data["meta"]["name"] for data in data_list]
     values = {
         label: [data[key] for key in tbm_keys] for label, data in zip(labels, data_list)
     }
@@ -266,10 +274,10 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
     height = 0.8 / len(labels)
 
     # Set up the plot
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(10, 10))
     bar_positions = []
 
-    cmap = plt.get_cmap('tab10')
+    cmap = plt.get_cmap("tab10")
 
     custom_colors = [
         "#000000",
@@ -278,13 +286,12 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
         "#d16626",
     ]
 
-    custom_colors = [
-        "#000000",
-        cmap(9),
-        cmap(0),
-        cmap(1),
-        cmap(3),
-    ]
+    custom_colors = []
+    for c in plot_colors.values():
+        if isinstance(c, int):
+            custom_colors.append(cmap(c))
+        else:
+            custom_colors.append(c)
 
     for i, (label, tbm_values) in enumerate(values.items()):
         pos = y + (len(labels) - i - 1) * height - 0.4 + (height / 2)
@@ -351,6 +358,7 @@ if __name__ == "__main__":
         folders = [os.path.dirname(m) for m in metas]
 
     ents: list[dict] = []
+    all_stats: list[Stats] = []
     hd = ["metric"]
     for fld in folders:
         if quick:
@@ -359,19 +367,35 @@ if __name__ == "__main__":
             entries = read_json(fld + "/entries.txt")
         else:
             stats, entries = main(fld)
-        entries["name"] = stats.meta["name"]
+        entries["meta"] = stats.meta
         ents.append(entries)
-    ents.sort(key=lambda e: -e["tokens"])
-    hd += [e["name"] for e in ents]
+        all_stats.append(stats)
+
+    positions = list(plot_colors.keys())
+    ents.sort(key=lambda e: positions.index(e["meta"]["id"]))
+
+    hd += [e["meta"]["name"] for e in ents]
     rows = [hd]
     for k in ents[0].keys():
-        if k == "name":
+        if k == "meta":
             continue
         line = [k]
         for e in ents:
             line.append(f"{e[k]:,}")
         rows.append(line)
-    tbl = print_markdown_table(rows)
+    tbl = markdown_table(rows)
+
+    tbl += "\n\n### Versions\n\n"
+    seen_modules = set()
+    for st in ents:
+        meta = st["meta"]
+        module = meta["module"]
+        if module in seen_modules:
+            continue
+        seen_modules.add(module)
+        tbl += f"* {module}: {meta['module_version']}\n"
+
+    print(tbl)
 
     with open("README.md", "r") as f:
         rdm = f.read()

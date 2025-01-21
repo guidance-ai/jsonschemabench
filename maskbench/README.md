@@ -27,12 +27,20 @@ for a total of about 2M tokens.
     <img src="plots/ttfm.png" />
 </p>
 
+## Engines
+
 We have run the following grammar engines:
 
-- [LLGuidance](https://github.com/guidance-ai/llguidance) v0.6.7
-- [XGrammar](https://github.com/mlc-ai/xgrammar) v0.1.10 in default configuration
-- "XGrammar.cpp", using [llama.cpp](https://github.com/ggerganov/llama.cpp) script [json_schema_to_grammar.py](https://github.com/ggerganov/llama.cpp/blob/master/examples/json_schema_to_grammar.py) and XGrammar engine
-- [Outlines](https://github.com/dottxt-ai/outlines) v0.1.13
+- [LLGuidance](https://github.com/guidance-ai/llguidance)
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) grammars,
+  with [json_schema_to_grammar.py](https://github.com/ggerganov/llama.cpp/blob/master/examples/json_schema_to_grammar.py)
+  with whitespace regex modified to `/[ \t\n\r]*/` to match JSON definition
+  (by default it puts limits on the amount of whitespace, which slows down the engine)
+- [XGrammar](https://github.com/mlc-ai/xgrammar) in default configuration
+- "XGrammar.cpp", which is XGrammar engine together with the above script
+- [Outlines](https://github.com/dottxt-ai/outlines)
+
+## Test setup
 
 All tests were run on
 [Azure NC96ads_A100_v4](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/nca100v4-series?tabs=sizebasic)
@@ -41,7 +49,7 @@ with 880 GiB of RAM and 4xA100 80GB PCIe GPUs (though GPUs were not used).
 
 There was a time limit of 15 minutes per schema,
 memory limit of 40GiB resident set size (which works out to a few GiB of working set)
-and a 90 running thread limit (these are all defaults, except for thread limit which
+and a 40 running thread limit (these are all defaults, except for thread limit which
 will be lower on lesser machines).
 
 We run every engine single-threaded, under the assumption that for heavy
@@ -51,7 +59,27 @@ We've set XGrammar to only use one thread and LLGuidance always uses one thread.
 Outlines seems to be using more than one thread, so we instead run it with 90
 threads in parallel to limit the CPU this way.
 
-Random notes:
+## Discussion
+
+Grammar compilation time (TTFM) is almost instantaneous for LLGuidance and llama.cpp
+(the high p100 time for llama.cpp is likely due to Python implementation of JSON Schema conversion).
+Outlines has by far the highest TTFM, and this doesn't account for over 1000 timeouts (15 minutes or more).
+Observed XGrammar's TTFM can likely often be hidden in prefill time, provided the computation is parallelized,
+but it's consistently 3-4 orders of magnitude slower than LLGuidance and llama.cpp.
+
+For mask computation time (TBM), XGrammar in its default settings beats LLGuidance
+up to p75 (the easy cases), but becomes 2x slower at p90 and 10x slower at p99.
+Due to this slow tail, LLGuidance is 6x faster than XGrammar on average.
+
+When a comparable grammar is considered (XGrammar.cpp), XGrammar is much slower
+than LLGuidance (2-3 orders of magnitude) from p50 onwards,
+and 3 orders of magnitude slower on average.
+Interestingly, llama.cpp using the same grammar as XGrammar is in fact faster
+on average and by 1 order of magnitude above p75.
+
+Outlines, despite having everything pre-computed, is very slow.
+
+## Random notes
 
 - for TBM, with batch size 100 and forward pass time of 20ms, the p99 happens 50 times per second,
   and p99.9 happens 5 times per second; unless handled specially, these mask computations
@@ -77,35 +105,43 @@ Random notes:
 
 
 <!-- GEN-BEGIN -->
-| metric             | LLGuidance |    XGrammar | XGrammar.cpp |    Outlines |
-|:-------------------|-----------:|------------:|-------------:|------------:|
-| TBM avg (us)       |         49 |         292 |       65,291 |      59,420 |
-| TBM p25            |         16 |           3 |            9 |          16 |
-| TBM p50            |         36 |           8 |          859 |         118 |
-| TBM p75            |         43 |          54 |      125,984 |     133,981 |
-| TBM p90            |         61 |         117 |      188,490 |     200,689 |
-| TBM p95            |        100 |         294 |      244,471 |     243,995 |
-| TBM p99            |        468 |       4,936 |      616,316 |     358,041 |
-| TBM p99.9          |      1,468 |      44,687 |    1,787,863 |     598,956 |
-| TBM p100           |     66,397 |     694,664 |    8,009,566 |   1,260,641 |
-| TTFM avg (us)      |      1,637 |   4,137,530 |    3,696,374 |  37,948,447 |
-| TTFM p25           |        795 |     432,583 |      421,313 |   3,928,969 |
-| TTFM p50           |        984 |     535,498 |      706,548 |   6,987,012 |
-| TTFM p75           |      1,420 |   1,043,954 |    1,134,304 |  16,556,110 |
-| TTFM p90           |      2,646 |   2,996,171 |    2,955,676 |  78,684,322 |
-| TTFM p95           |      4,704 |   7,379,516 |    7,176,634 | 206,301,765 |
-| TTFM p99           |     14,526 |  62,151,076 |   42,872,915 | 621,693,634 |
-| TTFM p99.9         |     24,979 | 521,102,130 |  531,718,350 | 853,211,644 |
-| TTFM p100          |    160,896 | 837,805,312 |  629,500,663 | 888,396,817 |
-| tokens             |  2,565,234 |   2,096,637 |    1,461,375 |   1,042,656 |
-| schemas            |     10,163 |      10,163 |       10,163 |      10,163 |
-| passing            |      7,765 |       5,216 |        5,356 |       4,259 |
-| compile error      |      2,373 |       2,089 |        1,709 |       3,608 |
-| segmentation fault |          0 |         189 |            1 |           0 |
-| out of memory      |          0 |           0 |            0 |          13 |
-| timeout            |          0 |          11 |           49 |       1,020 |
-| validation error   |         24 |       1,409 |        2,726 |         649 |
-| invalidation error |          0 |       1,249 |          322 |         614 |
+| metric             | LLGuidance | XGrammar (defl.) |  llama.cpp | XGrammar.cpp |    Outlines |
+|:-------------------|-----------:|-----------------:|-----------:|-------------:|------------:|
+| TBM avg (us)       |         47 |              292 |     14,523 |       64,805 |      59,420 |
+| TBM p25            |         16 |                3 |         87 |            7 |          16 |
+| TBM p50            |         36 |                8 |     14,483 |          866 |         118 |
+| TBM p75            |         43 |               54 |     20,038 |      123,211 |     133,981 |
+| TBM p90            |         60 |              117 |     22,743 |      185,712 |     200,689 |
+| TBM p95            |         98 |              294 |     25,111 |      242,835 |     243,995 |
+| TBM p99            |        460 |            4,936 |     57,317 |      615,009 |     358,041 |
+| TBM p99.9          |      1,453 |           44,687 |    268,292 |    1,923,424 |     598,956 |
+| TBM p100           |     20,007 |          694,664 |  1,083,198 |    7,975,547 |   1,260,641 |
+| TTFM avg (us)      |      1,611 |        4,137,527 |      3,117 |    3,347,141 |  37,948,447 |
+| TTFM p25           |        792 |          432,583 |        209 |      240,697 |   3,928,969 |
+| TTFM p50           |        987 |          535,498 |        307 |      534,235 |   6,987,012 |
+| TTFM p75           |      1,402 |        1,043,954 |        671 |      971,319 |  16,556,110 |
+| TTFM p90           |      2,584 |        2,996,171 |      1,909 |    2,827,280 |  78,684,322 |
+| TTFM p95           |      4,408 |        7,379,516 |      4,475 |    6,918,368 | 206,301,765 |
+| TTFM p99           |     14,180 |       62,151,076 |     31,263 |   41,703,619 | 621,693,634 |
+| TTFM p99.9         |     24,604 |      521,102,130 |    179,470 |  424,413,135 | 853,211,644 |
+| TTFM p100          |    170,635 |      837,805,312 | 10,076,300 |  517,111,658 | 888,396,817 |
+| tokens             |  2,565,248 |        2,096,637 |  2,035,114 |    1,461,592 |   1,042,656 |
+| schemas            |     10,163 |           10,163 |     10,163 |       10,163 |      10,163 |
+| passing            |      7,765 |            5,216 |      5,476 |        5,356 |       4,259 |
+| compile error      |      2,373 |            2,089 |      1,292 |        1,709 |       3,608 |
+| segmentation fault |          0 |              189 |          0 |            1 |           0 |
+| out of memory      |          0 |                0 |          0 |            0 |          13 |
+| timeout            |          0 |               11 |          1 |           48 |       1,020 |
+| validation error   |         25 |            1,409 |      2,745 |        2,726 |         649 |
+| invalidation error |          0 |            1,249 |        649 |          323 |         614 |
+
+
+### Versions
+
+* llguidance: 0.6.7
+* xgrammar: 0.1.10
+* llama-cpp-python: 0.3.6
+* outlines: 0.1.13
 <!-- GEN-END -->
 
 ## Reproducing
