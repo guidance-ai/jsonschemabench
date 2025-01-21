@@ -7,21 +7,20 @@ import os
 import random
 import time
 import resource
+import argparse
+import signal
 
-from huggingface_hub import hf_hub_download
-
-import llguidance as llg
-
-output_path = "tmp/output/"
+from .engine import Engine
+from transformers import AutoTokenizer
 
 
 def time_us(prev: float) -> int:
     return int((time.monotonic() - prev) * 1000000)
 
 
-def process_file(file: str):
+def process_file(engine: Engine, file: str):
     id = os.path.basename(file)
-    output_name = output_path + id
+    output_name = os.path.join(output_path, id)
     if os.path.exists(output_name):
         return None
 
@@ -31,10 +30,10 @@ def process_file(file: str):
     except FileExistsError:
         return None
 
+    print(file, file=sys.stderr)
+
     with open(file) as f:
         pos_data = json.loads(f.read())
-
-    grammars = json.dumps({"grammars": [{"json_schema": pos_data["schema"]}]})
 
     all_mask_us = []
     status = {
@@ -52,10 +51,7 @@ def process_file(file: str):
 
     try:
         t0 = time.monotonic()
-        interp = llg.LLInterpreter(
-            tokenizer, grammars, enable_backtrack=False, enable_ff_tokens=False
-        )
-        interp.start_without_prompt()
+        engine.compile_grammar(pos_data["schema"])
     except Exception as e:
         status["compile_error"] = repr(e)
         with open(output_name, "w") as f:
@@ -69,21 +65,17 @@ def process_file(file: str):
     max_mask_us = 0
     num_tokens = 0
 
-    mask_data = bytearray((tokenizer.vocab_size + 7) // 8)
-
     for i, test in enumerate(pos_data["tests"]):
-        matcher = interp.deep_copy()
-        instance = json.dumps(test["data"], indent=None)
-        tokens = tokenizer.tokenize_str(instance)
+        engine.reset()
 
-        t1 = time.monotonic()
+        instance = json.dumps(test["data"], indent=None, ensure_ascii=False)
+        tokens = engine.tokenizer.encode(instance, add_special_tokens=False)
+
         accepted = True
         for tidx, t in enumerate(tokens):
             t2 = time.monotonic()
-            res = matcher.compute_mask_into(mask_data)
-            ok = (mask_data[t // 8] & (1 << (t % 8))) != 0
-            if ok:
-                matcher.commit_token(t)
+            engine.compute_mask()
+            ok = engine.commit_token(t)
             mask_time = time_us(t2)
             # print(f"Token {tidx} {repr(tokenizer.decode([t]))}: {ok}", file=sys.stderr)
             num_tokens += 1
@@ -115,17 +107,61 @@ def process_file(file: str):
 
 
 def main():
-    global tokenizer
+    global output_path
 
-    limit_gb = 32
+    limit_gb = 40
     limit_bytes = limit_gb * 1024 * 1024 * 1024
     resource.setrlimit(resource.RLIMIT_AS, (limit_bytes, limit_bytes))
 
+    time_limit_s = 15 * 60
+
+    parser = argparse.ArgumentParser(description="Run mask computation.")
+    parser.add_argument("--xgr", action="store_true", help="Enable XGrammar")
+    parser.add_argument(
+        "--xgr-compliant",
+        action="store_true",
+        help="Enable XGrammar in compliant (non-strict, any whitespace) mode",
+    )
+    parser.add_argument("--llg", action="store_true", help="Enable LLGuidance")
+    parser.add_argument("--outlines", action="store_true", help="Enable Outlines")
+    parser.add_argument("--output", type=str, help="Output path")
+    parser.add_argument(
+        "files", metavar="file", type=str, nargs="+", help="List of files to process"
+    )
+
+    args = parser.parse_args()
+
     # Get tokenizer info
     model_id = "meta-llama/Llama-3.1-8B-Instruct"
-    tokenizer_json_path = hf_hub_download(repo_id=model_id, filename="tokenizer.json")
-    with open(tokenizer_json_path, "r") as f:
-        tokenizer = llg.LLTokenizer(f.read())
+
+    if args.xgr or args.xgr_compliant:
+        from .xgr_engine import XgrEngine
+
+        engine = XgrEngine()
+        engine.compliant = args.xgr_compliant
+        id = "xgr_compliant" if args.xgr_compliant else "xgr"
+    elif args.llg:
+        from .llg_engine import LlgEngine
+
+        engine = LlgEngine()
+        id = "llg"
+    elif args.outlines:
+        from .outlines_engine import OutlinesEngine
+
+        engine = OutlinesEngine()
+        id = "outlines"
+    else:
+        raise Exception("No mode specified")
+
+    if args.output:
+        output_path = args.output
+    else:
+        output_path = f"tmp/out-{id}"
+
+    engine.tokenizer_model_id = model_id
+    engine.tokenizer = AutoTokenizer.from_pretrained(model_id)  # type: ignore
+
+    engine.init()
 
     files = []
     for arg in sys.argv[1:]:
@@ -133,14 +169,23 @@ def main():
             files.append(arg)
         else:
             files.extend(glob.glob(arg + "/*.json"))
-    # print(len(files), file=sys.stderr)
+    print(f"{len(files)} files, timeout {time_limit_s}s", file=sys.stderr)
     random.shuffle(files)
 
     os.makedirs(output_path, exist_ok=True)
 
+    # rely on default SIGALRM handler (terminates the process)
+    # def timeout_handler(signum, frame):
+    #     print(f"Timeout ({time_limit_s}s). Terminating...", file=sys.stderr)
+    #     os.kill(os.getpid(), signal.SIGKILL)
+
+    # signal.signal(signal.SIGALRM, timeout_handler)
+
     for f in files:
-        # print(f, file=sys.stderr)
-        process_file(f)
+        signal.alarm(time_limit_s)
+        process_file(engine, f)
+        signal.alarm(0)
 
 
-main()
+if __name__ == "__main__":
+    main()

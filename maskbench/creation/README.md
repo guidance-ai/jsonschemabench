@@ -1,4 +1,6 @@
-Note, `unique_tests` is now `maskbench/data` ; some scripts have not been updated.
+Note, `unique_tests` is now `maskbench/data` and `json` is `data`.
+
+Scripts have not been updated yet.
 
 Typical script usage:
 
