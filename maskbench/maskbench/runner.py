@@ -147,7 +147,7 @@ def setup_argparse():
         "--mem-limit", type=int, default=40, help="Memory (RSS) limit in gigabytes"
     )
 
-    defl_cpu = min(os.cpu_count(), 40)
+    defl_cpu = min(os.cpu_count(), 90)
     parser.add_argument(
         "--num-threads", type=int, default=defl_cpu, help="Number of threads to run"
     )

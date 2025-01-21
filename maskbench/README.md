@@ -33,7 +33,7 @@ with 880 GiB of RAM and 4xA100 80GB PCIe GPUs (though GPUs were not used).
 
 There was a time limit of 15 minutes per schema,
 memory limit of 40GiB resident set size (which works out to a few GiB of working set)
-and a 40 running thread limit (these are all defaults, except for thread limit which
+and a 90 running thread limit (these are all defaults, except for thread limit which
 will be lower on lesser machines).
 
 We run every engine single-threaded, under the assumption that for heavy

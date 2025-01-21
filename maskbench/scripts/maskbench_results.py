@@ -4,7 +4,7 @@ import json
 import math
 import glob
 import sys
-
+import os
 
 class Stats:
     def __init__(self) -> None:
@@ -58,8 +58,10 @@ def us_to_str(us: int):
     return f"{us//1000000}s"
 
 
-def main(args: list[str]):
+def main(folder: str):
     # for llg rust: "tmp/llg_results.json"
+    if os.path.isdir(folder):
+        files = glob.glob(folder + "/*.json")
     files = []
     for arg in args:
         if arg.endswith(".json"):
