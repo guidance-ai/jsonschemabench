@@ -176,7 +176,7 @@ def main(folder: str):
     entries["tokens"] = stats.num_tokens
     entries["schemas"] = stats.num_schemas
     entries["passing"] = stats.num_schemas_ok
-    entries["crashes"] = stats.num_crashes_or_timeouts
+    # entries["crashes"] = stats.num_crashes_or_timeouts
     entries["segv"] = stats.num_segv
     entries["oom"] = stats.num_abort
     entries["timeouts"] = stats.num_timeouts

@@ -51,6 +51,21 @@ We've set XGrammar to only use one thread and LLGuidance always uses one thread.
 Outlines seems to be using more than one thread, so we instead run it with 90
 threads in parallel to limit the CPU this way.
 
+Random notes:
+- for TBM, with batch size 100 and forward pass time of 20ms, the p99 happens 50 times per second,
+  and p99.9 happens 5 times per second; unless handled specially, these mask computations
+  will hold the entire batch
+- the TTFM is cut off at 900s due to timeout (especially for Outlines)
+- while LLGuidance has the biggest number of compile errors,
+  it has almost no validation errors nor crashes;
+  in other words it's upfront about what it cannot do
+- the "invalidation errors" are cases where a generation should be rejected,
+  but wasn't; these are clear bugs
+- "validation errors" may be more tricky due to object property ordering;
+  however, all engines stick to definition order in `properties`,
+  and engines other than LLGuidance don't support `allOf` and sibling properties
+  (which introduces complications to the ordering)
+
 <!-- GEN-BEGIN -->
 | metric              | LLGuidance | XGrammar (defl.) |    XGrammar |    Outlines |
 |:--------------------|-----------:|-----------------:|------------:|------------:|
@@ -75,7 +90,6 @@ threads in parallel to limit the CPU this way.
 | tokens              |  2,565,234 |        2,096,637 |   2,709,854 |   1,042,656 |
 | schemas             |     10,163 |           10,163 |      10,163 |      10,163 |
 | passing             |      7,765 |            5,216 |       4,719 |       4,259 |
-| crashes             |          1 |              200 |         270 |       1,033 |
 | segv                |          0 |              189 |         187 |           0 |
 | oom                 |          0 |                0 |           0 |          13 |
 | timeouts            |          0 |               11 |          83 |       1,020 |
