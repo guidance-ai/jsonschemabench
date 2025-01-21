@@ -6,8 +6,14 @@ import glob
 import sys
 import os
 
+import matplotlib.pyplot as plt
+import numpy as np
+import math
+
+
 class Stats:
     def __init__(self) -> None:
+        self.meta = {}
         self.ttfm_us = 0
         self.max_ttfm_us = 0
         self.masks_us = 0
@@ -21,7 +27,10 @@ class Stats:
         self.max_mask_us = 0
         self.num_tokens = 0
         self.num_schemas = 0
-        self.num_crashes = 0
+        self.num_crashes_or_timeouts = 0
+        self.num_timeouts = 0
+        self.num_segv = 0
+        self.num_abort = 0
         self.num_schemas_ok = 0
         self.num_compilation_errors = 0
         self.num_validation_errors = 0
@@ -29,6 +38,11 @@ class Stats:
         self.num_tests = 0
         self.num_valid_tests = 0
         self.num_invalid_tests = 0
+
+    def load_json(self, data: dict):
+        for k in self.__dict__.keys():
+            if k in data:
+                self.__dict__[k] = data[k]
 
 
 def log_fraction_plot(times: list[int]):
@@ -58,19 +72,21 @@ def us_to_str(us: int):
     return f"{us//1000000}s"
 
 
+def read_json(filename: str):
+    with open(filename) as f:
+        data = json.load(f)
+    return data
+
+
 def main(folder: str):
     # for llg rust: "tmp/llg_results.json"
-    if os.path.isdir(folder):
-        files = glob.glob(folder + "/*.json")
-    files = []
-    for arg in args:
-        if arg.endswith(".json"):
-            files.append(arg)
-        else:
-            files.extend(glob.glob(arg + "/*.json"))
+    if not os.path.isdir(folder):
+        raise Exception(f"Not a directory: {folder}")
+    files = glob.glob(folder + "/*.json")
     files = sorted(files)
 
     stats = Stats()
+    stats.meta = read_json(folder + "/meta.txt")
     ttfm_us = []
     all_masks_us = []
     histogram_us = [0] * 10
@@ -84,7 +100,7 @@ def main(folder: str):
         for data in elts:
             stats.num_schemas += 1
             if "num_tests" not in data:
-                stats.num_crashes += 1
+                stats.num_crashes_or_timeouts += 1
                 continue
             stats.num_tests += data["num_tests"]
             if "compile_error" in data:
@@ -121,29 +137,52 @@ def main(folder: str):
     stats.avg_masks_over_10ms = stats.masks_us_over_10ms // stats.num_masks_over_10ms
     stats.avg_mask_us = stats.masks_us // stats.num_tokens
     print(json.dumps(stats.__dict__, indent=2))
-    with open("tmp/xgr_ttfm_us.csv", "w") as f:
+    with open(folder + "/stats.txt", "w") as f:
+        f.write(json.dumps(stats.__dict__, indent=2))
+    with open(folder + "/ttfm_us.csv", "w") as f:
         f.write(log_fraction_plot(ttfm_us))
-    with open("tmp/xgr_masks_us.csv", "w") as f:
+    with open(folder + "/masks_us.csv", "w") as f:
         f.write(log_fraction_plot(all_masks_us))
 
-    ps = [25, 50, 75, 90, 95, 99, 99.9, 99.99]
+    with open(folder + "/log.txt", "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.strip()
+            if line == "Exit code: -11":
+                stats.num_segv += 1
+            elif line == "Exit code: -6":
+                stats.num_abort += 1
+            elif line == "Exit code: -14":
+                stats.num_timeouts += 1
+
+    ps = [25, 50, 75, 90, 95, 99, 99.9, 100]
+
+    def get_p(arr: list[int], p: float):
+        idx = int(len(arr) * p / 100)
+        if idx >= len(arr):
+            idx = len(arr) - 1
+        return arr[idx]
+
     entries = {}
     all_masks_us.sort()
     entries["TBM avg (us)"] = sum(all_masks_us) // len(all_masks_us)
     for p in ps:
-        entries[f"TBM p{p}"] = all_masks_us[int(len(all_masks_us) * p / 100)]
+        entries[f"TBM p{p}"] = get_p(all_masks_us, p)
     ttfm_us.sort()
-    entries["TTFM avg (ms)"] = sum(ttfm_us) // len(ttfm_us) // 1000
+    entries["TTFM avg (us)"] = sum(ttfm_us) // len(ttfm_us)
     for p in ps:
-        entries[f"TTFM p{p}"] = ttfm_us[int(len(ttfm_us) * p / 100)] // 1000
+        entries[f"TTFM p{p}"] = get_p(ttfm_us, p)
     entries["tokens"] = stats.num_tokens
     entries["schemas"] = stats.num_schemas
-    entries["crashes"] = stats.num_crashes
+    entries["crashes"] = stats.num_crashes_or_timeouts
+    entries["segv"] = stats.num_segv
+    entries["oom"] = stats.num_abort
+    entries["timeouts"] = stats.num_timeouts
     entries["compile errors"] = stats.num_compilation_errors
     entries["validation errors"] = stats.num_validation_errors
     entries["invalidation errors"] = stats.num_invalidation_errors
     print(json.dumps(entries, indent=2))
-    with open("tmp/xgr_entries.json", "w") as f:
+    with open(folder + "/entries.txt", "w") as f:
         f.write(json.dumps(entries, indent=2))
     # print(f"{'ttfm_p' + str(p):10}, {ttfm_us[int(len(ttfm_us) * p / 100)]}")
 
@@ -155,9 +194,9 @@ def main(folder: str):
         h_csv += f","
         h_csv += f"{frac:1.15}"
         h_csv += f"\n"
-    with open("tmp/xgr_histogram.csv", "w") as f:
+    with open(folder + "/histogram.csv", "w") as f:
         f.write(h_csv)
-    print(h_csv)
+    # print(h_csv)
 
     return stats, entries
 
@@ -193,28 +232,125 @@ def print_markdown_table(data):
         print(format_row(row))
 
 
+def plot_metrics(data_list: list[dict], prefix, title):
+    tbm_keys = [key for key in data_list[0].keys() if key.startswith(prefix)]
+    labels = [data["name"] for data in data_list]
+    values = {
+        label: [data[key] for key in tbm_keys] for label, data in zip(labels, data_list)
+    }
+
+    # Calculate positions
+    x = np.arange(len(tbm_keys))
+    width = 0.8 / len(labels)
+
+    # Set up the plot
+    fig, ax = plt.subplots(figsize=(12, 6))
+    bar_positions = []
+
+    for i, (label, tbm_values) in enumerate(values.items()):
+        pos = x + i * width - 0.4 + (width / 2)
+        bar_positions.append(pos)
+        bars = ax.bar(pos, tbm_values, width, label=label)
+
+        # Add annotations on the bars
+        for j, (bar, value) in enumerate(zip(bars, tbm_values)):
+            time_unit = "μs"
+            scaled_value = value
+
+            if value >= 1e6:
+                scaled_value = value / 1e6
+                time_unit = "s"
+            elif value >= 1e3:
+                scaled_value = value / 1e3
+                time_unit = "ms"
+
+            label_text = f"{scaled_value:.0f}{time_unit}"
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height(),
+                label_text,
+                ha="center",
+                va="bottom",
+                fontsize=8,
+                rotation=45,
+            )
+
+            # Add speedup/slowdown factor
+            all_values_for_key = [values[engine][j] for engine in labels]
+            fastest = min(all_values_for_key)
+            factor = value / fastest
+            
+            if math.isclose(factor, 1.0, rel_tol=0.3):
+                continue
+            else:
+                speedup_text = f"{factor:.0f}x"
+
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() / 1.5,
+                speedup_text,
+                ha="center",
+                va="top",
+                fontsize=8,
+                rotation=90,
+                color="white",
+                # transform=ax.get_yaxis_transform(),
+            )
+
+    # Configure axes
+    ax.set_yscale("log", base=10)
+    ax.set_xticks(x)
+    ax.set_xticklabels(tbm_keys, rotation=45, ha="right")
+    ax.set_ylabel("Time (log scale, microseconds)")
+    ax.set_title(title)
+    ax.legend()
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 xgr_combine.py <file> [<file>...]")
-        sys.exit(1)
-    if sys.argv[1] == "table":
-        files = {
-            "tmp/out--xgr-compliant": "XGrammar (compl.)",
-            "tmp/out--xgr": "XGrammar (defl.)",
-            "tmp/out--llg": "LLGuidance",
-        }
-        ents: list[dict] = []
-        hd = ["metric"]
-        for f, name in files.items():
-            stats, entries = main([f])
-            hd.append(name)
-            ents.append(entries)
-        rows = [hd]
-        for k in ents[0].keys():
-            line = [k]
-            for e in ents:
-                line.append(f"{e[k]:,}")
-            rows.append(line)
-        print_markdown_table(rows)
-    else:
-        main(sys.argv[1:])
+    folders = sys.argv[1:]
+    quick = False
+    if len(folders) > 0 and folders[0] == "-q":
+        quick = True
+        folders = folders[1:]
+
+    if not folders:
+        metas = glob.glob("tmp/out--*/meta.txt")
+        folders = [os.path.dirname(m) for m in metas]
+
+    ents: list[dict] = []
+    hd = ["metric"]
+    for fld in folders:
+        if quick:
+            stats = Stats()
+            stats.load_json(read_json(fld + "/stats.txt"))
+            entries = read_json(fld + "/entries.txt")
+        else:
+            stats, entries = main(fld)
+        entries["name"] = stats.meta["name"]
+        hd.append(stats.meta["name"])
+        ents.append(entries)
+    ents.sort(key=lambda e: e["TBM avg (us)"])
+    rows = [hd]
+    for k in ents[0].keys():
+        if k == "name":
+            continue
+        line = [k]
+        for e in ents:
+            line.append(f"{e[k]:,}")
+        rows.append(line)
+    print_markdown_table(rows)
+
+    plot_metrics(
+        ents,
+        prefix="TBM ",
+        title="Per-token mask computation time (Time Between Masks aka TBM)",
+    )
+    plot_metrics(
+        ents,
+        prefix="TTFM ",
+        title="Grammar compilation (Time To First Mask aka TTFM); 900s timeout",
+    )
+
+    # Display the chart
+    plt.tight_layout()
+    plt.show()
