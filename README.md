@@ -10,7 +10,7 @@ JSONSchemaBench helps to measure **efficiency** and **coverage** of a given stru
 </p>
 
 <p align="center">
-    <img src="maskbench/plots/hero.png" width="550"/>
+    <img src="maskbench/plots/hero.png" width="700"/>
        <br/>
     <em>Figure 2: Isolated performance of token mask computation (for server-side scenarios). 
     See <a href="maskbench">MaskBench folder</a>.
