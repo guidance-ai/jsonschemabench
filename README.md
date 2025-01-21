@@ -9,8 +9,13 @@ JSONSchemaBench helps to measure **efficiency** and **coverage** of a given stru
     <em>Figure 1: Comparison across various constrained-decoding frameworks by efficiency (speed of output generation), coverage (support for JSON Schema features), and quality (effects on underlying task accuracy).</em>
 </p>
 
-> [!NOTE]
-> The paper and this README is concerned with end-to-end performance of constrained generation with LLM. The [MaskBench](./maskbench/) folder contains scripts and timings for just the mask computation, without any LLM involved. This lets us measure the performance of the mask computation in isolation, and is more applicable to server-side scenarios, where large batch sizes are used.
+<p align="center">
+    <img src="maskbench/plots/hero.png" width="550"/>
+       <br/>
+    <em>Figure 2: Isolated performance of token mask computation (for server-side scenarios). 
+    See <a href="maskbench">MaskBench folder</a>.
+    </em>
+</p>
 
 ## Dataset Details
 

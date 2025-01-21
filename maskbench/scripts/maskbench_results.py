@@ -166,11 +166,11 @@ def main(folder: str):
 
     entries = {}
     all_masks_us.sort()
-    entries["TBM avg (us)"] = sum(all_masks_us) // len(all_masks_us)
+    entries["TBM avg"] = sum(all_masks_us) // len(all_masks_us)
     for p in ps:
         entries[f"TBM p{p}"] = get_p(all_masks_us, p)
     ttfm_us.sort()
-    entries["TTFM avg (us)"] = sum(ttfm_us) // len(ttfm_us)
+    entries["TTFM avg"] = sum(ttfm_us) // len(ttfm_us)
     for p in ps:
         entries[f"TTFM p{p}"] = get_p(ttfm_us, p)
     entries["tokens"] = stats.num_tokens
@@ -262,19 +262,18 @@ plot_colors = {
 }
 
 
-def plot_metrics(data_list: list[dict], prefix: str, title: str):
-    tbm_keys = [key for key in data_list[0].keys() if key.startswith(prefix)]
+def plot_metrics(data_list: list[dict], id: str, keys: list[str], title: str):
     labels = [data["meta"]["name"] for data in data_list]
     values = {
-        label: [data[key] for key in tbm_keys] for label, data in zip(labels, data_list)
+        label: [data[key] for key in keys] for label, data in zip(labels, data_list)
     }
 
     # Calculate positions
-    y = np.arange(len(tbm_keys))
+    y = np.arange(len(keys))
     height = 0.8 / len(labels)
 
     # Set up the plot
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(10, len(keys) + 1))
     bar_positions = []
 
     cmap = plt.get_cmap("tab10")
@@ -337,13 +336,13 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
     # Configure axes
     ax.set_xscale("log", base=10)
     ax.set_yticks(y)
-    ax.set_yticklabels(tbm_keys, rotation=45, ha="right")
+    ax.set_yticklabels(keys, rotation=45, ha="right")
     ax.set_xlabel("Time (log scale, microseconds)")
     ax.set_title(title)
     ax.legend()
 
     plt.tight_layout()
-    plt.savefig(f"plots/{prefix.strip().lower()}.png", dpi=300)
+    plt.savefig(f"plots/{id}.png", dpi=300)
 
 
 if __name__ == "__main__":
@@ -408,13 +407,23 @@ if __name__ == "__main__":
     with open("README.md", "w") as f:
         f.write(rdm)
 
+    keys = ents[0].keys()
+
     plot_metrics(
         ents,
-        prefix="TBM ",
+        keys=[k for k in keys if k.startswith("TBM ")],
+        id="tbm",
         title="Per-token mask computation time (Time Between Masks aka TBM)",
     )
     plot_metrics(
         ents,
-        prefix="TTFM ",
+        keys=[k for k in keys if k.startswith("TTFM ")],
+        id="ttfm",
         title="Grammar compilation (Time To First Mask aka TTFM); 900s timeout",
+    )
+    plot_metrics(
+        ents,
+        keys=["TTFM avg", "TBM avg"],
+        id="hero",
+        title="Time To First Mask (TTFM) and Time Between Masks (TBM)",
     )
