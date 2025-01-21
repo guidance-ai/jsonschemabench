@@ -177,12 +177,12 @@ def main(folder: str):
     entries["schemas"] = stats.num_schemas
     entries["passing"] = stats.num_schemas_ok
     # entries["crashes"] = stats.num_crashes_or_timeouts
-    entries["segv"] = stats.num_segv
-    entries["oom"] = stats.num_abort
-    entries["timeouts"] = stats.num_timeouts
-    entries["compile errors"] = stats.num_compilation_errors
-    entries["validation errors"] = stats.num_validation_errors
-    entries["invalidation errors"] = stats.num_invalidation_errors
+    entries["compile error"] = stats.num_compilation_errors
+    entries["segmentation fault"] = stats.num_segv
+    entries["out of memory"] = stats.num_abort
+    entries["timeout"] = stats.num_timeouts
+    entries["validation error"] = stats.num_validation_errors
+    entries["invalidation error"] = stats.num_invalidation_errors
     print(json.dumps(entries, indent=2))
     with open(folder + "/entries.txt", "w") as f:
         f.write(json.dumps(entries, indent=2))
