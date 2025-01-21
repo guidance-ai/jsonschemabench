@@ -9,6 +9,9 @@ JSONSchemaBench helps to measure **efficiency** and **coverage** of a given stru
     <em>Figure 1: Comparison across various constrained-decoding frameworks by efficiency (speed of output generation), coverage (support for JSON Schema features), and quality (effects on underlying task accuracy).</em>
 </p>
 
+> [!NOTE]
+> The paper and this README is concerned with end-to-end performance of constrained generation with LLM. The [MaskBench](./maskbench/) folder contains scripts and timings for just the mask computation, without any LLM involved. This lets us measure the performance of the mask computation in isolation, and is more applicable to server-side scenarios, where large batch sizes are used.
+
 ## Dataset Details
 
 JSONSchemaBench is built from a collection of real-world JSON schemas drawn from diverse sources, including GitHub, Kubernetes configurations, and API specifications. The benchmark consists of schemas categorized into datasets based on complexity and domain. We start from collections from [json-schema-corpus](https://github.com/sdbs-uni-p/json-schema-corpus) and did heavy curation to ensure the schemas are standard-compliant and satisfiable. We also added schemas from other sources to increase the diversity of the benchmark, such as [GlaiveAI function call schemas](https://huggingface.co/datasets/glaiveai/glaive-function-calling-v2) and [kubernetes schemas](https://github.com/instrumenta/kubernetes-json-schema).
