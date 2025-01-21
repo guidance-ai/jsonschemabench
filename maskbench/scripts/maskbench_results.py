@@ -174,6 +174,7 @@ def main(folder: str):
         entries[f"TTFM p{p}"] = get_p(ttfm_us, p)
     entries["tokens"] = stats.num_tokens
     entries["schemas"] = stats.num_schemas
+    entries["passing"] = stats.num_schemas_ok
     entries["crashes"] = stats.num_crashes_or_timeouts
     entries["segv"] = stats.num_segv
     entries["oom"] = stats.num_abort
@@ -335,9 +336,9 @@ if __name__ == "__main__":
         else:
             stats, entries = main(fld)
         entries["name"] = stats.meta["name"]
-        hd.append(stats.meta["name"])
         ents.append(entries)
     ents.sort(key=lambda e: e["TBM avg (us)"])
+    hd += [e["name"] for e in ents]
     rows = [hd]
     for k in ents[0].keys():
         if k == "name":
