@@ -5,6 +5,7 @@ import math
 import glob
 import sys
 import os
+import re
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -214,23 +215,26 @@ def print_markdown_table(data):
                 f"{cell:<{col_widths[i]}}" if i == 0 else f"{cell:>{col_widths[i]}}"
                 for i, cell in enumerate(row)
             )
-            + " |"
+            + " |\n"
         )
 
-    # Print the header
-    print(format_row(data[0]))
-    print(
+    r = format_row(data[0])
+    r += (
         "|"
         + "|".join(
             ":" + "-" * (width + 1) if i == 0 else "-" * (width + 1) + ":"
             for i, width in enumerate(col_widths)
         )
-        + "|"
+        + "|\n"
     )
 
     # Print the rows
     for row in data[1:]:
-        print(format_row(row))
+        r += format_row(row)
+
+    print(r)
+    return r
+
 
 def format_time(time_us: int):
     if time_us < 1_000:
@@ -248,6 +252,7 @@ def format_time(time_us: int):
         else:
             result = f"{time_s:.0f}s"
     return result
+
 
 def plot_metrics(data_list: list[dict], prefix: str, title: str):
     tbm_keys = [key for key in data_list[0].keys() if key.startswith(prefix)]
@@ -347,7 +352,18 @@ if __name__ == "__main__":
         for e in ents:
             line.append(f"{e[k]:,}")
         rows.append(line)
-    print_markdown_table(rows)
+    tbl = print_markdown_table(rows)
+
+    with open("README.md", "r") as f:
+        rdm = f.read()
+        rdm = re.sub(
+            r"<!-- GEN-BEGIN -->.*?<!-- GEN-END -->",
+            "<!-- GEN-BEGIN -->\n" + tbl + "<!-- GEN-END -->",
+            rdm,
+            flags=re.DOTALL,
+        )
+    with open("README.md", "w") as f:
+        f.write(rdm)
 
     plot_metrics(
         ents,

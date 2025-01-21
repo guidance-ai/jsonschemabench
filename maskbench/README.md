@@ -51,6 +51,7 @@ We've set XGrammar to only use one thread and LLGuidance always uses one thread.
 Outlines seems to be using more than one thread, so we instead run it with 90
 threads in parallel to limit the CPU this way.
 
+<!-- GEN-BEGIN -->
 | metric              | LLGuidance | XGrammar (defl.) |    XGrammar |    Outlines |
 |:--------------------|-----------:|-----------------:|------------:|------------:|
 | TBM avg (us)        |         49 |              292 |       5,671 |      59,420 |
@@ -81,6 +82,7 @@ threads in parallel to limit the CPU this way.
 | compile errors      |      2,373 |            2,089 |       2,091 |       3,608 |
 | validation errors   |         24 |            1,409 |         495 |         649 |
 | invalidation errors |          0 |            1,249 |       2,588 |         614 |
+<!-- GEN-END -->
 
 ## Reproducing
 
