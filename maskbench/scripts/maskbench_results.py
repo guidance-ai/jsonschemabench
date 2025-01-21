@@ -269,10 +269,23 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
     fig, ax = plt.subplots(figsize=(10, 8))
     bar_positions = []
 
+    custom_colors = [
+        "#000000",
+        "#0379b6",
+        "#039eb6",
+        "#d16626",
+    ]
+
     for i, (label, tbm_values) in enumerate(values.items()):
         pos = y + (len(labels) - i - 1) * height - 0.4 + (height / 2)
         bar_positions.append(pos)
-        bars = ax.barh(pos, tbm_values, height, label=label)
+        bars = ax.barh(
+            pos,
+            tbm_values,
+            height,
+            label=label,
+            color=custom_colors[i % len(custom_colors)],
+        )
 
         # Add annotations on the bars
         for j, (bar, value) in enumerate(zip(bars, tbm_values)):
@@ -292,11 +305,7 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
             fastest = min(all_values_for_key)
             factor = value / fastest
 
-            if math.isclose(factor, 1.0, rel_tol=0.3):
-                continue
-            else:
-                speedup_text = f"{factor:.0f}x"
-
+            speedup_text = f"{factor:.0f}x"
             ax.text(
                 bar.get_width() / 1.2,
                 bar.get_y() + bar.get_height() / 2,
