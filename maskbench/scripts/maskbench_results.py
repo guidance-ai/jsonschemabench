@@ -283,6 +283,7 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
         cmap(9),
         cmap(0),
         cmap(1),
+        cmap(3),
     ]
 
     for i, (label, tbm_values) in enumerate(values.items()):

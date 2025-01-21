@@ -45,7 +45,7 @@ class LlamaCppEngine(Engine):
         return "llama.cpp"
 
     def get_module(self):
-        return "llama_cpp"
+        return "llama-cpp-python"
 
     def compile_grammar(self, schema: dict):
         grm = json_schema_to_gbnf(schema)
