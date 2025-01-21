@@ -197,8 +197,7 @@ class BuiltinRule:
         self.content = content
         self.deps = deps or []
 
-# Constraining spaces to prevent model "running away".
-SPACE_RULE = '"" | " " | "\\n" [ \\t]{0,20}'
+SPACE_RULE = '[ \\t\\n\\r]*'
 
 PRIMITIVE_RULES = {
     'boolean'      : BuiltinRule('("true" | "false") space', []),
