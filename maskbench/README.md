@@ -19,6 +19,14 @@ for a total of about 2M tokens.
 
 ## Results
 
+<p align="center">
+    <img src="plots/tbm.png" width="800px" />
+</p>
+
+<p align="center">
+    <img src="plots/ttfm.png" width="800px" />
+</p>
+
 We have run the following grammar engines:
 
 - [llguidance](https://github.com/guidance-ai/llguidance) v0.6.7
@@ -39,7 +47,39 @@ will be lower on lesser machines).
 We run every engine single-threaded, under the assumption that for heavy
 production work-loads, the batch size will be bigger than the number of
 available cores, so it makes sense to run each sequence in a single thread.
-This particularly applies to XGrammar.
+We've set XGrammar to only use one thread and LLGuidance always uses one thread.
+Outlines seems to be using more than one thread, so we instead run it with 90
+threads in parallel to limit the CPU this way.
+
+| metric              | LLGuidance | XGrammar (defl.) |    Outlines |    XGrammar |
+|:--------------------|-----------:|-----------------:|------------:|------------:|
+| TBM avg (us)        |         49 |              292 |       5,671 |      59,420 |
+| TBM p25             |         16 |                3 |          12 |          16 |
+| TBM p50             |         36 |                8 |          80 |         118 |
+| TBM p75             |         43 |               54 |         321 |     133,981 |
+| TBM p90             |         61 |              117 |       1,668 |     200,689 |
+| TBM p95             |        100 |              294 |       5,919 |     243,995 |
+| TBM p99             |        468 |            4,936 |      66,378 |     358,041 |
+| TBM p99.9           |      1,468 |           44,687 |     889,990 |     598,956 |
+| TBM p100            |     66,397 |          694,664 |  30,748,937 |   1,260,641 |
+| TTFM avg (us)       |      1,637 |        4,137,530 |   5,504,335 |  37,948,447 |
+| TTFM p25            |        795 |          432,583 |     770,277 |   3,928,969 |
+| TTFM p50            |        984 |          535,498 |     995,320 |   6,987,012 |
+| TTFM p75            |      1,420 |        1,043,954 |   1,895,386 |  16,556,110 |
+| TTFM p90            |      2,646 |        2,996,171 |   4,925,680 |  78,684,322 |
+| TTFM p95            |      4,704 |        7,379,516 |  11,376,422 | 206,301,765 |
+| TTFM p99            |     14,526 |       62,151,076 | 112,906,309 | 621,693,634 |
+| TTFM p99.9          |     24,979 |      521,102,130 | 566,943,598 | 853,211,644 |
+| TTFM p100           |    160,896 |      837,805,312 | 854,445,907 | 888,396,817 |
+| tokens              |  2,565,234 |        2,096,637 |   2,709,854 |   1,042,656 |
+| schemas             |     10,163 |           10,163 |      10,163 |      10,163 |
+| crashes             |          1 |              200 |         270 |       1,033 |
+| segv                |          0 |              189 |         187 |           0 |
+| oom                 |          0 |                0 |           0 |          13 |
+| timeouts            |          0 |               11 |          83 |       1,020 |
+| compile errors      |      2,373 |            2,089 |       2,091 |       3,608 |
+| validation errors   |         24 |            1,409 |         495 |         649 |
+| invalidation errors |          0 |            1,249 |       2,588 |         614 |
 
 ## Reproducing
 

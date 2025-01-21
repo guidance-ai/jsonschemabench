@@ -231,7 +231,8 @@ def print_markdown_table(data):
     for row in data[1:]:
         print(format_row(row))
 
-def plot_metrics(data_list: list[dict], prefix, title):
+
+def plot_metrics(data_list: list[dict], prefix: str, title: str):
     tbm_keys = [key for key in data_list[0].keys() if key.startswith(prefix)]
     labels = [data["name"] for data in data_list]
     values = {
@@ -303,6 +304,9 @@ def plot_metrics(data_list: list[dict], prefix, title):
     ax.set_title(title)
     ax.legend()
 
+    plt.tight_layout()
+    plt.savefig(f"plots/{prefix.strip().lower()}.png", dpi=300)
+
 
 if __name__ == "__main__":
     folders = sys.argv[1:]
@@ -348,7 +352,3 @@ if __name__ == "__main__":
         prefix="TTFM ",
         title="Grammar compilation (Time To First Mask aka TTFM); 900s timeout",
     )
-
-    # Display the chart
-    plt.tight_layout()
-    plt.show()
