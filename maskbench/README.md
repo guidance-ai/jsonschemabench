@@ -20,11 +20,11 @@ for a total of about 2M tokens.
 ## Results
 
 <p align="center">
-    <img src="plots/tbm.png" width="800px" />
+    <img src="plots/tbm.png" />
 </p>
 
 <p align="center">
-    <img src="plots/ttfm.png" width="800px" />
+    <img src="plots/ttfm.png" />
 </p>
 
 We have run the following grammar engines:

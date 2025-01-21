@@ -231,6 +231,22 @@ def print_markdown_table(data):
     for row in data[1:]:
         print(format_row(row))
 
+def format_time(time_us: int):
+    if time_us < 1_000:
+        result = f"{time_us}μs"
+    elif time_us < 1_000_000:
+        time_ms = time_us / 1_000
+        if time_ms < 10:
+            result = f"{time_ms:.1f}ms"
+        else:
+            result = f"{time_ms:.0f}ms"
+    else:
+        time_s = time_us / 1_000_000
+        if time_s < 10:
+            result = f"{time_s:.1f}s"
+        else:
+            result = f"{time_s:.0f}s"
+    return result
 
 def plot_metrics(data_list: list[dict], prefix: str, title: str):
     tbm_keys = [key for key in data_list[0].keys() if key.startswith(prefix)]
@@ -254,17 +270,7 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
 
         # Add annotations on the bars
         for j, (bar, value) in enumerate(zip(bars, tbm_values)):
-            time_unit = "μs"
-            scaled_value = value
-
-            if value >= 1e6:
-                scaled_value = value / 1e6
-                time_unit = "s"
-            elif value >= 1e3:
-                scaled_value = value / 1e3
-                time_unit = "ms"
-
-            label_text = f"{scaled_value:.0f}{time_unit}"
+            label_text = format_time(value)
             ax.text(
                 bar.get_width() * 1.1,
                 bar.get_y() + bar.get_height() / 2,
