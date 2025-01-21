@@ -21,14 +21,16 @@ def time_us(prev: float) -> int:
 def process_file(engine: Engine, file: str):
     id = os.path.basename(file)
     output_name = os.path.join(output_path, id)
-    if os.path.exists(output_name):
-        return None
 
-    try:
-        with open(output_name, "x") as f:
-            f.write(json.dumps({"pending_file": 1}, indent=2))
-    except FileExistsError:
-        return None
+    if engine.multi:
+        if os.path.exists(output_name):
+            return None
+
+        try:
+            with open(output_name, "x") as f:
+                f.write(json.dumps({"pending_file": 1}, indent=2))
+        except FileExistsError:
+            return None
 
     print(file, file=sys.stderr)
 
@@ -53,7 +55,9 @@ def process_file(engine: Engine, file: str):
         t0 = time.monotonic()
         engine.compile_grammar(pos_data["schema"])
     except Exception as e:
-        status["compile_error"] = repr(e)
+        e_str = repr(e)
+        engine.log_single(e_str)
+        status["compile_error"] = e_str
         with open(output_name, "w") as f:
             f.write(json.dumps(status, indent=2))
         return status
@@ -126,6 +130,11 @@ def setup_argparse():
     )
     parser.add_argument("--xgr", action="store_true", help="Enable XGrammar")
     parser.add_argument(
+        "--xgr-cpp",
+        action="store_true",
+        help="Enable XGrammar with JSON->ENBF from llama.cpp",
+    )
+    parser.add_argument(
         "--xgr-compliant",
         action="store_true",
         help="Enable XGrammar in compliant (non-strict, any whitespace) mode",
@@ -152,6 +161,8 @@ def setup_argparse():
         "--num-threads", type=int, default=defl_cpu, help="Number of threads to run"
     )
 
+    parser.add_argument("--multi", action="store_true", help="Enable running from run_maskbench.py")
+
     parser.add_argument(
         "files", metavar="file", type=str, nargs="+", help="List of files to process"
     )
@@ -162,11 +173,12 @@ def setup_argparse():
 def get_engine(args):
     engine: Engine
 
-    if args.xgr or args.xgr_compliant:
+    if args.xgr or args.xgr_compliant or args.xgr_cpp:
         from .xgr_engine import XgrEngine
 
         engine = XgrEngine()
         engine.compliant = args.xgr_compliant
+        engine.llama_cpp = args.xgr_cpp
     elif args.llg:
         from .llg_engine import LlgEngine
 
@@ -177,6 +189,10 @@ def get_engine(args):
         engine = OutlinesEngine()
     else:
         raise Exception("No grammar engine specified")
+
+    engine.multi = args.multi
+    engine.tokenizer_model_id = args.tokenizer
+
     return engine
 
 
@@ -210,13 +226,11 @@ def main():
     resource.setrlimit(resource.RLIMIT_AS, (limit_bytes, limit_bytes))
 
     time_limit_s = args.time_limit
-    model_id = args.tokenizer
 
     engine = get_engine(args)
     output_path = get_output(args)
 
-    engine.tokenizer_model_id = model_id
-    engine.tokenizer = AutoTokenizer.from_pretrained(model_id)  # type: ignore
+    engine.tokenizer = AutoTokenizer.from_pretrained(engine.tokenizer_model_id)  # type: ignore
 
     engine.init()
 

@@ -6,7 +6,7 @@ class Engine:
     tokenizer_model_id: str
 
     def __init__(self):
-        pass
+        self.multi = False
 
     def get_id(self):
         raise NotImplementedError()
@@ -36,3 +36,9 @@ class Engine:
 
     def commit_token(self, token: int) -> bool:
         raise NotImplementedError()
+
+    def log_single(self, s: str):
+        import sys
+
+        if not self.multi:
+            print(s, file=sys.stderr)

@@ -9,7 +9,7 @@ import glob
 import json
 
 output_path = "tmp/output/"
-cmd = ["python3", "-m", "maskbench.runner"]
+cmd = ["python3", "-m", "maskbench.runner", "--multi"]
 log_lock = Lock()
 
 
