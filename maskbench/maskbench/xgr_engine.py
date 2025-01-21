@@ -48,15 +48,9 @@ class XgrEngine(Engine):
 
         schema_s = json.dumps(schema)
         if self.llama_cpp:
-            from .json_schema_to_grammar import SchemaConverter
+            from .json_schema import json_schema_to_gbnf
 
-            url = "stdin"
-            converter = SchemaConverter(
-                prop_order={}, allow_fetch=False, dotall=False, raw_pattern=False
-            )
-            xschema = converter.resolve_refs(schema, url)
-            converter.visit(xschema, "")
-            grm = converter.format_grammar()
+            grm = json_schema_to_gbnf(schema)
             self.log_single(grm)
             self.compiled_grammar = self.xgr_compiler.compile_grammar(grm)
         else:

@@ -81,7 +81,10 @@ def process_file(engine: Engine, file: str):
             engine.compute_mask()
             ok = engine.commit_token(t)
             mask_time = time_us(t2)
-            # engine.log_single(f"Token {tidx} {repr(engine.tokenizer.decode([t]))}: {ok}")
+            if engine.debug:
+                engine.log_single(
+                    f"Token {tidx} {repr(engine.tokenizer.decode([t]))}: {ok}"
+                )
             num_tokens += 1
             masks_us += mask_time
             all_mask_us.append(mask_time)
@@ -109,7 +112,7 @@ def process_file(engine: Engine, file: str):
     engine.log_single(st)
     with open(output_name, "w") as f:
         f.write(st)
-        
+
     return status
 
 
@@ -144,6 +147,9 @@ def setup_argparse():
     )
     parser.add_argument("--llg", action="store_true", help="Enable LLGuidance")
     parser.add_argument("--outlines", action="store_true", help="Enable Outlines")
+    parser.add_argument(
+        "--llamacpp", action="store_true", help="Enable llama.cpp grammars"
+    )
     parser.add_argument("--output", type=str, help="Output path")
     parser.add_argument(
         "--tokenizer",
@@ -164,7 +170,11 @@ def setup_argparse():
         "--num-threads", type=int, default=defl_cpu, help="Number of threads to run"
     )
 
-    parser.add_argument("--multi", action="store_true", help="Enable running from run_maskbench.py")
+    parser.add_argument(
+        "--multi", action="store_true", help="Enable running from run_maskbench.py"
+    )
+
+    parser.add_argument("--debug", action="store_true", help="Enable debug output")
 
     parser.add_argument(
         "files", metavar="file", type=str, nargs="+", help="List of files to process"
@@ -173,28 +183,41 @@ def setup_argparse():
     return parser
 
 
-def get_engine(args):
-    engine: Engine
+def get_engine(args) -> Engine:
+    engine: Engine | None = None
 
     if args.xgr or args.xgr_compliant or args.xgr_cpp:
         from .xgr_engine import XgrEngine
 
+        assert not engine, "Multiple engines specified"
         engine = XgrEngine()
         engine.compliant = args.xgr_compliant
         engine.llama_cpp = args.xgr_cpp
-    elif args.llg:
+
+    if args.llg:
         from .llg_engine import LlgEngine
 
+        assert not engine, "Multiple engines specified"
         engine = LlgEngine()
-    elif args.outlines:
+
+    if args.outlines:
         from .outlines_engine import OutlinesEngine
 
+        assert not engine, "Multiple engines specified"
         engine = OutlinesEngine()
-    else:
+
+    if args.llamacpp:
+        from .llamacpp_engine import LlamaCppEngine
+
+        assert not engine, "Multiple engines specified"
+        engine = LlamaCppEngine()
+
+    if not engine:
         raise Exception("No grammar engine specified")
 
     engine.multi = args.multi
     engine.tokenizer_model_id = args.tokenizer
+    engine.debug = args.debug
 
     return engine
 
@@ -224,9 +247,10 @@ def main():
 
     args = parser.parse_args()
 
-    limit_gb = args.mem_limit
-    limit_bytes = limit_gb * 1024 * 1024 * 1024
-    resource.setrlimit(resource.RLIMIT_AS, (limit_bytes, limit_bytes))
+    if sys.platform.startswith("linux"):
+        limit_gb = args.mem_limit
+        limit_bytes = limit_gb * 1024 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit_bytes, limit_bytes))
 
     time_limit_s = args.time_limit
 

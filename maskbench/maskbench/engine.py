@@ -7,6 +7,7 @@ class Engine:
 
     def __init__(self):
         self.multi = False
+        self.debug = False
 
     def get_id(self):
         raise NotImplementedError()
