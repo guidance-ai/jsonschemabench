@@ -269,11 +269,20 @@ def plot_metrics(data_list: list[dict], prefix: str, title: str):
     fig, ax = plt.subplots(figsize=(10, 8))
     bar_positions = []
 
+    cmap = plt.get_cmap('tab10')
+
     custom_colors = [
         "#000000",
         "#0379b6",
         "#039eb6",
         "#d16626",
+    ]
+
+    custom_colors = [
+        "#000000",
+        cmap(9),
+        cmap(0),
+        cmap(1),
     ]
 
     for i, (label, tbm_values) in enumerate(values.items()):
@@ -351,7 +360,7 @@ if __name__ == "__main__":
             stats, entries = main(fld)
         entries["name"] = stats.meta["name"]
         ents.append(entries)
-    ents.sort(key=lambda e: e["TBM avg (us)"])
+    ents.sort(key=lambda e: -e["tokens"])
     hd += [e["name"] for e in ents]
     rows = [hd]
     for k in ents[0].keys():

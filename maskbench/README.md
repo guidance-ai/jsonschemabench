@@ -29,9 +29,9 @@ for a total of about 2M tokens.
 
 We have run the following grammar engines:
 
-- [llguidance](https://github.com/guidance-ai/llguidance) v0.6.7
+- [LLGuidance](https://github.com/guidance-ai/llguidance) v0.6.7
 - [XGrammar](https://github.com/mlc-ai/xgrammar) v0.1.10 in default configuration
-- XGrammar with flexible white-space and "non-strict" mode (ie., compliant, or adhering to JSON Schema specification)
+- "XGrammar.cpp", using [llama.cpp](https://github.com/ggerganov/llama.cpp) script [json_schema_to_grammar.py](https://github.com/ggerganov/llama.cpp/blob/master/examples/json_schema_to_grammar.py) and XGrammar engine
 - [Outlines](https://github.com/dottxt-ai/outlines) v0.1.13
 
 All tests were run on
@@ -63,46 +63,49 @@ Random notes:
 - the "invalidation errors" are cases where a generation should be rejected,
   but wasn't; these are clear bugs
 - "validation errors" may be more tricky due to object property ordering;
-  however, all engines stick to definition order in `properties`,
+  however, all engines stick to definition order in `properties`
+  (except for llama.cpp, which puts required properties first),
   and engines other than LLGuidance don't support `allOf` and sibling properties
   (which introduces complications to the ordering)
-- XGrammar in "compliant" (non-default) configuration, doesn't apply constraints
-  to non-required properties (for object with properties `"a"` and `"b"` it uses grammar
-  similar to `("a": A)? ("b": B)? ("[^"]+": ANYTHING)*`, so in object `{"a":1}`
-  `1` can be matched to **either** `A` or `ANYTHING`);
-  this is why it has lots of invalidation errors and processes more tokens (since it gets further
-  into the invalid instances)
+- by default, XGrammar uses fixed white-space and assumes `"additionalProperties": false`;
+  it also ignores keywords like `minItems` and `maxItems`, as well as `allOf`, sibling properties, etc.;
+  this all significantly reduces complexity of the grammar
+- OTOH, grammars used in XGrammar.cpp configuration are similar in feature coverage
+  and flexibility to the ones used in LLGuidance; thus it provides a more
+  apples-to-apples comparison of the grammar engines (as opposed to grammars)
+
+
 
 <!-- GEN-BEGIN -->
-| metric             | LLGuidance | XGrammar (defl.) |    XGrammar |    Outlines |
-|:-------------------|-----------:|-----------------:|------------:|------------:|
-| TBM avg (us)       |         49 |              292 |       5,671 |      59,420 |
-| TBM p25            |         16 |                3 |          12 |          16 |
-| TBM p50            |         36 |                8 |          80 |         118 |
-| TBM p75            |         43 |               54 |         321 |     133,981 |
-| TBM p90            |         61 |              117 |       1,668 |     200,689 |
-| TBM p95            |        100 |              294 |       5,919 |     243,995 |
-| TBM p99            |        468 |            4,936 |      66,378 |     358,041 |
-| TBM p99.9          |      1,468 |           44,687 |     889,990 |     598,956 |
-| TBM p100           |     66,397 |          694,664 |  30,748,937 |   1,260,641 |
-| TTFM avg (us)      |      1,637 |        4,137,530 |   5,504,335 |  37,948,447 |
-| TTFM p25           |        795 |          432,583 |     770,277 |   3,928,969 |
-| TTFM p50           |        984 |          535,498 |     995,320 |   6,987,012 |
-| TTFM p75           |      1,420 |        1,043,954 |   1,895,386 |  16,556,110 |
-| TTFM p90           |      2,646 |        2,996,171 |   4,925,680 |  78,684,322 |
-| TTFM p95           |      4,704 |        7,379,516 |  11,376,422 | 206,301,765 |
-| TTFM p99           |     14,526 |       62,151,076 | 112,906,309 | 621,693,634 |
-| TTFM p99.9         |     24,979 |      521,102,130 | 566,943,598 | 853,211,644 |
-| TTFM p100          |    160,896 |      837,805,312 | 854,445,907 | 888,396,817 |
-| tokens             |  2,565,234 |        2,096,637 |   2,709,854 |   1,042,656 |
-| schemas            |     10,163 |           10,163 |      10,163 |      10,163 |
-| passing            |      7,765 |            5,216 |       4,719 |       4,259 |
-| compile error      |      2,373 |            2,089 |       2,091 |       3,608 |
-| segmentation fault |          0 |              189 |         187 |           0 |
-| out of memory      |          0 |                0 |           0 |          13 |
-| timeout            |          0 |               11 |          83 |       1,020 |
-| validation error   |         24 |            1,409 |         495 |         649 |
-| invalidation error |          0 |            1,249 |       2,588 |         614 |
+| metric             | LLGuidance |    XGrammar | XGrammar.cpp |    Outlines |
+|:-------------------|-----------:|------------:|-------------:|------------:|
+| TBM avg (us)       |         49 |         292 |       65,291 |      59,420 |
+| TBM p25            |         16 |           3 |            9 |          16 |
+| TBM p50            |         36 |           8 |          859 |         118 |
+| TBM p75            |         43 |          54 |      125,984 |     133,981 |
+| TBM p90            |         61 |         117 |      188,490 |     200,689 |
+| TBM p95            |        100 |         294 |      244,471 |     243,995 |
+| TBM p99            |        468 |       4,936 |      616,316 |     358,041 |
+| TBM p99.9          |      1,468 |      44,687 |    1,787,863 |     598,956 |
+| TBM p100           |     66,397 |     694,664 |    8,009,566 |   1,260,641 |
+| TTFM avg (us)      |      1,637 |   4,137,530 |    3,696,374 |  37,948,447 |
+| TTFM p25           |        795 |     432,583 |      421,313 |   3,928,969 |
+| TTFM p50           |        984 |     535,498 |      706,548 |   6,987,012 |
+| TTFM p75           |      1,420 |   1,043,954 |    1,134,304 |  16,556,110 |
+| TTFM p90           |      2,646 |   2,996,171 |    2,955,676 |  78,684,322 |
+| TTFM p95           |      4,704 |   7,379,516 |    7,176,634 | 206,301,765 |
+| TTFM p99           |     14,526 |  62,151,076 |   42,872,915 | 621,693,634 |
+| TTFM p99.9         |     24,979 | 521,102,130 |  531,718,350 | 853,211,644 |
+| TTFM p100          |    160,896 | 837,805,312 |  629,500,663 | 888,396,817 |
+| tokens             |  2,565,234 |   2,096,637 |    1,461,375 |   1,042,656 |
+| schemas            |     10,163 |      10,163 |       10,163 |      10,163 |
+| passing            |      7,765 |       5,216 |        5,356 |       4,259 |
+| compile error      |      2,373 |       2,089 |        1,709 |       3,608 |
+| segmentation fault |          0 |         189 |            1 |           0 |
+| out of memory      |          0 |           0 |            0 |          13 |
+| timeout            |          0 |          11 |           49 |       1,020 |
+| validation error   |         24 |       1,409 |        2,726 |         649 |
+| invalidation error |          0 |       1,249 |          322 |         614 |
 <!-- GEN-END -->
 
 ## Reproducing
