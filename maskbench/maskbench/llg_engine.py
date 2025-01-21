@@ -5,6 +5,7 @@ from huggingface_hub import hf_hub_download
 import llguidance as llg
 import json
 
+
 class LlgEngine(Engine):
     def __init__(self):
         super().__init__()
@@ -16,6 +17,15 @@ class LlgEngine(Engine):
         with open(tokenizer_json_path, "r") as f:
             self.llg_tokenizer = llg.LLTokenizer(f.read())
         self.mask_data = bytearray(bytearray((self.llg_tokenizer.vocab_size + 7) // 8))
+
+    def get_id(self):
+        return "llg"
+
+    def get_name(self):
+        return "LLGuidance"
+
+    def get_module(self):
+        return "llguidance"
 
     def compile_grammar(self, schema: dict):
         grammars = json.dumps({"grammars": [{"json_schema": schema}]})

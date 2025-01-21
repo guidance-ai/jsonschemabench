@@ -62,6 +62,12 @@ def process_files_in_threads(file_list: list[str], thread_count=40, chunk_size=1
 
     print(f"Total files: {len(file_list)}")
 
+    if not file_list:
+        print("All files processed.")
+        return
+
+    thread_count = min(thread_count, len(file_list))
+
     def worker():
         nonlocal file_list
 
@@ -105,11 +111,12 @@ def process_files_in_threads(file_list: list[str], thread_count=40, chunk_size=1
 if __name__ == "__main__":
     sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-    from maskbench.runner import setup_argparse, get_output, get_files
+    from maskbench.runner import setup_argparse, get_output, get_files, get_engine
 
     parser = setup_argparse()
     args = parser.parse_args()
 
+    engine = get_engine(args)
     output_path = get_output(args)
 
     file_list = get_files(args)
@@ -119,14 +126,25 @@ if __name__ == "__main__":
     args_to_pass = [a for a in sys.argv[1:] if a not in args.files]
     cmd += args_to_pass
 
-    print(
-        f"{len(file_list)} files, timeout {args.time_limit}s, memory {args.mem_limit}GB, "
-        + f"output {output_path}; {args.num_threads} threads; cmd: {' '.join(cmd)}",
-        file=sys.stderr,
-    )
+    info = f"{len(file_list)} files, timeout {args.time_limit}s, memory {args.mem_limit}GB, "
+    info += f"output {output_path}; {args.num_threads} threads; cmd: {' '.join(cmd)}"
+
+    print(info, file=sys.stderr)
 
     os.makedirs(output_path, exist_ok=True)
     with open(os.path.join(output_path, "meta.txt"), "w") as meta:
-        meta.write(json.dumps({"cmd": cmd}, indent=2))
+        meta.write(
+            json.dumps(
+                {
+                    "id": engine.get_id(),
+                    "name": engine.get_name(),
+                    "module": engine.get_module(),
+                    "module_version": engine.get_version(),
+                    "cmd": cmd,
+                    "info": info,
+                },
+                indent=2,
+            )
+        )
 
     process_files_in_threads(file_list, thread_count=args.num_threads, chunk_size=100)

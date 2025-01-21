@@ -10,6 +10,12 @@ class OutlinesEngine(Engine):
     def __init__(self):
         super().__init__()
 
+    def get_id(self):
+        return "outlines"
+
+    def get_name(self):
+        return "Outlines"
+
     def init(self):
         self.outlines_tokenizer = TransformerTokenizer(self.tokenizer)
 

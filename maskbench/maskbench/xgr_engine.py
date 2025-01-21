@@ -9,6 +9,20 @@ class XgrEngine(Engine):
         super().__init__()
         self.compliant = False
 
+    def get_id(self):
+        if self.compliant:
+            return "xgr-compliant"
+        else:
+            return "xgr"
+
+    def get_name(self):
+        if self.compliant:
+            return "XGrammar"
+        return "XGrammar (defl.)"
+
+    def get_module(self):
+        return "xgrammar"
+
     def init(self):
         config = AutoConfig.from_pretrained(self.tokenizer_model_id)
         # This can be larger than tokenizer.vocab_size due to paddings

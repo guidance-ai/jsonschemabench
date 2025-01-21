@@ -1,11 +1,26 @@
 from transformers import PreTrainedTokenizer
 
+
 class Engine:
     tokenizer: PreTrainedTokenizer
     tokenizer_model_id: str
 
     def __init__(self):
         pass
+
+    def get_id(self):
+        raise NotImplementedError()
+
+    def get_name(self):
+        return self.get_id()
+
+    def get_module(self):
+        return self.get_id()
+
+    def get_version(self):
+        from importlib.metadata import version
+
+        return version(self.get_module())
 
     def init(self):
         raise NotImplementedError()

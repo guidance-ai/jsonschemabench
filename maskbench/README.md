@@ -19,7 +19,7 @@ for a total of about 2M tokens.
 
 ## Results
 
-We have run the following:
+We have run the following grammar engines:
 
 - [llguidance](https://github.com/guidance-ai/llguidance) v0.6.7
 - [XGrammar](https://github.com/mlc-ai/xgrammar) v0.1.10 in default configuration
@@ -35,6 +35,11 @@ There was a time limit of 15 minutes per schema,
 memory limit of 40GiB resident set size (which works out to a few GiB of working set)
 and a 40 running thread limit (these are all defaults, except for thread limit which
 will be lower on lesser machines).
+
+We run every engine single-threaded, under the assumption that for heavy
+production work-loads, the batch size will be bigger than the number of
+available cores, so it makes sense to run each sequence in a single thread.
+This particularly applies to XGrammar.
 
 ## Reproducing
 

@@ -159,19 +159,33 @@ def setup_argparse():
     return parser
 
 
+def get_engine(args):
+    engine: Engine
+
+    if args.xgr or args.xgr_compliant:
+        from .xgr_engine import XgrEngine
+
+        engine = XgrEngine()
+        engine.compliant = args.xgr_compliant
+    elif args.llg:
+        from .llg_engine import LlgEngine
+
+        engine = LlgEngine()
+    elif args.outlines:
+        from .outlines_engine import OutlinesEngine
+
+        engine = OutlinesEngine()
+    else:
+        raise Exception("No grammar engine specified")
+    return engine
+
+
 def get_output(args):
     if args.output:
         return args.output
-    elif args.xgr_compliant:
-        return "tmp/out--xgr-compliant"
-    elif args.llg:
-        return "tmp/out--llg"
-    elif args.xgr:
-        return "tmp/out--xgr"
-    elif args.outlines:
-        return "tmp/out--outlines"
     else:
-        raise Exception("No mode or output path specified")
+        id = get_engine(args).get_id()
+        return f"tmp/out--{id}"
 
 
 def get_files(args):
@@ -198,22 +212,7 @@ def main():
     time_limit_s = args.time_limit
     model_id = args.tokenizer
 
-    if args.xgr or args.xgr_compliant:
-        from .xgr_engine import XgrEngine
-
-        engine = XgrEngine()
-        engine.compliant = args.xgr_compliant
-    elif args.llg:
-        from .llg_engine import LlgEngine
-
-        engine = LlgEngine()
-    elif args.outlines:
-        from .outlines_engine import OutlinesEngine
-
-        engine = OutlinesEngine()
-    else:
-        raise Exception("No mode specified")
-
+    engine = get_engine(args)
     output_path = get_output(args)
 
     engine.tokenizer_model_id = model_id
