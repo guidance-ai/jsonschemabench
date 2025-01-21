@@ -81,7 +81,7 @@ def process_file(engine: Engine, file: str):
             engine.compute_mask()
             ok = engine.commit_token(t)
             mask_time = time_us(t2)
-            # print(f"Token {tidx} {repr(tokenizer.decode([t]))}: {ok}", file=sys.stderr)
+            # engine.log_single(f"Token {tidx} {repr(engine.tokenizer.decode([t]))}: {ok}")
             num_tokens += 1
             masks_us += mask_time
             all_mask_us.append(mask_time)
@@ -105,8 +105,11 @@ def process_file(engine: Engine, file: str):
     status["max_mask_us"] = max_mask_us
     status["num_tokens"] = num_tokens
 
+    st = json.dumps(status, indent=2)
+    engine.log_single(st)
     with open(output_name, "w") as f:
-        f.write(json.dumps(status, indent=2))
+        f.write(st)
+        
     return status
 
 
@@ -156,7 +159,7 @@ def setup_argparse():
         "--mem-limit", type=int, default=40, help="Memory (RSS) limit in gigabytes"
     )
 
-    defl_cpu = min(os.cpu_count(), 90)
+    defl_cpu = min(os.cpu_count(), 40)
     parser.add_argument(
         "--num-threads", type=int, default=defl_cpu, help="Number of threads to run"
     )
