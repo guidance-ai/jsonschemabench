@@ -76,33 +76,40 @@ def process_file(engine: Engine, file: str):
         tokens = engine.tokenizer.encode(instance, add_special_tokens=False)
 
         accepted = True
-        for tidx, t in enumerate(tokens):
-            t2 = time.monotonic()
-            engine.compute_mask()
-            ok = engine.commit_token(t)
-            mask_time = time_us(t2)
-            if engine.debug:
-                engine.log_single(
-                    f"Token {tidx} {repr(engine.tokenizer.decode([t]))}: {ok}"
-                )
-            num_tokens += 1
-            masks_us += mask_time
-            all_mask_us.append(mask_time)
-            if mask_time > max_mask_us:
-                max_mask_us = mask_time
-            if not ok:
-                accepted = False
-                break
+        try:
+            for tidx, t in enumerate(tokens):
+                t2 = time.monotonic()
+                engine.compute_mask()
+                ok = engine.commit_token(t)
+                mask_time = time_us(t2)
+                if engine.debug:
+                    engine.log_single(
+                        f"Token {tidx} {repr(engine.tokenizer.decode([t]))}: {ok}"
+                    )
+                num_tokens += 1
+                masks_us += mask_time
+                all_mask_us.append(mask_time)
+                if mask_time > max_mask_us:
+                    max_mask_us = mask_time
+                if not ok:
+                    accepted = False
+                    break
 
-        if accepted and not test["valid"]:
-            status["validation_error"] = f"test #{i}: should reject but didn't"
-        elif not accepted and test["valid"]:
-            status["validation_error"] = f"test #{i}: should accept but didn't"
-        else:
-            if test["valid"]:
-                status["num_valid_tests"] += 1
+            if accepted and not test["valid"]:
+                status["validation_error"] = f"test #{i}: should reject but didn't"
+            elif not accepted and test["valid"]:
+                status["validation_error"] = f"test #{i}: should accept but didn't"
             else:
-                status["num_invalid_tests"] += 1
+                if test["valid"]:
+                    status["num_valid_tests"] += 1
+                else:
+                    status["num_invalid_tests"] += 1
+
+        except Exception as e:
+            e_str = repr(e)
+            engine.log_single(e_str)
+            status["validation_error"] = f"test #{i}: EXN {e_str}"
+            accepted = False
 
     status["masks_us"] = masks_us
     status["max_mask_us"] = max_mask_us
