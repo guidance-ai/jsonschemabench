@@ -103,26 +103,30 @@ def process_files_in_threads(file_list: list[str], thread_count=40, chunk_size=1
 
 
 if __name__ == "__main__":
-    file_list = []
-    if len(sys.argv) < 3:
-        raise Exception(
-            "Usage: python3 run_maskbench.py <--llg|--xgr|--outlines|...> <file> [<file>...]"
-        )
-    cmd.append(sys.argv[1])
-    output_path = "tmp/out" + sys.argv[1]
-    cmd.append("--output")
-    cmd.append(output_path)
-    for arg in sys.argv[2:]:
-        if arg.endswith(".json"):
-            file_list.append(arg)
-        else:
-            file_list.extend(glob.glob(arg + "/*.json"))
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
+    from maskbench.runner import setup_argparse, get_output, get_files
+
+    parser = setup_argparse()
+    args = parser.parse_args()
+
+    output_path = get_output(args)
+
+    file_list = get_files(args)
     if not file_list:
         raise Exception("No files found")
+
+    args_to_pass = [a for a in sys.argv[1:] if a not in args.files]
+    cmd += args_to_pass
+
+    print(
+        f"{len(file_list)} files, timeout {args.time_limit}s, memory {args.mem_limit}GB, "
+        + f"output {output_path}; {args.num_threads} threads; cmd: {' '.join(cmd)}",
+        file=sys.stderr,
+    )
 
     os.makedirs(output_path, exist_ok=True)
     with open(os.path.join(output_path, "meta.txt"), "w") as meta:
         meta.write(json.dumps({"cmd": cmd}, indent=2))
 
-    process_files_in_threads(file_list, thread_count=40, chunk_size=100)
+    process_files_in_threads(file_list, thread_count=args.num_threads, chunk_size=100)
