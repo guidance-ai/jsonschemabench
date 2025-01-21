@@ -231,7 +231,6 @@ def print_markdown_table(data):
     for row in data[1:]:
         print(format_row(row))
 
-
 def plot_metrics(data_list: list[dict], prefix, title):
     tbm_keys = [key for key in data_list[0].keys() if key.startswith(prefix)]
     labels = [data["name"] for data in data_list]
@@ -240,17 +239,17 @@ def plot_metrics(data_list: list[dict], prefix, title):
     }
 
     # Calculate positions
-    x = np.arange(len(tbm_keys))
-    width = 0.8 / len(labels)
+    y = np.arange(len(tbm_keys))
+    height = 0.8 / len(labels)
 
     # Set up the plot
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(10, 8))
     bar_positions = []
 
     for i, (label, tbm_values) in enumerate(values.items()):
-        pos = x + i * width - 0.4 + (width / 2)
+        pos = y + (len(labels) - i - 1) * height - 0.4 + (height / 2)
         bar_positions.append(pos)
-        bars = ax.bar(pos, tbm_values, width, label=label)
+        bars = ax.barh(pos, tbm_values, height, label=label)
 
         # Add annotations on the bars
         for j, (bar, value) in enumerate(zip(bars, tbm_values)):
@@ -266,42 +265,41 @@ def plot_metrics(data_list: list[dict], prefix, title):
 
             label_text = f"{scaled_value:.0f}{time_unit}"
             ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height(),
+                bar.get_width() * 1.1,
+                bar.get_y() + bar.get_height() / 2,
                 label_text,
-                ha="center",
-                va="bottom",
+                ha="left",
+                va="center",
                 fontsize=8,
-                rotation=45,
+                rotation=0,
             )
 
             # Add speedup/slowdown factor
             all_values_for_key = [values[engine][j] for engine in labels]
             fastest = min(all_values_for_key)
             factor = value / fastest
-            
+
             if math.isclose(factor, 1.0, rel_tol=0.3):
                 continue
             else:
                 speedup_text = f"{factor:.0f}x"
 
             ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height() / 1.5,
+                bar.get_width() / 1.2,
+                bar.get_y() + bar.get_height() / 2,
                 speedup_text,
-                ha="center",
-                va="top",
+                ha="right",
+                va="center",
                 fontsize=8,
-                rotation=90,
+                rotation=0,
                 color="white",
-                # transform=ax.get_yaxis_transform(),
             )
 
     # Configure axes
-    ax.set_yscale("log", base=10)
-    ax.set_xticks(x)
-    ax.set_xticklabels(tbm_keys, rotation=45, ha="right")
-    ax.set_ylabel("Time (log scale, microseconds)")
+    ax.set_xscale("log", base=10)
+    ax.set_yticks(y)
+    ax.set_yticklabels(tbm_keys, rotation=45, ha="right")
+    ax.set_xlabel("Time (log scale, microseconds)")
     ax.set_title(title)
     ax.legend()
 
