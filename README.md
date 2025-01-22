@@ -11,7 +11,7 @@ JSONSchemaBench helps to measure **efficiency** and **coverage** of a given stru
 
 ## MaskBench
 
-On top of JSONSchemaBench's view on real world JSON schema, we also develop a purely performance-oriented benchmark `MaskBench` targeting mask computation times. This benchmark emphasizes results relevant to server-side deployments of constrained decoding.
+On top of JSONSchemaBench's view on real world JSON schema, we also develop a purely performance-oriented benchmark [MaskBench](./maskbench) targeting mask computation times. This benchmark emphasizes results relevant to server-side deployments of constrained decoding.
 
 <p align="center">
     <img src="maskbench/plots/hero.png" width="700"/>
