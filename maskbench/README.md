@@ -1,8 +1,8 @@
-# MaskBench
-
 <p align="center">
     <img src="plots/hero.png" width="700"/>
 </p>
+
+# MaskBench
 
 While the paper and the top-level repo here are mainly concerned with end-to-end performance and accuracy of
 constrained generation with JSON Schema, this folder contains scripts and results
