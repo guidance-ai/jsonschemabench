@@ -161,7 +161,7 @@ def setup_argparse():
     parser.add_argument(
         "--tokenizer",
         type=str,
-        default="meta-llama/Llama-3.1-8B-Instruct",
+        default="unsloth/Meta-Llama-3.1-8B-Instruct",
         help="Tokenizer model ID",
     )
 
