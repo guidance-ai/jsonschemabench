@@ -26,7 +26,7 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 ## Engines Benchmarked
 
 1. **[LLGuidance](https://github.com/guidance-ai/llguidance)**
-2. [llama.cpp](https://github.com/ggerganov/llama.cpp) grammars,
+2. **[llama.cpp](https://github.com/ggerganov/llama.cpp)** grammars,
   with [json_schema_to_grammar.py](https://github.com/ggerganov/llama.cpp/blob/master/examples/json_schema_to_grammar.py)
   with whitespace regex modified to `/[ \t\n\r]*/` to match JSON definition
   (by default it puts limits on the amount of whitespace, which slows down the engine).
@@ -138,7 +138,7 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 
 The schema instances were generated using the Meta Llama 3.1 70B instruct model. The output was constrained to produce valid JSON, though not strictly conforming to the schema. For valid instances, the model was further prompted to modify them into invalid ones.
 
-Prompts for invalid instances were adjusted to emphasize specific schema features (e.g., `maxItems` or `pattern`), while some instances were generated without such focus. The data generation scripts are located in the `creation/` folder.
+Prompts for invalid instances were adjusted to emphasize specific schema features (e.g., `maxItems`, `pattern`, `minLength`, `if` etc.), while some instances were generated without such focus. The data generation scripts are located in the `creation/` folder.
 
 Both valid and invalid instances were validated using Python and Rust jsonschema libraries.
 
@@ -153,7 +153,7 @@ For valid instances only (since invalid instances are not generated in productio
 
 Compacted JSON is preferred unless the model is fine-tuned on indented JSON.
 
-Fast-forward tokens are additional tokens that can be appended to the model's context window after sampling. These tokens are 3-10x faster to compute than regular tokens. For example, a 15% share of fast-forward tokens corresponds to a 10-12% speed-up in generation.
+Fast-forward tokens are additional tokens that can be appended to the model's context window after sampling. These tokens are 3-10x faster to compute than regular tokens. For example, a 15% share of fast-forward tokens corresponds to a 10-13% increase in throughput.
 
 | split           | schemas | has tests | valid inst. | invalid inst. | tok/inst. |  FF | FF compact |
 |:----------------|--------:|----------:|------------:|--------------:|----------:|----:|-----------:|
