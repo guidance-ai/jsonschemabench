@@ -1,27 +1,19 @@
+# MaskBench
+
 <p align="center">
     <img src="plots/hero.png" width="700"/>
 </p>
 
-# MaskBench
+The primary focus of this repository is end-to-end performance and accuracy of JSON Schema-constrained generation. This folder, however, contains scripts and results dedicated to benchmarking mask computation in isolation, without involving an LLM.
 
-While the paper and the top-level repo here are mainly concerned with end-to-end performance and accuracy of
-constrained generation with JSON Schema, this folder contains scripts and results
-of benchmarking of just the mask computation, without any involvement of an LLM.
+By isolating mask computation, this benchmark assesses its standalone performance, which is particularly relevant for server-side scenarios with large batch sizes.
 
-This lets us measure the performance of the mask computation in isolation, and also
-is more applicable to server-side scenarios, where large batch sizes are used.
+### Data Overview
 
-In particular, the `data/` folder contains one file per schema (around 10k),
-and in most of them (8.5k) there are valid and invalid schema instances that can be used for
-benchmarking and light-weight correctness testing.
-In total there is 13k valid and 23k invalid instances, which works out to about 2M tokens.
-See [below](#data-sources) for how these files were generated.
+- **Data Folder (`data/`)**: Contains ~10k schemas, with 13k valid and 23k invalid instances (total: ~2M tokens). About 1.5k schemas lack tests.  
+- **Schema Instances**: Each schema includes valid and invalid examples for benchmarking and correctness testing. See [Data Sources](#data-sources) for details on data generation.
 
-Thus, `data/` contains about 10k schemas, 13k valid and 23k invalid instances,
-with 1.5k schemas having no tests,
-for a total of about 2M tokens.
-
-## Results
+## Benchmark Results
 
 <p align="center">
     <img src="plots/tbm.png" />
@@ -31,64 +23,48 @@ for a total of about 2M tokens.
     <img src="plots/ttfm.png" />
 </p>
 
-## Engines
+## Engines Benchmarked
 
-We have run the following grammar engines:
-
-- [LLGuidance](https://github.com/guidance-ai/llguidance)
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) grammars,
+1. **[LLGuidance](https://github.com/guidance-ai/llguidance)**
+2. [llama.cpp](https://github.com/ggerganov/llama.cpp) grammars,
   with [json_schema_to_grammar.py](https://github.com/ggerganov/llama.cpp/blob/master/examples/json_schema_to_grammar.py)
   with whitespace regex modified to `/[ \t\n\r]*/` to match JSON definition
-  (by default it puts limits on the amount of whitespace, which slows down the engine)
-- [XGrammar](https://github.com/mlc-ai/xgrammar) in default configuration
-- "XGrammar.cpp", which is XGrammar engine together with the above script
-- [Outlines](https://github.com/dottxt-ai/outlines)
+  (by default it puts limits on the amount of whitespace, which slows down the engine).
+3. **[XGrammar](https://github.com/mlc-ai/xgrammar)** in default configuration.
+4. **"XGrammar.cpp"**: XGrammar with the llama.cpp script above.
+5. **[Outlines](https://github.com/dottxt-ai/outlines)**
 
-## Test setup
+## Test Environment
 
-All tests were run on
-[Azure NC96ads_A100_v4](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/nca100v4-series?tabs=sizebasic)
-with AMD EPYC 7V13 (Milan) with 96 threads enabled (48 cores),
-with 880 GiB of RAM and 4xA100 80GB PCIe GPUs (though GPUs were not used).
+- **Hardware**: Azure [NC96ads_A100_v4](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/nca100v4-series?tabs=sizebasic) with 96 threads (48 cores), 880 GiB RAM, 4x A100 GPUs (GPUs not utilized).
+- **Constraints**: 
+  - Time: 15 minutes per schema.
+  - Memory: 40 GiB resident set size.
+  - Threads: 40-thread limit.
 
-There was a time limit of 15 minutes per schema,
-memory limit of 40GiB resident set size (which works out to a few GiB of working set)
-and a 40 running thread limit (these are all defaults, except for thread limit which
-will be lower on lesser machines).
+- Engines were executed single-threaded to emulate large batch scenarios (where batch size is larger than the number of available cores).
+- XGrammar was set to only use a single thread per sequence, LLGuidance and llama.cpp always do that.
+- Outlines normally uses several threads per sequence, so it was run with 90 parallel threads, so it doesn't get more CPU time than the other engines.
 
-We run every engine single-threaded, under the assumption that for heavy
-production work-loads, the batch size will be bigger than the number of
-available cores, so it makes sense to run each sequence in a single thread.
-We've set XGrammar to only use one thread and LLGuidance always uses one thread.
-Outlines seems to be using more than one thread, so we instead run it with 90
-threads in parallel to limit the CPU this way.
+## Key Findings
 
-## Discussion
+- **Grammar Compilation Time (TTFM)**:
+  - **LLGuidance** and **llama.cpp** had near-instantaneous compilation.
+  - **Outlines** was the slowest, with 1000+ timeouts (15+ minutes).
+  - **XGrammar**'s TTFM is 3–4 orders of magnitude slower than **LLGuidance** and **llama.cpp**. It's likely grammar compilation time can be hidden in prefill time (especially when parallelized).
 
-Grammar compilation time (TTFM) is almost instantaneous for LLGuidance and llama.cpp
-(the high p100 time for llama.cpp is likely due to Python implementation of JSON Schema conversion).
-Outlines has by far the highest TTFM, and this doesn't account for over 1000 timeouts (15 minutes or more).
-Observed XGrammar's TTFM can likely often be hidden in prefill time, provided the computation is parallelized,
-but it's consistently 3-4 orders of magnitude slower than LLGuidance and llama.cpp.
-
-For mask computation time (TBM), XGrammar in its default settings beats LLGuidance
-up to p75 (the easy cases), but becomes 2x slower at p90 and 10x slower at p99.
-Due to this slow tail, LLGuidance is 6x faster than XGrammar on average.
-
-When a comparable grammar is considered (XGrammar.cpp), XGrammar is much slower
-than LLGuidance (2-3 orders of magnitude) from p50 onwards,
-and 3 orders of magnitude slower on average.
-Interestingly, llama.cpp using the same grammar as XGrammar is in fact faster
-on average and by 1 order of magnitude above p75.
-
-Outlines, despite having everything pre-computed, is very slow.
+- **Mask Computation Time (TBM)**:
+  - **XGrammar** outperforms **LLGuidance** on simple cases (p25–p75), but becomes 2x and 10x slower at p90 and p99, respectively.
+  - **LLGuidance** is thus 6x faster on average due to better tail performance.
+  - **Outlines** is very slow despite pre-computed results.
+  - **XGrammar.cpp** lags significantly (2–3 orders of magnitude slower than **LLGuidance** from p50 onward).
 
 ## Random notes
 
 - for TBM, with batch size 100 and forward pass time of 20ms, the p99 happens 50 times per second,
   and p99.9 happens 5 times per second; unless handled specially, these mask computations
   will hold the entire batch
-- the TTFM is cut off at 900s due to timeout (especially for Outlines)
+- the TTFM is cut off at 900s due to timeout (especially relevant for Outlines)
 - while LLGuidance has the biggest number of compile errors,
   it has almost no validation errors nor crashes;
   in other words it's upfront about what it cannot do
@@ -106,7 +82,7 @@ Outlines, despite having everything pre-computed, is very slow.
   and flexibility to the ones used in LLGuidance; thus it provides a more
   apples-to-apples comparison of the grammar engines (as opposed to grammars)
 
-
+## Performance Metrics
 
 <!-- GEN-BEGIN -->
 | metric             | LLGuidance | XGrammar (defl.) |  llama.cpp | XGrammar.cpp |    Outlines |
@@ -148,16 +124,15 @@ Outlines, despite having everything pre-computed, is very slow.
 * outlines: 0.1.13
 <!-- GEN-END -->
 
-## Reproducing
+## Reproducing Results
 
-Masks can be computed using `scripts/run_maskbench.py`.
-Typical execution is `./scripts/run_maskbench.py --xgr-compliant data/`,
-which will store the results under `tmp/out--xgr-compliant` folder.
-See `./scripts/run_maskbench.py --help` for more details.
-In particular, the resource limits can be adjusted via command line flags.
-
-Once the results are generated, you can generate table and plots with
-`./scripts/maskbench_results.py`.
+- **Run Masks**: Use `scripts/run_maskbench.py`. Example:  
+  `./scripts/run_maskbench.py --xgr-compliant data/`  
+  Results are saved in `tmp/out--xgr-compliant`.
+  See `./scripts/run_maskbench.py --help` for more options, in particular resource limits.
+  
+- **Analyze Results**: Generate tables and plots with  
+  `./scripts/maskbench_results.py`.
 
 ## Data Sources
 
