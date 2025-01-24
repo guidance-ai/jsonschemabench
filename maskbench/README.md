@@ -11,7 +11,7 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 ### Data Overview
 
 - **Data Folder (`data/`)**: Contains ~10k schemas, with 13k valid and 23k invalid instances (total: ~2M tokens). About 1.5k schemas lack tests.  
-- **Schema Instances**: Each schema includes valid and invalid examples for benchmarking and correctness testing. See [Data Sources](#data-sources) for details on data generation.
+- **Schema Instances**: Each schema includes valid and invalid examples for benchmarking and correctness testing. See [Testcases](#testcases) for details on data generation and stats on the testcases.
 
 ## Benchmark Results
 
@@ -134,7 +134,7 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 - **Analyze Results**: Generate tables and plots with  
   `./scripts/maskbench_results.py`.
 
-## Data Sources
+## Testcases
 
 The schema instances were generated using the Meta Llama 3.1 70B instruct model. The output was constrained to produce valid JSON, though not strictly conforming to the schema. For valid instances, the model was further prompted to modify them into invalid ones.
 
