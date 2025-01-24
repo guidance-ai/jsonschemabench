@@ -159,15 +159,38 @@ In particular, the resource limits can be adjusted via command line flags.
 Once the results are generated, you can generate table and plots with
 `./scripts/maskbench_results.py`.
 
-## Data sources
+## Data Sources
 
-The schema instances instances were generated with Meta Llama 3.1 70B instruct model,
-constrained to output valid JSON, but not the schema.
-If a valid instance was generated, the model was additionally prompted to
-modify it to make it invalid.
-The prompts were tuned to have the model focus on specific features
-of the schema (e.g. `maxItems` or `pattern`),
-and some were generated without such focus.
-The data generation scripts are under `creation/` folder.
+The schema instances were generated using the Meta Llama 3.1 70B instruct model. The output was constrained to produce valid JSON, though not strictly conforming to the schema. For valid instances, the model was further prompted to modify them into invalid ones.
 
-Both valid and invalid instances were checked by Python and Rust jsonschema libraries.
+Prompts for invalid instances were adjusted to emphasize specific schema features (e.g., `maxItems` or `pattern`), while some instances were generated without such focus. The data generation scripts are located in the `creation/` folder.
+
+Both valid and invalid instances were validated using Python and Rust jsonschema libraries.
+
+Tests are categorized by origin and complexity. The table below summarizes the number of schemas, the percentage with generated instances, and the count of valid and invalid instances (some schemas have multiple valid/invalid instances).
+
+For valid instances only (since invalid instances are not generated in production), the following metrics are computed:
+
+- **Average tokens per instance** (as counted by the Llama3 tokenizer).
+- **Fast-forward token share**, measured for two cases:
+  1. Regular JSON (allowing whitespace wherever permitted by the spec).
+  2. Compacted JSON (no whitespace anywhere).
+
+Compacted JSON is preferred unless the model is fine-tuned on indented JSON.
+
+Fast-forward tokens are additional tokens that can be appended to the model's context window after sampling. These tokens are 3-10x faster to compute than regular tokens. For example, a 15% share of fast-forward tokens corresponds to a 10-12% speed-up in generation.
+
+| split           | schemas | has tests | valid inst. | invalid inst. | tok/inst. |  FF | FF compact |
+|:----------------|--------:|----------:|------------:|--------------:|----------:|----:|-----------:|
+| Github_trivial  |     444 |       73% |         460 |           771 |        41 |  3% |         5% |
+| Github_easy     |    1943 |       87% |        2641 |          4611 |        46 | 11% |        14% |
+| Github_hard     |    1240 |       68% |        1493 |          3405 |       339 | 16% |        19% |
+| Github_medium   |    1976 |       87% |        3091 |          6119 |       141 | 11% |        13% |
+| Github_ultra    |     164 |       54% |         160 |           302 |       768 | 19% |        21% |
+| Glaiveai2K      |    1707 |       61% |        1634 |          1104 |        30 | 21% |        25% |
+| Kubernetes      |    1064 |       89% |        1680 |          2908 |        86 |  9% |        10% |
+| Snowplow        |     403 |       95% |         670 |          1730 |       142 |  9% |        11% |
+| WashingtonPost  |     125 |       78% |         146 |           330 |        95 | 12% |        14% |
+| MCPspec         |      45 |       78% |          44 |            44 |        45 | 20% |        29% |
+| JsonSchemaStore |     492 |       73% |         679 |          1405 |       295 |  7% |         7% |
+| TOTAL           |   10163 |       75% |       12821 |         23047 |       133 | 13% |        15% |
