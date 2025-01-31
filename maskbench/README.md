@@ -4,10 +4,10 @@
     <img src="plots/hero.png" width="700"/>
 </p>
 
-The primary focus of the top-level repository is end-to-end performance and accuracy of JSON Schema-constrained generation. See[paper](https://arxiv.org/abs/2501.10868) for general methodology, description of data and results.
+The primary focus of the top-level repository is end-to-end performance and accuracy of JSON Schema-constrained generation.
+See [paper](https://arxiv.org/abs/2501.10868) for general methodology, description of data and results.
 
 This folder, however, contains scripts and results dedicated to benchmarking mask computation in isolation, without involving an LLM.
-
 By isolating mask computation, this benchmark assesses its standalone performance, which is particularly relevant for server-side scenarios with large batch sizes.
 
 ### Data Overview
