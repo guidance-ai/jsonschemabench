@@ -7,6 +7,7 @@ import random
 import sys
 import glob
 import json
+import time
 
 output_path = "tmp/output/"
 cmd = ["python3", "-m", "maskbench.runner", "--multi"]
@@ -59,8 +60,12 @@ def process_files_in_threads(file_list: list[str], thread_count=40, chunk_size=1
 
     file_list0 = file_list
     file_list = missing_files(file_list)
+    num_processed = 0
+    num_all_files = len(file_list)
 
-    print(f"Total files: {len(file_list)}")
+    t0 = time.monotonic()
+
+    print(f"Total files: {num_all_files}")
 
     if not file_list:
         print("All files processed.")
@@ -69,7 +74,7 @@ def process_files_in_threads(file_list: list[str], thread_count=40, chunk_size=1
     thread_count = min(thread_count, len(file_list))
 
     def worker():
-        nonlocal file_list
+        nonlocal file_list, num_processed
 
         while True:
             files_chunk = []
@@ -87,15 +92,23 @@ def process_files_in_threads(file_list: list[str], thread_count=40, chunk_size=1
 
             unprocessed_files = missing_files(files_chunk)
 
+            processed_here = len(files_chunk) - len(unprocessed_files)
+
             num_total = 0
             with file_list_lock:
+                num_processed += processed_here
                 file_list.extend(unprocessed_files)
                 num_total = len(file_list)
                 random.shuffle(file_list)
 
             n_unprocessed = len(unprocessed_files)
             n_processed = len(files_chunk) - n_unprocessed
-            print(f"{n_processed} + {n_unprocessed}; {num_total} left.")
+            now = time.monotonic() - t0
+            perc_done = num_processed / num_all_files * 100
+            est_time_left = (now / (1 + num_processed) * num_all_files) - now
+            print(
+                f"{now:.1f}s {n_processed} + {n_unprocessed}; {num_total} pending; {perc_done:.1f}% done, est. {est_time_left:.1f}s left"
+            )
 
     threads = []
     for _ in range(thread_count):
@@ -106,6 +119,8 @@ def process_files_in_threads(file_list: list[str], thread_count=40, chunk_size=1
     # Wait for all threads to complete
     for thread in threads:
         thread.join()
+
+    print(f"Total time: {time.monotonic() - t0:.2f}s")
 
 
 if __name__ == "__main__":
