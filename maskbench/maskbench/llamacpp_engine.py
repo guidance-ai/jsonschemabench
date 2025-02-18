@@ -29,9 +29,12 @@ class LlamaCppEngine(Engine):
         params = llama_cpp.llama_model_default_params()
         model = llama_cpp.llama_load_model_from_file(model_path.encode("utf-8"), params)
         assert model
-        self.model = model
+        vocab = llama_cpp.llama_model_get_vocab(model)
+        assert vocab
+        # self.model = model
+        self.vocab = vocab
 
-        n_vocab = llama_cpp.llama_n_vocab(self.model)
+        n_vocab = llama_cpp.llama_n_vocab(self.vocab)
         token_data_arr = llama_cpp._internals.LlamaTokenDataArray(n_vocab=n_vocab)
         token_data_arr.candidates_data.id[:] = token_data_arr.default_candidates_data_id
         token_data_arr.candidates_data.logit[:] = 0.0
@@ -52,7 +55,7 @@ class LlamaCppEngine(Engine):
         if self.debug:
             self.log_single(grm)
         self.sampler = llama_cpp.llama_sampler_init_grammar(
-            self.model, grm.encode("utf-8"), b"root"
+            self.vocab, grm.encode("utf-8"), b"root"
         )
 
     def reset(self):
@@ -86,5 +89,5 @@ class LlamaCppEngine(Engine):
         size = 256
         buf = ctypes.create_string_buffer(size)
         special = True
-        l = llama_cpp.llama_token_to_piece(self.model, tok, buf, size, 0, special)
+        l = llama_cpp.llama_token_to_piece(self.vocab, tok, buf, size, 0, special)
         return bytes(buf[0:l])
