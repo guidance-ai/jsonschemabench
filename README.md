@@ -1,10 +1,8 @@
 # JSONSchemaBench
 
-<div align="center">
+[![ArXiv](https://img.shields.io/badge/arXiv-2501.10868-b31b1b)](https://arxiv.org/abs/2501.10868)
+[![Hugging Face](https://img.shields.io/badge/Dataset-Hugging%20Face-orange)](https://huggingface.co/datasets/epfl-dlab/JSONSchemaBench)
 
-[Paper](https://arxiv.org/abs/2501.10868)
-
-</div>
 
 Reliably generating structured outputs is a key capability for modern LLM applications. Despite its growing adoption, a systematic evaluation of structured output generation is still lacking. With JSON Schema emerging as the standard format for structured data, we introduce JSONSchemaBench a benchmark of around 10,000 real-world JSON schemas that capture a wide range of constraints and complexities.
 JSONSchemaBench helps to measure **efficiency** and **coverage** of a given structured output engine. 
@@ -60,6 +58,20 @@ For statistics on the datasets and an overview of schema constraint features, pl
 </p>
 
 </details>
+
+### 📥 Accessing the Dataset on Hugging Face
+JSONSchemaBench is now available on the Hugging Face Hub. You can load it directly using the `datasets` library:
+
+```python
+from datasets import load_dataset
+
+dataset = load_dataset("epfl-dlab/JSONSchemaBench")
+print(dataset)  
+```
+Each dataset split contains:
+- `"json_schema"`: The schema definition.
+- `"unique_id"`: A unique identifier for the schema.
+
 
 
 ## Data files
