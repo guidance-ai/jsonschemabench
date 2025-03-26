@@ -10,7 +10,14 @@ See [paper](https://arxiv.org/abs/2501.10868) for general methodology, descripti
 This folder, however, contains scripts and results dedicated to benchmarking mask computation in isolation, without involving an LLM.
 By isolating mask computation, this benchmark assesses its standalone performance, which is particularly relevant for server-side scenarios with large batch sizes.
 
-### Data Overview
+## News
+
+- **2024-03-26**: added (quite easy) testcases from [Gorilla BFCL v3](https://github.com/ShishirPatil/gorilla/tree/main/berkeley-function-call-leaderboard/data) using [improved](./creation/fetch_bfcl.py) version of script by @zanderjiang
+- **2024-03-21**: reordered properties in a few objects, to follow [stable property order](https://github.com/guidance-ai/llguidance/blob/main/docs/json_schema.md#property-order)
+- **2024-02-17**: re-run tests with latest versions of engines
+- **2024-01-20**: initial release of the benchmark
+
+## Data Overview
 
 - **Data Folder (`data/`)**: Contains ~10k schemas, with 13k valid and 23k invalid instances (total: ~2M tokens). About 1.5k schemas lack tests.  
 - **Schema Instances**: Each schema includes valid and invalid examples for benchmarking and correctness testing. See [Testcases](#testcases) for details on data generation and stats on the testcases.
