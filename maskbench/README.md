@@ -53,8 +53,14 @@ By isolating mask computation, this benchmark assesses its standalone performanc
   - Threads: 40-thread limit.
 
 - Engines were executed single-threaded to emulate large batch scenarios (where batch size is larger than the number of available cores).
-- XGrammar was set to only use a single thread per sequence, LLGuidance and llama.cpp always do that.
-- Outlines normally uses several threads per sequence, so it was run with 90 parallel threads, so it doesn't get more CPU time than the other engines.
+- XGrammar was set to only use a single thread per sequence, other always do that.
+- ~~Outlines normally uses several threads per sequence, so it was run with 90 parallel threads, so it doesn't get more CPU time than the other engines.~~
+
+## Measurements
+
+TTFM p75 is computed as follows: take all successful grammar compilation times for a given engine, sort them, and take the 75th percentile. **This may be changed to count time-outs as 15 minutes each.**
+
+TBM p75 is computed as follows: take all successful mask computation times for a given engine (accross all schemas), sort them, and take the 75th percentile.
 
 ## Key Findings
 
