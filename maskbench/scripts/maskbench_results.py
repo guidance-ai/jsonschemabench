@@ -352,7 +352,9 @@ if __name__ == "__main__":
         quick = True
         folders = folders[1:]
 
+    selective = True
     if not folders:
+        selective = False
         metas = glob.glob("tmp/out--*/meta.txt")
         folders = [os.path.dirname(m) for m in metas]
 
@@ -395,6 +397,9 @@ if __name__ == "__main__":
         tbl += f"* {module}: {meta['module_version']}\n"
 
     print(tbl)
+
+    if selective:
+        sys.exit(0)
 
     with open("README.md", "r") as f:
         rdm = f.read()
