@@ -144,6 +144,11 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 - **Analyze Results**: Generate tables and plots with  
   `./scripts/maskbench_results.py`.
 
+
+### Debugging engine
+
+Run `python -m maskbench.runner data/Github_easy---o13947.json --debug --llg`. Replace `--llg` with other engine options as needed.
+
 ## Testcases
 
 The schema instances were generated using the Meta Llama 3.1 70B instruct model. The output was constrained to produce valid JSON, though not strictly conforming to the schema. For valid instances, the model was further prompted to modify them into invalid ones.

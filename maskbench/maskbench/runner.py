@@ -9,6 +9,7 @@ import time
 import resource
 import argparse
 import signal
+import traceback
 
 from .engine import Engine
 from transformers import AutoTokenizer
@@ -55,9 +56,9 @@ def process_file(engine: Engine, file: str):
         t0 = time.monotonic()
         engine.compile_grammar(pos_data["schema"])
     except Exception as e:
-        e_str = repr(e)
-        engine.log_single(e_str)
-        status["compile_error"] = e_str
+        if not engine.multi:
+            traceback.print_exc()
+        status["compile_error"] = repr(e)
         with open(output_name, "w") as f:
             f.write(json.dumps(status, indent=2))
         return status
@@ -106,9 +107,9 @@ def process_file(engine: Engine, file: str):
                     status["num_invalid_tests"] += 1
 
         except Exception as e:
-            e_str = repr(e)
-            engine.log_single(e_str)
-            status["validation_error"] = f"test #{i}: EXN {e_str}"
+            if not engine.multi:
+                traceback.print_exc()
+            status["validation_error"] = f"test #{i}: EXN {repr(e)}"
             accepted = False
 
     status["masks_us"] = masks_us
@@ -264,7 +265,9 @@ def main():
     engine = get_engine(args)
     output_path = get_output(args)
 
-    engine.tokenizer = AutoTokenizer.from_pretrained(engine.tokenizer_model_id)  # type: ignore
+    engine.tokenizer = AutoTokenizer.from_pretrained(
+        engine.tokenizer_model_id
+    )  # type: ignore
 
     engine.init()
 
