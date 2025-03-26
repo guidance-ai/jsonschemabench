@@ -11,6 +11,9 @@ class OutlinesEngine(Engine):
     def get_id(self):
         return "outlines"
 
+    def get_module(self):
+        return "outlines-core"
+    
     def get_name(self):
         return "Outlines"
 
