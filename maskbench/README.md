@@ -12,6 +12,7 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 
 ## News
 
+- **2024-03-26**: added testcases from [NousResearch/json-mode-eval](https://huggingface.co/datasets/NousResearch/json-mode-eval)
 - **2024-03-26**: added (quite easy) testcases from [Gorilla BFCL v3](https://github.com/ShishirPatil/gorilla/tree/main/berkeley-function-call-leaderboard/data) using [improved](./creation/fetch_bfcl.py) version of script by @zanderjiang
 - **2024-03-21**: reordered properties in a few objects, to follow [stable property order](https://github.com/guidance-ai/llguidance/blob/main/docs/json_schema.md#property-order)
 - **2024-02-17**: re-run tests with latest versions of engines
