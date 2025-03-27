@@ -42,7 +42,7 @@ By isolating mask computation, this benchmark assesses its standalone performanc
   (by default it puts limits on the amount of whitespace, which slows down the engine).
 3. **[XGrammar](https://github.com/mlc-ai/xgrammar)** in default configuration.
 4. **"XGrammar.cpp"**: XGrammar with the llama.cpp script above.
-5. **[Outlines](https://github.com/dottxt-ai/outlines)**
+5. **[Outlines Core](https://github.com/dottxt-ai/outlines-core)**
 
 ## Test Environment
 
@@ -55,6 +55,13 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 - Engines were executed single-threaded to emulate large batch scenarios (where batch size is larger than the number of available cores).
 - XGrammar was set to only use a single thread per sequence, other always do that.
 - ~~Outlines normally uses several threads per sequence, so it was run with 90 parallel threads, so it doesn't get more CPU time than the other engines.~~
+
+Approximate times to run the benchmark with 40-way parallelism:
+- LLGuidance: under 1 minute
+- llama.cpp: ~20 minutes
+- XGrammar: ~80 minutes
+- XGrammar.cpp: ~80 minutes
+- Outlines: ~130 minutes
 
 ## Measurements
 
