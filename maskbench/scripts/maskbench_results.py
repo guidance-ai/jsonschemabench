@@ -169,6 +169,7 @@ def main(folder: str):
     entries["TBM avg"] = sum(all_masks_us) // len(all_masks_us)
     for p in ps:
         entries[f"TBM p{p}"] = get_p(all_masks_us, p)
+    ttfm_us += [900_000_000] * stats.num_timeouts
     ttfm_us.sort()
     entries["TTFM avg"] = sum(ttfm_us) // len(ttfm_us)
     for p in ps:
