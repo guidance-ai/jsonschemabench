@@ -58,7 +58,7 @@ By isolating mask computation, this benchmark assesses its standalone performanc
 - ~~Outlines normally uses several threads per sequence, so it was run with 90 parallel threads, so it doesn't get more CPU time than the other engines.~~
 
 Approximate times to run the benchmark with 40-way parallelism:
-- LLGuidance: under 1 minute
+- LLGuidance: ~45 seconds (Python overhead; Rust benchmark takes ~7 seconds)
 - llama.cpp: ~20 minutes
 - XGrammar: ~80 minutes
 - XGrammar.cpp: ~70 minutes
