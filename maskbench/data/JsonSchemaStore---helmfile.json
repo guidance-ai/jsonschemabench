@@ -567,7 +567,29 @@
       "description": "llama 70b generated positive",
       "valid": true,
       "data": {
-        "$schema": "https://json.schemastore.org/helmfile.json",
+        "apiVersions": [
+          "example/v1"
+        ],
+        "bases": [
+          "/path/to/base/file"
+        ],
+        "environments": {
+          "dev": {
+            "values": [
+              "/path/to/values/file"
+            ],
+            "secrets": [
+              "secret1",
+              "secret2"
+            ],
+            "missingFileHandler": "Error",
+            "kubeContext": "default"
+          }
+        },
+        "commonLabels": {
+          "app": "my-app"
+        },
+        "helmBinary": "/path/to/helm/binary",
         "helmDefaults": {
           "tillerNamespace": "kube-system",
           "tillerless": true,
@@ -589,25 +611,23 @@
           "historyMax": 10,
           "createNamespace": true
         },
-        "repositories": [
+        "helmfiles": [
           {
-            "name": "stable",
-            "url": "https://kubernetes-charts.storage.googleapis.com/",
-            "certFile": "/path/to/cert/file",
-            "keyFile": "/path/to/key/file",
-            "caFile": "/path/to/ca/file",
-            "username": "username",
-            "password": "password",
-            "oci": true,
-            "passCredentials": true
+            "path": "/path/to/helmfile",
+            "selectors": [
+              "selector1",
+              "selector2"
+            ],
+            "values": [
+              "/path/to/values/file"
+            ]
           }
         ],
+        "missingFileHandler": "Error",
         "releases": [
           {
-            "name": "my-release",
-            "chart": "stable/nginx-ingress",
-            "version": "1.24.0",
             "atomic": true,
+            "chart": "stable/nginx-ingress",
             "cleanupOnFail": true,
             "condition": "all",
             "createNamespace": true,
@@ -637,6 +657,7 @@
               "app": "my-app"
             },
             "missingFileHandler": "Error",
+            "name": "my-release",
             "namespace": "default",
             "recreatePods": true,
             "secrets": [
@@ -661,53 +682,43 @@
               "/path/to/values/file"
             ],
             "verify": true,
+            "version": "1.24.0",
             "wait": true,
             "waitForJobs": true
           }
         ],
-        "helmfiles": [
+        "repositories": [
           {
-            "path": "/path/to/helmfile",
-            "selectors": [
-              "selector1",
-              "selector2"
-            ],
-            "values": [
-              "/path/to/values/file"
-            ]
+            "name": "stable",
+            "url": "https://kubernetes-charts.storage.googleapis.com/",
+            "certFile": "/path/to/cert/file",
+            "keyFile": "/path/to/key/file",
+            "caFile": "/path/to/ca/file",
+            "username": "username",
+            "password": "password",
+            "oci": true,
+            "passCredentials": true
           }
         ],
-        "environments": {
-          "dev": {
-            "values": [
-              "/path/to/values/file"
-            ],
-            "secrets": [
-              "secret1",
-              "secret2"
-            ],
-            "missingFileHandler": "Error",
-            "kubeContext": "default"
-          }
-        },
-        "commonLabels": {
-          "app": "my-app"
-        },
-        "helmBinary": "/path/to/helm/binary",
-        "missingFileHandler": "Error",
-        "apiVersions": [
-          "example/v1"
-        ],
-        "bases": [
-          "/path/to/base/file"
-        ]
+        "$schema": "https://json.schemastore.org/helmfile.json"
       }
     },
     {
       "description": "llama 70b generated positive",
       "valid": true,
       "data": {
-        "$schema": "https://json.schemastore.org/helmfile.json",
+        "environments": {
+          "dev": {
+            "values": [
+              "dev-values.yaml"
+            ]
+          },
+          "prod": {
+            "values": [
+              "prod-values.yaml"
+            ]
+          }
+        },
         "helmDefaults": {
           "tillerNamespace": "kube-system",
           "tillerless": true,
@@ -729,6 +740,45 @@
           "historyMax": 10,
           "createNamespace": true
         },
+        "helmfiles": [
+          {
+            "path": "helmfile.yaml"
+          }
+        ],
+        "releases": [
+          {
+            "chart": "stable/nginx-ingress",
+            "createNamespace": true,
+            "name": "nginx-ingress",
+            "namespace": "ingress-nginx",
+            "set": [
+              {
+                "name": "rbac.create",
+                "value": "true"
+              }
+            ],
+            "values": [
+              "values.yaml"
+            ],
+            "version": "1.24.0"
+          },
+          {
+            "chart": "incubator/cert-manager",
+            "createNamespace": true,
+            "name": "cert-manager",
+            "namespace": "cert-manager",
+            "set": [
+              {
+                "name": "installCRDs",
+                "value": "true"
+              }
+            ],
+            "values": [
+              "values.yaml"
+            ],
+            "version": "0.8.1"
+          }
+        ],
         "repositories": [
           {
             "name": "stable",
@@ -739,57 +789,7 @@
             "url": "https://kubernetes-charts-incubator.storage.googleapis.com/"
           }
         ],
-        "releases": [
-          {
-            "name": "nginx-ingress",
-            "chart": "stable/nginx-ingress",
-            "version": "1.24.0",
-            "namespace": "ingress-nginx",
-            "createNamespace": true,
-            "set": [
-              {
-                "name": "rbac.create",
-                "value": "true"
-              }
-            ],
-            "values": [
-              "values.yaml"
-            ]
-          },
-          {
-            "name": "cert-manager",
-            "chart": "incubator/cert-manager",
-            "version": "0.8.1",
-            "namespace": "cert-manager",
-            "createNamespace": true,
-            "set": [
-              {
-                "name": "installCRDs",
-                "value": "true"
-              }
-            ],
-            "values": [
-              "values.yaml"
-            ]
-          }
-        ],
-        "environments": {
-          "dev": {
-            "values": [
-              "dev-values.yaml"
-            ]
-          },
-          "prod": {
-            "values": [
-              "prod-values.yaml"
-            ]
-          }
-        },
-        "helmfiles": [
-          {
-            "path": "helmfile.yaml"
-          }
-        ]
+        "$schema": "https://json.schemastore.org/helmfile.json"
       }
     },
     {
