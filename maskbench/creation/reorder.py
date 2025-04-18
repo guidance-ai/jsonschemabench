@@ -266,6 +266,10 @@ def remove_constraints(obj):
             "minLength",
             "maxLength",
             "format",
+            "minItems",
+            "maxItems",
+            "minProperties",
+            "maxProperties",
         ]:
             if k in obj:
                 del obj[k]
