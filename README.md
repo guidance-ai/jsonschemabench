@@ -13,6 +13,12 @@ JSONSchemaBench helps to measure **efficiency** and **coverage** of a given stru
     <em>Figure 1: Comparison across various constrained-decoding frameworks by efficiency (speed of output generation), coverage (support for JSON Schema features), and quality (effects on underlying task accuracy).</em>
 </p>
 
+## 🔔 News
+
+ – *JSONSchemaBench* is now supported in the [**EleutherAI/lm-evaluation-harness**](https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/jsonschema_bench/README.md)!  
+While originally designed to benchmark the performance of **constrained decoding engines**, JSONSchemaBench can also be used to assess an LLM's **native ability to generate structured outputs** that conform to a given JSON schema — without any constrained decoding. We also have a leaderboard to track the 📊 [Benchmark results for several popular models](https://docs.google.com/spreadsheets/d/1gloUwsKiiOgrBmxbNluh-2_-vV_6RgaPji6KAD52pv0/edit?usp=sharing)
+
+
 ## JsonSchemaBench
 
 Visit [epfl-dlab/jsonschemabench](https://github.com/epfl-dlab/jsonschemabench) for the codebase of JSONSchemaBench.
