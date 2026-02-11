@@ -283,16 +283,7 @@ def remove_constraints(obj):
 def mk_interp(schema):
     return llguidance.LLInterpreter(
         PhiTokenizer.ll_tokenizer(),
-        json.dumps(
-            {
-                "grammars": [
-                    {
-                        "json_schema": schema,
-                    }
-                ]
-            },
-            ensure_ascii=False,
-        ),
+        f"""start: %json{json.dumps(schema)}""",
         log_level=0,
         enable_ff_tokens=False,
         enable_backtrack=False,
