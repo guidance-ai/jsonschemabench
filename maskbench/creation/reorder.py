@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 
-from typing import Any, List
-import sys
-import json
-import glob
-import os
-import random
-import re
-from jsonschema import Draft202012Validator, validate
-import tokenizers
-import llguidance
 import copy
+import glob
+import json
+import sys
+
+import llguidance
 
 
 class Stats:
