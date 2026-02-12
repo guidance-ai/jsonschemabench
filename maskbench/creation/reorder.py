@@ -13,53 +13,6 @@ import llguidance
 import copy
 
 
-class PhiTokenizer:
-    _ll_tokenizer = None
-    _instance = None
-
-    @staticmethod
-    def instance():
-        if PhiTokenizer._instance is None:
-            PhiTokenizer._instance = PhiTokenizer()
-        return PhiTokenizer._instance
-
-    @staticmethod
-    def ll_tokenizer():
-        if PhiTokenizer._ll_tokenizer is None:
-            PhiTokenizer._ll_tokenizer = llguidance.LLTokenizer(
-                llguidance.TokenizerWrapper(PhiTokenizer.instance())
-            )
-        return PhiTokenizer._ll_tokenizer
-
-    def tokenize_str(self, s: str) -> List[int]:
-        return self.hf_tokenizer.encode(s).ids
-
-    def __init__(self) -> None:
-        self.hf_tokenizer: tokenizers.Tokenizer = tokenizers.Tokenizer.from_pretrained(
-            "microsoft/Phi-3-mini-128k-instruct"
-        )
-        empty = self.tokenize_str("")
-        if empty:
-            self.bos_token_id = empty[0]
-        else:
-            self.bos_token_id = None
-        eos = self.tokenize_str("</s>")
-        assert len(eos) == 1
-        self.eos_token_id = eos[0]
-        self.tokens = []
-        for i in range(self.hf_tokenizer.get_vocab_size()):
-            t: str = self.hf_tokenizer.id_to_token(i)
-            if t.startswith("<0x"):
-                self.tokens.append(bytes([int(t[3:5], 16)]))
-            else:
-                t = t.replace("▁", " ")
-                self.tokens.append(t.encode("utf-8"))
-        assert len(self.tokens) == self.hf_tokenizer.get_vocab_size()
-
-    def __call__(self, s):
-        return self.tokenize_str(s)
-
-
 class Stats:
     def __init__(self):
         self.files = 0
@@ -103,7 +56,7 @@ def reorder_json(test: dict, interp: llguidance.LLInterpreter):
     text_buf = ""
     text_committed = ""
     dbg = False
-    ll_tok = PhiTokenizer.ll_tokenizer()
+    ll_tok = llguidance.LLTokenizer("byte")
 
     def save_state():
         return text_buf, text_committed, interp.deep_copy()
@@ -119,7 +72,7 @@ def reorder_json(test: dict, interp: llguidance.LLInterpreter):
         nonlocal text_buf, text_committed
         if text_buf == "":
             return
-        tokens = PhiTokenizer.ll_tokenizer().tokenize_str(text_buf)
+        tokens = ll_tok.tokenize_str(text_buf)
         for idx, token in enumerate(tokens):
             n = interp.validate_tokens_raw([token])
             if n != 1:
@@ -140,7 +93,7 @@ def reorder_json(test: dict, interp: llguidance.LLInterpreter):
 
     def validate_text(text: str):
         flush_tokens()
-        tokens = PhiTokenizer.ll_tokenizer().tokenize_str(text)
+        tokens = ll_tok.tokenize_str(text)
         if interp.validate_tokens_raw(tokens) != len(tokens):
             if dbg:
                 print("FAIL_V", text_committed, text)
@@ -282,17 +235,8 @@ def remove_constraints(obj):
 
 def mk_interp(schema):
     return llguidance.LLInterpreter(
-        PhiTokenizer.ll_tokenizer(),
-        json.dumps(
-            {
-                "grammars": [
-                    {
-                        "json_schema": schema,
-                    }
-                ]
-            },
-            ensure_ascii=False,
-        ),
+        llguidance.LLTokenizer("byte"),
+        f"""start: %json{json.dumps(schema)}""",
         log_level=0,
         enable_ff_tokens=False,
         enable_backtrack=False,
@@ -300,7 +244,8 @@ def mk_interp(schema):
 
 
 def process_file(file_name):
-    file_base = file_name.split("/")[-1]
+    ll_tok = llguidance.LLTokenizer("byte")
+    # file_base = file_name.split("/")[-1]
 
     stats.files += 1
 
@@ -326,7 +271,6 @@ def process_file(file_name):
 
     for idx, test in enumerate(tests):
         test_str = json.dumps(test["data"], ensure_ascii=False, indent=None)
-        ll_tok = PhiTokenizer.ll_tokenizer()
         tokens = ll_tok.tokenize_str(test_str)
         # print(ll_tok.dbg_tokens(tokens))
 
