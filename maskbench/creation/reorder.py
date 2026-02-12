@@ -256,7 +256,7 @@ def process_file(file_name):
     try:
         interp0 = mk_interp(schema)
     except Exception as e:
-        # print("interpreter creation error", file_name, str(e))
+        print("interpreter creation error", file_name, str(e))
         stats.grammar_error += 1
         return
 
