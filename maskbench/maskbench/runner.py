@@ -69,6 +69,8 @@ def process_file(engine: Engine, file: str):
 
     status["ttfm_us"] = time_us(t0)
     status["max_ttfm_us"] = status["ttfm_us"]
+    if hasattr(engine, "backend"):
+        status["backend"] = engine.backend
 
     masks_us = 0
     max_mask_us = 0
@@ -182,6 +184,11 @@ def setup_argparse():
         action="store_true",
         help="Enable LLGuidance with raw byte masks and fast-forward tokens",
     )
+    parser.add_argument(
+        "--llg-xgr-hybrid",
+        action="store_true",
+        help="Enable XGrammar for a static safe subset and LLGuidance fallback",
+    )
     parser.add_argument("--outlines", action="store_true", help="Enable Outlines")
     parser.add_argument(
         "--llamacpp", action="store_true", help="Enable llama.cpp grammars"
@@ -247,6 +254,12 @@ def get_engine(args) -> Engine:
 
         assert not engine, "Multiple engines specified"
         engine = LlgFastForwardEngine()
+
+    if args.llg_xgr_hybrid:
+        from .hybrid_engine import LlgXgrHybridEngine
+
+        assert not engine, "Multiple engines specified"
+        engine = LlgXgrHybridEngine()
 
     if args.outlines:
         from .outlines_engine import OutlinesEngine
