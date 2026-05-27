@@ -154,6 +154,11 @@ def setup_argparse():
         help="Enable XGrammar in compliant (non-strict, any whitespace) mode",
     )
     parser.add_argument("--llg", action="store_true", help="Enable LLGuidance")
+    parser.add_argument(
+        "--llg-rawbytes",
+        action="store_true",
+        help="Enable LLGuidance with a reusable raw byte bitmask",
+    )
     parser.add_argument("--outlines", action="store_true", help="Enable Outlines")
     parser.add_argument(
         "--llamacpp", action="store_true", help="Enable llama.cpp grammars"
@@ -207,6 +212,12 @@ def get_engine(args) -> Engine:
 
         assert not engine, "Multiple engines specified"
         engine = LlgEngine()
+
+    if args.llg_rawbytes:
+        from .llg_engine import LlgRawBytesEngine
+
+        assert not engine, "Multiple engines specified"
+        engine = LlgRawBytesEngine()
 
     if args.outlines:
         from .outlines_engine import OutlinesEngine

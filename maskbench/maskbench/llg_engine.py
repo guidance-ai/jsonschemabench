@@ -3,6 +3,7 @@ from .engine import Engine
 import llguidance as llg
 from llguidance.numpy import fill_next_token_bitmask, allocate_token_bitmask
 import llguidance.hf
+import ctypes
 import json
 
 
@@ -40,7 +41,33 @@ class LlgEngine(Engine):
         fill_next_token_bitmask(self.interp, self.mask_data, 0)
 
     def commit_token(self, t: int) -> bool:
-        ok = (self.mask_data[0, t // 32] & (1 << (t % 32))) != 0
+        word = int(self.mask_data[0, t >> 5]) & 0xFFFFFFFF
+        ok = (word & (1 << (t & 31))) != 0
+        if ok:
+            self.interp.consume_token(t)
+        elif self.interp.is_error():
+            raise ValueError(self.interp.get_error())
+        return ok
+
+
+class LlgRawBytesEngine(LlgEngine):
+    def get_id(self):
+        return "llg-rawbytes"
+
+    def get_name(self):
+        return "LLGuidanceRawBytes"
+
+    def init(self):
+        self.llg_tokenizer = llguidance.hf.from_tokenizer(self.tokenizer)
+        mask_words = (self.llg_tokenizer.vocab_size + 31) // 32
+        self.mask_buf = bytearray(mask_words * 4)
+        self.mask_ptr = ctypes.addressof(ctypes.c_char.from_buffer(self.mask_buf))
+
+    def compute_mask(self):
+        self.interp.unsafe_compute_mask_ptr(self.mask_ptr, len(self.mask_buf))
+
+    def commit_token(self, t: int) -> bool:
+        ok = (self.mask_buf[t >> 3] & (1 << (t & 7))) != 0
         if ok:
             self.interp.consume_token(t)
         elif self.interp.is_error():
