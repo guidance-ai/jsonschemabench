@@ -46,6 +46,10 @@ def process_file(engine: Engine, file: str):
         "masks_us": 0,
         "max_mask_us": 0,
         "num_tokens": 0,
+        "num_mask_calls": 0,
+        "mask_call_us": 0,
+        "num_ff_tokens": 0,
+        "ff_us": 0,
         "num_tests": len(pos_data["tests"]),
         "all_mask_us": all_mask_us,
         "num_valid_tests": 0,
@@ -65,6 +69,8 @@ def process_file(engine: Engine, file: str):
 
     status["ttfm_us"] = time_us(t0)
     status["max_ttfm_us"] = status["ttfm_us"]
+    if hasattr(engine, "backend"):
+        status["backend"] = engine.backend
 
     masks_us = 0
     max_mask_us = 0
@@ -78,23 +84,37 @@ def process_file(engine: Engine, file: str):
 
         accepted = True
         try:
-            for tidx, t in enumerate(tokens):
-                t2 = time.monotonic()
-                engine.compute_mask()
-                ok = engine.commit_token(t)
-                mask_time = time_us(t2)
-                if engine.debug:
-                    engine.log_single(
-                        f"Token {tidx} {repr(engine.tokenizer.decode([t]))}: {ok}"
-                    )
-                num_tokens += 1
-                masks_us += mask_time
-                all_mask_us.append(mask_time)
-                if mask_time > max_mask_us:
-                    max_mask_us = mask_time
-                if not ok:
-                    accepted = False
-                    break
+            if hasattr(engine, "process_tokens"):
+                result = engine.process_tokens(tokens)
+                accepted = result["accepted"]
+                num_tokens += result["num_tokens"]
+                masks_us += result["masks_us"]
+                all_mask_us.extend(result["all_mask_us"])
+                max_mask_us = max(max_mask_us, result["max_mask_us"])
+                status["num_mask_calls"] += result["num_mask_calls"]
+                status["mask_call_us"] += result["mask_call_us"]
+                status["num_ff_tokens"] += result["num_ff_tokens"]
+                status["ff_us"] += result["ff_us"]
+            else:
+                for tidx, t in enumerate(tokens):
+                    t2 = time.monotonic()
+                    engine.compute_mask()
+                    ok = engine.commit_token(t)
+                    mask_time = time_us(t2)
+                    if engine.debug:
+                        engine.log_single(
+                            f"Token {tidx} {repr(engine.tokenizer.decode([t]))}: {ok}"
+                        )
+                    num_tokens += 1
+                    masks_us += mask_time
+                    all_mask_us.append(mask_time)
+                    status["num_mask_calls"] += 1
+                    status["mask_call_us"] += mask_time
+                    if mask_time > max_mask_us:
+                        max_mask_us = mask_time
+                    if not ok:
+                        accepted = False
+                        break
 
             if accepted and not test["valid"]:
                 status["validation_error"] = f"test #{i}: should reject but didn't"
@@ -154,6 +174,21 @@ def setup_argparse():
         help="Enable XGrammar in compliant (non-strict, any whitespace) mode",
     )
     parser.add_argument("--llg", action="store_true", help="Enable LLGuidance")
+    parser.add_argument(
+        "--llg-rawbytes",
+        action="store_true",
+        help="Enable LLGuidance with a reusable raw byte bitmask",
+    )
+    parser.add_argument(
+        "--llg-ff",
+        action="store_true",
+        help="Enable LLGuidance with raw byte masks and fast-forward tokens",
+    )
+    parser.add_argument(
+        "--llg-xgr-hybrid",
+        action="store_true",
+        help="Enable XGrammar for a static safe subset and LLGuidance fallback",
+    )
     parser.add_argument("--outlines", action="store_true", help="Enable Outlines")
     parser.add_argument(
         "--llamacpp", action="store_true", help="Enable llama.cpp grammars"
@@ -207,6 +242,24 @@ def get_engine(args) -> Engine:
 
         assert not engine, "Multiple engines specified"
         engine = LlgEngine()
+
+    if args.llg_rawbytes:
+        from .llg_engine import LlgRawBytesEngine
+
+        assert not engine, "Multiple engines specified"
+        engine = LlgRawBytesEngine()
+
+    if args.llg_ff:
+        from .llg_engine import LlgFastForwardEngine
+
+        assert not engine, "Multiple engines specified"
+        engine = LlgFastForwardEngine()
+
+    if args.llg_xgr_hybrid:
+        from .hybrid_engine import LlgXgrHybridEngine
+
+        assert not engine, "Multiple engines specified"
+        engine = LlgXgrHybridEngine()
 
     if args.outlines:
         from .outlines_engine import OutlinesEngine
