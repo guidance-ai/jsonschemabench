@@ -38,19 +38,19 @@ required field when the required key had no declared property schema.
 ## Commands
 
 ```bash
-/Users/sasi/Documents/fresh/.venv/bin/python scripts/run_maskbench.py \
+python scripts/run_maskbench.py \
   --llg-rawbytes --output tmp/llgraw175-glaiveall \
   --time-limit 120 --num-threads 8 data/Glaiveai2K---*.json
 
-/Users/sasi/Documents/fresh/.venv/bin/python scripts/run_maskbench.py \
+python scripts/run_maskbench.py \
   --llg-xgr-hybrid --output tmp/hybrid175-glaiveall \
   --time-limit 120 --num-threads 8 data/Glaiveai2K---*.json
 
-/Users/sasi/Documents/fresh/.venv/bin/python scripts/run_maskbench.py \
+python scripts/run_maskbench.py \
   --llg-rawbytes --output tmp/llgraw175-full \
   --time-limit 900 --num-threads 8 data/*.json
 
-/Users/sasi/Documents/fresh/.venv/bin/python scripts/run_maskbench.py \
+python scripts/run_maskbench.py \
   --llg-xgr-hybrid --output tmp/hybrid175-full-v2 \
   --time-limit 900 --num-threads 8 data/*.json
 ```

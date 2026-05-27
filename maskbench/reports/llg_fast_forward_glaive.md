@@ -29,11 +29,11 @@ and the same invalid instances must be rejected.
 ## Commands
 
 ```bash
-/Users/sasi/Documents/fresh/.venv/bin/python scripts/run_maskbench.py \
+python scripts/run_maskbench.py \
   --llg-rawbytes --output tmp/llgraw175-glaiveall \
   --time-limit 120 --num-threads 8 data/Glaiveai2K---*.json
 
-/Users/sasi/Documents/fresh/.venv/bin/python scripts/run_maskbench.py \
+python scripts/run_maskbench.py \
   --llg-ff --output tmp/llgff175-glaiveall \
   --time-limit 120 --num-threads 8 data/Glaiveai2K---*.json
 ```
