@@ -18,6 +18,7 @@ class GridEngine(Engine):
     def __init__(self, strict: bool = False):
         super().__init__()
         self.strict = strict
+        self.recorded = []
 
     def init(self):
         from grid.models.hf_adapter import HFTokenizerAdapter
@@ -28,7 +29,7 @@ class GridEngine(Engine):
         self.trie = build_trie(self.adapter)
 
     def get_id(self):
-        return "grid"
+        return "grid-strict" if self.strict else "grid"
 
     def get_name(self):
         return "GRID" + (" (strict)" if self.strict else "")
@@ -44,6 +45,7 @@ class GridEngine(Engine):
         from grid.lalr.compile import compile_tables
         from grid.lexer.dfa import build_scanner
 
+        self.recorded = []
         src, recorded = compile_json_schema(schema, strict=self.strict)
         grammar = spec.load(src)
         proj = RoleProjection.full(grammar).build()
@@ -54,6 +56,11 @@ class GridEngine(Engine):
         self.recorded = sorted(recorded)
         if recorded:
             self.log_single(f"recorded (unenforced): {self.recorded}")
+
+    def get_status_extras(self):
+        # persisted into the per-schema status JSON by the runner, so the
+        # record of unenforced constraints survives --multi batch runs
+        return {"unenforced_keywords": self.recorded} if self.recorded else {}
 
     def reset(self):
         self.state = self.guide.initial_state

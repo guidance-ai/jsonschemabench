@@ -66,6 +66,10 @@ def process_file(engine: Engine, file: str):
     status["ttfm_us"] = time_us(t0)
     status["max_ttfm_us"] = status["ttfm_us"]
 
+    get_extras = getattr(engine, "get_status_extras", None)
+    if get_extras:
+        status.update(get_extras())
+
     masks_us = 0
     max_mask_us = 0
     num_tokens = 0
