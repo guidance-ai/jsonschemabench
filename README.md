@@ -57,6 +57,14 @@ We then categorized the schemas into datasets based on complexity and domain. Th
 | **Total**       |                     | 9558  
 </div>
 
+### Known unsatisfiable schemas
+
+Thirteen schemas in the GlaiveAI-2K subset are unsatisfiable: each parent `required` list
+includes the shape-specific keys from every `oneOf` branch, so all branches match
+whenever the object satisfies `required`. They remain in the dataset; the satisfiable
+ceiling is 1,694 of 1,707. See [issue #16](https://github.com/guidance-ai/jsonschemabench/issues/16)
+for the affected IDs and validation evidence.
+
 For statistics on the datasets and an overview of schema constraint features, please refer to the [paper]()(link coming soon).
 
 <details>
