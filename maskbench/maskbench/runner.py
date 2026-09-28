@@ -66,6 +66,10 @@ def process_file(engine: Engine, file: str):
     status["ttfm_us"] = time_us(t0)
     status["max_ttfm_us"] = status["ttfm_us"]
 
+    get_extras = getattr(engine, "get_status_extras", None)
+    if get_extras:
+        status.update(get_extras())
+
     masks_us = 0
     max_mask_us = 0
     num_tokens = 0
@@ -154,6 +158,12 @@ def setup_argparse():
         help="Enable XGrammar in compliant (non-strict, any whitespace) mode",
     )
     parser.add_argument("--llg", action="store_true", help="Enable LLGuidance")
+    parser.add_argument("--grid", action="store_true", help="Enable GRID")
+    parser.add_argument(
+        "--grid-strict",
+        action="store_true",
+        help="Enable GRID in strict mode (unenforced constraints become errors)",
+    )
     parser.add_argument("--outlines", action="store_true", help="Enable Outlines")
     parser.add_argument(
         "--llamacpp", action="store_true", help="Enable llama.cpp grammars"
@@ -207,6 +217,12 @@ def get_engine(args) -> Engine:
 
         assert not engine, "Multiple engines specified"
         engine = LlgEngine()
+
+    if args.grid or args.grid_strict:
+        from .grid_engine import GridEngine
+
+        assert not engine, "Multiple engines specified"
+        engine = GridEngine(strict=args.grid_strict)
 
     if args.outlines:
         from .outlines_engine import OutlinesEngine
