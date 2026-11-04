@@ -19,7 +19,7 @@ def download_gorilla_file(filename: str) -> Tuple[List, List]:
     print(f"Downloading {filename} from GitHub...")
 
     try:
-        function_response = requests.get(function_url)
+        function_response = requests.get(function_url, timeout=30)
         function_response.raise_for_status()
         function_text = function_response.text
 
@@ -31,7 +31,7 @@ def download_gorilla_file(filename: str) -> Tuple[List, List]:
                 except json.JSONDecodeError as e:
                     print(f"Error parsing function line in {filename}: {e}")
 
-        answer_response = requests.get(answer_url)
+        answer_response = requests.get(answer_url, timeout=30)
         answer_response.raise_for_status()
         answer_text = answer_response.text
 
